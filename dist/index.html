@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101820">
+  <meta name="description" content="黑夜君临怪物图鉴与本地存档遗物筛选。查看敌人属性、抗性、遭遇位置，解析遗物全部词条并探索组合。">
+  <title>渡夜图鉴 · 黑夜君临资料与遗物工坊</title>
+  <link rel="icon" href="./nightreign-banner.png" type="image/png">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./game-ui.css">
+  <script src="./crypto-js.min.js" defer></script>
+  <script src="./relic-parser.js" defer></script>
+  <script src="./save-editor.js" defer></script>
+  <script src="./app.js" defer></script>
+  <script src="./save-editor-ui.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <a class="brand" href="#overview" aria-label="渡夜图鉴首页"><img class="brand-image" src="./nightreign-banner.png" alt="ELDEN RING NIGHTREIGN"><span class="brand-caption">渡夜图鉴</span></a>
+      <div class="side-divider"></div>
+      <p class="side-label">探索</p>
+      <nav class="nav-list">
+        <button class="nav-link active" data-view="overview"><img class="nav-icon" src="./nav-icons/roundtable.webp" alt="">圆桌厅堂</button>
+        <button class="nav-link" data-view="enemies"><img class="nav-icon" src="./nav-icons/bestiary.webp" alt="">图鉴 <b id="nav-enemy-count">—</b></button>
+        <button class="nav-link" data-view="relics"><img class="nav-icon" src="./nav-icons/relic-rite.png" alt="">遗物仪式</button>
+        <button class="nav-link" data-view="records"><img class="nav-icon" src="./nav-icons/journal.png" alt="">日志</button>
+        <button class="nav-link" data-view="builds"><img class="nav-icon" src="./nav-icons/relic-equip.png" alt="">遗物装配</button>
+        <button class="nav-link" data-view="sources"><img class="nav-icon" src="./nav-icons/sources.png" alt="">资料说明</button>
+      </nav>
+      <div class="side-bottom"><span class="pulse-dot"></span> 离线资料 · 本地解析<br><small>存档始终留在你的浏览器中</small></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><button id="mobile-menu" class="icon-button" aria-label="打开导航">☰</button><span class="breadcrumb">ELDEN RING NIGHTREIGN <span>/</span> <b id="breadcrumb-current">圆桌厅堂</b></span><span class="topbar-right">非官方玩家工具 <i></i> 数据快照</span></header>
+      <div class="content">
+        <section id="view-overview" class="view active">
+          <div class="hero"><div class="hero-content"><p class="eyebrow">NIGHTFARER EXPEDITION · LIMVELD</p><h1>黑夜还没有<br><em>结束</em></h1><p class="hero-copy">选择渡夜者，探索宁姆韦德，在远征尽头迎战夜王。查阅敌人资料、解析遗物，并为下一场出击整备装配。</p><div class="hero-actions"><button class="button primary" data-go="relics">解析遗物存档 <span>↗</span></button><button class="button ghost" data-go="enemies">查阅敌人图鉴 <span>→</span></button></div></div><div class="hero-caption">LIMVELD · THREE-DAY EXPEDITION</div></div>
+          <div class="section-heading"><div><p class="eyebrow">EXPEDITION DESK</p><h2>远征控制台</h2></div><p>从情报到配装，一处完成</p></div>
+          <div class="feature-grid"><button class="feature-card" data-go="enemies"><img class="feature-icon-image" src="./nav-icons/bestiary.webp" alt=""><div><span class="card-kicker">01 / BESTIARY</span><h3>图鉴</h3><p>浏览敌人分类与遭遇资料，查看生命值、魔火雷圣倍率和异常抗性。</p><span class="text-link">查阅图鉴 ↗</span></div></button><button class="feature-card" data-go="relics"><img class="feature-icon-image" src="./nav-icons/relic-rite.png" alt=""><div><span class="card-kicker">02 / RELIC RITE</span><h3>遗物仪式</h3><p>解析本地游戏存档，筛选角色拥有的遗物与全部词条。</p><span class="text-link">读取存档 ↗</span></div></button><button class="feature-card" data-go="builds"><img class="feature-icon-image" src="./nav-icons/relic-equip.png" alt=""><div><span class="card-kicker">03 / RELIC EQUIPMENT</span><h3>遗物装配</h3><p>选择渡夜者与器皿，从已拥有的遗物中装配并查看组合效果。</p><span class="text-link">开始装配 ↗</span></div></button></div>
+          <div class="note-panel"><span class="note-icon">i</span><div><strong>关于资料完整度</strong><p>敌人属性与抗性来自社区整理数据。遭遇位置仅显示可核对的信息；部分敌人的刷新点和场景可能不完整。</p></div></div>
+        </section>
+
+        <section id="view-enemies" class="view">
+          <div class="page-intro"><p class="eyebrow">BESTIARY / MONSTER ARCHIVE</p><h1>图鉴</h1><p>按名称、分类、区域或遭遇 ID 筛选敌人，比较生命值、伤害倍率与异常状态抗性。</p></div>
+          <div class="toolbar"><label class="search-field"><span>⌕</span><input id="enemy-search" type="search" placeholder="搜索怪物名称、ID 或分类" autocomplete="off"></label><select id="enemy-filter" aria-label="怪物分类"><option value="all">全部敌人</option></select><select id="enemy-area" aria-label="出现区域与遭遇"><option value="all">全部区域 / 遭遇</option></select><span class="result-count" id="enemy-count">载入中…</span></div>
+          <div class="enemy-layout"><div class="enemy-list-column"><div class="enemy-list" id="enemy-list" aria-label="怪物列表"></div><div id="enemy-pagination" class="pagination enemy-pagination" aria-label="怪物页数" hidden></div></div><article class="enemy-detail" id="enemy-detail"><div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性、抗性和可核对的出现位置会显示在这里。</p></div></article></div>
+        </section>
+
+        <section id="view-relics" class="view">
+          <div class="page-intro"><p class="eyebrow">RELIC VAULT / LOCAL ONLY</p><h1>遗物仪式</h1><p>读取你的 <code>NR0000.sl2</code>，列出所有遗物及其每条效果。文件只在当前浏览器内解析。</p></div>
+          <label class="drop-zone" id="drop-zone" for="save-file"><span class="drop-icon">◇</span><strong>将存档拖到这里，或点击选择文件</strong><span>支持 .sl2 · 不上传 · 不修改原存档</span><input id="save-file" type="file" accept=".sl2,application/octet-stream" hidden></label>
+          <p class="hint">常见路径：<code>AppData/Roaming/Nightreign/SteamID/NR0000.sl2</code>。请在游戏关闭或存档同步完成后读取。</p>
+          <p class="hint">遗物中文名与图标对照 <a href="https://wiki.biligame.com/nightreign/%E9%81%97%E7%89%A9%E6%80%BB%E8%A7%88" target="_blank" rel="noopener noreferrer">Biligame 遗物总览 ↗</a>；词条类型参照 <a href="https://xxiixi.github.io/NightreignQuickRef/" target="_blank" rel="noopener noreferrer">NightreignQuickRef ↗</a>。该总览未收录的两件特殊遗物由 5gamers 中文条目补充。</p>
+          <div id="save-status" class="status-line" role="status" aria-live="polite">尚未选择存档</div>
+          <div id="relic-dashboard" hidden><div class="stat-row"><div class="stat-card"><span>遗物总数</span><strong id="relic-total">0</strong></div><div class="stat-card"><span>普通遗物</span><strong id="relic-normal">0</strong></div><div class="stat-card"><span>深夜遗物</span><strong id="relic-deep">0</strong></div><div class="stat-card"><span>独特遗物</span><strong id="relic-unique">0</strong></div></div><div class="toolbar"><label class="search-field"><span>⌕</span><input id="relic-search" type="search" placeholder="搜索遗物名、词条或 ID"></label><select id="relic-category" aria-label="词条类型"><option value="all">全部词条类型</option></select><select id="relic-type" aria-label="遗物模式"><option value="all">普通 / 深夜</option><option value="normal">普通（含独特）</option><option value="deep">深夜</option></select><select id="relic-color" aria-label="遗物颜色"><option value="all">全部颜色</option><option value="Red">红色</option><option value="Blue">蓝色</option><option value="Yellow">黄色</option><option value="Green">绿色</option><option value="Any">任意色</option></select><span class="result-count" id="relic-count"></span></div><div id="relic-list" class="relic-grid"></div><div id="relic-pagination" class="pagination" aria-label="遗物页数" hidden></div></div>
+        </section>
+
+        <section id="view-records" class="view">
+          <div class="page-intro"><p class="eyebrow">BATTLE RECORDS / LOCAL SAVE</p><h1>日志</h1><p>读取存档后，在此查看游戏内概要、渡夜者使用次数、夜王战绩、累计数据与深层区域纪录。数据仅在浏览器内解析。</p></div>
+          <div id="records-empty" class="note-panel"><span class="note-icon">▣</span><div><strong>等待存档</strong><p>先在“遗物仪式”选择 NR0000.sl2。</p><button class="text-link button-link" data-go="relics">前往解析存档 ↗</button></div></div>
+          <div id="records-panel" class="record-dashboard" hidden>
+            <section class="record-panel"><header class="record-header"><span class="record-emblem" aria-hidden="true">♜</span><div><p class="eyebrow">RECORD / OVERVIEW</p><h2>战斗记录－概要</h2></div></header><div id="record-overview" class="record-list"></div></section>
+            <div class="record-grid two"><section class="record-panel"><header class="record-header"><span class="record-emblem" aria-hidden="true">Ⅰ</span><div><p class="eyebrow">NIGHTFARERS</p><h2>渡夜者使用次数</h2></div></header><div id="record-characters" class="record-list"></div></section><section class="record-panel"><header class="record-header"><span class="record-emblem" aria-hidden="true">Ⅱ</span><div><p class="eyebrow">NIGHTLORDS</p><h2>夜王战绩</h2></div></header><div id="record-nightlords" class="record-list"></div></section></div>
+            <section class="record-panel"><header class="record-header"><span class="record-emblem" aria-hidden="true">Ⅲ</span><div><p class="eyebrow">ALL EXPEDITIONS</p><h2>战斗记录－累计</h2></div></header><div class="record-grid two"><div><h3 class="record-subtitle">累计数据</h3><div id="record-total" class="record-list"></div></div><div><h3 class="record-subtitle">最高纪录</h3><div id="record-peak" class="record-list"></div></div></div></section>
+            <section class="record-panel"><header class="record-header"><span class="record-emblem" aria-hidden="true">Ⅳ</span><div><p class="eyebrow">DEEP NIGHT</p><h2>战斗记录（深层区域）</h2></div></header><div class="record-grid two"><div><h3 class="record-subtitle">累计数据</h3><div id="record-deep-total" class="record-list"></div></div><div><h3 class="record-subtitle">最高纪录</h3><div id="record-deep-peak" class="record-list"></div></div></div></section>
+            <p id="record-method" class="record-method"></p>
+          </div>
+        </section>
+
+        <section id="view-builds" class="view">
+          <div class="page-intro"><p class="eyebrow">BUILD FORGE / PERSONAL COLLECTION</p><h1>遗物装配</h1><p>从你实际拥有的遗物中，按供具槽位与目标词条筛选搭配。先在“遗物仪式”读取存档。读取后可拖拽遗物到供具槽位，实时查看搭配。</p></div>
+          <div id="build-empty" class="note-panel"><span class="note-icon">◇</span><div><strong>等待存档</strong><p>读取存档后可选择角色、目标词条和遗物模式。</p><button class="text-link button-link" data-go="relics">前往解析存档 ↗</button></div></div>
+          <div id="build-workspace" hidden><div class="build-save-banner"><span id="build-save-count">已载入存档</span><button id="clear-save" type="button">清除本页缓存的存档</button></div><div class="build-controls"><div class="control-group"><label id="character-picker-label" for="character-trigger">渡夜者</label><div class="visual-picker"><select id="character-select" hidden aria-hidden="true"></select><button type="button" id="character-trigger" class="visual-trigger character-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="character-menu"></button><div id="character-menu" class="visual-menu character-menu" role="listbox" aria-label="选择渡夜者" hidden></div></div></div><div class="control-group"><label id="vessel-picker-label" for="vessel-trigger">遗物供具</label><div class="visual-picker"><select id="vessel-select" hidden aria-hidden="true"></select><button type="button" id="vessel-trigger" class="visual-trigger vessel-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="vessel-menu"></button><div id="vessel-menu" class="visual-menu vessel-menu" role="listbox" aria-label="选择遗物供具" hidden></div></div></div><div class="control-group"><label for="build-mode">组合模式</label><select id="build-mode"><option value="combined">普通 + 深夜（各 3 槽）</option><option value="normal">仅普通（3 槽）</option></select></div></div><section class="loadout"><div class="loadout-heading"><div><span class="card-kicker">RELIC RITE / 遗物仪式</span><h2>装配预览</h2></div><span id="loadout-score">选择目标词条后显示匹配分</span></div><p class="hint">点击左侧槽位，右侧会显示可装入的遗物；点击遗物即可装配，也可以拖入槽位。仅在浏览器内调整，不写回存档。上方匹配分按目标词条即时计算，推荐方案分数由完整组合算法计算。</p><div class="loadout-layout"><div class="loadout-left"><div id="loadout-slots" class="loadout-slots"></div><div id="loadout-effects" class="loadout-effects"></div></div><div class="loadout-right"><div class="pool-heading"><h3>我的遗物</h3><span id="pool-count"></span></div><div id="pool-slot-filter" class="pool-slot-filter" hidden><span id="pool-slot-filter-label"></span><button type="button" id="pool-clear-slot">显示全部</button></div><div class="toolbar"><label class="search-field"><span>⌕</span><input id="pool-search" type="search" placeholder="搜索遗物名、颜色或词条"></label><select id="pool-category" aria-label="收藏遗物词条类型"><option value="all">全部词条类型</option></select><select id="pool-type" aria-label="收藏遗物模式"><option value="all">普通 / 深夜</option><option value="normal">普通（含独特）</option><option value="deep">深夜</option></select><select id="pool-color" aria-label="收藏遗物颜色"><option value="all">全部颜色</option><option value="Red">红色</option><option value="Blue">蓝色</option><option value="Yellow">黄色</option><option value="Green">绿色</option><option value="Any">任意色</option></select></div><div id="build-relic-pool" class="build-relic-pool"></div><div id="pool-pagination" class="pagination" aria-label="可装备遗物页数" hidden></div><p id="equip-status" class="hint" role="status" aria-live="polite">点击左侧槽位，再从这里选择遗物。</p></div></div></section><div class="effect-picker"><div class="effect-header"><div><span class="card-kicker">目标词条</span><h3>选择想要的效果</h3></div><span id="selected-count">0 项已选</span></div><label class="search-field"><span>⌕</span><input id="effect-search" type="search" placeholder="搜索中文词条 / 英文名称"></label><div id="effect-options" class="effect-options"></div><div id="selected-effects" class="selected-effects"></div></div><div class="build-actions"><button id="run-build" class="button primary">计算推荐组合 <span>→</span></button><span id="build-status" role="status" aria-live="polite">最多展示前 10 套；必选词条优先。</span></div><details class="scoring-details"><summary>查看推荐评分规则</summary><div><p>必选、偏好、加分词条分别按 100、10、1 分计；排除词条每出现一次扣 100 分，并使方案不满足必选条件。必选覆盖优先于总分排序。</p><p>同一件遗物每命中一对目标词条，加 5 分。重复词条按可叠加性处理：可叠加逐次计分；条件叠加与不可叠加从第二次起分别扣约 30% 与 50% 的权重。</p><p>未设为“排除”的负面词条不会自动扣分。装配预览的匹配分是按目标是否出现计算的简化值，与推荐总分不同。</p></div></details><div id="build-results" class="build-results"></div></div>
+        </section>
+
+        <section id="view-sources" class="view"><div class="page-intro"><p class="eyebrow">SOURCES / METHODOLOGY</p><h1>资料与方法</h1><p>公开每一类资料的来源，并说明哪些数据暂时缺失。</p></div><div class="source-grid"><article class="source-card"><span class="card-kicker">ENEMY DATA</span><h3>怪物属性与抗性</h3><p>收录 1,725 条敌人参数记录。首领遭遇位置来自同一资料集的 Boss 表，可匹配时显示。一般敌人的精确刷新点和场景信息仍待补充。</p><a href="https://yanweiyuan3.github.io/nightreign-wiki/#/overview" target="_blank" rel="noopener noreferrer">夜之数据 Wiki ↗</a></article><article class="source-card"><span class="card-kicker">SAVE PARSER / OPTIMIZER</span><h3>存档解析与推荐算法</h3><p>浏览器内的存档解密、遗物识别、槽位与组合计算基于 ERN_RelicForge 的开源实现，按 MIT 许可使用。</p><a href="https://github.com/cetusk/ERN_RelicForge" target="_blank" rel="noopener noreferrer">ERN_RelicForge ↗</a></article><article class="source-card"><span class="card-kicker">CHINESE EFFECT NAMES</span><h3>中文词条</h3><p>中文名称和说明优先参考夜之数据 Wiki，缺失项补充 NightreignQuickRef。仍未对应的词条显示英文或日文与 ID；QuickRef 数据按原项目 GPLv3 许可标注。</p><a href="https://xxiixi.github.io/NightreignQuickRef/" target="_blank" rel="noopener noreferrer">NightreignQuickRef ↗</a></article><article class="source-card"><span class="card-kicker">RELIC ICONS / NAMES</span><h3>遗物中文名与图标</h3><p>按道具 key 对应 69 种遗物的中文名与图标：67 种来自 Biligame 遗物总览，另 2 种来自 5gamers 中文条目。角色专属、黑夜王、永夜王及特殊遗物分别标示。</p><a href="https://wiki.biligame.com/nightreign/%E9%81%97%E7%89%A9%E6%80%BB%E8%A7%88" target="_blank" rel="noopener noreferrer">Biligame 遗物总览 ↗</a> · <a href="https://5gamers.com/zh-CN/elden-ring-nightreign/item/old-pocketwatch" target="_blank" rel="noopener noreferrer">老旧怀表 ↗</a> · <a href="https://5gamers.com/zh-CN/elden-ring-nightreign/item/fell-omen-fetish" target="_blank" rel="noopener noreferrer">恶兆妖鬼的诅咒物 ↗</a></article></div><div class="note-panel"><span class="note-icon">!</span><div><strong>数据边界</strong><p>“未收录”代表当前来源没有可核对的怪物具体刷新点，并非游戏中不存在。怪物记录可能包含同一敌人的不同难度、场景或版本。推荐分数用于在你自己的收藏中排序，不代表唯一最优配装。</p></div></div><div class="license-links"><a href="./ERN_RelicForge_LICENSE.txt">ERN_RelicForge MIT 许可</a><a href="./NightreignQuickRef_LICENSE.txt">NightreignQuickRef GPLv3 许可</a></div></section>
+      </div>
+      <footer>渡夜图鉴 · 玩家制作的非官方工具 <span>ELDEN RING NIGHTREIGN 为其权利人商标</span></footer>
+    </main>
+  </div>
+</body>
+</html>
+
