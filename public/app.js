@@ -36,7 +36,7 @@ window.navigateTo=navigate;
 
 async function loadCatalogs(){
   try{
-    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,enemyImages]=await Promise.all(['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','enemy-image-map.json'].map(async name=>{const url='./'+name+(name==='enemy-image-map.json'?'?v=20261017-monster-images':'');const r=await fetch(url);if(!r.ok)throw new Error(name+' 读取失败');return r.json()}));
+    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,enemyImages]=await Promise.all(['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','enemy-image-map.json'].map(async name=>{const url='./'+name+(name==='enemy-image-map.json'?'?v=20261017-monster-names':'');const r=await fetch(url);if(!r.ok)throw new Error(name+' 读取失败');return r.json()}));
     Object.assign(state,{enemyData:enemy,enemyImages,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects});
     buildEffectCategoryIndex();
     $('#nav-enemy-count').textContent=enemy.rows.length.toLocaleString('zh-CN');
