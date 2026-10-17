@@ -29,6 +29,16 @@
 - 返回方案必须引用本次清单中的遗物实例 ID，且通过后端和前端的类型、颜色、槽位合法性校验。用户点击“应用方案”后才会改变浏览器内的装配预览。
 - 后端不写入用户的存档或流派规则，也不保存请求正文。DeepSeek API 使用量会按 DeepSeek 账户当前价格计费。
 
-线上部署时，将 API 密钥设置为部署平台的私密环境变量，并把 `FRONTEND_ORIGINS` 限定为实际前端域名；在 `public/ai-config.js` 中将 `window.NIGHTREIGN_AI_API_BASE` 设置为该 API 的 HTTPS 地址。API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件。
+## 容器部署
+
+项目提供 `backend/Dockerfile`，可部署到支持 Docker 的 Python 服务平台。构建上下文使用项目根目录：
+
+```powershell
+docker build -t nightreign-ai -f backend/Dockerfile .
+```
+
+部署服务时设置 `DEEPSEEK_API_KEY` 为私密环境变量，将 `FRONTEND_ORIGINS` 设置为线上网站的完整来源（例如 `https://nightreign-relic-atlas.shrewdsky2.chatgpt.site`），其余配置可沿用默认值。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。
+
+API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件或前端构建产物。
 
 当前频率限制保存在单个 FastAPI 进程的内存中，适用于本地或单实例试运行。正式多实例部署应使用共享限流存储（例如 Redis），并正确配置可信反向代理，避免所有访客被误认为同一客户端。
