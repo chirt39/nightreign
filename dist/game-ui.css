@@ -441,3 +441,9 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .rule-row label{min-width:0}
 @media(max-width:1400px){.profile-controls{grid-template-columns:repeat(3,minmax(0,1fr))}.profile-controls .button{width:100%}}
 @media(max-width:950px){.rule-row{grid-template-columns:repeat(2,minmax(0,1fr))}.rule-name{grid-column:1/-1}.rule-note{grid-column:1/-1}.rule-row>button{grid-column:2;justify-self:end;width:38px}}
+
+/* Keep numeric data aligned across the interface. */
+.record-line strong,.stat-card strong,.score,.enemy-row small,.enemy-variant small,.detail-top small,.enemy-detail .kv strong,.enemy-detail .resist strong,.pagination,.enemy-group>summary small,#nav-enemy-count,.relic-edit-index{font-family:var(--numeric-font);font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1;letter-spacing:0}
+.enemy-number,.enemy-record-picker select{font-family:Arial,"Helvetica Neue",sans-serif;font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1;letter-spacing:0}
+#enemy-list .enemy-row small,.enemy-variant small,.enemy-detail-title small{font-family:Arial,"Helvetica Neue",sans-serif!important;font-variant-numeric:lining-nums tabular-nums!important;font-feature-settings:"lnum" 1,"tnum" 1!important;letter-spacing:0!important}
+#enemy-list .enemy-row small .enemy-number,.enemy-variant small .enemy-number,.enemy-detail-title small .enemy-number{font-family:Arial,"Helvetica Neue",sans-serif!important;font-variant-numeric:lining-nums tabular-nums!important;font-feature-settings:"lnum" 1,"tnum" 1!important;letter-spacing:0!important}

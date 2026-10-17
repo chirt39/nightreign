@@ -2,7 +2,9 @@
 
 ## 当前基线
 
-`dist/index.html` 为单页入口，`dist/style.css` 和 `dist/game-ui.css` 负责样式；`dist/app.js` 组织页面、筛选、记录与装配交互。`dist/relic-parser.js` 在浏览器内解析存档；`dist/save-editor.js` 与 `dist/save-editor-ui.js` 包含编辑与导出路径；`dist/relic-optimizer.js` 负责组合计算。`dist/*.json` 是当前静态数据快照，图片在 `dist/relic-images/`、`dist/character-images/` 与 `dist/nav-icons/`。Sites 静态发布配置在 `.openai/hosting.json`。
+前端正在迁移到 Vue 3、JavaScript 和 Vite。`index.html` 是 Vite 入口，`src/main.js` 挂载 Vue 根组件；当前 `src/App.vue` 加载页面模板并管理页面导航，功能控制器暂时保留在 `public/app.js`，存档编辑 UI 在 `public/save-editor-ui.js`。样式仍在 `public/style.css` 和 `public/game-ui.css`。`public/*.json` 是静态数据快照，图片位于 `public/relic-images/`、`public/character-images/` 与 `public/nav-icons/`。`npm run build` 将站点产物写入 `dist`，Sites 静态发布配置仍指向 `.openai/hosting.json` 中的 `dist`。
+
+`public/relic-parser.js` 在浏览器内解析存档；`public/save-editor.js` 与 `public/save-editor-ui.js` 包含现有编辑与导出路径；`public/relic-optimizer.js` 负责组合计算。迁移期间保留这些本地处理边界和静态资源路径，再逐页将 DOM 控制器替换为 Vue 状态和组件。
 
 这是**现状图**，不是对代码正确性的认定。重构须保留基线可回退，并先固定数据接口。
 

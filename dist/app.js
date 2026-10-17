@@ -3,18 +3,18 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyMeta:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const state = {enemyData:null,enemyImages:{},enemyMeta:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
 const RELIC_PAGE_SIZE=36,POOL_PAGE_SIZE=12;
 const characterZh = {'追跡者':'追踪者','守護者':'守护者','鉄の目':'铁之眼','レディ':'女爵','無頼漢':'无赖','復讐者':'复仇者','隠者':'隐士','執行者':'执行者','学者':'学者','葬儀屋':'送葬者'};
 const characterImage = {'追跡者':'wylder','守護者':'guardian','鉄の目':'iron-eye','レディ':'duchess','無頼漢':'raider','復讐者':'revenant','隠者':'recluse','執行者':'executor','学者':'scholar','葬儀屋':'undertaker'};
 const vesselZh = {urn:'器皿',goblet:'杯盅',chalice:'高脚杯',sootCoveredUrn:'熏黑的器皿',sealedUrn:'封印的器皿',decrepitGoblet:'破旧的杯盅',forgottenGoblet:'被遗忘的杯盅',sacredErdtreeGrail:'黄金树圣杯',spiritTreeGrail:'灵魂树圣杯',giantTreeGrail:'巨人树圣杯',scadutreeGrail:'幽影树圣杯'};
 const colorZh = {Red:'红',Blue:'蓝',Yellow:'黄',Green:'绿',Any:'任意'};
-// 夜王图片等待用户提供对应素材后再添加。
+// Enemy portraits map by the NPC parameter ID shared with the source wiki.
 const enemyPortraits = [];
-function enemyPortraitInfo(name){return enemyPortraits.find(([pattern])=>pattern.test(String(name||'')))||null}
-function enemyPortrait(name,large=false){
-  const item=enemyPortraitInfo(name),src=item?.[1]||'';
+function enemyPortraitInfo(name,id){const imageId=String(id||'').replace(/[a-z]$/i,'');const src=state.enemyImages?.[imageId];return src?[null,src]:enemyPortraits.find(([pattern])=>pattern.test(String(name||'')))||null}
+function enemyPortrait(name,large=false,id=''){
+  const item=enemyPortraitInfo(name,id),src=item?.[1]||'';
   return `<span class="enemy-portrait ${large?'large':''} ${item?'has-image':''}" aria-hidden="true">${item?`<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}<span>⚔</span></span>`;
 }
 function attachEnemyPortraitFallbacks(root){root.querySelectorAll('.enemy-portrait img').forEach(img=>img.addEventListener('error',()=>img.parentElement.classList.remove('has-image'),{once:true}))}
@@ -29,24 +29,15 @@ function vesselName(key,character){
 }
 
 function navigate(view){
-  if(!$('#view-'+view)) view='overview';
   if(view==='builds'&&state.save){$('#build-empty').hidden=true;$('#build-workspace').hidden=false;renderBuildWorkspace()}
-  $$('.view').forEach(el=>el.classList.toggle('active',el.id==='view-'+view));
-  $$('.nav-link').forEach(el=>el.classList.toggle('active',el.dataset.view===view));
-  $('#breadcrumb-current').textContent={overview:'圆桌厅堂',enemies:'图鉴',relics:'遗物仪式',records:'日志',builds:'遗物装配',sources:'资料说明'}[view];
-  $('.sidebar').classList.remove('open');
-  const nextUrl=new URL(location.href);nextUrl.hash=view;history.replaceState(null,'',nextUrl);
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.dispatchEvent(new CustomEvent('nightreign:navigate',{detail:{view}}));
 }
-$$('[data-view]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.view)));
-$$('[data-go]').forEach(el=>el.addEventListener('click',()=>navigate(el.dataset.go)));
-$('#mobile-menu').addEventListener('click',()=>$('.sidebar').classList.toggle('open'));
-window.addEventListener('hashchange',()=>navigate(location.hash.slice(1)));
+window.navigateTo=navigate;
 
 async function loadCatalogs(){
   try{
-    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects]=await Promise.all(['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json'].map(async name=>{const r=await fetch('./'+name);if(!r.ok)throw new Error(name+' 读取失败');return r.json()}));
-    Object.assign(state,{enemyData:enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects});
+    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,enemyImages]=await Promise.all(['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','enemy-image-map.json'].map(async name=>{const url='./'+name+(name==='enemy-image-map.json'?'?v=20261017-monster-images':'');const r=await fetch(url);if(!r.ok)throw new Error(name+' 读取失败');return r.json()}));
+    Object.assign(state,{enemyData:enemy,enemyImages,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects});
     buildEffectCategoryIndex();
     $('#nav-enemy-count').textContent=enemy.rows.length.toLocaleString('zh-CN');
     buildEnemyMetadata();
@@ -137,13 +128,13 @@ function renderEnemies(){
   const total=state.enemyGroups.length,pages=Math.max(1,Math.ceil(total/state.enemyPageSize));
   state.enemyPage=Math.min(Math.max(state.enemyPage,1),pages);
   const start=(state.enemyPage-1)*state.enemyPageSize,groups=state.enemyGroups.slice(start,start+state.enemyPageSize);
-  const variants=(group)=>group.rows.map(({row,index},variantIndex)=>`<button type="button" class="enemy-variant ${state.enemySelected===row?'active':''}" data-enemy-index="${index}"><span>${esc(enemyName(row))===esc(group.name)?`记录 ${variantIndex+1}`:esc(enemyName(row))}</span><small>ID ${esc(row[1])} · 第一天 HP ${esc(fmt(row[2]))}</small></button>`).join('');
+  const variants=(group)=>group.rows.map(({row,index},variantIndex)=>`<button type="button" class="enemy-variant ${state.enemySelected===row?'active':''}" data-enemy-index="${index}"><span>${esc(enemyName(row))===esc(group.name)?`记录 ${variantIndex+1}`:esc(enemyName(row))}</span><small>ID <span class="enemy-number">${esc(row[1])}</span> · 第一天 HP <span class="enemy-number">${esc(fmt(row[2]))}</span></small></button>`).join('');
   $('#enemy-count').textContent=total?`第 ${start+1}–${start+groups.length} 组 / 共 ${total.toLocaleString('zh-CN')} 组 · ${state.enemyFiltered.length.toLocaleString('zh-CN')} 条记录`:`0 组 · 0 条记录`;
   $('#enemy-list').innerHTML=groups.length?groups.map(group=>{
     const selected=group.rows.some(({row})=>row===state.enemySelected);
     const row=group.rows[0].row,badge=enemyCategoryLabel(row);
-    if(group.rows.length===1){const {index}=group.rows[0];return `<button type="button" class="enemy-row ${state.enemySelected===row?'active':''}" data-enemy-index="${index}">${enemyPortrait(enemyName(row))}<span class="enemy-row-copy"><strong>${esc(enemyName(row))}</strong><small>ID ${esc(row[1])} · 第一天 HP ${esc(fmt(row[2]))}</small></span><span class="badge ${isBoss(row)?'':'muted'}">${esc(badge)}</span></button>`}
-    return `<details class="enemy-group" ${selected?'open':''}><summary class="enemy-row enemy-group-title">${enemyPortrait(group.name)}<span class="enemy-row-copy"><strong>${esc(group.name)}</strong><small>${group.rows.length} 条同名记录</small></span><span class="badge ${isBoss(row)?'':'muted'}">${esc(badge)}</span></summary><div class="enemy-variants">${variants(group)}</div></details>`;
+    if(group.rows.length===1){const {index}=group.rows[0];return `<button type="button" class="enemy-row ${state.enemySelected===row?'active':''}" data-enemy-index="${index}">${enemyPortrait(enemyName(row),false,row[1])}<span class="enemy-row-copy"><strong>${esc(enemyName(row))}</strong><small>ID <span class="enemy-number">${esc(row[1])}</span> · 第一天 HP <span class="enemy-number">${esc(fmt(row[2]))}</span></small></span><span class="badge ${isBoss(row)?'':'muted'}">${esc(badge)}</span></button>`}
+    return `<details class="enemy-group" ${selected?'open':''}><summary class="enemy-row enemy-group-title">${enemyPortrait(group.name,false,row[1])}<span class="enemy-row-copy"><strong>${esc(group.name)}</strong><small>${group.rows.length} 条同名记录</small></span><span class="badge ${isBoss(row)?'':'muted'}">${esc(badge)}</span></summary><div class="enemy-variants">${variants(group)}</div></details>`;
   }).join(''):'<div class="empty-state"><h3>没有找到记录</h3><p>试试其他名称或 ID。</p></div>';
   attachEnemyPortraitFallbacks($('#enemy-list'));
   renderPagination('enemy-pagination',total,state.enemyPageSize,state.enemyPage);
@@ -176,7 +167,7 @@ function renderEnemyDetail(r){
   const locations=locationFor(r);
   const sameName=state.enemyData.rows.map((row,index)=>({row,index})).filter(({row})=>enemyGroupName(row)===enemyGroupName(r));
   const recordPicker=sameName.length>1?`<label class="enemy-record-picker">同名数据<select id="enemy-record-select" aria-label="选择同名怪物数据">${sameName.map(({row,index})=>`<option value="${index}" ${row===r?'selected':''}>ID ${esc(row[1])} · HP ${esc(fmt(row[2]))}${enemyName(row)!==enemyGroupName(r)?' · '+esc(enemyName(row)):''}</option>`).join('')}</select></label>`:'';
-  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${enemyPortrait(enemyName(r),true)}<div><span class="card-kicker">${esc(enemyCategoryLabel(r))} / 怪物分类</span><h2>${esc(enemyName(r))}</h2><small>内部 ID ${esc(r[1])}</small></div></div><span class="badge ${isBoss(r)?'':'muted'}">${esc(enemyCategoryLabel(r))}</span></div>${recordPicker}${section('核心属性',[2,3,4,24,25,26,27],true,`<div class="enemy-element-summary"><div class="enemy-element-heading">魔 / 火 / 雷 / 圣 · 最高与最低伤害倍率</div><div class="enemy-element-cards">${enemyElementSummary(r)}</div></div>`)}${section('伤害倍率',[5,6,7,8,9,10,11,12])}${section('异常状态抗性',[13,14,15,16,17,18,19,20,21,22,23])}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}<section class="detail-section location-section"><h3>出现位置</h3><p class="detail-note">${locations.length?esc(locations.join('、'))+'（同名 Boss 表可核对的遭遇分类）':'未收录可核对的具体位置'}</p></section>`;
+  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${enemyPortrait(enemyName(r),true,r[1])}<div><span class="card-kicker">${esc(enemyCategoryLabel(r))} / 怪物分类</span><h2>${esc(enemyName(r))}</h2><small>内部 ID <span class="enemy-number">${esc(r[1])}</span></small></div></div><span class="badge ${isBoss(r)?'':'muted'}">${esc(enemyCategoryLabel(r))}</span></div>${recordPicker}${section('核心属性',[2,3,4,24,25,26,27],true,`<div class="enemy-element-summary"><div class="enemy-element-heading">魔 / 火 / 雷 / 圣 · 最高与最低伤害倍率</div><div class="enemy-element-cards">${enemyElementSummary(r)}</div></div>`)}${section('伤害倍率',[5,6,7,8,9,10,11,12])}${section('异常状态抗性',[13,14,15,16,17,18,19,20,21,22,23])}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}<section class="detail-section location-section"><h3>出现位置</h3><p class="detail-note">${locations.length?esc(locations.join('、'))+'（同名 Boss 表可核对的遭遇分类）':'未收录可核对的具体位置'}</p></section>`;
   attachEnemyPortraitFallbacks($('#enemy-detail'));
 }
 $('#enemy-search').addEventListener('input',filterEnemies);$('#enemy-filter').addEventListener('change',filterEnemies);$('#enemy-area').addEventListener('change',filterEnemies);
