@@ -59,7 +59,7 @@ function loadClassicScript(file) {
 onMounted(async () => {
   window.addEventListener('nightreign:navigate', handleNavigation);
   window.addEventListener('hashchange', handleHashChange);
-  for (const file of ['crypto-js.min.js', 'relic-parser.js', 'save-editor.js', 'app.js?v=20261017-monster-names', 'save-editor-ui.js']) {
+  for (const file of ['crypto-js.min.js', 'relic-parser.js', 'save-editor.js', 'ai-config.js', 'app.js?v=20261017-ai-knowledge', 'save-editor-ui.js']) {
     try {
       await loadClassicScript(file);
     } catch (error) {

@@ -448,6 +448,34 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #enemy-list .enemy-row small,.enemy-variant small,.enemy-detail-title small{font-family:Arial,"Helvetica Neue",sans-serif!important;font-variant-numeric:lining-nums tabular-nums!important;font-feature-settings:"lnum" 1,"tnum" 1!important;letter-spacing:0!important}
 #enemy-list .enemy-row small .enemy-number,.enemy-variant small .enemy-number,.enemy-detail-title small .enemy-number{font-family:Arial,"Helvetica Neue",sans-serif!important;font-variant-numeric:lining-nums tabular-nums!important;font-feature-settings:"lnum" 1,"tnum" 1!important;letter-spacing:0!important}
 
+/* Restricted DeepSeek relic build advisor. */
+.ai-relic-advisor{margin:22px 0;padding:18px;border:1px solid #42566c;background:linear-gradient(145deg,#1b2b3d,#142130);color:#dce3e9}
+.ai-advisor-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
+.ai-advisor-heading h3{margin:4px 0;font-size:18px;color:#e7d0a0}
+.ai-scope-badge{padding:5px 9px;border:1px solid #8c7449;color:#e5c77f;font-size:11px;white-space:nowrap}
+.ai-knowledge-base{margin:12px 0;padding:11px 12px;border:1px solid #3d5065;background:#142233}
+.ai-knowledge-base summary{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;color:#e4d0a0;font-size:13px;font-weight:600}
+.ai-knowledge-base summary span{color:#91a3b3;font-size:11px;font-weight:400}
+.ai-knowledge-base>p{margin:9px 0 6px}
+#ai-build-knowledge{display:block;width:100%;min-height:100px;padding:9px 11px;border:1px solid #53677e;border-radius:3px;background:#101b29;color:#e6e8df;font:inherit;line-height:1.55;resize:vertical}
+#ai-build-knowledge:focus{outline:1px solid #c8a466;border-color:#c8a466}
+#ai-knowledge-count.error{color:#ed9a8f}
+#ai-relic-form{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:end;margin-top:14px}
+#ai-relic-form label{display:grid;gap:6px;color:#bfcbd4;font-size:12px}
+#ai-relic-form select,#ai-relic-question{width:100%;min-height:42px;padding:9px 11px;border:1px solid #53677e;border-radius:3px;background:#101b29;color:#e6e8df;font:inherit}
+#ai-relic-question{min-height:82px;resize:vertical;line-height:1.5}
+#ai-relic-form select:focus,#ai-relic-question:focus{outline:1px solid #c8a466;border-color:#c8a466}
+.ai-advisor-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#93a3b2;font-size:11px}
+#ai-relic-status{margin:12px 0 0}
+#ai-relic-status.error{color:#ed9a8f}
+#ai-relic-result{margin-top:12px;padding:12px;border-left:2px solid #c8a466;background:#111e2d;line-height:1.6}
+.ai-plan-summary{margin:0 0 8px;color:#e2d1a6}
+.ai-plan-group>strong{display:block;color:#c9a969;font-size:12px}
+.ai-plan-group p{display:grid;grid-template-columns:minmax(140px,.7fr) minmax(0,2fr);gap:10px;margin:6px 0;color:#c4ced7;font-size:12px}
+.ai-plan-group p b{font-weight:600;color:#e1e6eb}
+#ai-relic-apply{margin-top:10px}
+@media(max-width:700px){.ai-relic-advisor{padding:13px}#ai-relic-form{grid-template-columns:1fr}.ai-advisor-actions{grid-column:auto}.ai-plan-group p{grid-template-columns:1fr;gap:2px}}
+
 /* Compact desktop loadout while keeping every owned relic affix readable. */
 .pool-relic{height:auto;max-height:none;min-height:0;align-self:start;overflow:visible}
 .pool-relic strong,.pool-relic small,.pool-relic em{white-space:normal;overflow:visible;text-overflow:clip;-webkit-line-clamp:unset}
@@ -482,3 +510,22 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
   .pool-effects em{font-size:9px;line-height:1.35;padding-left:6px}
 }
 @media(max-width:750px){.loadout-left{display:block}.loadout-effects{flex:none;grid-auto-rows:auto}.loadout-effects .game-relic-detail{height:auto}.build-relic-pool{grid-auto-rows:min-content}.pool-relic{height:auto;overflow:visible}}
+
+/* Size each relic grid row to its longest card so full affixes stay visible. */
+.pool-slot-filter[hidden]{display:none!important}
+.build-relic-pool{grid-auto-rows:max-content!important;align-content:start!important}
+.pool-relic{height:auto!important;align-self:stretch;min-height:max-content!important;overflow:visible!important}
+@media(max-width:750px){.pool-relic{align-self:stretch}}
+
+/* Temporarily hide save-editing and loadout-staging entry points; keep their code and data intact. */
+.relic-edit-button,#save-edit-bar,#vessel-stage{display:none!important}
+
+/* Keep the build rules, AI advisor, and entry filters together as one compact workspace. */
+.effect-picker{display:flex;flex-direction:column;gap:8px}
+.effect-picker>.rule-tools{margin:0;padding:10px 0}
+.effect-picker>.ai-relic-advisor{margin:4px 0;padding:13px}
+.effect-selection-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:4px;padding-top:10px;border-top:1px solid #3c4b51;color:#ead19e;font-size:14px}
+.effect-selection-heading span{color:#9aabb7;font-size:11px}
+.effect-picker>.effect-filter-bar{margin:4px 0}
+.effect-picker>.effect-options{margin-top:0}
+@media(max-width:650px){.effect-selection-heading{align-items:flex-start;flex-direction:column;gap:2px}}

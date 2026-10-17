@@ -307,7 +307,7 @@ function showSave(parsed){
   renderRelicCategoryOptions();filterRelics();renderEffectOptions();renderSelectedEffects();renderBuildWorkspace();
 }
 function restoreSave(){
-    try{const raw=sessionStorage.getItem('nightreign-parsed-save-v2');if(!raw)return;const parsed=JSON.parse(raw);state.saveEditor=null;state.saveFileName=null;showSave(parsed);setSaveStatus(`已恢复本页解析结果 · ${parsed.relics.length} 件遗物。若要编辑并导出存档，请重新选择原始 .sl2 文件。`)}
+    try{const raw=sessionStorage.getItem('nightreign-parsed-save-v2');if(!raw)return;const parsed=JSON.parse(raw);state.saveEditor=null;state.saveFileName=null;showSave(parsed);setSaveStatus(`已恢复本页解析结果 · ${parsed.relics.length} 件遗物。`)}
   catch(_){try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(e){}}
 }
 $('#save-file').addEventListener('change',e=>readSave(e.target.files[0]));
@@ -487,7 +487,7 @@ function renderSelectedEffects(){
   const option=(value,label,current)=>`<option value="${value}" ${current===value?'selected':''}>${label}</option>`;
   const ruleQuery=$('#selected-rule-search')?.value.trim().toLocaleLowerCase()||'';
   const shown=state.rules.map((rule,i)=>({rule,i})).filter(({rule})=>!ruleQuery||(ruleEffectName(catalog.get(rule.key)||{key:rule.key})+' '+rule.key+' '+(rule.note||'')).toLocaleLowerCase().includes(ruleQuery));
-  $('#selected-effects').innerHTML=shown.map(({rule,i})=>`<div class="rule-row" data-rule-index="${i}"><div class="rule-name"><strong>${esc(ruleEffectName(catalog.get(rule.key)||{key:rule.key}))}</strong><small>${esc(rule.key)}</small></div><label>条件<select data-field="priority">${option('required','必选',rule.priority)}${option('preferred','偏好',rule.priority)}${option('nice_to_have','加分',rule.priority)}${option('exclude','排除',rule.priority)}</select></label><label>生效位置<select data-field="scope">${option('normal','普通',rule.scope)}${option('deep','深夜',rule.scope)}${option('any','任意',rule.scope)}</select></label><label>权重<input data-field="weight" type="number" min="1" max="10000" step="1" value="${esc(rule.weight)}"></label><label>有效次数<input data-field="cap" type="number" min="1" max="6" step="1" value="${esc(rule.cap)}"></label><label class="rule-note">备注<input data-field="note" type="text" maxlength="160" value="${esc(rule.note||'')}" placeholder="为什么选择此词条"></label><button type="button" data-remove-rule="${i}" aria-label="删除此规则">×</button></div>`).join('')||(ruleQuery?'<p class="hint">当前流派没有匹配的规则。</p>':'<p class="hint">搜索词条并点击添加，或载入一个流派模板。</p>');
+  $('#selected-effects').innerHTML=shown.map(({rule,i})=>{const modes=effectModesForKey(rule.key),allowed=modes.map(mode=>mode==='普通'?'normal':'deep');if(allowed.length>1)allowed.push('any');const scopes=allowed.length?allowed:['normal','deep','any'];return `<div class="rule-row" data-rule-index="${i}"><div class="rule-name"><strong>${esc(ruleEffectName(catalog.get(rule.key)||{key:rule.key}))}</strong><small>${esc(rule.key)}</small></div><label>条件<select data-field="priority">${option('required','必选',rule.priority)}${option('preferred','偏好',rule.priority)}${option('nice_to_have','加分',rule.priority)}${option('exclude','排除',rule.priority)}</select></label><label>生效位置<select data-field="scope">${scopes.map(scope=>option(scope,scope==='normal'?'普通':scope==='deep'?'深夜':'任意',rule.scope)).join('')}</select></label><label>权重<input data-field="weight" type="number" min="1" max="10000" step="1" value="${esc(rule.weight)}"></label><label>有效次数<input data-field="cap" type="number" min="1" max="6" step="1" value="${esc(rule.cap)}"></label><label class="rule-note">备注<input data-field="note" type="text" maxlength="160" value="${esc(rule.note||'')}" placeholder="为什么选择此词条"></label><button type="button" data-remove-rule="${i}" aria-label="删除此规则">×</button></div>`}).join('')||(ruleQuery?'<p class="hint">当前流派没有匹配的规则。</p>':'<p class="hint">搜索词条并点击添加。</p>');
   $$('#selected-effects [data-field]').forEach(x=>x.addEventListener('change',()=>{const rule=state.rules[Number(x.closest('[data-rule-index]').dataset.ruleIndex)],field=x.dataset.field;rule[field]=field==='weight'||field==='cap'?Math.max(1,Math.min(field==='cap'?6:10000,Number(x.value)||1)):x.value;syncRules();renderSelectedEffects()}));
   $$('#selected-effects [data-remove-rule]').forEach(x=>x.addEventListener('click',()=>{state.rules.splice(Number(x.dataset.removeRule),1);syncRules();renderSelectedEffects();renderEffectOptions()}));
   if($('#loadout-effects'))renderLoadoutSummary();
@@ -506,6 +506,14 @@ function validRule(raw){
   const scope=['normal','deep','any'].includes(raw.scope)?raw.scope:'any';
   return {key:raw.key,priority,scope,weight:Math.max(1,Math.min(10000,Math.round(Number(raw.weight)||10))),cap:Math.max(1,Math.min(6,Math.round(Number(raw.cap)||1))),note:String(raw.note||'').slice(0,160)};
 }
+function isWeaponConversionRule(key){return typeof key==='string'&&key.startsWith('changesCompatibleArmaments')&&key.endsWith('AtStartOfExpedition')}
+function effectModesForKey(key){const row=Object.entries(state.effects?.effects||{}).find(([,effect])=>effect.key===key);return row?state.relicRuleEffects?.definitions?.[row[0]]?.modes||[]:[]}
+function normalizeRuleScope(key,scope){
+  const modes=effectModesForKey(key),allowed=modes.map(mode=>mode==='普通'?'normal':'deep');
+  if(allowed.length===1)return allowed[0];
+  if(allowed.length>1)return [...allowed,'any'].includes(scope)?scope:'any';
+  return ['normal','deep','any'].includes(scope)?scope:'any';
+}
 function syncRules(){
   state.selectedEffects=new Map(state.rules.map(r=>[r.key,r.priority]));
   saveActiveRuleProfile();invalidateBuildResults();renderLoadoutSummary();
@@ -515,7 +523,8 @@ function normalizeProfile(raw,index=0){
   if(!raw||typeof raw!=='object')return null;
   const characters=[...$('#character-select').options].map(o=>o.value),candidate=String(raw.character||characters[0]||'追跡者');
   const rules=Array.isArray(raw.rules)?raw.rules.map(validRule).filter(Boolean):[];
-  return {id:String(raw.id||profileId()+`-${index}`),name:String(raw.name||'未命名流派').slice(0,60),character:characters.includes(candidate)?candidate:(characters[0]||'追跡者'),rules:[...new Map(rules.map(r=>[r.key,r])).values()]};
+  const normalizedRules=[...new Map(rules.map(r=>[r.key,r])).values()].map(rule=>({...rule,scope:normalizeRuleScope(rule.key,rule.scope)}));
+  return {id:String(raw.id||profileId()+`-${index}`),name:String(raw.name||'未命名流派').slice(0,60),character:characters.includes(candidate)?candidate:(characters[0]||'追跡者'),rules:normalizedRules};
 }
 function saveRuleProfiles(){try{localStorage.setItem(RULE_STORAGE_KEY,JSON.stringify({version:2,profiles:state.ruleProfiles,activeProfileId:state.activeRuleProfileId}));return true}catch(_){return false}}
 function saveActiveRuleProfile(){
@@ -527,7 +536,8 @@ function renderRuleProfiles(){
   const select=$('#rule-profile-select');if(!select)return;
   const query=$('#rule-profile-search')?.value.trim().toLocaleLowerCase()||'';
   const visible=state.ruleProfiles.filter(p=>p.id===state.activeRuleProfileId||!query||(p.name+' '+(characterZh[p.character]||p.character)).toLocaleLowerCase().includes(query));
-  select.innerHTML=visible.map(p=>`<option value="${esc(p.id)}">${esc(p.name)} · ${esc(characterZh[p.character]||p.character)}</option>`).join('');select.value=state.activeRuleProfileId||'';
+  select.innerHTML=visible.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');select.value=state.activeRuleProfileId||'';
+  $('#rule-profile-delete').textContent=state.ruleProfiles.length<=1?'清空规则':'删除';
   const p=state.ruleProfiles.find(x=>x.id===state.activeRuleProfileId);$('#rule-profile-name').value=p?.name||'';
 }
 function activateRuleProfile(id){
@@ -548,13 +558,20 @@ function restoreRules(){
   const active=state.ruleProfiles.find(p=>p.id===state.activeRuleProfileId);state.rules=(active?.rules||[]).map(r=>({...r}));$('#character-select').value=active?.character||'追跡者';updateVessels();
   state.selectedEffects=new Map(state.rules.map(r=>[r.key,r.priority]));renderRuleProfiles();saveRuleProfiles();renderSelectedEffects();renderEffectOptions();
 }
-function addRule(key){const row=Object.entries(state.effects?.effects||{}).find(([,e])=>e.key===key);if(!row||!isOutOfGameRelicEffect({...row[1],id:row[0]})||state.rules.some(r=>r.key===key))return;const e=row[1];state.rules.push({key,priority:'preferred',scope:'any',weight:10,cap:e.stackable===true?3:1,note:''});syncRules();renderSelectedEffects();renderEffectOptions()}
-function buildSpecs(){return state.rules.map((r,rank)=>({key:r.key,priority:r.priority==='exclude'?'required':r.priority,exclude:r.priority==='exclude',scope:r.scope,weight:r.weight,cap:r.cap,rank}))}
-const ruleTools=document.createElement('div');ruleTools.className='rule-tools';ruleTools.innerHTML='<div class="rule-tools-heading"><strong>流派规则表</strong><p class="hint">候选区只列 <a href="https://github.com/xxiixi/NightreignQuickRef/tree/main/src/data/zh-CN" target="_blank" rel="noopener">NightreignQuickRef</a> 的局外遗物词条，可按普通／深夜遗物和词条类型筛选；局内词条不加载、不展示。添加后可设置条件、位置、权重、次数和备注。</p></div><div class="profile-controls"><label>当前流派<select id="rule-profile-select" aria-label="当前流派"></select></label><label class="profile-name">流派名称<input id="rule-profile-name" maxlength="60" placeholder="例如：复仇者·兽爪蜗"></label><button type="button" id="rule-profile-new" class="button ghost">新建</button><button type="button" id="rule-profile-duplicate" class="button ghost">复制</button><button type="button" id="rule-profile-delete" class="button ghost">删除</button></div><div class="rule-tool-buttons"><button type="button" id="rule-template-load" class="button ghost">载入兽爪蜗模板</button><button type="button" id="rule-clear" class="button ghost">清空当前规则</button><button type="button" id="rule-import" class="button ghost">导入 JSON</button><button type="button" id="rule-export" class="button ghost">导出全部流派</button><input id="rule-file" type="file" accept=".json,application/json" hidden></div><p id="rule-io-status" role="status" aria-live="polite"></p>';
+function addRule(key){const row=Object.entries(state.effects?.effects||{}).find(([,e])=>e.key===key);if(!row||!isOutOfGameRelicEffect({...row[1],id:row[0]})||state.rules.some(r=>r.key===key))return;if(isWeaponConversionRule(key)&&state.rules.some(rule=>isWeaponConversionRule(rule.key))){$('#rule-io-status').textContent='出击时的武器转换词条只保留第一条；已保留当前规则。';return}const e=row[1],modes=state.relicRuleEffects.definitions[row[0]].modes,relicMode=$('#effect-relic-mode').value;const scope=modes.length===1?(modes[0]==='普通'?'normal':'deep'):relicMode==='normal'?'normal':relicMode==='deep'?'deep':'any';state.rules.push({key,priority:'preferred',scope,weight:10,cap:e.stackable===true?3:1,note:''});syncRules();renderSelectedEffects();renderEffectOptions()}
+function effectiveRules(){let conversionUsed=false;return state.rules.filter(rule=>{if(!isWeaponConversionRule(rule.key))return true;if(conversionUsed)return false;conversionUsed=true;return true})}
+function buildSpecs(){return effectiveRules().map((r,rank)=>({key:r.key,priority:r.priority==='exclude'?'required':r.priority,exclude:r.priority==='exclude',scope:normalizeRuleScope(r.key,r.scope),weight:r.weight,cap:r.cap,rank}))}
+const ruleTools=document.createElement('div');ruleTools.className='rule-tools';ruleTools.innerHTML='<div class="rule-tools-heading"><strong>流派规则表</strong><p class="hint">候选区只列 <a href="https://github.com/xxiixi/NightreignQuickRef/tree/main/src/data/zh-CN" target="_blank" rel="noopener">NightreignQuickRef</a> 的局外遗物词条，可按普通／深夜遗物和词条类型筛选；局内词条不加载、不展示。出击时武器转换只按首条生效，推荐尽量命中更多有效词条。</p></div><div class="profile-controls"><label>当前流派<select id="rule-profile-select" aria-label="当前流派"></select></label><label class="profile-name">流派名称<input id="rule-profile-name" maxlength="60" placeholder="例如：复仇者·兽爪蜗"></label><button type="button" id="rule-profile-new" class="button ghost">新建</button><button type="button" id="rule-profile-duplicate" class="button ghost">复制</button><button type="button" id="rule-profile-delete" class="button ghost">删除</button></div><div class="rule-tool-buttons"><button type="button" id="rule-clear" class="button ghost">清空当前规则</button><button type="button" id="rule-import" class="button ghost">导入 JSON</button><button type="button" id="rule-export" class="button ghost">导出全部流派</button><input id="rule-file" type="file" accept=".json,application/json" hidden></div><p id="rule-io-status" role="status" aria-live="polite"></p>';
 ruleTools.querySelector('.profile-controls').insertAdjacentHTML('afterbegin','<label class="profile-filter">查找流派<input id="rule-profile-search" type="search" placeholder="名称或渡夜者"></label>');
 ruleTools.querySelector('.profile-controls').insertAdjacentHTML('beforeend','<button type="button" id="rule-profile-save" class="button primary">保存当前流派</button>');
 $('.effect-header').after(ruleTools);
-$('#effect-search').closest('.search-field').insertAdjacentHTML('afterend','<div class="effect-filter-bar"><label>遗物种类<select id="effect-relic-mode"><option value="all">全部局外遗物</option><option value="normal">普通遗物</option><option value="deep">深夜遗物</option></select></label><label>词条类型<select id="effect-category"><option value="all">全部类型</option></select></label><label class="effect-owned-filter"><input id="effect-owned-only" type="checkbox"> 只看存档持有</label><span id="effect-result-count" role="status"></span></div>');
+$('.effect-header .card-kicker').textContent='配装工作区';$('.effect-header h3').textContent='规则与推荐';
+const aiRelicAdvisor=document.createElement('section');
+aiRelicAdvisor.className='ai-relic-advisor';
+aiRelicAdvisor.innerHTML='<div class="ai-advisor-heading"><div><span class="card-kicker">DEEPSEEK / BUILD ASSISTANT</span><h3>AI 遗物搭配助手</h3></div><span class="ai-scope-badge">仅限配装咨询</span></div><p class="hint">描述你的角色、武器或战斗需求。每次限 240 字，每分钟最多 5 次；仅发送遗物摘要和本次问题，不会上传原始存档或保存聊天记录。</p><form id="ai-relic-form"><label>你的问题<textarea id="ai-relic-question" maxlength="240" minlength="8" required placeholder="例如：复仇者使用兽爪，希望提高近战输出，同时保留一定生存能力。问题需围绕角色、武器、遗物、词条或战斗配装。"></textarea></label><div class="ai-advisor-actions"><span id="ai-question-count">0 / 240 字</span><button id="ai-relic-submit" type="submit" class="button primary">生成配装建议</button></div></form><p id="ai-relic-status" class="hint" role="status" aria-live="polite">请先读取存档，AI 才能从你拥有的遗物中搭配。</p><div id="ai-relic-result" hidden></div><button id="ai-relic-apply" type="button" class="button primary" hidden>应用方案到装配槽</button>';
+ruleTools.insertAdjacentElement('afterend',aiRelicAdvisor);
+$('#effect-search').closest('.search-field').insertAdjacentHTML('beforebegin','<div class="effect-selection-heading"><strong>词条选择</strong><span>先筛选普通或深夜词条，再添加到流派规则表</span></div>');
+$('#effect-search').closest('.search-field').insertAdjacentHTML('afterend','<div class="effect-filter-bar"><label>遗物种类<select id="effect-relic-mode"><option value="normal">普通遗物</option><option value="deep">深夜遗物</option><option value="all">全部局外遗物</option></select></label><label>词条类型<select id="effect-category"><option value="all">全部类型</option></select></label><label class="effect-owned-filter"><input id="effect-owned-only" type="checkbox"> 只看存档持有</label><span id="effect-result-count" role="status"></span></div>');
 $('#effect-options').insertAdjacentHTML('afterend','<div id="effect-pagination" class="pagination" aria-label="候选词条页数" hidden></div><label class="selected-rule-filter">筛选已选规则<input id="selected-rule-search" type="search" placeholder="搜索词条或备注"></label>');
 $('#selected-effects').insertAdjacentHTML('beforebegin','<div class="rule-columns" aria-hidden="true"><span>目标词条</span><span>条件</span><span>生效位置</span><span>权重</span><span>有效次数</span><span>备注</span><span></span></div>');
 $('.scoring-details > div').innerHTML='<p>必选是硬条件，缺少任意必选词条的组合不会被推荐；偏好和加分按权重计分。普通、深夜、任意决定词条在哪类遗物上生效；排除词条出现时组合不合格。</p><p>有效次数限制该词条参与评分的次数；不可叠加效果设为 1。每个流派可以指定不同角色和规则。评分根据规则匹配、有效次数与槽位可装配情况计算。</p>';
@@ -570,9 +587,67 @@ $('#selected-rule-search').addEventListener('input',renderSelectedEffects);
 $('#rule-profile-name').addEventListener('change',e=>{const p=state.ruleProfiles.find(x=>x.id===state.activeRuleProfileId);if(p){p.name=e.target.value.trim()||'未命名流派';renderRuleProfiles();saveRuleProfiles()}});
 $('#rule-profile-new').addEventListener('click',()=>{saveActiveRuleProfile();const p={id:profileId(),name:'新流派',character:$('#character-select').value,rules:[]};state.ruleProfiles.push(p);activateRuleProfile(p.id);$('#rule-profile-name').focus();$('#rule-io-status').textContent='已新建空白流派，请设置名称、角色和目标词条。'});
 $('#rule-profile-duplicate').addEventListener('click',()=>{saveActiveRuleProfile();const src=state.ruleProfiles.find(p=>p.id===state.activeRuleProfileId);if(!src)return;const p={...src,id:profileId(),name:`${src.name}（副本）`,rules:src.rules.map(r=>({...r}))};state.ruleProfiles.push(p);activateRuleProfile(p.id);$('#rule-io-status').textContent='已复制当前流派，可独立修改副本。'});
-$('#rule-profile-delete').addEventListener('click',()=>{if(state.ruleProfiles.length<=1){$('#rule-io-status').textContent='至少保留一个流派；可先新建其他流派再删除。';return}saveActiveRuleProfile();const i=state.ruleProfiles.findIndex(p=>p.id===state.activeRuleProfileId);state.ruleProfiles=state.ruleProfiles.filter(p=>p.id!==state.activeRuleProfileId);const next=state.ruleProfiles[Math.max(0,i-1)].id;state.activeRuleProfileId=null;activateRuleProfile(next);$('#rule-io-status').textContent='当前流派已删除。'});
-$('#rule-template-load').addEventListener('click',()=>{const p=state.ruleProfiles.find(x=>x.id===state.activeRuleProfileId);if(p)p.name='复仇者·兽爪蜗';state.rules=BEAST_CLAW_TEMPLATE.map(r=>({...r}));$('#character-select').value='復讐者';updateVessels();syncRules();renderRuleProfiles();renderSelectedEffects();renderEffectOptions();$('#rule-io-status').textContent='已载入复仇者·兽爪蜗模板，可继续修改规则。'});
+$('#rule-profile-delete').addEventListener('click',()=>{if(state.ruleProfiles.length<=1){state.rules=[];syncRules();renderSelectedEffects();renderEffectOptions();$('#rule-io-status').textContent='已清空最后一个流派的规则；流派本身已保留。';return}saveActiveRuleProfile();const i=state.ruleProfiles.findIndex(p=>p.id===state.activeRuleProfileId);state.ruleProfiles=state.ruleProfiles.filter(p=>p.id!==state.activeRuleProfileId);const next=state.ruleProfiles[Math.max(0,i-1)].id;state.activeRuleProfileId=null;activateRuleProfile(next);$('#rule-io-status').textContent='当前流派已删除。'});
 $('#rule-clear').addEventListener('click',()=>{state.rules=[];syncRules();renderSelectedEffects();renderEffectOptions();$('#rule-io-status').textContent='当前流派规则已清空。'});
+let pendingAiRelicPlan=null;
+const aiQuestion=$('#ai-relic-question'),aiQuestionCount=$('#ai-question-count');
+aiQuestion.addEventListener('input',()=>{aiQuestionCount.textContent=`${Array.from(aiQuestion.value).length} / 240 字`});
+const aiKnowledgeStorageKey='nightreign_ai_build_knowledge_v1';
+function parseAiKnowledge(input){return input.value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean)}
+function updateAiKnowledgeStatus(input,count){
+  const rules=parseAiKnowledge(input),tooLong=rules.find(rule=>Array.from(rule).length>300);
+  try{localStorage.setItem(aiKnowledgeStorageKey,input.value)}catch(_){count.textContent='本机存储失败'}
+  count.textContent=tooLong?'单条规则不能超过 300 字':rules.length>30?'最多保存 30 条规则':`本机已保存 · ${rules.length}/30 条`;
+  count.classList.toggle('error',Boolean(tooLong||rules.length>30));
+}
+// 知识库界面暂时隐藏；保留原本机数据与辅助逻辑，便于日后恢复。
+function setAiRelicStatus(message,error=false){const status=$('#ai-relic-status');status.textContent=message;status.classList.toggle('error',error)}
+function describeAiPlan(plan,inventory){
+  const names=new Map(inventory.map(relic=>[String(relic.id),relic.name]));
+  const sections=[['normal','普通遗物'],['deep','深夜遗物']].filter(([group])=>plan[group]?.length);
+  $('#ai-relic-result').innerHTML=`<p class="ai-plan-summary"></p>${sections.map(([group,label])=>`<div class="ai-plan-group"><strong>${label}</strong>${plan[group].map(item=>`<p><b>${item.index+1} 槽 · ${item.relic_id?esc(names.get(String(item.relic_id))||'未识别遗物'):'暂留空'}</b><span>${esc(item.reason||'')}</span></p>`).join('')}</div>`).join('')}`;
+  $('#ai-relic-result .ai-plan-summary').textContent=plan.summary;
+  $('#ai-relic-result').hidden=false;$('#ai-relic-apply').hidden=false;
+}
+$('#ai-relic-form').addEventListener('submit',async event=>{
+  event.preventDefault();pendingAiRelicPlan=null;$('#ai-relic-result').hidden=true;$('#ai-relic-apply').hidden=true;
+  if(!state.save?.relics?.length){setAiRelicStatus('请先在“遗物仪式”读取存档。',true);return}
+  const question=aiQuestion.value.trim();if(question.length<8||question.length>240){setAiRelicStatus('问题需填写 8–240 字。',true);return}
+  const vessel=currentVessel();if(!vessel){setAiRelicStatus('当前供具信息不可用，请重新选择角色或供具。',true);return}
+  const character=$('#character-select').value,combined=$('#build-mode').value==='combined';
+  const slots=[...(vessel.normalSlots||[]).map((color,index)=>({group:'normal',index,color})),...(combined?(vessel.deepSlots||[]).map((color,index)=>({group:'deep',index,color})):[])];
+  const inventory=state.save.relics.map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}));
+  const ruleEffects=Object.entries(state.effects?.effects||{});
+  const rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([,entry])=>entry.key===rule.key)||[];return {effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope)}});
+  const body={character:characterZh[character]||character,vessel:vesselName($('#vessel-select').value,character),question,slots,rules,inventory};
+  const button=$('#ai-relic-submit');button.disabled=true;setAiRelicStatus('正在根据你的遗物清单生成配装建议…');
+  try{
+    const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/ai/recommend`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const contentType=response.headers.get('content-type')||'';
+    if(!contentType.includes('application/json')){
+      const raw=await response.text();
+      if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');
+      if(response.status===404)throw new Error('找不到 AI 接口，请检查 FastAPI 地址配置。');
+      throw new Error(`AI 服务返回了非 JSON 响应（HTTP ${response.status}），请检查后端地址和运行状态。`);
+    }
+    let result;try{result=await response.json()}catch(_){throw new Error('AI 服务返回的数据格式异常，请检查后端日志。')}
+    if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');
+    pendingAiRelicPlan={plan:result,inventory,characterId:character,vesselKey:$('#vessel-select').value,mode:$('#build-mode').value};
+    describeAiPlan(result,inventory);setAiRelicStatus('建议已生成；点击“应用方案”后才会替换装配预览。');
+  }catch(error){setAiRelicStatus(error.message||'AI 请求失败，请检查 API 服务是否启动。',true)}
+  finally{button.disabled=false}
+});
+$('#ai-relic-apply').addEventListener('click',()=>{
+  if(!pendingAiRelicPlan||!state.save)return;
+  if(pendingAiRelicPlan.characterId!==$('#character-select').value||pendingAiRelicPlan.vesselKey!==$('#vessel-select').value||pendingAiRelicPlan.mode!==$('#build-mode').value){setAiRelicStatus('角色、供具或组合模式已改变，请重新生成建议。',true);return}
+  const next={normal:[...state.equipped.normal],deep:[...state.equipped.deep]},used=new Set();
+  for(const group of ['normal','deep'])for(const choice of pendingAiRelicPlan.plan[group]||[]){
+    const index=choice.relic_id===null?null:state.save.relics.findIndex(relic=>String(relic.id)===String(choice.relic_id));
+    if(index!==null&&(index<0||used.has(index)||!canEquip(index,group,choice.index))){setAiRelicStatus('方案校验失败：遗物不在当前清单中，或与槽位不匹配。请重新生成建议。',true);return}
+    if(index!==null)used.add(index);next[group][choice.index]=index;
+  }
+  state.equipped=next;state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent='AI 配装建议已应用到装配预览，可继续手动调整。';setAiRelicStatus('方案已应用到装配预览；尚未写入存档。');
+});
 $('#rule-export').addEventListener('click',()=>{saveActiveRuleProfile();const data={version:2,profiles:state.ruleProfiles,activeProfileId:state.activeRuleProfileId};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='nightreign-build-profiles.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('#rule-io-status').textContent='已导出全部流派规则；文件不含存档数据。'});
 $('#rule-import').addEventListener('click',()=>$('#rule-file').click());
 $('#rule-file').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>1000000)throw new Error('规则文件过大');const data=JSON.parse(await file.text());let profiles;if(data.version===2&&Array.isArray(data.profiles)){profiles=data.profiles.map(normalizeProfile).filter(Boolean);if(!profiles.length)throw new Error('文件中没有有效流派')}else if(data.version===1&&Array.isArray(data.rules)){const rules=data.rules.map(validRule);if(rules.some(r=>!r)||new Set(rules.map(r=>r.key)).size!==rules.length)throw new Error('包含未知或重复词条');profiles=[normalizeProfile({id:profileId(),name:'导入流派',character:data.character,rules})]}else throw new Error('不是受支持的规则文件');state.ruleProfiles=profiles;state.activeRuleProfileId=null;const next=profiles.some(p=>p.id===data.activeProfileId)?data.activeProfileId:profiles[0].id;activateRuleProfile(next);saveRuleProfiles();$('#rule-io-status').textContent=`已导入 ${profiles.length} 个流派。`}catch(err){$('#rule-io-status').textContent='导入失败：'+err.message}finally{e.target.value=''}});
