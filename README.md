@@ -6,7 +6,7 @@
 
 本仓库以 2026-10-17 恢复的线上 v41 文件为初始基线；该版本的页面内容与先前 v36 回退目标一致。原有功能保留，准确性与完整度按需求文档逐项验收，不以“已存在代码”代替验证。当前网站仍由 Sites 发布；GitHub 作为后续协作的主仓库，发布同步流程见 [路线图](docs/ROADMAP.md)。
 
-从 [项目需求](docs/REQUIREMENTS.md) 开始阅读；[架构](docs/ARCHITECTURE.md)、[数据来源](docs/DATA.md)、[评分规则](docs/SCORING.md)、[质量与验收](docs/QUALITY.md)、[任务与阶段](docs/ROADMAP.md)、[对话分工](docs/WORKSTREAMS.md) 和 [决策记录](docs/DECISIONS.md) 分别说明各专项工作。协作规则见 [AGENTS.md](AGENTS.md)。
+从 [项目状态](docs/STATUS.md) 和 [项目需求](docs/REQUIREMENTS.md) 开始阅读；[架构](docs/ARCHITECTURE.md)、[数据来源](docs/DATA.md)、[评分规则](docs/SCORING.md)、[质量与验收](docs/QUALITY.md)、[任务与阶段](docs/ROADMAP.md)、[对话分工](docs/WORKSTREAMS.md) 和 [决策记录](docs/DECISIONS.md) 分别说明各专项工作。协作规则见 [AGENTS.md](AGENTS.md)。
 
 ## 数据范围
 
