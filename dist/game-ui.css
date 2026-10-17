@@ -447,3 +447,38 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .enemy-number,.enemy-record-picker select{font-family:Arial,"Helvetica Neue",sans-serif;font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1;letter-spacing:0}
 #enemy-list .enemy-row small,.enemy-variant small,.enemy-detail-title small{font-family:Arial,"Helvetica Neue",sans-serif!important;font-variant-numeric:lining-nums tabular-nums!important;font-feature-settings:"lnum" 1,"tnum" 1!important;letter-spacing:0!important}
 #enemy-list .enemy-row small .enemy-number,.enemy-variant small .enemy-number,.enemy-detail-title small .enemy-number{font-family:Arial,"Helvetica Neue",sans-serif!important;font-variant-numeric:lining-nums tabular-nums!important;font-feature-settings:"lnum" 1,"tnum" 1!important;letter-spacing:0!important}
+
+/* Compact desktop loadout while keeping every owned relic affix readable. */
+.pool-relic{height:auto;max-height:none;min-height:0;align-self:start;overflow:visible}
+.pool-relic strong,.pool-relic small,.pool-relic em{white-space:normal;overflow:visible;text-overflow:clip;-webkit-line-clamp:unset}
+.pool-relic strong{display:block;-webkit-box-orient:initial}
+.pool-effects>span{display:block!important;overflow:visible!important;-webkit-line-clamp:unset;-webkit-box-orient:initial;white-space:normal;overflow-wrap:anywhere}
+.pool-effects em{display:block!important;overflow:visible!important;white-space:normal;overflow-wrap:anywhere}
+@media(min-width:1320px){
+  .loadout{padding:12px}
+  .loadout-heading{padding-bottom:6px}
+  .loadout-heading h2{font-size:19px}
+  .loadout .hint{margin:4px 0 7px;line-height:1.45}
+  .loadout-layout{grid-template-columns:minmax(330px,.82fr) minmax(560px,1.18fr);align-items:start;gap:14px}
+  .loadout-left{display:block;min-height:0}
+  .loadout-slots{gap:5px;padding:7px 0 8px}
+  .slot-group h3{font-size:11px;margin-bottom:4px}
+  .slot-row{gap:5px}
+  .loadout-slot{aspect-ratio:1.75;padding:3px}
+  .loadout-effects{flex:none;min-height:0;align-content:start;grid-auto-rows:auto;gap:5px;padding:5px;margin:5px 0 0}
+  .loadout-effects .game-relic-detail{height:auto;min-height:0;padding:6px}
+  .loadout-effects .game-relic-empty{min-height:78px}
+  .loadout-right{padding-left:14px}
+  .loadout-right .toolbar{margin:8px 0;padding:8px;gap:6px}
+  .loadout-right .toolbar .search-field{height:40px}
+  .loadout-right .toolbar select{min-height:38px}
+  .loadout-right #pool-pagination{height:38px;min-height:38px;margin:5px 0 7px;padding:3px 7px}
+  .build-relic-pool{height:min(42vh,410px);max-height:none;grid-auto-rows:min-content;align-content:start;gap:6px}
+  .pool-relic{min-width:0;gap:7px;padding:7px}
+  .pool-relic .relic-thumb{width:38px;height:38px;flex-basis:38px}
+  .pool-relic strong{font-size:11px;line-height:1.35}
+  .pool-relic small{font-size:9px;line-height:1.35}
+  .pool-effects{font-size:10px;line-height:1.35;margin-top:3px}
+  .pool-effects em{font-size:9px;line-height:1.35;padding-left:6px}
+}
+@media(max-width:750px){.loadout-left{display:block}.loadout-effects{flex:none;grid-auto-rows:auto}.loadout-effects .game-relic-detail{height:auto}.build-relic-pool{grid-auto-rows:min-content}.pool-relic{height:auto;overflow:visible}}
