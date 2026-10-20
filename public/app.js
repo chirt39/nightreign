@@ -371,7 +371,7 @@ async function readSave(file){
     showSave(parsed);
     try{sessionStorage.setItem('nightreign-parsed-save-v2',JSON.stringify(parsed))}catch(_){/* 存储不可用时仍保留本页数据 */}
     state.equipped={normal:[null,null,null],deep:[null,null,null]};state.selectedRelicIndex=null;renderBuildWorkspace();
-    setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改，也未发送到服务器。${state.saveEditor?'可在下方编辑并导出副本。':'此存档版式暂不支持编辑。'}`);
+    setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改，也未发送到服务器。${state.saveEditor?'当前为只读模式；存档写回尚未验收。':'此存档版式暂不支持编辑。'}`);
   }catch(err){setSaveStatus('无法解析此存档：'+(err.message||String(err)),true)}
 }
 function showSave(parsed){
