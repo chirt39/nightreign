@@ -31,7 +31,84 @@ ALLOWED_ORIGINS = [
     if origin.strip()
 ]
 
+
+MAX_REQUEST_BODY_BYTES = 750_000
+
+
+class RequestBodyLimitMiddleware:
+    """Bound declared and streamed request bodies before routing or parsing."""
+
+    def __init__(self, app, max_body_bytes: int = MAX_REQUEST_BODY_BYTES):
+        self.app = app
+        self.max_body_bytes = max_body_bytes
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        content_length = next(
+            (
+                value
+                for name, value in scope.get("headers", [])
+                if name.lower() == b"content-length"
+            ),
+            None,
+        )
+        if content_length is not None:
+            try:
+                declared_size = int(content_length)
+                if declared_size < 0:
+                    raise ValueError
+            except ValueError:
+                response = JSONResponse(status_code=400, content={"detail": "请求格式无效。"})
+                await response(scope, receive, send)
+                return
+            if declared_size > self.max_body_bytes:
+                response = JSONResponse(
+                    status_code=413,
+                    content={"detail": "请求数据过大，请重新读取遗物清单后重试。"},
+                )
+                await response(scope, receive, send)
+                return
+
+        messages = []
+        received_size = 0
+        while True:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                return
+            if message["type"] != "http.request":
+                continue
+
+            received_size += len(message.get("body", b""))
+            if received_size > self.max_body_bytes:
+                response = JSONResponse(
+                    status_code=413,
+                    content={"detail": "请求数据过大，请重新读取遗物清单后重试。"},
+                )
+                await response(scope, receive, send)
+                return
+
+            messages.append(message)
+            if not message.get("more_body", False):
+                break
+
+        next_message = 0
+
+        async def replay_receive():
+            nonlocal next_message
+            if next_message < len(messages):
+                message = messages[next_message]
+                next_message += 1
+                return message
+            return await receive()
+
+        await self.app(scope, replay_receive, send)
+
+
 app = FastAPI(title="Nightreign Relic Advisor", docs_url=None, redoc_url=None)
+app.add_middleware(RequestBodyLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -78,18 +155,6 @@ def _localized_vessel_name(key: str, character: str = "") -> str:
 
 def _localized_slot_colors(colors: list[str]) -> str:
     return "/".join(COLOR_ZH.get(color, "未知") for color in colors)
-
-
-@app.middleware("http")
-async def limit_request_size(request: Request, call_next):
-    content_length = request.headers.get("content-length")
-    if content_length:
-        try:
-            if int(content_length) > 750_000:
-                return JSONResponse(status_code=413, content={"detail": "请求数据过大，请重新读取遗物清单后重试。"})
-        except ValueError:
-            return JSONResponse(status_code=400, content={"detail": "请求格式无效。"})
-    return await call_next(request)
 
 
 class StrictModel(BaseModel):
@@ -508,7 +573,12 @@ def _parse_plan(content: str, body: AdviceRequest) -> dict:
 
 @app.get("/api/health")
 async def health() -> JSONResponse:
-    checks: dict[str, dict[str, str | int]] = {}
+    checks: dict[str, dict[str, str | int]] = {
+        "deepseek_api": {"status": "ok" if API_KEY else "unavailable"},
+        "dashscope_api": {
+            "status": "ok" if rag_store.EMBEDDING_API_KEY else "unavailable"
+        },
+    }
     source_count = 0
     try:
         source_count = await run_in_threadpool(rag_store.source_record_count)

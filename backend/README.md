@@ -33,7 +33,7 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 
 每个浏览器在本地存储一个随机会话标识。FastAPI 将该会话的问答存入 SQLite，并在 Chroma 中建立语义记忆索引；默认只保留最近 5 轮完整问答（可用 `AGENT_MEMORY_MAX_EXCHANGES` 调整），更早的 SQLite 记录和对应 Chroma 记录会清理。提问时只检索仍保留的记忆。助手页面不提供手动清除按钮；原始存档和遗物库存不写入对话记忆。
 
-`GET /api/health` 是就绪检查：要求知识库源语料可读且非空、Chroma 活动集合可用、索引记录数与源语料条数一致，并且百炼向量 API Key 已配置；全部满足返回 HTTP 200，否则返回 HTTP 503 和逐项检查状态。该接口不调用 DeepSeek 或百炼，避免健康检查产生模型费用。`GET /api/knowledge/status` 可查看索引与源语料计数。
+`GET /api/health` 是 AI 服务就绪检查：要求知识库源语料可读且非空、Chroma 活动集合可用、索引记录数与源语料条数一致，并且 DeepSeek 生成 API Key 和百炼向量 API Key 均已配置；全部满足返回 HTTP 200，否则返回 HTTP 503 和逐项检查状态（`deepseek_api`、`dashscope_api`、`knowledge_source`、`chroma`）。该接口不调用 DeepSeek 或百炼，避免健康检查产生模型费用。`GET /api/knowledge/status` 可查看索引与源语料计数。
 
 ### RAG 检索评估
 
@@ -63,6 +63,7 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 
 - 对话每条消息限 2–400 字，仅接收黑夜君临相关主题；最多携带 8 条近期对话消息，不接收文件、图片或工具调用。确认配装条件后，提交给配装接口的问题合并后限 8–240 字。
 - 每个客户端 IP 每分钟最多请求 5 次。配装请求最多 900 件遗物、6 个槽位和 40 条当前流派规则。
+- 每个 HTTP 请求体最多 750,000 字节；服务端先检查声明长度，再按 ASGI 请求流累计实际字节数，超限返回 HTTP 413，只暂存上限内的数据，不累积超限后的剩余请求体。
 - 所有 AI 接口共享同一客户端每分钟限流；默认全站每天最多发起 100 次 DeepSeek 请求（UTC 日界线重置），分别由 `AI_REQUESTS_PER_MINUTE` 和 `AI_REQUESTS_PER_DAY` 配置。计数保存在 `AGENT_MEMORY_DB` 的 SQLite 数据库中，单机多进程共享；多服务器部署需改用 Redis 等共享限流存储。
 - 若 FastAPI 通过本机 Caddy 反向代理，Uvicorn 应信任本机代理头（`--proxy-headers --forwarded-allow-ips=127.0.0.1`），否则每 IP 限流可能把访客都识别成代理地址。不要信任任意公网来源的转发头。
 - 请求次数上限不能精确限制人民币费用，实际花费仍取决于模型、输入长度和输出长度；还应在 DeepSeek 账户侧设置余额或预算提醒。CORS 只约束浏览器，不是 API 认证或防刷手段。
