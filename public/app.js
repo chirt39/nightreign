@@ -3,7 +3,7 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyMeta:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const state = {enemyData:null,enemyMeta:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
 const relicColorClasses = Object.freeze({Red:'red',Blue:'blue',Yellow:'yellow',Green:'green',Any:'any'});
 const relicColorClass = (relic) => {const key=String(relic?.itemColor||'Any');return `color-${Object.hasOwn(relicColorClasses,key)?relicColorClasses[key]:'any'}`};
@@ -97,6 +97,8 @@ function restoreEnemyUrlState(){
   $('#enemy-area').value=[...$('#enemy-area').options].some(option=>option.value===params.get('enemyArea'))?params.get('enemyArea'):'all';
   state.enemyPage=Math.max(1,Number(params.get('enemyPage'))||1);
   state.enemyUrlId=params.get('enemyId')||'';
+  const rawRecordIndex=params.get('enemyRecordIndex'),recordIndex=rawRecordIndex===null?'':Number(rawRecordIndex);
+  state.enemyUrlIndex=rawRecordIndex!==null&&Number.isSafeInteger(recordIndex)&&recordIndex>=0?recordIndex:null;
 }
 function syncEnemyUrl(){
   const url=new URL(location.href),params=url.searchParams;
@@ -105,8 +107,17 @@ function syncEnemyUrl(){
   type==='all'?params.delete('enemyType'):params.set('enemyType',type);
   area==='all'?params.delete('enemyArea'):params.set('enemyArea',area);
   state.enemyPage>1?params.set('enemyPage',String(state.enemyPage)):params.delete('enemyPage');
-  state.enemySelected?params.set('enemyId',String(state.enemySelected[1])):params.delete('enemyId');
+  const selectedIndex=state.enemySelected?state.enemyData.rows.indexOf(state.enemySelected):-1;
+  if(selectedIndex>=0){params.set('enemyId',String(state.enemySelected[1]));params.set('enemyRecordIndex',String(selectedIndex))}
+  else{params.delete('enemyId');params.delete('enemyRecordIndex')}
   url.search=params.toString();history.replaceState(null,'',url);
+}
+function resolveEnemyUrlMatch(filteredRows,allRows,recordIndex,enemyId){
+  if(Number.isSafeInteger(recordIndex)&&recordIndex>=0){
+    const indexedRow=allRows[recordIndex];
+    if(indexedRow&&(!enemyId||String(indexedRow[1])===enemyId))return filteredRows.find(({index})=>index===recordIndex)||null;
+  }
+  return enemyId?filteredRows.find(({row})=>String(row[1])===enemyId)||null:null;
 }
 function filterEnemies(resetPage=true){
   if(!state.enemyData)return;
@@ -116,7 +127,7 @@ function filterEnemies(resetPage=true){
   const groups=new Map();
   rows.forEach(item=>{const name=enemyGroupName(item.row);if(!groups.has(name))groups.set(name,{name,rows:[]});groups.get(name).rows.push(item)});
   state.enemyGroups=[...groups.values()];
-  if(state.enemyUrlId){const match=rows.find(({row})=>String(row[1])===state.enemyUrlId);if(match)state.enemySelected=match.row;state.enemyUrlId=''}
+  if(state.enemyUrlId||state.enemyUrlIndex!==null){const match=resolveEnemyUrlMatch(rows,state.enemyData.rows,state.enemyUrlIndex,state.enemyUrlId);if(match)state.enemySelected=match.row;state.enemyUrlId='';state.enemyUrlIndex=null}
   if(state.enemySelected&&!rows.some(({row})=>row===state.enemySelected))state.enemySelected=null;
   if(resetPage)state.enemyPage=1;renderEnemies();renderEnemyDetail(state.enemySelected);syncEnemyUrl();
 }
