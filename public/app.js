@@ -503,14 +503,15 @@ function renderBuildWorkspace(){
 }
 function renderLoadoutSummary(){
   const combined=$('#build-mode').value==='combined',indices=[...state.equipped.normal,...(combined?state.equipped.deep:[])].filter(i=>i!==null);
-  const counts=new Map();for(const group of ['normal',...(combined?['deep']:[])])for(const index of state.equipped[group])if(index!==null)for(const e of effectGroups(state.save?.relics?.[index]||{})){const key=e.key+'@@'+group;counts.set(key,(counts.get(key)||0)+1)}
+  const instances=new Map();for(const group of ['normal',...(combined?['deep']:[])])for(const index of state.equipped[group])if(index!==null)for(const effect of effectGroups(state.save?.relics?.[index]||{})){const key=effect.key+'@@'+group;if(!instances.has(key))instances.set(key,[]);instances.get(key).push({effect,group})}
   const {group:activeGroup,index:activeSlot}=state.activeSlot,details=[];
   for(const group of ['normal',...(combined?['deep']:[])])state.equipped[group].forEach((relicIndex,index)=>{if(relicIndex===null)return;details.push({group,index,relic:state.save?.relics?.[relicIndex],active:group===activeGroup&&index===activeSlot})});
   const detailRoot=$('#loadout-effects'),validDetails=details.filter(item=>item.relic);detailRoot.dataset.count=String(validDetails.length);
   detailRoot.innerHTML=validDetails.length?validDetails.map(({group,index,relic,active})=>`<section class="game-relic-detail ${active?'active':''}" data-detail-group="${group}" data-detail-slot="${index}"><header>${relicImage(relic)}<div><small>${group==='normal'?'普通':'深夜'} · ${esc(colorZh[relic.itemColor]||relic.itemColor)}色 · 第 ${index+1} 槽</small><strong>${esc(relicName(relic))}</strong></div></header><div class="game-effect-list">${renderEffectRows(relic)}</div></section>`).join(''):'<div class="game-relic-empty">已装配的遗物详情会显示在这里。</div>';
   if(!state.selectedEffects.size){$('#loadout-score').textContent=`已装配 ${indices.length} / ${combined?6:3} 件 · 选择目标词条后显示匹配分`;return}
   let score=0,matched=0,missing=0;
-  for(const rule of state.rules){const count=rule.scope==='any'?(counts.get(rule.key+'@@normal')||0)+(counts.get(rule.key+'@@deep')||0):(counts.get(rule.key+'@@'+rule.scope)||0);if(count){score+=(rule.priority==='exclude'?-1:1)*rule.weight*Math.min(count,rule.cap);matched++}else if(rule.priority==='required')missing++}
+  const stacking=stackingData();
+  for(const rule of state.rules){const found=rule.scope==='any'?[...(instances.get(rule.key+'@@normal')||[]),...(instances.get(rule.key+'@@deep')||[])]:instances.get(rule.key+'@@'+rule.scope)||[];if(found.length){score+=rule.priority==='exclude'?-rule.weight*found.length:scoreRuleInstances(found,rule,stacking);matched++}else if(rule.priority==='required')missing++}
   $('#loadout-score').textContent=`当前目标匹配分 ${score} · 命中 ${matched} 项${missing?' · 缺少 '+missing+' 项必选':''}`;
 }
 function renderPool(){
@@ -761,7 +762,30 @@ $('#agent-apply-build').addEventListener('click',()=>{
   for(const group of ['normal','deep'])for(const choice of plan[group]||[]){const index=choice.relic_id===null?null:state.save.relics.findIndex(relic=>String(relic.id)===String(choice.relic_id));if(index!==null&&(index<0||used.has(index)||!canEquip(index,group,choice.index))){setAgentStatus('方案校验失败：遗物不在当前存档中，或与所选角色供具槽位不匹配。',true);return}if(index!==null)used.add(index);next[group][choice.index]=index}
   state.equipped=next;state.selectedRelicIndex=null;renderBuildWorkspace();navigate('builds');$('#equip-status').textContent='Agent 配装已放入装配预览，可继续调整；尚未写入存档。';setAgentStatus('配装已应用到装配预览；尚未写入存档。');
 });
-function stackingData(){const map={};for(const e of Object.values(state.effects.effects||{})){const key=e.key,v=e.stackable===true?true:e.stackable==='conditional'?'conditional':false;if(!(key in map)||v===true||v==='conditional'&&map[key]===false)map[key]=v}return map}
+function stackingData(){
+  const byId={},byMode={normal:{},deep:{}},byKey={};
+  const merge=(target,key,value)=>{if(!(key in target))target[key]=value;else if(target[key]!==value)target[key]=false};
+  for(const [id,e] of Object.entries(state.effects?.effects||{})){
+    const value=e.stackable===true?true:e.stackable==='conditional'?'conditional':false;
+    byId[id]=value;
+    merge(byKey,e.key,value);
+    for(const mode of state.relicRuleEffects?.definitions?.[id]?.modes||[]){
+      if(mode==='普通')merge(byMode.normal,e.key,value);
+      if(mode==='深夜')merge(byMode.deep,e.key,value);
+    }
+  }
+  return {byId,byMode,byKey};
+}
+function scoreRuleInstances(instances,rule,stacking){
+  let nonstackable=0,conditional=0,stackable=0;
+  for(const {effect,group} of instances){
+    const id=effect.id==null?'':String(effect.id);
+    const value=id&&Object.hasOwn(stacking.byId,id)?stacking.byId[id]:Object.hasOwn(stacking.byMode[group]||{},effect.key)?stacking.byMode[group][effect.key]:stacking.byKey[effect.key];
+    if(value===true)stackable++;else if(value==='conditional')conditional++;else nonstackable++;
+  }
+  const cap=Math.max(1,Math.min(6,Number(rule.cap)||1)),full=Math.min(stackable+(nonstackable?1:0),cap),discounted=Math.min(conditional,cap-full);
+  return rule.weight*full+(discounted?rule.weight*(full?0.7*discounted:1+0.7*(discounted-1)):0);
+}
 function renderBuildResult(data){
   const results=(data.allResults?.flatMap(x=>x.results||[])||[]).filter(x=>x.requiredMet);
   state.buildResults=results.slice(0,10);

@@ -10,6 +10,16 @@ const { RelicOptimizer, WorstFirstHeap } = vm.runInNewContext(
   source + '\n;({ RelicOptimizer, WorstFirstHeap })'
 );
 const effects = JSON.parse(fs.readFileSync(path.join(root, 'public/effects_data.json'), 'utf8')).effects;
+const appSource = fs.readFileSync(path.join(root, 'public/app.js'), 'utf8');
+const stackingAdapter = appSource.match(/function stackingData\(\)\{[\s\S]*?\n\}/)?.[0];
+const previewScorer = appSource.match(/function scoreRuleInstances\([\s\S]*?\n\}/)?.[0];
+
+function pageStackingData(effectEntries, definitions = {}) {
+  assert.ok(stackingAdapter, 'page stacking adapter exists');
+  return vm.runInNewContext(`${stackingAdapter}\nstackingData()`, {
+    state: { effects: { effects: effectEntries }, relicRuleEffects: { definitions } },
+  });
+}
 
 function relic(id, keys, itemType = 'Relic', itemColor = 'Red') {
   return { id, itemType, itemColor, effects: keys.map(key => [{ id, key }]) };
@@ -18,6 +28,8 @@ function relic(id, keys, itemType = 'Relic', itemColor = 'Red') {
 function optimizer(relics, specs, stackingData) {
   return new RelicOptimizer(relics, specs, null, stackingData);
 }
+
+const encodedCount = (kind, count) => count * (kind === true ? 65536 : kind === 'conditional' ? 256 : 1);
 
 test('effect data includes all three stacking kinds used by the website policy', () => {
   assert.equal(effects['7000000'].stackable, true);
@@ -33,7 +45,7 @@ test('normal and combined recommendations use full, 70%, and one-time scores', (
     [true, 30, 60], ['conditional', 24, 45], [false, 10, 10],
   ]) {
     const opt = optimizer(relics, [{ key: 'sample', priority: 'preferred', weight: 10, cap: 6 }], { sample: kind });
-    assert.equal(opt._fastStackingScore(Int32Array.of(3)), expectedNormal);
+    assert.equal(opt._fastStackingScore(Int32Array.of(encodedCount(kind, 3))), expectedNormal);
     const normal = opt.optimizeCombined(['Red', 'Red', 'Red'], ['Red', 'Red', 'Red'], {
       normalTypes: ['Relic'], deepTypes: [], candidatesPerSlot: 6, topN: 1,
     });
@@ -48,8 +60,83 @@ test('normal and combined recommendations use full, 70%, and one-time scores', (
 test('effective-count cap limits stackable and conditional repeats, never raises non-stackable score', () => {
   for (const [kind, expected] of [[true, 20], ['conditional', 17], [false, 10]]) {
     const opt = optimizer([], [{ key: 'sample', priority: 'preferred', weight: 10, cap: 2 }], { sample: kind });
-    assert.equal(opt._fastStackingScore(Int32Array.of(6)), expected);
+    assert.equal(opt._fastStackingScore(Int32Array.of(encodedCount(kind, 6))), expected);
   }
+});
+
+test('same key keeps ordinary false and deep true by effect ID in every scope', () => {
+  const definitions = {
+    '7000090': { modes: ['普通'] },
+    '6610400': { modes: ['深夜'] },
+  };
+  const stacking = pageStackingData({
+    '7000090': effects['7000090'],
+    '6610400': effects['6610400'],
+  }, definitions);
+  assert.equal(stacking.byId['7000090'], false);
+  assert.equal(stacking.byId['6610400'], true);
+  assert.equal(stacking.byMode.normal.increasedMaximumHP, false);
+  assert.equal(stacking.byMode.deep.increasedMaximumHP, true);
+  assert.ok(previewScorer, 'loadout preview scorer exists');
+  const preview = vm.runInNewContext(`${previewScorer}\nscoreRuleInstances`, {});
+  const previewInstances = [
+    ...[1, 2].map(() => ({ effect: { id: '7000090', key: 'increasedMaximumHP' }, group: 'normal' })),
+    ...[1, 2].map(() => ({ effect: { id: '6610400', key: 'increasedMaximumHP' }, group: 'deep' })),
+  ];
+  assert.equal(preview(previewInstances, { weight: 10, cap: 6 }, stacking), 30);
+  const make = (id, effectId, itemType) => ({
+    id, itemType, itemColor: 'Red',
+    effects: [[{ id: effectId, key: 'increasedMaximumHP' }]],
+  });
+  const relics = [1, 2, 3].map(id => make(id, '7000090', 'Relic'))
+    .concat([4, 5, 6].map(id => make(id, '6610400', 'DeepRelic')));
+  const spec = scope => [{ key: 'increasedMaximumHP', scope, priority: 'preferred', weight: 10, cap: 6 }];
+  const options = { candidatesPerSlot: 6, topN: 1 };
+  const normal = optimizer(relics, spec('any'), stacking).optimizeCombined(
+    ['Red', 'Red', 'Red'], ['Red', 'Red', 'Red'], { ...options, normalTypes: ['Relic'], deepTypes: [] }
+  );
+  assert.equal(normal[0].score, 10);
+  const any = optimizer(relics, spec('any'), stacking).optimizeCombined(
+    ['Red', 'Red', 'Red'], ['Red', 'Red', 'Red'], options
+  );
+  assert.equal(any[0].score, 40);
+  const normalScope = optimizer(relics, spec('normal'), stacking).optimizeCombined(
+    ['Red', 'Red', 'Red'], ['Red', 'Red', 'Red'], options
+  );
+  assert.equal(normalScope[0].score, 10);
+  const deepScope = optimizer(relics, spec('deep'), stacking).optimizeCombined(
+    ['Red', 'Red', 'Red'], ['Red', 'Red', 'Red'], options
+  );
+  assert.equal(deepScope[0].score, 30);
+  const deepOpt = optimizer(relics, spec('any'), stacking);
+  const deepCandidates = [4, 5, 6].map(id => deepOpt._compactRelic(relics[id - 1]));
+  assert.equal(deepOpt._enumerateCombos([deepCandidates, deepCandidates, deepCandidates], ['Red', 'Red', 'Red'])[0][0], 30);
+});
+
+test('effect ID overrides mode and missing IDs fall back to mode without changing key rules', () => {
+  const stacking = pageStackingData({
+    '7000090': effects['7000090'],
+    '6610400': effects['6610400'],
+  }, { '7000090': { modes: ['普通'] }, '6610400': { modes: ['深夜'] } });
+  const relics = [
+    { id: 1, itemType: 'Relic', itemColor: 'Red', effects: [[{ id: '6610400', key: 'increasedMaximumHP' }]] },
+    { id: 2, itemType: 'Relic', itemColor: 'Red', effects: [[{ key: 'increasedMaximumHP' }]] },
+    { id: 3, itemType: 'DeepRelic', itemColor: 'Red', effects: [[{ key: 'increasedMaximumHP' }]] },
+  ];
+  const opt = optimizer(relics, [{ key: 'increasedMaximumHP', scope: 'any', weight: 10, cap: 6 }], stacking);
+  assert.equal(opt._fastStackingScore(Int32Array.of(65536 + 1 + 65536)), 30);
+  assert.equal(opt.scoreRelic(relics[0]), 10);
+  assert.equal(opt.scoreRelic(relics[1]), 10);
+  assert.equal(opt.scoreRelic(relics[2]), 10);
+  assert.equal(opt._enumerateCombos(relics.map(r => [opt._compactRelic(r)]), ['Red', 'Blue', 'Green'])[0][0], 30);
+});
+
+test('mixed instance kinds share one effective-count cap', () => {
+  const spec = [{ key: 'sample', scope: 'any', weight: 10, cap: 2 }];
+  const opt = optimizer([], spec, {});
+  assert.equal(opt._fastStackingScore(Int32Array.of(1 + 2 * 65536)), 20);
+  assert.equal(opt._fastStackingScore(Int32Array.of(1 + 2 * 256)), 17);
+  assert.equal(opt._fastStackingScore(Int32Array.of(2 * 256)), 17);
 });
 
 test('all slot enumeration shapes use the same conditional score', () => {
