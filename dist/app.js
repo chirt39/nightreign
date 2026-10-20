@@ -3,21 +3,16 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyImages:{},enemyMeta:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const state = {enemyData:null,enemyMeta:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
-const RELIC_PAGE_SIZE=36,POOL_PAGE_SIZE=12;
+const relicColorClasses = Object.freeze({Red:'red',Blue:'blue',Yellow:'yellow',Green:'green',Any:'any'});
+const relicColorClass = (relic) => {const key=String(relic?.itemColor||'Any');return `color-${Object.hasOwn(relicColorClasses,key)?relicColorClasses[key]:'any'}`};
+const relicColorTag = (relic) => {const key=String(relic?.itemColor||'Any'),label=Object.hasOwn(colorZh,key)?colorZh[key]:'任意';return `<span class="relic-color-tag ${relicColorClass(relic)}"><i aria-hidden="true"></i>${esc(label)}色</span>`};
+const RELIC_PAGE_SIZE=36,POOL_PAGE_SIZE=12,EFFECT_ENCYCLOPEDIA_PAGE_SIZE=18;
 const characterZh = {'追跡者':'追踪者','守護者':'守护者','鉄の目':'铁之眼','レディ':'女爵','無頼漢':'无赖','復讐者':'复仇者','隠者':'隐士','執行者':'执行者','学者':'学者','葬儀屋':'送葬者'};
 const characterImage = {'追跡者':'wylder','守護者':'guardian','鉄の目':'iron-eye','レディ':'duchess','無頼漢':'raider','復讐者':'revenant','隠者':'recluse','執行者':'executor','学者':'scholar','葬儀屋':'undertaker'};
 const vesselZh = {urn:'器皿',goblet:'杯盅',chalice:'高脚杯',sootCoveredUrn:'熏黑的器皿',sealedUrn:'封印的器皿',decrepitGoblet:'破旧的杯盅',forgottenGoblet:'被遗忘的杯盅',sacredErdtreeGrail:'黄金树圣杯',spiritTreeGrail:'灵魂树圣杯',giantTreeGrail:'巨人树圣杯',scadutreeGrail:'幽影树圣杯'};
 const colorZh = {Red:'红',Blue:'蓝',Yellow:'黄',Green:'绿',Any:'任意'};
-// Enemy portraits map by the NPC parameter ID shared with the source wiki.
-const enemyPortraits = [];
-function enemyPortraitInfo(name,id){const imageId=String(id||'').replace(/[a-z]$/i,'');const src=state.enemyImages?.[imageId];return src?[null,src]:enemyPortraits.find(([pattern])=>pattern.test(String(name||'')))||null}
-function enemyPortrait(name,large=false,id=''){
-  const item=enemyPortraitInfo(name,id),src=item?.[1]||'';
-  return `<span class="enemy-portrait ${large?'large':''} ${item?'has-image':''}" aria-hidden="true">${item?`<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}<span>⚔</span></span>`;
-}
-function attachEnemyPortraitFallbacks(root){root.querySelectorAll('.enemy-portrait img').forEach(img=>img.addEventListener('error',()=>img.parentElement.classList.remove('has-image'),{once:true}))}
 function vesselName(key,character){
   if((state.vessels?.universalVessels||[]).some(v=>v.key===key))return vesselZh[key]||key;
   const name=characterZh[character]||character||'渡夜者';
@@ -36,9 +31,10 @@ window.navigateTo=navigate;
 
 async function loadCatalogs(){
   try{
-    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,enemyImages]=await Promise.all(['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','enemy-image-map.json'].map(async name=>{const url='./'+name+(name==='enemy-image-map.json'?'?v=20261017-monster-names':'');const r=await fetch(url);if(!r.ok)throw new Error(name+' 读取失败');return r.json()}));
-    Object.assign(state,{enemyData:enemy,enemyImages,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects});
+    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData]=await Promise.all(['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json'].map(async name=>{const url='./'+name+(name==='effect_names_zh.json'?'?v=20261018-zh-audit':name==='effect_encyclopedia.json'?'?v=20261019-four-groups':'');const r=await fetch(url);if(!r.ok)throw new Error(name+' 读取失败');return r.json()}));
+    Object.assign(state,{enemyData:enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData});
     buildEffectCategoryIndex();
+    renderEffectEncyclopedia();
     $('#nav-enemy-count').textContent=enemy.rows.length.toLocaleString('zh-CN');
     buildEnemyMetadata();
     setupEnemyFilters();
@@ -133,10 +129,9 @@ function renderEnemies(){
   $('#enemy-list').innerHTML=groups.length?groups.map(group=>{
     const selected=group.rows.some(({row})=>row===state.enemySelected);
     const row=group.rows[0].row,badge=enemyCategoryLabel(row);
-    if(group.rows.length===1){const {index}=group.rows[0];return `<button type="button" class="enemy-row ${state.enemySelected===row?'active':''}" data-enemy-index="${index}">${enemyPortrait(enemyName(row),false,row[1])}<span class="enemy-row-copy"><strong>${esc(enemyName(row))}</strong><small>ID <span class="enemy-number">${esc(row[1])}</span> · 第一天 HP <span class="enemy-number">${esc(fmt(row[2]))}</span></small></span><span class="badge ${isBoss(row)?'':'muted'}">${esc(badge)}</span></button>`}
-    return `<details class="enemy-group" ${selected?'open':''}><summary class="enemy-row enemy-group-title">${enemyPortrait(group.name,false,row[1])}<span class="enemy-row-copy"><strong>${esc(group.name)}</strong><small>${group.rows.length} 条同名记录</small></span><span class="badge ${isBoss(row)?'':'muted'}">${esc(badge)}</span></summary><div class="enemy-variants">${variants(group)}</div></details>`;
+    if(group.rows.length===1){const {index}=group.rows[0];return `<button type="button" class="enemy-row ${state.enemySelected===row?'active':''}" data-enemy-index="${index}"><span class="enemy-row-copy"><strong>${esc(enemyName(row))}</strong><small>ID <span class="enemy-number">${esc(row[1])}</span> · 第一天 HP <span class="enemy-number">${esc(fmt(row[2]))}</span></small></span><span class="badge ${isBoss(row)?'':'muted'}">${esc(badge)}</span></button>`}
+    return `<details class="enemy-group" ${selected?'open':''}><summary class="enemy-row enemy-group-title"><span class="enemy-row-copy"><strong>${esc(group.name)}</strong><small>${group.rows.length} 条同名记录</small></span><span class="badge ${isBoss(row)?'':'muted'}">${esc(badge)}</span></summary><div class="enemy-variants">${variants(group)}</div></details>`;
   }).join(''):'<div class="empty-state"><h3>没有找到记录</h3><p>试试其他名称或 ID。</p></div>';
-  attachEnemyPortraitFallbacks($('#enemy-list'));
   renderPagination('enemy-pagination',total,state.enemyPageSize,state.enemyPage);
 }
 function normalizeName(s){return String(s||'').replace(/[「」『』“”‘’\s]/g,'').replace(/\([^)]*\)|（[^）]*）|\[[^\]]*\]|【[^】]*】/g,'').toLowerCase()}
@@ -161,14 +156,14 @@ function enemyElementSummary(row){
   return card('high',highest,'最高倍率')+card('low',lowest,'最低倍率');
 }
 function renderEnemyDetail(r){
-  if(!r){$('#enemy-detail').innerHTML='<div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性、抗性和可核对的出现位置会显示在这里。</p></div>';return}
+  if(!r){$('#enemy-detail').innerHTML='<div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性、抗性和可核对的出现位置会显示在这里。</p></div>';$('#enemy-detail').scrollTop=0;return}
   const c=state.enemyData.columns;
   const section=(title,indexes,open=false,extra='')=>`<details class="detail-section" ${open?'open':''}><summary><span>${title}</span><small>${indexes.length} 项</small></summary>${extra}<div class="${indexes.length>8?'resist-grid':'kv-grid'}">${indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(r[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';return `<div class="${indexes.length>8?'resist':'kv'} ${tone}"><span>${esc(c[i].label)}</span><strong>${esc(damage?enemyDamageText(r[i]):fmt(r[i]))}</strong></div>`}).join('')}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`;
   const locations=locationFor(r);
   const sameName=state.enemyData.rows.map((row,index)=>({row,index})).filter(({row})=>enemyGroupName(row)===enemyGroupName(r));
   const recordPicker=sameName.length>1?`<label class="enemy-record-picker">同名数据<select id="enemy-record-select" aria-label="选择同名怪物数据">${sameName.map(({row,index})=>`<option value="${index}" ${row===r?'selected':''}>ID ${esc(row[1])} · HP ${esc(fmt(row[2]))}${enemyName(row)!==enemyGroupName(r)?' · '+esc(enemyName(row)):''}</option>`).join('')}</select></label>`:'';
-  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${enemyPortrait(enemyName(r),true,r[1])}<div><span class="card-kicker">${esc(enemyCategoryLabel(r))} / 怪物分类</span><h2>${esc(enemyName(r))}</h2><small>内部 ID <span class="enemy-number">${esc(r[1])}</span></small></div></div><span class="badge ${isBoss(r)?'':'muted'}">${esc(enemyCategoryLabel(r))}</span></div>${recordPicker}${section('核心属性',[2,3,4,24,25,26,27],true,`<div class="enemy-element-summary"><div class="enemy-element-heading">魔 / 火 / 雷 / 圣 · 最高与最低伤害倍率</div><div class="enemy-element-cards">${enemyElementSummary(r)}</div></div>`)}${section('伤害倍率',[5,6,7,8,9,10,11,12])}${section('异常状态抗性',[13,14,15,16,17,18,19,20,21,22,23])}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}<section class="detail-section location-section"><h3>出现位置</h3><p class="detail-note">${locations.length?esc(locations.join('、'))+'（同名 Boss 表可核对的遭遇分类）':'未收录可核对的具体位置'}</p></section>`;
-  attachEnemyPortraitFallbacks($('#enemy-detail'));
+  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title"><div><span class="card-kicker">${esc(enemyCategoryLabel(r))} / 怪物分类</span><h2>${esc(enemyName(r))}</h2><small>内部 ID <span class="enemy-number">${esc(r[1])}</span></small></div></div><span class="badge ${isBoss(r)?'':'muted'}">${esc(enemyCategoryLabel(r))}</span></div>${recordPicker}${section('核心属性',[2,3,4,24,25,26,27],true,`<div class="enemy-element-summary"><div class="enemy-element-heading">魔 / 火 / 雷 / 圣 · 最高与最低伤害倍率</div><div class="enemy-element-cards">${enemyElementSummary(r)}</div></div>`)}${section('伤害倍率',[5,6,7,8,9,10,11,12])}${section('异常状态抗性',[13,14,15,16,17,18,19,20,21,22,23])}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}<section class="detail-section location-section"><h3>出现位置</h3><p class="detail-note">${locations.length?esc(locations.join('、'))+'（同名 Boss 表可核对的遭遇分类）':'未收录可核对的具体位置'}</p></section>`;
+  $('#enemy-detail').scrollTop=0;
 }
 $('#enemy-search').addEventListener('input',filterEnemies);$('#enemy-filter').addEventListener('change',filterEnemies);$('#enemy-area').addEventListener('change',filterEnemies);
 $('#enemy-list').addEventListener('click',e=>{const btn=e.target.closest('[data-enemy-index]');if(!btn)return;state.enemySelected=state.enemyData.rows[Number(btn.dataset.enemyIndex)];renderEnemies();renderEnemyDetail(state.enemySelected);syncEnemyUrl()});
@@ -177,10 +172,86 @@ $('#enemy-pagination').addEventListener('click',e=>{const step=e.target.closest(
 $('#enemy-pagination').addEventListener('change',e=>{if(e.target.tagName!=='SELECT')return;state.enemyPage=Number(e.target.value);renderEnemies();syncEnemyUrl();$('#enemy-list').scrollTop=0});
 $('#enemy-detail').addEventListener('change',e=>{if(e.target.id!=='enemy-record-select')return;state.enemySelected=state.enemyData.rows[Number(e.target.value)];renderEnemies();renderEnemyDetail(state.enemySelected);syncEnemyUrl()});
 
-function effectName(e){const id=String(e.id);const info=state.relicRuleEffects?.definitions?.[id]||state.wikiZh?.[id]||state.zh?.mappings?.[id];return info?.name||info?.name_zh||e.name_en||e.name_ja||e.key||`未知效果 #${e.id}`}
+function effectName(e){
+  const id=String(e.id??'');
+  const info=state.relicRuleEffects?.definitions?.[id]||state.wikiZh?.[id]||state.zh?.mappings?.[id];
+  if(info?.name||info?.name_zh)return info.name||info.name_zh;
+  if(e.key){
+    if(!state.effectNamesByKey){
+      state.effectNamesByKey=new Map();
+      for(const [effectId,effect] of Object.entries(state.effects?.effects||{})){
+        const translated=state.relicRuleEffects?.definitions?.[effectId]||state.wikiZh?.[effectId]||state.zh?.mappings?.[effectId];
+        const name=translated?.name||translated?.name_zh;
+        if(effect.key&&name&&!state.effectNamesByKey.has(effect.key))state.effectNamesByKey.set(effect.key,name);
+      }
+    }
+    const name=state.effectNamesByKey.get(e.key);if(name)return name;
+  }
+  return e.name_en||e.name_ja||e.key||`未知效果 #${e.id}`;
+}
 function isOutOfGameRelicEffect(e){return !!state.relicRuleEffects?.definitions?.[String(e.id??'')]}
 function ruleEffectName(e){return state.relicRuleEffects?.definitions?.[String(e.id??'')]?.name||effectName(e)}
 function ruleEffectCategory(e){return state.relicRuleEffects?.definitions?.[String(e.id??'')]?.type||'其他'}
+function outOfGameEffectCatalog(){
+  const catalog=new Map();
+  for(const [id,e] of Object.entries(state.effects?.effects||{})){
+    const definition=state.relicRuleEffects?.definitions?.[id];if(!e.key||!definition)continue;
+    const item=catalog.get(e.key);
+    if(item){item.modes=[...new Set([...item.modes,...(definition.modes||[])])];item.definitionIds.push(id)}
+    else catalog.set(e.key,{...e,id,modes:[...(definition.modes||[])],definitionIds:[id]});
+  }
+  return catalog;
+}
+function renderEffectEncyclopedia(){
+  const data=state.effectEncyclopediaData||{},labels=new Map((data.categories||[]).map(group=>[group.id,group.label]));
+  const entries=(data.entries||[]).map(entry=>{
+    const effect=state.effects?.effects?.[entry.id]||{};
+    return {...entry,categoryLabel:labels.get(entry.category)||entry.category,english:effect.name_en||'',key:effect.key||''};
+  }).sort((a,b)=>a.name.localeCompare(b.name,'zh-CN')||a.id.localeCompare(b.id));
+  const types=[...new Set(entries.map(item=>item.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
+  const typeSelect=$('#effect-encyclopedia-type');if(!typeSelect)return;
+  typeSelect.innerHTML='<option value="all">全部类型</option>'+types.map(type=>`<option value="${esc(type)}">${esc(type)}</option>`).join('');
+  state.effectEncyclopedia=entries;
+  for(const button of $$('.effect-encyclopedia-categories [data-effect-category]')){
+    const category=button.dataset.effectCategory,count=category==='all'?entries.length:entries.filter(item=>item.category===category).length;
+    button.querySelector('span').textContent=count.toLocaleString('zh-CN');
+  }
+  filterEffectEncyclopedia();
+}
+function filterEffectEncyclopedia(resetPage=true){
+  const list=$('#effect-encyclopedia-list');if(!list)return;
+  const query=($('#effect-encyclopedia-search')?.value||'').trim().toLocaleLowerCase(),category=state.effectEncyclopediaCategory,type=$('#effect-encyclopedia-type')?.value||'all';
+  const found=(state.effectEncyclopedia||[]).filter(item=>{
+    if(category!=='all'&&item.category!==category)return false;
+    if(type!=='all'&&item.type!==type)return false;
+    return !query||`${item.name} ${item.type} ${item.explanation} ${item.id} ${item.english} ${item.key} ${item.categoryLabel} ${item.buffType}`.toLocaleLowerCase().includes(query);
+  });
+  if(resetPage)state.effectEncyclopediaPage=1;
+  const pages=Math.max(1,Math.ceil(found.length/EFFECT_ENCYCLOPEDIA_PAGE_SIZE));
+  state.effectEncyclopediaPage=Math.min(Math.max(state.effectEncyclopediaPage,1),pages);
+  const start=(state.effectEncyclopediaPage-1)*EFFECT_ENCYCLOPEDIA_PAGE_SIZE,rows=found.slice(start,start+EFFECT_ENCYCLOPEDIA_PAGE_SIZE);
+  $('#effect-encyclopedia-count').textContent=found.length?`第 ${start+1}–${start+rows.length} 条 / 共 ${found.length} 条匹配`:'0 条匹配结果';
+  list.innerHTML=rows.length?rows.map(item=>`<article class="effect-encyclopedia-card" id="effect-${esc(item.category)}-${esc(item.id)}"><header><h2>${esc(item.name)}</h2><span class="effect-encyclopedia-id">#${esc(item.id)}</span></header><div class="effect-encyclopedia-tags"><span>${esc(item.categoryLabel)}</span><span>${esc(item.type)}</span>${item.buffType?`<span>${esc(item.buffType)}</span>`:''}</div><p>${esc(item.explanation||'效果说明暂未收录')}</p>${item.stackability?`<small>${esc(item.stackability)}</small>`:''}</article>`).join(''):'<div class="empty-state"><h3>没有找到匹配词条</h3><p>可以更换关键词或筛选条件。</p></div>';
+  renderPagination('effect-encyclopedia-pagination',found.length,EFFECT_ENCYCLOPEDIA_PAGE_SIZE,state.effectEncyclopediaPage);
+}
+$('#effect-encyclopedia-search').addEventListener('input',()=>filterEffectEncyclopedia());
+$('#effect-encyclopedia-type').addEventListener('change',()=>filterEffectEncyclopedia());
+$('.effect-encyclopedia-categories').addEventListener('click',event=>{
+  const button=event.target.closest('[data-effect-category]');if(!button)return;
+  state.effectEncyclopediaCategory=button.dataset.effectCategory;
+  for(const item of $$('.effect-encyclopedia-categories [data-effect-category]'))item.setAttribute('aria-pressed',String(item===button));
+  filterEffectEncyclopedia();
+});
+$('#effect-encyclopedia-pagination').addEventListener('click',event=>{
+  const step=event.target.closest('[data-step]');if(!step)return;
+  state.effectEncyclopediaPage+=Number(step.dataset.step);filterEffectEncyclopedia(false);
+  const pager=$('#effect-encyclopedia-pagination');pager.scrollIntoView({block:'nearest'});pager.querySelector(`[data-step="${step.dataset.step}"]:not(:disabled)`)?.focus();
+});
+$('#effect-encyclopedia-pagination').addEventListener('change',event=>{
+  if(event.target.tagName!=='SELECT')return;
+  state.effectEncyclopediaPage=Number(event.target.value);filterEffectEncyclopedia(false);
+  const pager=$('#effect-encyclopedia-pagination');pager.scrollIntoView({block:'nearest'});pager.querySelector('select')?.focus();
+});
 function effectGroups(relic){return (relic.effects||[]).flat().filter(Boolean)}
 function normalizedEffectName(name){return String(name||'').normalize('NFKC').replace(/\s+/g,'').replace(/\+\d+$/,'')}
 function buildEffectCategoryIndex(){
@@ -336,18 +407,20 @@ function renderRelics(){
   state.relicPage=Math.min(Math.max(state.relicPage,1),pages);
   const start=(state.relicPage-1)*RELIC_PAGE_SIZE,rows=state.relicFiltered.slice(start,start+RELIC_PAGE_SIZE);
   $('#relic-count').textContent=total?`第 ${start+1}–${start+rows.length} 件 / 共 ${total} 件`:'0 件';
-  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${entry?.source_page?`<a href="${esc(entry.source_page)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${esc(colorZh[r.itemColor]||r.itemColor)}色<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
+  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${entry?.source_page?`<a href="${esc(entry.source_page)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
   if(typeof decorateRelicEditorCards==='function')decorateRelicEditorCards(rows);
   renderPagination('relic-pagination',total,RELIC_PAGE_SIZE,state.relicPage);
 }
 $('#relic-search').addEventListener('input',filterRelics);
 for(const id of ['relic-category','relic-type','relic-color'])$('#'+id).addEventListener('change',filterRelics);
-$('#relic-pagination').addEventListener('click',e=>{const step=e.target.closest('[data-step]');if(!step)return;state.relicPage+=Number(step.dataset.step);renderRelics();$('#relic-list').scrollIntoView({block:'start'})});
-$('#relic-pagination').addEventListener('change',e=>{if(e.target.tagName!=='SELECT')return;state.relicPage=Number(e.target.value);renderRelics();$('#relic-list').scrollIntoView({block:'start'})});
+$('#relic-pagination').addEventListener('click',e=>{const step=e.target.closest('[data-step]');if(!step)return;state.relicPage+=Number(step.dataset.step);renderRelics();$('#relic-pagination').scrollIntoView({block:'start'});$('#relic-pagination [data-step="'+step.dataset.step+'"]:not(:disabled)')?.focus()});
+$('#relic-pagination').addEventListener('change',e=>{if(e.target.tagName!=='SELECT')return;state.relicPage=Number(e.target.value);renderRelics();$('#relic-pagination').scrollIntoView({block:'start'});$('#relic-pagination select')?.focus()});
 
 function setupCharacters(){
   const chars=state.vessels.characters||{};
   $('#character-select').innerHTML=Object.entries(chars).map(([key,v])=>`<option value="${esc(key)}">${esc(characterZh[key]||key)} · ${esc(v.nameEn)}</option>`).join('');
+  const buildCharacter=$('#build-character-select');
+  if(buildCharacter){buildCharacter.innerHTML=$('#character-select').innerHTML;buildCharacter.value=$('#character-select').value}
   renderCharacterPicker();
   updateVessels();
 }
@@ -408,7 +481,6 @@ function equipRelic(index,group,slot){
 }
 function activateSlot(group,index){
   state.activeSlot={group,index};state.slotFilterActive=true;state.poolPage=1;
-  $('#pool-search').value='';for(const id of ['pool-category','pool-type','pool-color'])$('#'+id).value='all';
 }
 function renderBuildWorkspace(){
   if(!state.vessels||!$('#loadout-slots'))return;
@@ -440,15 +512,21 @@ function renderPool(){
   const pages=Math.max(1,Math.ceil(rows.length/POOL_PAGE_SIZE));state.poolPage=Math.min(Math.max(state.poolPage,1),pages);
   const start=(state.poolPage-1)*POOL_PAGE_SIZE,shown=rows.slice(start,start+POOL_PAGE_SIZE);
   $('#pool-count').textContent=rows.length?`第 ${start+1}–${start+shown.length} 件 / 共 ${rows.length} 件`:'0 件';
-  $('#pool-slot-filter').hidden=!state.slotFilterActive;
-  if(state.slotFilterActive){const {group,index}=state.activeSlot,slot=slotColor(group,index);$('#pool-slot-filter-label').textContent=`当前槽位：${group==='normal'?'普通':'深夜'}第 ${index+1} 槽 · ${colorZh[slot]||slot}色`;}
-  $('#build-relic-pool').innerHTML=shown.map(({r,index})=>`<button type="button" draggable="true" class="pool-relic ${state.selectedRelicIndex===index?'selected':''} ${index===activeEquipped?'currently-equipped':''}" data-relic-index="${index}" aria-label="选择${esc(relicName(r))}，${esc(colorZh[r.itemColor]||r.itemColor)}色">${relicImage(r)}<span><strong>${esc(relicName(r))}${index===activeEquipped?' · 当前已装配':''}</strong><small>${esc(typeLabel[relicType(r)])} · ${esc(colorZh[r.itemColor]||r.itemColor)}色 · #${esc(r.id)}</small><span class="pool-effects">${pairedEffects(r).map(group=>`<span>${esc(effectName(group[0]))}${group.slice(1).map(e=>`<em>${esc(effectName(e))}</em>`).join('')}</span>`).join('')||'无已识别词条'}</span></span></button>`).join('')||'<span class="detail-note">没有匹配的可装备遗物。</span>';
+  const filters=[];
+  if(state.slotFilterActive){const {group,index}=state.activeSlot,slot=slotColor(group,index);filters.push(`槽位：${group==='normal'?'普通':'深夜'}第 ${index+1} 槽 · ${colorZh[slot]||slot}色`);}
+  const search=$('#pool-search').value.trim();if(search)filters.push(`搜索：${search}`);
+  if(category!=='all')filters.push(`词条：${$('#pool-category').selectedOptions[0]?.textContent.trim()||category}`);
+  if(type!=='all')filters.push(`模式：${$('#pool-type').selectedOptions[0]?.textContent.trim()||type}`);
+  if(color!=='all')filters.push(`颜色：${$('#pool-color').selectedOptions[0]?.textContent.trim()||color}`);
+  $('#pool-filter-summary').hidden=filters.length===0;
+  $('#pool-filter-summary-label').textContent=filters.length?`当前筛选：${filters.join(' · ')}`:'';
+  $('#build-relic-pool').innerHTML=shown.map(({r,index})=>{const rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[relicType(r)]||'normal';return `<button type="button" draggable="true" class="pool-relic ${state.selectedRelicIndex===index?'selected':''} ${index===activeEquipped?'currently-equipped':''}" data-relic-index="${index}" aria-label="选择${esc(relicName(r))}，${esc(colorZh[r.itemColor]||r.itemColor)}色">${relicImage(r)}<span><strong>${esc(relicName(r))}${index===activeEquipped?' · 当前已装配':''}</strong><small><span class="relic-rarity-tag rarity-${rarity}">${esc(typeLabel[relicType(r)])}</span> · ${relicColorTag(r)} · #${esc(r.id)}</small><span class="pool-effects">${pairedEffects(r).map(group=>`<span>${esc(effectName(group[0]))}${group.slice(1).map(e=>`<em>${esc(effectName(e))}</em>`).join('')}</span>`).join('')||'无已识别词条'}</span></span></button>`}).join('')||'<span class="detail-note">没有匹配的可装备遗物。</span>';
   renderPagination('pool-pagination',rows.length,POOL_PAGE_SIZE,state.poolPage,true);
 }
 $('#pool-search').addEventListener('input',()=>{state.poolPage=1;renderPool()});for(const id of ['pool-category','pool-type','pool-color'])$('#'+id).addEventListener('change',()=>{state.poolPage=1;renderPool()});
 $('#pool-pagination').addEventListener('click',e=>{const step=e.target.closest('[data-step]');if(!step)return;state.poolPage+=Number(step.dataset.step);renderPool();$('#build-relic-pool').scrollTop=0});
 $('#pool-pagination').addEventListener('change',e=>{if(e.target.tagName!=='SELECT')return;state.poolPage=Number(e.target.value);renderPool();$('#build-relic-pool').scrollTop=0});
-$('#pool-clear-slot').addEventListener('click',()=>{state.slotFilterActive=false;state.poolPage=1;state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent='已显示全部遗物；点击槽位可只看能装入的遗物。'});
+$('#pool-clear-filters').addEventListener('click',()=>{$('#pool-search').value='';$('#pool-category').value='all';$('#pool-type').value='all';$('#pool-color').value='all';state.slotFilterActive=false;state.poolPage=1;state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent='已清除筛选，显示所有可用遗物。';$('#pool-search').focus()});
 $('#build-relic-pool').addEventListener('click',e=>{const item=e.target.closest('[data-relic-index]');if(!item)return;const index=Number(item.dataset.relicIndex);if(state.slotFilterActive){equipRelic(index,state.activeSlot.group,state.activeSlot.index);return}state.selectedRelicIndex=index;$('#equip-status').textContent=`已选择 ${relicName(state.save.relics[index])}，请点击一个匹配颜色的槽位。`;renderPool()});
 $('#build-relic-pool').addEventListener('dragstart',e=>{const item=e.target.closest('[data-relic-index]');if(!item)return;state.dragRelicIndex=Number(item.dataset.relicIndex);e.dataTransfer.setData('text/plain',item.dataset.relicIndex);e.dataTransfer.effectAllowed='move'});
 $('#loadout-slots').addEventListener('dragstart',e=>{const slot=e.target.closest('.loadout-slot');if(!slot)return;const index=state.equipped[slot.dataset.group][Number(slot.dataset.slot)];if(index!==null){state.dragRelicIndex=index;e.dataTransfer.setData('text/plain',String(index))}});
@@ -470,24 +548,23 @@ function renderEffectOptions(){
   const q=$('#effect-search').value.trim().toLocaleLowerCase();
   const category=$('#effect-category')?.value||'all',relicMode=$('#effect-relic-mode')?.value||'all',ownedOnly=$('#effect-owned-only')?.checked||false;
   const owned=new Map(ownedEffects().map(e=>[e.key,e.count]));
-  const catalog=new Map(Object.entries(state.effects?.effects||{}).filter(([id,e])=>isOutOfGameRelicEffect({...e,id})).map(([id,e])=>[e.key,{...e,id}]));
+  const catalog=outOfGameEffectCatalog();
   const categoryPicker=$('#effect-category');
   if(categoryPicker&&categoryPicker.options.length===1){const categories=[...new Set([...catalog.values()].map(ruleEffectCategory))].sort((a,b)=>a.localeCompare(b,'zh-CN'));categoryPicker.insertAdjacentHTML('beforeend',categories.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join(''))}
-  const list=[...catalog.values()].filter(e=>e.key&&!state.rules.some(r=>r.key===e.key)&&(!q||(ruleEffectName(e)+' '+ruleEffectCategory(e)+' '+state.relicRuleEffects.definitions[e.id].explanation+' '+e.name_en+' '+e.key).toLocaleLowerCase().includes(q))&&(category==='all'||ruleEffectCategory(e)===category)&&(relicMode==='all'||state.relicRuleEffects.definitions[e.id].modes.includes(relicMode==='normal'?'普通':'深夜'))&&(!ownedOnly||(owned.get(e.key)||0)>0)).sort((a,b)=>(owned.get(b.key)||0)-(owned.get(a.key)||0)||ruleEffectName(a).localeCompare(ruleEffectName(b),'zh-CN'));
+  const list=[...catalog.values()].filter(e=>e.key&&!state.rules.some(r=>r.key===e.key)&&(!q||(ruleEffectName(e)+' '+ruleEffectCategory(e)+' '+e.definitionIds.map(id=>state.relicRuleEffects.definitions[id].explanation||'').join(' ')+' '+e.name_en+' '+e.key).toLocaleLowerCase().includes(q))&&(category==='all'||ruleEffectCategory(e)===category)&&(relicMode==='all'||e.modes.includes(relicMode==='normal'?'普通':'深夜'))&&(!ownedOnly||(owned.get(e.key)||0)>0)).sort((a,b)=>(owned.get(b.key)||0)-(owned.get(a.key)||0)||ruleEffectName(a).localeCompare(ruleEffectName(b),'zh-CN'));
   const pageSize=18,pages=Math.max(1,Math.ceil(list.length/pageSize));state.effectPage=Math.min(Math.max(state.effectPage||1,1),pages);
   const start=(state.effectPage-1)*pageSize,rows=list.slice(start,start+pageSize);
   $('#effect-result-count').textContent=list.length?`第 ${start+1}–${start+rows.length} 项 / 共 ${list.length} 项`:'0 项匹配';
-  $('#effect-options').innerHTML=rows.map(e=>{const entry=state.relicRuleEffects.definitions[e.id];return `<button class="effect-option" data-effect="${esc(e.key)}" title="${esc(ruleEffectName(e))}"><span>${esc(ruleEffectName(e))}</span><small>${esc(entry.modes.map(mode=>mode+'遗物').join(' / '))} · ${esc(ruleEffectCategory(e))} · ${owned.get(e.key)||0} 件已拥有 · 添加 +</small></button>`}).join('')||'<div class="empty-state" style="padding:18px"><p>没有更多匹配词条</p></div>';
+  $('#effect-options').innerHTML=rows.map(e=>{return `<button class="effect-option" data-effect="${esc(e.key)}" title="${esc(ruleEffectName(e))}"><span>${esc(ruleEffectName(e))}</span><small>${esc(e.modes.map(mode=>mode+'遗物').join(' / '))} · ${esc(ruleEffectCategory(e))} · ${owned.get(e.key)||0} 件已拥有 · 添加 +</small></button>`}).join('')||'<div class="empty-state" style="padding:18px"><p>没有更多匹配词条</p></div>';
   renderPagination('effect-pagination',list.length,pageSize,state.effectPage);
-  $$('#effect-options [data-effect]').forEach(b=>b.addEventListener('click',()=>addRule(b.dataset.effect)));
 }
 function renderSelectedEffects(){
-  const catalog=new Map(Object.entries(state.effects?.effects||{}).filter(([id,e])=>isOutOfGameRelicEffect({...e,id})).map(([id,e])=>[e.key,{...e,id}]));
+  const catalog=outOfGameEffectCatalog();
   $('#selected-count').textContent=state.rules.length+' 项规则';
   const option=(value,label,current)=>`<option value="${value}" ${current===value?'selected':''}>${label}</option>`;
   const ruleQuery=$('#selected-rule-search')?.value.trim().toLocaleLowerCase()||'';
-  const shown=state.rules.map((rule,i)=>({rule,i})).filter(({rule})=>!ruleQuery||(ruleEffectName(catalog.get(rule.key)||{key:rule.key})+' '+rule.key+' '+(rule.note||'')).toLocaleLowerCase().includes(ruleQuery));
-  $('#selected-effects').innerHTML=shown.map(({rule,i})=>{const modes=effectModesForKey(rule.key),allowed=modes.map(mode=>mode==='普通'?'normal':'deep');if(allowed.length>1)allowed.push('any');const scopes=allowed.length?allowed:['normal','deep','any'];return `<div class="rule-row" data-rule-index="${i}"><div class="rule-name"><strong>${esc(ruleEffectName(catalog.get(rule.key)||{key:rule.key}))}</strong><small>${esc(rule.key)}</small></div><label>条件<select data-field="priority">${option('required','必选',rule.priority)}${option('preferred','偏好',rule.priority)}${option('nice_to_have','加分',rule.priority)}${option('exclude','排除',rule.priority)}</select></label><label>生效位置<select data-field="scope">${scopes.map(scope=>option(scope,scope==='normal'?'普通':scope==='deep'?'深夜':'任意',rule.scope)).join('')}</select></label><label>权重<input data-field="weight" type="number" min="1" max="10000" step="1" value="${esc(rule.weight)}"></label><label>有效次数<input data-field="cap" type="number" min="1" max="6" step="1" value="${esc(rule.cap)}"></label><label class="rule-note">备注<input data-field="note" type="text" maxlength="160" value="${esc(rule.note||'')}" placeholder="为什么选择此词条"></label><button type="button" data-remove-rule="${i}" aria-label="删除此规则">×</button></div>`}).join('')||(ruleQuery?'<p class="hint">当前流派没有匹配的规则。</p>':'<p class="hint">搜索词条并点击添加。</p>');
+  const shown=state.rules.map((rule,i)=>({rule,i})).filter(({rule})=>!ruleQuery||(ruleEffectName(catalog.get(rule.key)||{key:rule.key})+' '+rule.key).toLocaleLowerCase().includes(ruleQuery));
+  $('#selected-effects').innerHTML=shown.map(({rule,i})=>{const modes=effectModesForKey(rule.key),allowed=modes.map(mode=>mode==='普通'?'normal':'deep');if(allowed.length>1)allowed.push('any');const scopes=allowed.length?allowed:['normal','deep','any'];return `<div class="rule-row" data-rule-index="${i}" data-rule-key="${esc(rule.key)}"><button type="button" class="rule-drag-handle" draggable="true" aria-label="拖动排序，第 ${i+1} 项" title="拖动调整顺序"><span aria-hidden="true">⠿</span><span>${i+1}</span></button><div class="rule-name"><strong>${esc(ruleEffectName(catalog.get(rule.key)||{key:rule.key}))}</strong><small>${esc(rule.key)}</small></div><label>条件<select data-field="priority">${option('required','必选',rule.priority)}${option('preferred','偏好',rule.priority)}${option('nice_to_have','加分',rule.priority)}${option('exclude','排除',rule.priority)}</select></label><label>生效位置<select data-field="scope">${scopes.map(scope=>option(scope,scope==='normal'?'普通':scope==='deep'?'深夜':'任意',rule.scope)).join('')}</select></label><label>权重<input data-field="weight" type="number" min="1" max="10000" step="1" value="${esc(rule.weight)}"></label><label>有效次数<input data-field="cap" type="number" min="1" max="6" step="1" value="${esc(rule.cap)}"></label><button type="button" data-remove-rule="${i}" aria-label="删除此规则">×</button></div>`}).join('')||(ruleQuery?'<p class="hint">当前流派没有匹配的规则。</p>':'<p class="hint">搜索词条并点击添加。</p>');
   $$('#selected-effects [data-field]').forEach(x=>x.addEventListener('change',()=>{const rule=state.rules[Number(x.closest('[data-rule-index]').dataset.ruleIndex)],field=x.dataset.field;rule[field]=field==='weight'||field==='cap'?Math.max(1,Math.min(field==='cap'?6:10000,Number(x.value)||1)):x.value;syncRules();renderSelectedEffects()}));
   $$('#selected-effects [data-remove-rule]').forEach(x=>x.addEventListener('click',()=>{state.rules.splice(Number(x.dataset.removeRule),1);syncRules();renderSelectedEffects();renderEffectOptions()}));
   if($('#loadout-effects'))renderLoadoutSummary();
@@ -507,7 +584,7 @@ function validRule(raw){
   return {key:raw.key,priority,scope,weight:Math.max(1,Math.min(10000,Math.round(Number(raw.weight)||10))),cap:Math.max(1,Math.min(6,Math.round(Number(raw.cap)||1))),note:String(raw.note||'').slice(0,160)};
 }
 function isWeaponConversionRule(key){return typeof key==='string'&&key.startsWith('changesCompatibleArmaments')&&key.endsWith('AtStartOfExpedition')}
-function effectModesForKey(key){const row=Object.entries(state.effects?.effects||{}).find(([,effect])=>effect.key===key);return row?state.relicRuleEffects?.definitions?.[row[0]]?.modes||[]:[]}
+function effectModesForKey(key){return [...new Set(Object.entries(state.effects?.effects||{}).filter(([id,e])=>e.key===key&&isOutOfGameRelicEffect({...e,id})).flatMap(([id])=>state.relicRuleEffects.definitions[id].modes||[]))]}
 function normalizeRuleScope(key,scope){
   const modes=effectModesForKey(key),allowed=modes.map(mode=>mode==='普通'?'normal':'deep');
   if(allowed.length===1)return allowed[0];
@@ -526,7 +603,7 @@ function normalizeProfile(raw,index=0){
   const normalizedRules=[...new Map(rules.map(r=>[r.key,r])).values()].map(rule=>({...rule,scope:normalizeRuleScope(rule.key,rule.scope)}));
   return {id:String(raw.id||profileId()+`-${index}`),name:String(raw.name||'未命名流派').slice(0,60),character:characters.includes(candidate)?candidate:(characters[0]||'追跡者'),rules:normalizedRules};
 }
-function saveRuleProfiles(){try{localStorage.setItem(RULE_STORAGE_KEY,JSON.stringify({version:2,profiles:state.ruleProfiles,activeProfileId:state.activeRuleProfileId}));return true}catch(_){return false}}
+function saveRuleProfiles(){try{localStorage.setItem(RULE_STORAGE_KEY,JSON.stringify({version:2,emptyStartApplied:true,profiles:state.ruleProfiles,activeProfileId:state.activeRuleProfileId}));return true}catch(_){return false}}
 function saveActiveRuleProfile(){
   if(!state.ruleProfiles.length)return;
   const p=state.ruleProfiles.find(x=>x.id===state.activeRuleProfileId);if(!p)return;
@@ -534,128 +611,150 @@ function saveActiveRuleProfile(){
 }
 function renderRuleProfiles(){
   const select=$('#rule-profile-select');if(!select)return;
-  const query=$('#rule-profile-search')?.value.trim().toLocaleLowerCase()||'';
-  const visible=state.ruleProfiles.filter(p=>p.id===state.activeRuleProfileId||!query||(p.name+' '+(characterZh[p.character]||p.character)).toLocaleLowerCase().includes(query));
-  select.innerHTML=visible.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');select.value=state.activeRuleProfileId||'';
-  $('#rule-profile-delete').textContent=state.ruleProfiles.length<=1?'清空规则':'删除';
+  select.innerHTML='<option value="">未选择流派</option>'+state.ruleProfiles.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');select.value=state.activeRuleProfileId||'';
+  $('#rule-profile-delete').textContent='删除流派';$('#rule-profile-delete').disabled=!state.activeRuleProfileId;$('#rule-profile-delete').title='删除当前流派';$('#rule-profile-duplicate').disabled=!state.activeRuleProfileId;
   const p=state.ruleProfiles.find(x=>x.id===state.activeRuleProfileId);$('#rule-profile-name').value=p?.name||'';
 }
 function activateRuleProfile(id){
-  saveActiveRuleProfile();const p=state.ruleProfiles.find(x=>x.id===id);if(!p)return;
-  state.activeRuleProfileId=p.id;state.rules=p.rules.map(r=>({...r}));$('#character-select').value=p.character;updateVessels();
-  state.selectedEffects=new Map(state.rules.map(r=>[r.key,r.priority]));state.equipped={normal:[null,null,null],deep:[null,null,null]};invalidateBuildResults();renderRuleProfiles();renderSelectedEffects();renderEffectOptions();saveRuleProfiles();
+  saveActiveRuleProfile();const p=state.ruleProfiles.find(x=>x.id===id);
+  state.activeRuleProfileId=p?.id||null;state.rules=(p?.rules||[]).map(r=>({...r}));
+  if(p){$('#character-select').value=p.character;updateVessels()}
+  state.selectedEffects=new Map(state.rules.map(r=>[r.key,r.priority]));invalidateBuildResults();renderRuleProfiles();renderSelectedEffects();renderEffectOptions();saveRuleProfiles();
 }
 function restoreRules(){
   let data=null;try{data=JSON.parse(localStorage.getItem(RULE_STORAGE_KEY)||'null')}catch(_){}
-  if(data?.version===2&&Array.isArray(data.profiles)){
-    state.ruleProfiles=data.profiles.map(normalizeProfile).filter(Boolean);state.activeRuleProfileId=state.ruleProfiles.some(p=>p.id===data.activeProfileId)?data.activeProfileId:state.ruleProfiles[0]?.id||null;
+  state.ruleProfiles=data?.version===2&&Array.isArray(data.profiles)?data.profiles.map(normalizeProfile).filter(Boolean):[];
+  state.activeRuleProfileId=state.ruleProfiles.some(p=>p.id===data?.activeProfileId)?data.activeProfileId:null;
+  // 用户要求本次清空当前流派；只迁移一次，并保留本机恢复副本。
+  if(!data?.emptyStartApplied){
+    if(data){try{localStorage.setItem(RULE_STORAGE_KEY+'-before-empty-start',JSON.stringify(data))}catch(_){}
+      state.ruleProfiles=state.ruleProfiles.filter(p=>p.id!==state.activeRuleProfileId);
+    }
+    state.activeRuleProfileId=null;
   }
-  if(!state.ruleProfiles.length){
-    let old=null;try{old=JSON.parse(localStorage.getItem(LEGACY_RULE_STORAGE_KEY)||'null')}catch(_){}
-    const profile=old&&Array.isArray(old.rules)?normalizeProfile({id:profileId(),name:'默认流派',character:old.character,rules:old.rules}):normalizeProfile({id:profileId(),name:'复仇者·兽爪蜗',character:'復讐者',rules:BEAST_CLAW_TEMPLATE});
-    state.ruleProfiles=[profile];state.activeRuleProfileId=profile.id;
-  }
-  const active=state.ruleProfiles.find(p=>p.id===state.activeRuleProfileId);state.rules=(active?.rules||[]).map(r=>({...r}));$('#character-select').value=active?.character||'追跡者';updateVessels();
+  const active=state.ruleProfiles.find(p=>p.id===state.activeRuleProfileId);state.rules=(active?.rules||[]).map(r=>({...r}));
+  if(active)$('#character-select').value=active.character;updateVessels();
   state.selectedEffects=new Map(state.rules.map(r=>[r.key,r.priority]));renderRuleProfiles();saveRuleProfiles();renderSelectedEffects();renderEffectOptions();
 }
-function addRule(key){const row=Object.entries(state.effects?.effects||{}).find(([,e])=>e.key===key);if(!row||!isOutOfGameRelicEffect({...row[1],id:row[0]})||state.rules.some(r=>r.key===key))return;if(isWeaponConversionRule(key)&&state.rules.some(rule=>isWeaponConversionRule(rule.key))){$('#rule-io-status').textContent='出击时的武器转换词条只保留第一条；已保留当前规则。';return}const e=row[1],modes=state.relicRuleEffects.definitions[row[0]].modes,relicMode=$('#effect-relic-mode').value;const scope=modes.length===1?(modes[0]==='普通'?'normal':'deep'):relicMode==='normal'?'normal':relicMode==='deep'?'deep':'any';state.rules.push({key,priority:'preferred',scope,weight:10,cap:e.stackable===true?3:1,note:''});syncRules();renderSelectedEffects();renderEffectOptions()}
+function addRule(key){
+  const status=$('#effect-action-status'),relicMode=$('#effect-relic-mode')?.value||'all',wantedMode=relicMode==='normal'?'普通':relicMode==='deep'?'深夜':null;
+  const row=Object.entries(state.effects?.effects||{}).find(([id,e])=>e.key===key&&isOutOfGameRelicEffect({...e,id})&&(!wantedMode||state.relicRuleEffects.definitions[id].modes.includes(wantedMode)));
+  if(!row){if(status)status.textContent='此词条暂不支持加入流派规则。';return}
+  if(state.rules.some(r=>r.key===key)){if(status)status.textContent='该词条已经在已选规则中。';return}
+  if(isWeaponConversionRule(key)&&state.rules.some(rule=>isWeaponConversionRule(rule.key))){const message='出击时武器转换只保留一条；请先删除已有转换规则。';$('#rule-io-status').textContent=message;if(status)status.textContent=message;return}
+  const e={...row[1],id:row[0]},modes=effectModesForKey(key);
+  const scope=modes.length===1?(modes[0]==='普通'?'normal':'deep'):relicMode==='normal'?'normal':relicMode==='deep'?'deep':'any';
+  state.rules.push({key,priority:'preferred',scope,weight:10,cap:e.stackable===true?3:1,note:''});syncRules();renderSelectedEffects();renderEffectOptions();if(status)status.textContent=`已添加「${ruleEffectName(e)}」，可在已选规则中调整。`;
+}
 function effectiveRules(){let conversionUsed=false;return state.rules.filter(rule=>{if(!isWeaponConversionRule(rule.key))return true;if(conversionUsed)return false;conversionUsed=true;return true})}
-function buildSpecs(){return effectiveRules().map((r,rank)=>({key:r.key,priority:r.priority==='exclude'?'required':r.priority,exclude:r.priority==='exclude',scope:normalizeRuleScope(r.key,r.scope),weight:r.weight,cap:r.cap,rank}))}
-const ruleTools=document.createElement('div');ruleTools.className='rule-tools';ruleTools.innerHTML='<div class="rule-tools-heading"><strong>流派规则表</strong><p class="hint">候选区只列 <a href="https://github.com/xxiixi/NightreignQuickRef/tree/main/src/data/zh-CN" target="_blank" rel="noopener">NightreignQuickRef</a> 的局外遗物词条，可按普通／深夜遗物和词条类型筛选；局内词条不加载、不展示。出击时武器转换只按首条生效，推荐尽量命中更多有效词条。</p></div><div class="profile-controls"><label>当前流派<select id="rule-profile-select" aria-label="当前流派"></select></label><label class="profile-name">流派名称<input id="rule-profile-name" maxlength="60" placeholder="例如：复仇者·兽爪蜗"></label><button type="button" id="rule-profile-new" class="button ghost">新建</button><button type="button" id="rule-profile-duplicate" class="button ghost">复制</button><button type="button" id="rule-profile-delete" class="button ghost">删除</button></div><div class="rule-tool-buttons"><button type="button" id="rule-clear" class="button ghost">清空当前规则</button><button type="button" id="rule-import" class="button ghost">导入 JSON</button><button type="button" id="rule-export" class="button ghost">导出全部流派</button><input id="rule-file" type="file" accept=".json,application/json" hidden></div><p id="rule-io-status" role="status" aria-live="polite"></p>';
-ruleTools.querySelector('.profile-controls').insertAdjacentHTML('afterbegin','<label class="profile-filter">查找流派<input id="rule-profile-search" type="search" placeholder="名称或渡夜者"></label>');
-ruleTools.querySelector('.profile-controls').insertAdjacentHTML('beforeend','<button type="button" id="rule-profile-save" class="button primary">保存当前流派</button>');
+function buildSpecs(){const ranks={};return effectiveRules().map(r=>{const exclude=r.priority==='exclude',priority=exclude?'required':r.priority,group=`${exclude?'exclude':'include'}:${priority}`,rank=ranks[group]||0;ranks[group]=rank+1;return {key:r.key,priority,exclude,scope:normalizeRuleScope(r.key,r.scope),weight:r.weight,cap:r.cap,rank}})}
+const ruleTools=document.createElement('div');ruleTools.className='rule-tools';ruleTools.innerHTML='<div class="rule-tools-heading"><strong>流派规则表</strong></div><div class="profile-controls"><label>当前流派<select id="rule-profile-select" aria-label="当前流派"></select></label><label class="profile-name">流派名称<input id="rule-profile-name" maxlength="60" placeholder="输入流派名称"></label><div class="profile-actions"><button type="button" id="rule-profile-new" class="button ghost">新建</button><button type="button" id="rule-profile-duplicate" class="button ghost">复制</button><button type="button" id="rule-profile-delete" class="button ghost">删除流派</button><button type="button" id="rule-profile-save" class="button primary">保存当前流派</button></div></div><p id="rule-io-status" role="status" aria-live="polite"></p>';
 $('.effect-header').after(ruleTools);
 $('.effect-header .card-kicker').textContent='配装工作区';$('.effect-header h3').textContent='规则与推荐';
-const aiRelicAdvisor=document.createElement('section');
-aiRelicAdvisor.className='ai-relic-advisor';
-aiRelicAdvisor.innerHTML='<div class="ai-advisor-heading"><div><span class="card-kicker">DEEPSEEK / BUILD ASSISTANT</span><h3>AI 遗物搭配助手</h3></div><span class="ai-scope-badge">仅限配装咨询</span></div><p class="hint">描述你的角色、武器或战斗需求。每次限 240 字，每分钟最多 5 次；仅发送遗物摘要和本次问题，不会上传原始存档或保存聊天记录。</p><form id="ai-relic-form"><label>你的问题<textarea id="ai-relic-question" maxlength="240" minlength="8" required placeholder="例如：复仇者使用兽爪，希望提高近战输出，同时保留一定生存能力。问题需围绕角色、武器、遗物、词条或战斗配装。"></textarea></label><div class="ai-advisor-actions"><span id="ai-question-count">0 / 240 字</span><button id="ai-relic-submit" type="submit" class="button primary">生成配装建议</button></div></form><p id="ai-relic-status" class="hint" role="status" aria-live="polite">请先读取存档，AI 才能从你拥有的遗物中搭配。</p><div id="ai-relic-result" hidden></div><button id="ai-relic-apply" type="button" class="button primary" hidden>应用方案到装配槽</button>';
-ruleTools.insertAdjacentElement('afterend',aiRelicAdvisor);
-$('#effect-search').closest('.search-field').insertAdjacentHTML('beforebegin','<div class="effect-selection-heading"><strong>词条选择</strong><span>先筛选普通或深夜词条，再添加到流派规则表</span></div>');
+$('#effect-search').closest('.search-field').insertAdjacentHTML('beforebegin','<div class="effect-selection-heading"><strong>词条选择</strong><span>点击词条加入规则</span></div><p id="effect-action-status" class="effect-action-status" role="status" aria-live="polite"></p>');
 $('#effect-search').closest('.search-field').insertAdjacentHTML('afterend','<div class="effect-filter-bar"><label>遗物种类<select id="effect-relic-mode"><option value="normal">普通遗物</option><option value="deep">深夜遗物</option><option value="all">全部局外遗物</option></select></label><label>词条类型<select id="effect-category"><option value="all">全部类型</option></select></label><label class="effect-owned-filter"><input id="effect-owned-only" type="checkbox"> 只看存档持有</label><span id="effect-result-count" role="status"></span></div>');
-$('#effect-options').insertAdjacentHTML('afterend','<div id="effect-pagination" class="pagination" aria-label="候选词条页数" hidden></div><label class="selected-rule-filter">筛选已选规则<input id="selected-rule-search" type="search" placeholder="搜索词条或备注"></label>');
-$('#selected-effects').insertAdjacentHTML('beforebegin','<div class="rule-columns" aria-hidden="true"><span>目标词条</span><span>条件</span><span>生效位置</span><span>权重</span><span>有效次数</span><span>备注</span><span></span></div>');
-$('.scoring-details > div').innerHTML='<p>必选是硬条件，缺少任意必选词条的组合不会被推荐；偏好和加分按权重计分。普通、深夜、任意决定词条在哪类遗物上生效；排除词条出现时组合不合格。</p><p>有效次数限制该词条参与评分的次数；不可叠加效果设为 1。每个流派可以指定不同角色和规则。评分根据规则匹配、有效次数与槽位可装配情况计算。</p>';
+$('#effect-options').insertAdjacentHTML('afterend','<div id="effect-pagination" class="pagination" aria-label="候选词条页数" hidden></div><label class="selected-rule-filter">筛选已选规则<input id="selected-rule-search" type="search" placeholder="搜索词条"></label>');
+$('#selected-effects').insertAdjacentHTML('beforebegin','<div class="rule-columns" aria-hidden="true"><span>目标词条</span><span>条件</span><span>生效位置</span><span>权重</span><span>有效次数</span><span></span></div>');
+$('.selected-rule-filter').insertAdjacentHTML('beforebegin','<div class="selected-rule-heading"><strong>已选规则</strong><span>添加词条后在此调整条件与生效位置</span></div>');
+$('.selected-rule-heading span').textContent='拖动排序；同类条件中越靠上越优先';
+const assistantColumns=document.createElement('div');assistantColumns.className='build-assistant-columns';
+const rulesColumn=document.createElement('section');rulesColumn.className='assistant-column assistant-rules-column';rulesColumn.setAttribute('aria-label','流派规则表');
+const effectColumn=document.createElement('section');effectColumn.className='assistant-column effect-selection-panel';effectColumn.setAttribute('aria-label','词条选择');
+ruleTools.insertAdjacentElement('afterend',assistantColumns);assistantColumns.append(rulesColumn,effectColumn);
+const buildActions=$('.build-actions');
+buildActions.insertAdjacentHTML('afterbegin','<label class="build-character-control">推荐角色<select id="build-character-select" aria-label="选择推荐角色"></select></label>');
+const buildCharacterControl=$('.build-character-control'),runBuildButton=$('#run-build'),buildStatus=$('#build-status');
+const buildVesselScope=document.createElement('span');buildVesselScope.className='build-vessel-scope';buildVesselScope.textContent='只计算该角色专属遗物供具';
+buildActions.replaceChildren(buildCharacterControl,runBuildButton,buildVesselScope,buildStatus);
+assistantColumns.before(buildActions);
+for(const element of [$('.selected-rule-heading'),$('.selected-rule-filter'),$('.rule-columns'),$('#selected-effects')])if(element)rulesColumn.append(element);
+for(const element of [$('.effect-selection-heading'),$('#effect-action-status'),$('#effect-search').closest('.search-field'),$('.effect-filter-bar'),$('#effect-options'),$('#effect-pagination')])if(element)effectColumn.append(element);
+$('#effect-options').addEventListener('click',e=>{const button=e.target.closest('[data-effect]');if(button)addRule(button.dataset.effect)});
 $('#rule-profile-select').addEventListener('change',e=>activateRuleProfile(e.target.value));
-$('#rule-profile-search').addEventListener('input',renderRuleProfiles);
-$('#rule-profile-save').addEventListener('click',()=>{const p=state.ruleProfiles.find(x=>x.id===state.activeRuleProfileId);if(!p)return;p.name=$('#rule-profile-name').value.trim()||'未命名流派';p.character=$('#character-select').value;p.rules=state.rules.map(r=>({...r}));const saved=saveRuleProfiles();renderRuleProfiles();$('#rule-io-status').textContent=saved?`“${p.name}”已保存到当前浏览器（${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}）。建议导出 JSON 备份。`:'保存失败：浏览器不允许本地存储，请使用“导出全部流派”备份。'});
+$('#build-character-select').addEventListener('change',()=>invalidateBuildResults());
+$('#rule-profile-save').addEventListener('click',()=>{let p=state.ruleProfiles.find(x=>x.id===state.activeRuleProfileId);const name=$('#rule-profile-name').value.trim();if(!name){$('#rule-io-status').textContent='请先填写流派名称。';$('#rule-profile-name').focus();return}if(!p){p={id:profileId(),name,character:$('#character-select').value,rules:[]};state.ruleProfiles.push(p);state.activeRuleProfileId=p.id}p.name=name;p.character=$('#character-select').value;p.rules=state.rules.map(r=>({...r}));const saved=saveRuleProfiles();renderRuleProfiles();$('#rule-io-status').textContent=saved?`“${p.name}”已保存到当前浏览器（${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}）。`:'保存失败：浏览器不允许本地存储，请检查浏览器存储权限。'});
 $('#effect-category').addEventListener('change',()=>{state.effectPage=1;renderEffectOptions()});
 $('#effect-relic-mode').addEventListener('change',()=>{state.effectPage=1;renderEffectOptions()});
 $('#effect-owned-only').addEventListener('change',()=>{state.effectPage=1;renderEffectOptions()});
 $('#effect-pagination').addEventListener('click',e=>{const step=e.target.closest('[data-step]');if(!step)return;state.effectPage+=Number(step.dataset.step);renderEffectOptions();$('#effect-options').scrollTop=0});
 $('#effect-pagination').addEventListener('change',e=>{if(e.target.tagName!=='SELECT')return;state.effectPage=Number(e.target.value);renderEffectOptions();$('#effect-options').scrollTop=0});
 $('#selected-rule-search').addEventListener('input',renderSelectedEffects);
+let draggedRuleKey=null;
+function moveRuleTo(ruleKey,targetKey,after=false){
+  if(!ruleKey||ruleKey===targetKey)return;
+  const from=state.rules.findIndex(rule=>rule.key===ruleKey);if(from<0)return;
+  const [rule]=state.rules.splice(from,1);let to=state.rules.findIndex(item=>item.key===targetKey);if(to<0){state.rules.splice(from,0,rule);return}
+  if(after)to++;state.rules.splice(to,0,rule);syncRules();renderSelectedEffects();
+}
+$('#selected-effects').addEventListener('dragstart',e=>{const handle=e.target.closest('.rule-drag-handle'),row=handle?.closest('.rule-row');if(!row){e.preventDefault();return}draggedRuleKey=row.dataset.ruleKey;row.classList.add('is-dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',draggedRuleKey)});
+$('#selected-effects').addEventListener('dragover',e=>{const target=e.target.closest('.rule-row');if(!target||!draggedRuleKey||target.dataset.ruleKey===draggedRuleKey)return;e.preventDefault();e.dataTransfer.dropEffect='move';for(const row of $$('#selected-effects .rule-row'))row.classList.remove('drop-before','drop-after');target.classList.add(e.clientY>target.getBoundingClientRect().top+target.offsetHeight/2?'drop-after':'drop-before')});
+$('#selected-effects').addEventListener('drop',e=>{const target=e.target.closest('.rule-row');if(!target||!draggedRuleKey)return;e.preventDefault();moveRuleTo(draggedRuleKey,target.dataset.ruleKey,e.clientY>target.getBoundingClientRect().top+target.offsetHeight/2);draggedRuleKey=null});
+$('#selected-effects').addEventListener('dragend',()=>{draggedRuleKey=null;for(const row of $$('#selected-effects .rule-row'))row.classList.remove('is-dragging','drop-before','drop-after')});
+$('#selected-effects').addEventListener('keydown',e=>{const handle=e.target.closest('.rule-drag-handle');if(!handle||!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const row=handle.closest('.rule-row'),index=state.rules.findIndex(rule=>rule.key===row.dataset.ruleKey),next=index+(e.key==='ArrowUp'?-1:1);if(next<0||next>=state.rules.length)return;const target=state.rules[next].key;moveRuleTo(row.dataset.ruleKey,target,e.key==='ArrowDown');$('#selected-effects .rule-drag-handle')?.focus()});
 $('#rule-profile-name').addEventListener('change',e=>{const p=state.ruleProfiles.find(x=>x.id===state.activeRuleProfileId);if(p){p.name=e.target.value.trim()||'未命名流派';renderRuleProfiles();saveRuleProfiles()}});
 $('#rule-profile-new').addEventListener('click',()=>{saveActiveRuleProfile();const p={id:profileId(),name:'新流派',character:$('#character-select').value,rules:[]};state.ruleProfiles.push(p);activateRuleProfile(p.id);$('#rule-profile-name').focus();$('#rule-io-status').textContent='已新建空白流派，请设置名称、角色和目标词条。'});
 $('#rule-profile-duplicate').addEventListener('click',()=>{saveActiveRuleProfile();const src=state.ruleProfiles.find(p=>p.id===state.activeRuleProfileId);if(!src)return;const p={...src,id:profileId(),name:`${src.name}（副本）`,rules:src.rules.map(r=>({...r}))};state.ruleProfiles.push(p);activateRuleProfile(p.id);$('#rule-io-status').textContent='已复制当前流派，可独立修改副本。'});
-$('#rule-profile-delete').addEventListener('click',()=>{if(state.ruleProfiles.length<=1){state.rules=[];syncRules();renderSelectedEffects();renderEffectOptions();$('#rule-io-status').textContent='已清空最后一个流派的规则；流派本身已保留。';return}saveActiveRuleProfile();const i=state.ruleProfiles.findIndex(p=>p.id===state.activeRuleProfileId);state.ruleProfiles=state.ruleProfiles.filter(p=>p.id!==state.activeRuleProfileId);const next=state.ruleProfiles[Math.max(0,i-1)].id;state.activeRuleProfileId=null;activateRuleProfile(next);$('#rule-io-status').textContent='当前流派已删除。'});
-$('#rule-clear').addEventListener('click',()=>{state.rules=[];syncRules();renderSelectedEffects();renderEffectOptions();$('#rule-io-status').textContent='当前流派规则已清空。'});
-let pendingAiRelicPlan=null;
-const aiQuestion=$('#ai-relic-question'),aiQuestionCount=$('#ai-question-count');
-aiQuestion.addEventListener('input',()=>{aiQuestionCount.textContent=`${Array.from(aiQuestion.value).length} / 240 字`});
-const aiKnowledgeStorageKey='nightreign_ai_build_knowledge_v1';
-function parseAiKnowledge(input){return input.value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean)}
-function updateAiKnowledgeStatus(input,count){
-  const rules=parseAiKnowledge(input),tooLong=rules.find(rule=>Array.from(rule).length>300);
-  try{localStorage.setItem(aiKnowledgeStorageKey,input.value)}catch(_){count.textContent='本机存储失败'}
-  count.textContent=tooLong?'单条规则不能超过 300 字':rules.length>30?'最多保存 30 条规则':`本机已保存 · ${rules.length}/30 条`;
-  count.classList.toggle('error',Boolean(tooLong||rules.length>30));
+$('#rule-profile-delete').addEventListener('click',()=>{if(!state.activeRuleProfileId)return;state.ruleProfiles=state.ruleProfiles.filter(p=>p.id!==state.activeRuleProfileId);activateRuleProfile('');$('#rule-io-status').textContent='当前流派已删除。'});
+let pendingAgentPlan=null;
+const agentHistory=[];
+let agentClarificationContext=[];
+const agentSessionId=(()=>{const key='nightreign-agent-session-v1';let value;try{value=localStorage.getItem(key);if(!/^[0-9a-f-]{36}$/i.test(value||'')){value=crypto.randomUUID();localStorage.setItem(key,value)}}catch{value=crypto.randomUUID()}return value})();
+function setAgentStatus(message,error=false){const status=$('#agent-status');status.textContent=message;status.classList.toggle('error',error)}
+function appendAgentMessage(role,text){
+  const log=$('#agent-chat-log'),entry=document.createElement('p');entry.className=`agent-message ${role}`;
+  const pattern=/\[([^\]]+)\]\(#effects\)/g;let last=0,match;
+  while((match=pattern.exec(String(text)))){entry.append(document.createTextNode(String(text).slice(last,match.index)));const link=document.createElement('a');link.href='#effects';link.dataset.view='effects';link.textContent=match[1];entry.append(link);last=pattern.lastIndex}
+  entry.append(document.createTextNode(String(text).slice(last)));log.append(entry);log.scrollTop=log.scrollHeight;
 }
-// 知识库界面暂时隐藏；保留原本机数据与辅助逻辑，便于日后恢复。
-function setAiRelicStatus(message,error=false){const status=$('#ai-relic-status');status.textContent=message;status.classList.toggle('error',error)}
-function describeAiPlan(plan,inventory){
-  const names=new Map(inventory.map(relic=>[String(relic.id),relic.name]));
-  const sections=[['normal','普通遗物'],['deep','深夜遗物']].filter(([group])=>plan[group]?.length);
-  $('#ai-relic-result').innerHTML=`<p class="ai-plan-summary"></p>${sections.map(([group,label])=>`<div class="ai-plan-group"><strong>${label}</strong>${plan[group].map(item=>`<p><b>${item.index+1} 槽 · ${item.relic_id?esc(names.get(String(item.relic_id))||'未识别遗物'):'暂留空'}</b><span>${esc(item.reason||'')}</span></p>`).join('')}</div>`).join('')}`;
-  $('#ai-relic-result .ai-plan-summary').textContent=plan.summary;
-  $('#ai-relic-result').hidden=false;$('#ai-relic-apply').hidden=false;
+async function restoreAgentHistory(){
+  try{const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/ai/history?session_id=${encodeURIComponent(agentSessionId)}`);if(!response.ok)throw new Error('读取对话记忆失败');const data=await response.json();if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){appendAgentMessage(message.role,message.content);agentHistory.push(message)}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
 }
-$('#ai-relic-form').addEventListener('submit',async event=>{
-  event.preventDefault();pendingAiRelicPlan=null;$('#ai-relic-result').hidden=true;$('#ai-relic-apply').hidden=true;
-  if(!state.save?.relics?.length){setAiRelicStatus('请先在“遗物仪式”读取存档。',true);return}
-  const question=aiQuestion.value.trim();if(question.length<8||question.length>240){setAiRelicStatus('问题需填写 8–240 字。',true);return}
-  const vessel=currentVessel();if(!vessel){setAiRelicStatus('当前供具信息不可用，请重新选择角色或供具。',true);return}
-  const character=$('#character-select').value,combined=$('#build-mode').value==='combined';
+restoreAgentHistory();
+$('#agent-question').addEventListener('input',()=>{$('#agent-question-count').textContent=`${Array.from($('#agent-question').value).length} / 400 字`});
+function requestJson(url,body){return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');if(response.status===404)throw new Error('找不到 AI 接口，请更新并重启本地 FastAPI 服务。');throw new Error(`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`)}const result=await response.json();if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');return result})}
+function agentInventory(){return (state.save?.relics||[]).map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}))}
+function describeAgentPlan(plan,inventory){
+  const names=new Map(inventory.map(relic=>[String(relic.id),relic.name])),sections=[['normal','普通遗物'],['deep','深夜遗物']].filter(([group])=>plan[group]?.length),result=$('#agent-build-result');
+  result.replaceChildren();const summary=document.createElement('p');summary.className='ai-plan-summary';summary.textContent=plan.summary;result.append(summary);
+  for(const [group,label] of sections){const section=document.createElement('div');section.className='ai-plan-group';const heading=document.createElement('strong');heading.textContent=label;section.append(heading);for(const item of plan[group]){const row=document.createElement('p'),name=document.createElement('b'),reason=document.createElement('span');name.textContent=`${item.index+1} 槽 · ${item.relic_id?names.get(String(item.relic_id))||'未识别遗物':'暂留空'}`;reason.textContent=item.reason||'';row.append(name,reason);section.append(row)}result.append(section)}
+  result.hidden=false;$('#agent-apply-build').hidden=false;
+}
+async function requestAgentBuild(question,context){
+  if(!state.save?.relics?.length)throw new Error('请先在“遗物仪式”读取本机存档。');
+  if(question.length<8||question.length>240)throw new Error('配装问题需填写 8–240 字。');
+  const character=context.character_key,key=context.vessel_key,mode=context.build_scope,combined=mode==='combined';
+  const vessel=state.vessels.characters?.[character]?.vessels?.[key]||(state.vessels.universalVessels||[]).find(item=>item.key===key);if(!vessel)throw new Error('所选角色供具信息不可用，请重新选择。');
   const slots=[...(vessel.normalSlots||[]).map((color,index)=>({group:'normal',index,color})),...(combined?(vessel.deepSlots||[]).map((color,index)=>({group:'deep',index,color})):[])];
-  const inventory=state.save.relics.map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}));
-  const ruleEffects=Object.entries(state.effects?.effects||{});
-  const rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([,entry])=>entry.key===rule.key)||[];return {effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope)}});
-  const body={character:characterZh[character]||character,vessel:vesselName($('#vessel-select').value,character),question,slots,rules,inventory};
-  const button=$('#ai-relic-submit');button.disabled=true;setAiRelicStatus('正在根据你的遗物清单生成配装建议…');
+  const ruleEffects=Object.entries(state.effects?.effects||{}),rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([effectId,entry])=>entry.key===rule.key&&isOutOfGameRelicEffect({...entry,id:effectId}))||[];return {effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope)}});
+  const inventory=agentInventory(),body={session_id:agentSessionId,character:characterZh[character]||character,character_key:character,vessel:vesselName(key,character),vessel_key:key,mode,question,slots,rules,inventory};
+  const result=await requestJson('/api/ai/recommend',body);pendingAgentPlan={plan:result,inventory,character,key,mode};describeAgentPlan(result,inventory);setAgentStatus('配装建议已生成，请检查遗物和理由，再选择是否应用。');return result;
+}
+$('#agent-chat-form').addEventListener('submit',async event=>{
+  event.preventDefault();const question=$('#agent-question').value.trim();if(!question)return;
+  const button=$('#agent-send');pendingAgentPlan=null;$('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;appendAgentMessage('user',question);$('#agent-question').value='';$('#agent-question-count').textContent='0 / 400 字';button.disabled=true;
   try{
-    const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/ai/recommend`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    const contentType=response.headers.get('content-type')||'';
-    if(!contentType.includes('application/json')){
-      const raw=await response.text();
-      if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');
-      if(response.status===404)throw new Error('找不到 AI 接口，请检查 FastAPI 地址配置。');
-      throw new Error(`AI 服务返回了非 JSON 响应（HTTP ${response.status}），请检查后端地址和运行状态。`);
+    setAgentStatus('正在判断问题类型并查阅相关资料…');const reply=await requestJson('/api/ai/chat',{session_id:agentSessionId,question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)});
+    if(reply.intent==='build'){
+      const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);appendAgentMessage('assistant',plan.summary);agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
+    }else{
+      const answer=reply.answer||'这个问题还不够明确，请补充一下你指的角色、敌人或配装目标。';appendAgentMessage('assistant',answer);agentHistory.push({role:'user',content:question},{role:'assistant',content:answer});if(reply.intent==='clarify')agentClarificationContext.push(question);else agentClarificationContext=[];
+      setAgentStatus(reply.intent==='clarify'?'需要你补充信息后，我再继续。':'回答已整理完成。');
     }
-    let result;try{result=await response.json()}catch(_){throw new Error('AI 服务返回的数据格式异常，请检查后端日志。')}
-    if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');
-    pendingAiRelicPlan={plan:result,inventory,characterId:character,vesselKey:$('#vessel-select').value,mode:$('#build-mode').value};
-    describeAiPlan(result,inventory);setAiRelicStatus('建议已生成；点击“应用方案”后才会替换装配预览。');
-  }catch(error){setAiRelicStatus(error.message||'AI 请求失败，请检查 API 服务是否启动。',true)}
+  }catch(error){appendAgentMessage('assistant',`暂时无法完成：${error.message||'请检查 FastAPI 服务是否启动。'}`);setAgentStatus(error.message||'AI 请求失败，请稍后重试。',true)}
   finally{button.disabled=false}
 });
-$('#ai-relic-apply').addEventListener('click',()=>{
-  if(!pendingAiRelicPlan||!state.save)return;
-  if(pendingAiRelicPlan.characterId!==$('#character-select').value||pendingAiRelicPlan.vesselKey!==$('#vessel-select').value||pendingAiRelicPlan.mode!==$('#build-mode').value){setAiRelicStatus('角色、供具或组合模式已改变，请重新生成建议。',true);return}
-  const next={normal:[...state.equipped.normal],deep:[...state.equipped.deep]},used=new Set();
-  for(const group of ['normal','deep'])for(const choice of pendingAiRelicPlan.plan[group]||[]){
-    const index=choice.relic_id===null?null:state.save.relics.findIndex(relic=>String(relic.id)===String(choice.relic_id));
-    if(index!==null&&(index<0||used.has(index)||!canEquip(index,group,choice.index))){setAiRelicStatus('方案校验失败：遗物不在当前清单中，或与槽位不匹配。请重新生成建议。',true);return}
-    if(index!==null)used.add(index);next[group][choice.index]=index;
-  }
-  state.equipped=next;state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent='AI 配装建议已应用到装配预览，可继续手动调整。';setAiRelicStatus('方案已应用到装配预览；尚未写入存档。');
+$('#agent-apply-build').addEventListener('click',()=>{
+  if(!pendingAgentPlan||!state.save)return;const {character,key,mode,plan}=pendingAgentPlan;
+  $('#character-select').value=character;$('#character-select').dispatchEvent(new Event('change'));$('#vessel-select').value=key;$('#vessel-select').dispatchEvent(new Event('change'));$('#build-mode').value=mode;$('#build-mode').dispatchEvent(new Event('change'));
+  const next={normal:[null,null,null],deep:[null,null,null]},used=new Set();
+  for(const group of ['normal','deep'])for(const choice of plan[group]||[]){const index=choice.relic_id===null?null:state.save.relics.findIndex(relic=>String(relic.id)===String(choice.relic_id));if(index!==null&&(index<0||used.has(index)||!canEquip(index,group,choice.index))){setAgentStatus('方案校验失败：遗物不在当前存档中，或与所选角色供具槽位不匹配。',true);return}if(index!==null)used.add(index);next[group][choice.index]=index}
+  state.equipped=next;state.selectedRelicIndex=null;renderBuildWorkspace();navigate('builds');$('#equip-status').textContent='Agent 配装已放入装配预览，可继续调整；尚未写入存档。';setAgentStatus('配装已应用到装配预览；尚未写入存档。');
 });
-$('#rule-export').addEventListener('click',()=>{saveActiveRuleProfile();const data={version:2,profiles:state.ruleProfiles,activeProfileId:state.activeRuleProfileId};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='nightreign-build-profiles.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('#rule-io-status').textContent='已导出全部流派规则；文件不含存档数据。'});
-$('#rule-import').addEventListener('click',()=>$('#rule-file').click());
-$('#rule-file').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{if(file.size>1000000)throw new Error('规则文件过大');const data=JSON.parse(await file.text());let profiles;if(data.version===2&&Array.isArray(data.profiles)){profiles=data.profiles.map(normalizeProfile).filter(Boolean);if(!profiles.length)throw new Error('文件中没有有效流派')}else if(data.version===1&&Array.isArray(data.rules)){const rules=data.rules.map(validRule);if(rules.some(r=>!r)||new Set(rules.map(r=>r.key)).size!==rules.length)throw new Error('包含未知或重复词条');profiles=[normalizeProfile({id:profileId(),name:'导入流派',character:data.character,rules})]}else throw new Error('不是受支持的规则文件');state.ruleProfiles=profiles;state.activeRuleProfileId=null;const next=profiles.some(p=>p.id===data.activeProfileId)?data.activeProfileId:profiles[0].id;activateRuleProfile(next);saveRuleProfiles();$('#rule-io-status').textContent=`已导入 ${profiles.length} 个流派。`}catch(err){$('#rule-io-status').textContent='导入失败：'+err.message}finally{e.target.value=''}});
 function stackingData(){const map={};for(const e of Object.values(state.effects.effects||{})){const key=e.key,v=e.stackable===true?true:e.stackable==='conditional'?'conditional':false;if(!(key in map)||v===true||v==='conditional'&&map[key]===false)map[key]=v}return map}
 function renderBuildResult(data){
   const results=(data.allResults?.flatMap(x=>x.results||[])||[]).filter(x=>x.requiredMet);
   state.buildResults=results.slice(0,10);
-  $('#build-results').innerHTML=state.buildResults.length?state.buildResults.map((x,i)=>{const vessel=x.vessel||{};const renderRelic=r=>{const owned=state.save.relics.find(own=>String(own.id)===String(r.id))||r;return `<div class="build-relic"><div class="build-relic-main">${relicImage(owned)}<div><strong>${esc(relicName(owned))} · #${esc(r.id)}</strong><small>${esc(relicCategory(owned))}</small><div class="game-effect-list compact">${renderEffectRows(owned)}</div></div></div></div>`};return `<article class="build-result"><header><h3>方案 ${i+1} · ${esc(vesselName(vessel.key,$('#character-select').value))}</h3><strong class="score">${esc(fmt(x.score))} 分</strong></header><p class="meta">已覆盖必选词条 · 命中 ${(x.matchedEffects||[]).length} 项目标</p><div class="build-relics"><div><h4>普通遗物</h4>${(x.normalRelics||x.relics||[]).map(renderRelic).join('')||'<span class="detail-note">无</span>'}</div><div><h4>深夜遗物</h4>${(x.deepRelics||[]).map(renderRelic).join('')||'<span class="detail-note">当前模式未使用</span>'}</div></div><button type="button" class="button ghost apply-build" data-build-index="${i}">在上方槽位预览此方案 ↗</button></article>`}).join(''):'<div class="note-panel"><span class="note-icon">i</span><div><strong>没有满足全部必选条件的组合</strong><p>请检查存档里是否有必选词条，以及供具颜色是否能装入对应遗物。</p></div></div>';
+  $('#build-results').innerHTML=state.buildResults.length?state.buildResults.map((x,i)=>{const vessel=x.vessel||{},character=vessel.character||$('#build-character-select').value;const renderRelic=r=>{const owned=state.save.relics.find(own=>String(own.id)===String(r.id))||r;return `<div class="build-relic"><div class="build-relic-main">${relicImage(owned)}<div><strong>${esc(relicName(owned))} · #${esc(r.id)}</strong><small>${esc(relicCategory(owned))}</small><div class="game-effect-list compact">${renderEffectRows(owned)}</div></div></div></div>`};return `<article class="build-result"><header><h3>方案 ${i+1} · ${esc(characterZh[character]||character)} · ${esc(vesselName(vessel.key,character))}</h3><strong class="score">${esc(fmt(x.score))} 分</strong></header><p class="meta">已覆盖必选词条 · 命中 ${(x.matchedEffects||[]).length} 项目标</p><div class="build-relics"><div><h4>普通遗物</h4>${(x.normalRelics||x.relics||[]).map(renderRelic).join('')||'<span class="detail-note">无</span>'}</div><div><h4>深夜遗物</h4>${(x.deepRelics||[]).map(renderRelic).join('')||'<span class="detail-note">当前模式未使用</span>'}</div></div><button type="button" class="button ghost apply-build" data-build-index="${i}">在上方槽位预览此方案 ↗</button></article>`}).join(''):'<div class="note-panel"><span class="note-icon">i</span><div><strong>没有满足全部必选条件的组合</strong><p>请检查存档里是否有必选词条，以及供具颜色是否能装入对应槽位。</p></div></div>';
 }
 function placeRecommended(relics,colors){
   const indexes=relics.map(r=>state.save.relics.findIndex(own=>String(own.id)===String(r.id)));
@@ -665,6 +764,7 @@ function placeRecommended(relics,colors){
   return next(0)?placed:null;
 }
 $('#build-results').addEventListener('click',e=>{const btn=e.target.closest('[data-build-index]');if(!btn)return;const result=state.buildResults[Number(btn.dataset.buildIndex)];if(!result||!state.save)return;
+  const character=result.vessel?.character;if(character&&[...$('#character-select').options].some(option=>option.value===character)){$('#character-select').value=character;$('#character-select').dispatchEvent(new Event('change'));$('#build-character-select').value=character}
   const vessel=result.vessel?.key;if(vessel&&[...$('#vessel-select').options].some(option=>option.value===vessel))$('#vessel-select').value=vessel;
   const config=currentVessel(),normal=placeRecommended(result.normalRelics||result.relics||[],config.normalSlots),deep=$('#build-mode').value==='combined'?placeRecommended(result.deepRelics||[],config.deepSlots):[null,null,null];
   if(!normal||!deep){$('#build-status').textContent='此方案无法放入当前供具槽位，请更换供具后重试。';return}
@@ -676,10 +776,10 @@ $('#run-build').addEventListener('click',()=>{
   if($('#build-mode').value==='normal'&&state.rules.some(r=>r.scope==='deep'&&r.priority==='required')){$('#build-status').textContent='仅普通模式无法满足“深夜必选”规则，请切换组合模式或调整规则。';return}
   if(state.worker)state.worker.terminate();
   const btn=$('#run-build');btn.disabled=true;$('#build-status').textContent='正在计算供具槽位与遗物组合…';$('#build-results').innerHTML='';
-  const worker=new Worker('./relic-optimizer.js');state.worker=worker;
+    const worker=new Worker('./relic-optimizer.js');state.worker=worker;
   worker.onmessage=e=>{const d=e.data;if(d.progress){$('#build-status').textContent=`正在计算 ${d.progress.current}/${d.progress.total} 个供具…`;return}btn.disabled=false;worker.terminate();state.worker=null;if(d.error){$('#build-status').textContent='计算失败：'+d.error;return}renderBuildResult(d.result);$('#build-status').textContent=state.buildResults.length?`计算完成 · ${state.buildResults.length} 套满足必选条件的组合`:'没有满足全部必选条件的组合';};
   worker.onerror=e=>{btn.disabled=false;worker.terminate();state.worker=null;$('#build-status').textContent='计算失败：'+e.message};
-  worker.postMessage({relics:state.save.relics,effectSpecs:buildSpecs(),vesselsData:state.vessels,stackingData:stackingData(),params:{character:$('#character-select').value,vessel:$('#vessel-select').value||undefined,combined:$('#build-mode').value==='combined',candidates:25,top:10}});
+  worker.postMessage({relics:state.save.relics,effectSpecs:buildSpecs(),vesselsData:state.vessels,stackingData:stackingData(),params:{character:$('#build-character-select').value,vessel:undefined,characterVesselsOnly:true,combined:$('#build-mode').value==='combined',candidates:25,top:10}});
 });
 
 loadCatalogs();navigate(location.hash.slice(1)||'overview');

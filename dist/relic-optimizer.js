@@ -659,7 +659,7 @@ class RelicOptimizer {
     return results;
   }
 
-  getVesselConfigs(character, vesselTypes) {
+  getVesselConfigs(character, vesselTypes, characterVesselsOnly = false) {
     if (!this.vesselsData) return [];
 
     const charJa = resolveCharacterNameJa(character);
@@ -685,7 +685,7 @@ class RelicOptimizer {
     }
 
     // Universal vessels can be requested individually from the selector.
-    for (const uv of (this.vesselsData.universalVessels || [])) {
+    for (const uv of (characterVesselsOnly ? [] : this.vesselsData.universalVessels || [])) {
       if (vesselTypes && !vesselTypes.includes(uv.key)) continue;
       configs.push({
         key: uv.key,
@@ -1261,7 +1261,7 @@ if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typ
 
       if (params.character && vesselsData) {
         const vesselTypes = params.vessel ? params.vessel.split(',') : null;
-        const vesselConfigs = optimizer.getVesselConfigs(params.character, vesselTypes);
+        const vesselConfigs = optimizer.getVesselConfigs(params.character, vesselTypes, params.characterVesselsOnly === true);
 
         if (vesselConfigs.length === 0) {
           self.postMessage({ error: `No vessel configs found for ${params.character}` });
@@ -1275,6 +1275,7 @@ if (typeof self !== 'undefined' && typeof self.postMessage === 'function' && typ
           self.postMessage({ progress: { current: vi, total: totalVessels } });
           const vc = vesselConfigs[vi];
           const vesselInfo = {
+            character: params.character,
             key: vc.key,
             nameJa: vc.nameJa,
             nameEn: vc.nameEn,
