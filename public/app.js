@@ -3,7 +3,7 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyMeta:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const state = {enemyData:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
 const relicColorClasses = Object.freeze({Red:'red',Blue:'blue',Yellow:'yellow',Green:'green',Any:'any'});
 const relicColorClass = (relic) => {const key=String(relic?.itemColor||'Any');return `color-${Object.hasOwn(relicColorClasses,key)?relicColorClasses[key]:'any'}`};
@@ -55,15 +55,30 @@ function enemyName(r){return String(r[0]||'未知敌人')}
 function isBoss(r){return bossRe.test(enemyName(r))}
 function enemyGroupName(r){return enemyName(r)}
 function buildEnemyMetadata(){
-  const map=new Map();
+  const map=new Map(),locations=new Set(),categories=new Set();
   for(const row of state.enemyData.scale?.rows||[]){
     const key=normalizeName(row[0]);if(!key)continue;
-    if(!map.has(key))map.set(key,{categories:new Set(),locations:new Set()});
-    const item=map.get(key);if(row[2])item.categories.add(String(row[2]));if(row[1])item.locations.add(String(row[1]));
+    if(!map.has(key))map.set(key,[]);
+    const category=String(row[2]||''),location=String(row[1]||'');
+    map.get(key).push({category,location});
+    if(category)categories.add(category);if(location)locations.add(location);
   }
-  state.enemyMeta=map;
+  state.enemyMeta=map;state.enemyMetaLocations=locations;state.enemyMetaCategories=categories;
 }
-function enemyMetaFor(row){return state.enemyMeta.get(normalizeName(enemyName(row)))||{categories:new Set(),locations:new Set()}}
+function enemyMetaFor(row){
+  const records=state.enemyMeta.get(normalizeName(enemyName(row)))||[];
+  const context=[...enemyName(row).matchAll(/\(([^)]*)\)|（([^）]*)）|\[([^\]]*)\]|【([^】]*)】/g)].map(match=>match.slice(1).find(Boolean)||'').join(' ').toLocaleLowerCase();
+  if(context){
+    // Qualifiers come from the scale table's known locations/categories. Once recognized,
+    // an unmatched qualifier must stay unmatched instead of inheriting sibling encounters.
+    const recognizedLocations=[...state.enemyMetaLocations].filter(value=>context.includes(value.toLocaleLowerCase())).sort((a,b)=>b.length-a.length);
+    const recognizedCategories=[...state.enemyMetaCategories].filter(value=>context.includes(value.toLocaleLowerCase()));
+    if(recognizedLocations.length)return enemyMetaFromRecords(records.filter(record=>recognizedLocations.includes(record.location)));
+    if(recognizedCategories.length)return enemyMetaFromRecords(records.filter(record=>recognizedCategories.includes(record.category)));
+  }
+  return enemyMetaFromRecords(records);
+}
+function enemyMetaFromRecords(records){return {categories:new Set(records.map(record=>record.category).filter(Boolean)),locations:new Set(records.map(record=>record.location).filter(Boolean))}}
 function matchesEnemyCategory(row,filter){
   if(filter==='all')return true;
   const categories=enemyMetaFor(row).categories;
@@ -147,10 +162,7 @@ function renderEnemies(){
 }
 function normalizeName(s){return String(s||'').replace(/[「」『』“”‘’\s]/g,'').replace(/\([^)]*\)|（[^）]*）|\[[^\]]*\]|【[^】]*】/g,'').toLowerCase()}
 function locationFor(row){
-  const n=normalizeName(row[0]); if(!n)return [];
-  const scale=state.enemyData.scale?.rows||[];
-  const found=scale.filter(r=>{const x=normalizeName(r[0]);return x===n || (n.length>5&&x.length>5&&(x.includes(n)||n.includes(x)))}).map(r=>r[1]).filter(Boolean);
-  return [...new Set(found)].slice(0,8);
+  return [...enemyMetaFor(row).locations].slice(0,8);
 }
 // 敌人表的伤害列存的是减伤百分比；图鉴使用玩家实际造成伤害的倍率。
 function enemyDamageMultiplier(value){
