@@ -498,7 +498,13 @@ function updateVessels(){
   renderCharacterPicker();renderVesselPicker();
   renderBuildWorkspace();
 }
-function invalidateBuildResults(){if(state.worker){state.worker.terminate();state.worker=null}$('#run-build').disabled=false;state.buildResults=[];$('#build-results').innerHTML='';$('#build-status').textContent='选择目标词条后可计算推荐组合。'}
+function stopBuildWorker(worker=state.worker){
+  if(!worker)return;
+  if(state.worker===worker)state.worker=null;
+  worker.onmessage=null;worker.onerror=null;worker.onmessageerror=null;
+  try{worker.terminate()}catch(_){}
+}
+function invalidateBuildResults(){stopBuildWorker();$('#run-build').disabled=false;state.buildResults=[];$('#build-results').innerHTML='';$('#build-status').textContent='选择目标词条后可计算推荐组合。'}
 $('#character-select').addEventListener('change',()=>{invalidateBuildResults();state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;updateVessels();saveActiveRuleProfile()});
 $('#vessel-select').addEventListener('change',()=>{invalidateBuildResults();state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;renderVesselPicker();renderBuildWorkspace()});
 $('#build-mode').addEventListener('change',()=>{invalidateBuildResults();state.slotFilterActive=false;renderBuildWorkspace()});
@@ -892,12 +898,26 @@ $('#run-build').addEventListener('click',()=>{
   if(!state.save)return navigate('relics');
   if(!state.rules.length){$('#build-status').textContent='请先添加至少一项规则。';return}
   if($('#build-mode').value==='normal'&&state.rules.some(r=>r.scope==='deep'&&r.priority==='required')){$('#build-status').textContent='仅普通模式无法满足“深夜必选”规则，请切换组合模式或调整规则。';return}
-  if(state.worker)state.worker.terminate();
-  const btn=$('#run-build');btn.disabled=true;$('#build-status').textContent='正在计算供具槽位与遗物组合…';$('#build-results').innerHTML='';
-    const worker=new Worker('./relic-optimizer.js');state.worker=worker;
-  worker.onmessage=e=>{const d=e.data;if(d.progress){$('#build-status').textContent=`正在计算 ${d.progress.current}/${d.progress.total} 个供具…`;return}btn.disabled=false;worker.terminate();state.worker=null;if(d.error){$('#build-status').textContent='计算失败：'+d.error;return}renderBuildResult(d.result);$('#build-status').textContent=state.buildResults.length?`计算完成 · ${state.buildResults.length} 套满足必选条件的组合`:'没有满足全部必选条件的组合';};
-  worker.onerror=e=>{btn.disabled=false;worker.terminate();state.worker=null;$('#build-status').textContent='计算失败：'+e.message};
-  worker.postMessage({relics:state.save.relics,effectSpecs:buildSpecs(),vesselsData:state.vessels,stackingData:stackingData(),params:{character:$('#build-character-select').value,vessel:undefined,characterVesselsOnly:true,combined:$('#build-mode').value==='combined',candidates:25,top:10}});
+  stopBuildWorker();
+  const btn=$('#run-build');btn.disabled=true;state.buildResults=[];$('#build-status').textContent='正在计算供具槽位与遗物组合…';$('#build-results').innerHTML='';
+  let worker;
+  try{
+    const payload={relics:state.save.relics,effectSpecs:buildSpecs(),vesselsData:state.vessels,stackingData:stackingData(),params:{character:$('#build-character-select').value,vessel:undefined,characterVesselsOnly:true,combined:$('#build-mode').value==='combined',candidates:25,top:10}};
+    worker=new Worker('./relic-optimizer.js');state.worker=worker;
+    const fail=error=>{if(state.worker!==worker)return;stopBuildWorker(worker);btn.disabled=false;$('#build-status').textContent='计算失败：'+(error?.message||'后台计算发生错误')};
+    worker.onmessage=e=>{
+      if(state.worker!==worker)return;
+      const data=e.data||{};
+      if(data.progress){$('#build-status').textContent=`正在计算 ${data.progress.current}/${data.progress.total} 个供具…`;return}
+      stopBuildWorker(worker);btn.disabled=false;
+      if(data.error){$('#build-status').textContent='计算失败：'+data.error;return}
+      try{renderBuildResult(data.result);$('#build-status').textContent=state.buildResults.length?`计算完成 · ${state.buildResults.length} 套满足必选条件的组合`:'没有满足全部必选条件的组合'}
+      catch(error){state.buildResults=[];$('#build-results').innerHTML='';$('#build-status').textContent='计算失败：'+error.message}
+    };
+    worker.onerror=fail;
+    worker.onmessageerror=fail;
+    worker.postMessage(payload);
+  }catch(error){stopBuildWorker(worker);btn.disabled=false;$('#build-status').textContent='计算失败：'+error.message}
 });
 
 loadCatalogs();navigate(location.hash.slice(1)||'overview');
