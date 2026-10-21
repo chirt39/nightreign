@@ -51,8 +51,11 @@ const bossRe=/boss|首领|夜王|夜之王|夜王者/i;
 const enemyCategoryLabels={'夜王':'夜王','夜晚Boss':'夜晚首领','强敌boss':'强敌首领','中boss':'中型首领','小boss':'小型首领','boss':'Boss','封印监牢':'封印监牢','古代封印监牢':'古代封印监牢','特殊':'特殊敌人'};
 const enemyFilterOptions=[['all','全部敌人'],['boss','全部首领'],['nightlord','夜王'],['nightboss','夜晚首领'],['fieldboss','野外首领'],['sealed','封印监牢'],['ancient','古代封印监牢'],['special','特殊敌人'],['otherboss','未细分首领'],['other','其他敌人']];
 const fieldBossCategories=new Set(['强敌boss','boss','小boss','中boss']);
+// Repository evidence: rows 31700020 and 31800020 share the explicit “山顶 遗迹Boss” tag.
+// Require a recognized location on the child row and inherit location only, never category.
+const enemyLocationOnlyParents=new Map([['白金之子弓手的狼','白金之子弓手']]);
 function enemyName(r){return String(r[0]||'未知敌人')}
-function isBoss(r){return bossRe.test(enemyName(r))}
+function isBoss(r){return !enemyLocationOnlyParents.has(normalizeName(enemyName(r)))&&bossRe.test(enemyName(r))}
 function enemyGroupName(r){return enemyName(r)}
 function buildEnemyMetadata(){
   const map=new Map(),locations=new Set(),categories=new Set();
@@ -68,6 +71,15 @@ function buildEnemyMetadata(){
 function enemyMetaFor(row){
   const records=state.enemyMeta.get(normalizeName(enemyName(row)))||[];
   const context=[...enemyName(row).matchAll(/\(([^)]*)\)|（([^）]*)）|\[([^\]]*)\]|【([^】]*)】/g)].map(match=>match.slice(1).find(Boolean)||'').join(' ').toLocaleLowerCase();
+  const parentName=enemyLocationOnlyParents.get(normalizeName(enemyName(row)));
+  if(parentName&&context){
+    const recognizedLocations=[...state.enemyMetaLocations].filter(value=>context.includes(value.toLocaleLowerCase()));
+    if(recognizedLocations.length){
+      const parentRecords=state.enemyMeta.get(normalizeName(parentName))||[];
+      const locations=new Set(parentRecords.filter(record=>recognizedLocations.includes(record.location)).map(record=>record.location).filter(Boolean));
+      return {categories:new Set(),locations};
+    }
+  }
   if(context){
     // Qualifiers come from the scale table's known locations/categories. Once recognized,
     // an unmatched qualifier must stay unmatched instead of inheriting sibling encounters.
