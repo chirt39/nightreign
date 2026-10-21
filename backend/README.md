@@ -31,9 +31,11 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 
 ## 对话记忆
 
-每个浏览器在本地存储一个随机会话标识。FastAPI 将该会话的问答存入 SQLite，并在 Chroma 中建立语义记忆索引；默认只保留最近 5 轮完整问答（可用 `AGENT_MEMORY_MAX_EXCHANGES` 调整），更早的 SQLite 记录和对应 Chroma 记录会清理。提问时只检索仍保留的记忆。助手页面不提供手动清除按钮；原始存档和遗物库存不写入对话记忆。
+每个浏览器在本地存储一个随机会话标识。FastAPI 将该会话的问答存入 SQLite，并在 Chroma 中建立语义记忆索引；默认只保留最近 5 轮完整问答（可用正整数 `AGENT_MEMORY_MAX_EXCHANGES` 调整），更早的 SQLite 记录和对应 Chroma 记录会清理。提问时只检索仍保留的记忆。助手页面不提供手动清除按钮；原始存档和遗物库存不写入对话记忆。
 
-SQLite 问答还按 UTC `created_at` 保留 90 天，可用 `AGENT_MEMORY_RETENTION_DAYS` 配置。服务启动时立即清理，之后每小时再清理一次；本机已有的旧会话按原始创建时间计算，部署启用后若已超过期限就会清理。删除过期 assistant 问答时，向量 ID 会先写入 SQLite 待删队列，再与问答删除在同一事务提交；随后尝试删除 Chroma 向量。若 Chroma 不可用，待删 ID 会保留，worker 每小时重试。此清理只删除过期问答及其 assistant 向量，不删除会话外的限流/每日计数或其他表数据。
+SQLite 问答还按 UTC `created_at` 保留 90 天，可用正整数 `AGENT_MEMORY_RETENTION_DAYS` 配置，单位为天。服务启动时立即清理，之后每小时再清理一次；本机已有的旧会话按原始创建时间计算，部署启用后若已超过期限就会清理。删除过期 assistant 问答时，向量 ID 会先写入 SQLite 待删队列，再与问答删除在同一事务提交；随后尝试删除 Chroma 向量。若 Chroma 不可用，待删 ID 会保留，worker 每小时重试。此清理只删除过期问答及其 assistant 向量，不删除会话外的限流/每日计数或其他表数据。
+
+`AI_REQUESTS_PER_MINUTE` 和 `AI_REQUESTS_PER_DAY` 必须为正整数，分别表示每个客户端每分钟和每天可调用 AI 的次数；默认值为 5 和 100。`DASHSCOPE_EMBEDDING_DIMENSIONS` 也必须为正整数，默认 512 维（`text-embedding-v4` 支持该维度）。以上配置若不是正整数，服务会记录 warning 并采用对应默认值。
 
 ### SQLite 文件权限
 

@@ -13,14 +13,15 @@ from typing import Iterator
 
 from chromadb.errors import NotFoundError
 
+from backend.config import positive_int_setting
 from backend import rag_store
 
 
 DEFAULT_DB = Path(__file__).resolve().parent.parent / "local-data" / "agent_memory.sqlite3"
 DB_PATH = Path(os.getenv("AGENT_MEMORY_DB", str(DEFAULT_DB)))
 COLLECTION = "nightreign_browser_memory"
-MAX_EXCHANGES = max(1, int(os.getenv("AGENT_MEMORY_MAX_EXCHANGES", "5")))
-AGENT_MEMORY_RETENTION_DAYS = max(1, int(os.getenv("AGENT_MEMORY_RETENTION_DAYS", "90")))
+MAX_EXCHANGES = positive_int_setting("AGENT_MEMORY_MAX_EXCHANGES", 5)
+AGENT_MEMORY_RETENTION_DAYS = positive_int_setting("AGENT_MEMORY_RETENTION_DAYS", 90)
 FEEDBACK_RETENTION = timedelta(days=90)
 
 

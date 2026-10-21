@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.concurrency import run_in_threadpool
 
+from backend.config import positive_int_setting
 from backend import memory_store, rag_store
 
 
@@ -28,27 +29,12 @@ API_BASE = rag_store.validate_api_base_url(
     os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"), "DEEPSEEK_BASE_URL"
 )
 MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-flash")
-RATE_LIMIT = max(1, int(os.getenv("AI_REQUESTS_PER_MINUTE", "5")))
-DAILY_AI_LIMIT = max(1, int(os.getenv("AI_REQUESTS_PER_DAY", "100")))
+RATE_LIMIT = positive_int_setting("AI_REQUESTS_PER_MINUTE", 5)
+DAILY_AI_LIMIT = positive_int_setting("AI_REQUESTS_PER_DAY", 100)
 logger = logging.getLogger(__name__)
 
 
-def _positive_int_setting(name: str, default: int) -> int:
-    raw_value = os.getenv(name)
-    if raw_value is None:
-        return default
-    try:
-        value = int(raw_value)
-    except ValueError:
-        logger.warning("%s must be a positive integer; using the default value %d.", name, default)
-        return default
-    if value < 1:
-        logger.warning("%s must be a positive integer; using the default value %d.", name, default)
-        return default
-    return value
-
-
-FEEDBACK_REQUESTS_PER_DAY = _positive_int_setting("FEEDBACK_REQUESTS_PER_DAY", 250)
+FEEDBACK_REQUESTS_PER_DAY = positive_int_setting("FEEDBACK_REQUESTS_PER_DAY", 250)
 FEEDBACK_ADMIN_PASSWORD = os.getenv("FEEDBACK_ADMIN_PASSWORD", "")
 FEEDBACK_ADMIN_PASSWORD_MIN_LENGTH = 32
 FEEDBACK_RATE_LIMIT = 5

@@ -17,6 +17,8 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from backend.config import positive_int_setting
+
 
 ROOT = Path(__file__).resolve().parent.parent
 CORPUS = ROOT / "backend" / "knowledge_base" / "nightreign_knowledge.jsonl"
@@ -66,7 +68,7 @@ EMBEDDING_BASE_URL = validate_api_base_url(
     "DASHSCOPE_BASE_URL",
 )
 EMBEDDING_MODEL = os.getenv("DASHSCOPE_EMBEDDING_MODEL", "text-embedding-v4").strip()
-EMBEDDING_DIMENSIONS = int(os.getenv("DASHSCOPE_EMBEDDING_DIMENSIONS", "512"))
+EMBEDDING_DIMENSIONS = positive_int_setting("DASHSCOPE_EMBEDDING_DIMENSIONS", 512)
 
 
 @lru_cache(maxsize=1)
