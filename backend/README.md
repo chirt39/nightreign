@@ -65,7 +65,9 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 - 每个客户端 IP 每分钟最多请求 5 次。配装请求最多 900 件遗物、6 个槽位和 40 条当前流派规则。
 - 每个 HTTP 请求体最多 750,000 字节；服务端先检查声明长度，再按 ASGI 请求流累计实际字节数，超限返回 HTTP 413，只暂存上限内的数据，不累积超限后的剩余请求体。
 - 所有 AI 接口共享同一客户端每分钟限流；默认全站每天最多发起 100 次 DeepSeek 请求（UTC 日界线重置），分别由 `AI_REQUESTS_PER_MINUTE` 和 `AI_REQUESTS_PER_DAY` 配置。计数保存在 `AGENT_MEMORY_DB` 的 SQLite 数据库中，单机多进程共享；多服务器部署需改用 Redis 等共享限流存储。
-- 若 FastAPI 通过本机 Caddy 反向代理，Uvicorn 应信任本机代理头（`--proxy-headers --forwarded-allow-ips=127.0.0.1`），否则每 IP 限流可能把访客都识别成代理地址。不要信任任意公网来源的转发头。
+- Uvicorn 依赖范围为 `uvicorn[standard]>=0.30,<1.0`，没有锁定精确版本；Docker 构建会安装满足范围的版本。Uvicorn 默认已启用 `X-Forwarded-*` 解析，且默认只信任 `FORWARDED_ALLOW_IPS` 环境变量指定的来源或 `127.0.0.1`。Docker 启动命令显式启用该解析，并读取可选的 `FORWARDED_ALLOW_IPS`（逗号分隔的 IP/CIDR），默认值为 `127.0.0.1`。
+- Ubuntu 上由同机 Caddy 代理到 loopback 地址时，使用 `FORWARDED_ALLOW_IPS=127.0.0.1`；若 Uvicorn 实际看到的代理地址是 `::1` 或容器网桥地址，应只配置该代理的准确地址/CIDR，并限制后端端口只能由该代理访问。Caddy 的 `reverse_proxy` 会生成/追加 `X-Forwarded-*`，默认忽略客户端传入的这些值，避免直接转发伪造值。不要设为 `*`，也不要信任任意公网来源。
+- Render Web Service 的入口代理地址不等于 loopback。未把该代理加入可信列表时，Uvicorn 会忽略其 `X-Forwarded-For`，限流只能按入口代理地址计数，访客可能共享每分钟额度。Render 文档说明可从 `X-Forwarded-For` 读取原始客户端 IP（[Render DDoS 防护说明](https://render.com/articles/how-render-handles-ddos-attacks)），但部署前必须取得并核实适用于该服务的代理 IP/CIDR，再配置 `FORWARDED_ALLOW_IPS`；在可信地址可核实前不要使用通配符。若无法取得可信代理范围，就保留安全默认值并接受共享限流，或改为直接连接客户端的受支持拓扑。
 - 请求次数上限不能精确限制人民币费用，实际花费仍取决于模型、输入长度和输出长度；还应在 DeepSeek 账户侧设置余额或预算提醒。CORS 只约束浏览器，不是 API 认证或防刷手段。
 - 推荐方案必须引用本次清单中的遗物实例 ID，且通过后端和前端的类型、颜色、槽位合法性校验。用户点击“应用配装到装配预览”后才会改变浏览器内的装配预览。
 - 对话记录按浏览器会话标识保存；后端不写入用户的存档或流派规则。DeepSeek API 使用量会按 DeepSeek 账户当前价格计费。
@@ -86,7 +88,7 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 docker build -t nightreign-ai -f backend/Dockerfile .
 ```
 
-未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
+未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。只有确认反向代理的源地址/CIDR 后才设置可选变量 `FORWARDED_ALLOW_IPS`。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
 
 API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件或前端构建产物。
 
