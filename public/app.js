@@ -358,6 +358,10 @@ function relicName(r){return relicEntry(r)?.name_zh||r.itemNameEn||r.itemNameJa|
 function relicCategory(r){return relicEntry(r)?.category||'未匹配图鉴'}
 function relicImage(r){const entry=relicEntry(r);return entry?.image?`<img class="relic-thumb" src="${esc(entry.image)}" alt="${esc(entry.name_zh)}图标" loading="lazy" draggable="false" width="58" height="58">`:'<span class="relic-thumb relic-thumb-fallback" aria-hidden="true">◇</span>'}
 function setSaveStatus(s,error=false){$('#save-status').textContent=s;$('#save-status').classList.toggle('error',error)}
+function setSaveFailureStatus(message){
+  const retainedDataNote=state.save?'本次没有替换当前数据；仍保留上次成功读取的遗物与装配。':'当前没有可用存档数据。';
+  setSaveStatus(`${message} ${retainedDataNote}`,true);
+}
 function renderBattleRecords(){
   const records=state.save?.battleRecords;
   $('#records-empty').hidden=!!state.save;
@@ -384,8 +388,8 @@ function renderBattleRecords(){
 }
 async function readSave(file){
   if(!file)return;
-  if(!/\.sl2$/i.test(file.name)){setSaveStatus('请选择 .sl2 存档文件。',true);return}
-  if(!state.items||!state.effects){setSaveStatus('资料尚未载入，请稍后再试。',true);return}
+  if(!/\.sl2$/i.test(file.name)){setSaveFailureStatus('请选择 .sl2 存档文件。');return}
+  if(!state.items||!state.effects){setSaveFailureStatus('资料尚未载入，请稍后再试。');return}
   try{
     setSaveStatus(`正在本地解析 ${file.name}…`);
     await validateSaveFileHeader(file);
@@ -397,7 +401,7 @@ async function readSave(file){
     try{sessionStorage.setItem('nightreign-parsed-save-v2',JSON.stringify(parsed))}catch(_){/* 存储不可用时仍保留本页数据 */}
     state.equipped={normal:[null,null,null],deep:[null,null,null]};state.selectedRelicIndex=null;renderBuildWorkspace();
     setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改，也未发送到服务器。${state.saveEditor?'当前为只读模式；存档写回尚未验收。':'此存档版式暂不支持编辑。'}`);
-  }catch(err){setSaveStatus('无法解析此存档：'+(err.message||String(err)),true)}
+  }catch(err){setSaveFailureStatus('无法解析此存档：'+(err?.message||String(err)))}
 }
 function showSave(parsed){
   if(!parsed||!Array.isArray(parsed.relics))throw new Error('遗物数据格式错误');
