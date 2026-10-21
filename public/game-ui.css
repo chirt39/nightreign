@@ -594,11 +594,17 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .home-agent-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
 .home-agent-heading h2{margin:2px 0 6px;color:#e7d0a0;font-size:24px}
 .home-agent-heading>div>p:last-child{margin:0;color:#9cabb6;font-size:13px}
+.feedback-suggestion-open{flex:0 0 auto;padding:8px 12px;gap:8px;color:#c9b483;font-size:11px}
 .agent-chat-log{display:flex;flex-direction:column;gap:9px;min-height:170px;max-height:350px;overflow:auto;padding:12px;border:1px solid #354b60;background:#111d2b;scrollbar-gutter:stable}
 .agent-empty{margin:auto;color:#91a3b3;text-align:center;font-size:13px;line-height:1.7}
-.agent-message{max-width:min(88%,850px);margin:0;padding:10px 12px;border:1px solid #3b5064;border-radius:3px;background:#1a2a3b;color:#d4dde3;font-size:13px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
-.agent-message.user{align-self:flex-end;border-color:#806e4e;background:#2a2a29;color:#f1dfb7}
+.agent-entry{display:grid;gap:4px;max-width:min(88%,850px)}
+.agent-entry.user{align-self:flex-end}
+.agent-entry.assistant{align-self:flex-start}
+.agent-message{max-width:100%;margin:0;padding:10px 12px;border:1px solid #3b5064;border-radius:3px;background:#1a2a3b;color:#d4dde3;font-size:13px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.agent-message.user{justify-self:end;border-color:#806e4e;background:#2a2a29;color:#f1dfb7}
 .agent-message a{color:#e6c27e;text-decoration:underline;text-underline-offset:3px}
+.agent-feedback-trigger{justify-self:start;padding:2px 0;border:0;background:none;color:#bca777;font-size:11px;text-decoration:underline;text-underline-offset:3px}
+.agent-feedback-trigger:hover{color:#f0d89e}
 .agent-chat-form{display:grid;gap:7px;margin-top:12px}
 .agent-question-label{color:#c4cfd4;font-size:12px}
 #agent-question{width:100%;min-height:76px;padding:10px 12px;border:1px solid #53677e;border-radius:3px;background:#101b29;color:#e6e8df;font:inherit;line-height:1.55;resize:vertical}
@@ -608,7 +614,27 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #agent-status.error{color:#ed9a8f}
 #agent-build-result{margin-top:10px;padding:12px;border-left:2px solid #c8a466;background:#111e2d;line-height:1.6}
 #agent-apply-build{margin-top:10px}
-@media(max-width:600px){#view-overview .home-agent{padding:14px}.home-agent-heading{flex-direction:column;gap:8px}.agent-message{max-width:100%}}
+.feedback-dialog{width:min(620px,calc(100% - 24px));max-height:min(88vh,820px);padding:0;border:1px solid #596575;border-radius:4px;background:#14212b;color:#e5e6df;box-shadow:0 24px 80px #0009}
+.feedback-dialog::backdrop{background:#071018c9;backdrop-filter:blur(3px)}
+.feedback-form{display:grid;gap:9px;max-height:88vh;overflow:auto;padding:22px}
+.feedback-form-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.feedback-form-heading .eyebrow{margin:0 0 4px}
+.feedback-form-heading h2{margin:0;color:#e7d0a0;font:600 21px 'Noto Serif SC',serif}
+.feedback-kind-label{margin:0;color:#9eafb7;font-size:12px}
+.feedback-label{color:#c4cfd4;font-size:12px}
+#feedback-message,#feedback-email{width:100%;padding:10px 12px;border:1px solid #53677e;border-radius:3px;background:#101b29;color:#e6e8df;font:inherit}
+#feedback-message{min-height:115px;resize:vertical}
+#feedback-message:focus,#feedback-email:focus{outline:1px solid #c8a466;border-color:#c8a466}
+.feedback-context-option{display:flex;align-items:flex-start;gap:9px;padding:10px;border:1px solid #354b60;background:#111d2b;color:#c7d1d5;font-size:12px;cursor:pointer}
+.feedback-context-option input{flex:0 0 auto;margin-top:3px;accent-color:#c8a466}
+.feedback-context-preview{max-height:190px;overflow:auto;padding:9px 12px;border-left:2px solid #c8a466;background:#111a22;font-size:12px}
+.feedback-context-preview p{margin:0 0 8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.feedback-context-preview p:last-child{margin-bottom:0}
+.feedback-context-preview strong{display:block;margin-bottom:3px;color:#c7ad77;font-size:11px}
+.feedback-form-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
+#feedback-status{color:#aebcba;font-size:12px}
+#feedback-status:empty{display:none}
+@media(max-width:600px){#view-overview .home-agent{padding:14px}.home-agent-heading{flex-direction:column;align-items:flex-start;gap:12px}.feedback-suggestion-open{margin-top:0}.agent-entry{max-width:100%}.feedback-form{padding:16px}}
 
 /* Searchable relic effect glossary. */
 .effect-encyclopedia{padding:18px;border:1px solid #35495d;background:linear-gradient(150deg,#172638,#142231)}

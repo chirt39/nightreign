@@ -6,7 +6,7 @@ import os
 import sqlite3
 import time
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterator
 
@@ -19,6 +19,7 @@ DEFAULT_DB = Path(__file__).resolve().parent.parent / "local-data" / "agent_memo
 DB_PATH = Path(os.getenv("AGENT_MEMORY_DB", str(DEFAULT_DB)))
 COLLECTION = "nightreign_browser_memory"
 MAX_EXCHANGES = max(1, int(os.getenv("AGENT_MEMORY_MAX_EXCHANGES", "5")))
+FEEDBACK_RETENTION = timedelta(days=90)
 
 
 @contextmanager
@@ -46,6 +47,19 @@ def _connect() -> Iterator[sqlite3.Connection]:
         request_count INTEGER NOT NULL
     )""")
     connection.execute("CREATE TABLE IF NOT EXISTS pending_memory_deletions (id TEXT PRIMARY KEY)")
+    connection.execute("""CREATE TABLE IF NOT EXISTS feedback_submissions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kind TEXT NOT NULL CHECK(kind IN ('answer', 'suggestion')),
+        message TEXT NOT NULL,
+        email TEXT,
+        question TEXT,
+        answer TEXT,
+        created_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL
+    )""")
+    connection.execute(
+        "CREATE INDEX IF NOT EXISTS feedback_submissions_by_expiry ON feedback_submissions(expires_at)"
+    )
     try:
         yield connection
         connection.commit()
@@ -65,6 +79,59 @@ def recent(session_id: str, limit: int = 8) -> list[dict[str, str]]:
 
 def history(session_id: str, limit: int = 80) -> list[dict[str, str]]:
     return recent(session_id, min(limit, MAX_EXCHANGES * 2))
+
+
+def save_feedback(
+    kind: str,
+    message: str,
+    email: str | None,
+    question: str | None = None,
+    answer: str | None = None,
+) -> None:
+    created_at = datetime.now(timezone.utc)
+    expires_at = created_at + FEEDBACK_RETENTION
+    with _connect() as connection:
+        connection.execute(
+            "DELETE FROM feedback_submissions WHERE expires_at <= ?",
+            (created_at.isoformat(),),
+        )
+        connection.execute(
+            """INSERT INTO feedback_submissions
+               (kind, message, email, question, answer, created_at, expires_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (
+                kind,
+                message,
+                email,
+                question,
+                answer,
+                created_at.isoformat(),
+                expires_at.isoformat(),
+            ),
+        )
+
+
+def purge_expired_feedback() -> int:
+    now = datetime.now(timezone.utc).isoformat()
+    with _connect() as connection:
+        cursor = connection.execute(
+            "DELETE FROM feedback_submissions WHERE expires_at <= ?", (now,)
+        )
+        return cursor.rowcount
+
+
+def list_feedback(limit: int = 50, offset: int = 0) -> tuple[list[dict], int]:
+    purge_expired_feedback()
+    with _connect() as connection:
+        total = connection.execute(
+            "SELECT COUNT(*) FROM feedback_submissions"
+        ).fetchone()[0]
+        rows = connection.execute(
+            """SELECT id, kind, message, email, question, answer, created_at, expires_at
+               FROM feedback_submissions ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?""",
+            (max(1, min(limit, 100)), max(0, offset)),
+        ).fetchall()
+    return [dict(row) for row in rows], total
 
 
 def append_exchange(session_id: str, question: str, answer: str) -> None:

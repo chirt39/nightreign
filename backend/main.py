@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import asyncio
+import hmac
 import json
+import logging
 import os
 import re
+from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Literal
 
 import httpx
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Header, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
@@ -24,6 +28,10 @@ API_BASE = rag_store.validate_api_base_url(
 MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-flash")
 RATE_LIMIT = max(1, int(os.getenv("AI_REQUESTS_PER_MINUTE", "5")))
 DAILY_AI_LIMIT = max(1, int(os.getenv("AI_REQUESTS_PER_DAY", "100")))
+FEEDBACK_ADMIN_PASSWORD = os.getenv("FEEDBACK_ADMIN_PASSWORD", "")
+FEEDBACK_ADMIN_PASSWORD_MIN_LENGTH = 32
+FEEDBACK_RATE_LIMIT = 5
+logger = logging.getLogger(__name__)
 ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
@@ -109,13 +117,37 @@ class RequestBodyLimitMiddleware:
         await self.app(scope, replay_receive, send)
 
 
-app = FastAPI(title="Nightreign Relic Advisor", docs_url=None, redoc_url=None)
+async def _feedback_expiration_worker() -> None:
+    while True:
+        try:
+            await run_in_threadpool(memory_store.purge_expired_feedback)
+        except Exception:
+            logger.exception("Unable to purge expired feedback submissions.")
+        await asyncio.sleep(3600)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    cleanup_task = asyncio.create_task(_feedback_expiration_worker())
+    try:
+        yield
+    finally:
+        cleanup_task.cancel()
+        try:
+            await cleanup_task
+        except asyncio.CancelledError:
+            pass
+
+
+app = FastAPI(
+    title="Nightreign Relic Advisor", docs_url=None, redoc_url=None, lifespan=lifespan
+)
 app.add_middleware(RequestBodyLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 ALLOWED_COLORS = {"Red", "Blue", "Yellow", "Green", "Any"}
@@ -705,6 +737,15 @@ class MemoryAction(StrictModel):
     session_id: str = Field(pattern=r"^[0-9a-fA-F-]{36}$")
 
 
+class FeedbackSubmission(StrictModel):
+    kind: Literal["answer", "suggestion"]
+    message: str = Field(min_length=2, max_length=4000)
+    email: str | None = Field(default=None, max_length=254)
+    include_context: bool = False
+    question: str | None = Field(default=None, max_length=400)
+    answer: str | None = Field(default=None, max_length=4000)
+
+
 @app.post("/api/ai/history")
 async def chat_history(request: Request) -> dict:
     # Parse manually so validation errors never echo the bearer session ID.
@@ -725,6 +766,73 @@ async def clear_memory(body: MemoryAction) -> dict:
     except Exception as exc:
         raise HTTPException(status_code=503, detail="暂时无法清除本机向量库中的对话记忆，请稍后重试。") from exc
     return {"status": "cleared"}
+
+
+def _require_feedback_admin(authorization: str | None) -> None:
+    if len(FEEDBACK_ADMIN_PASSWORD) < FEEDBACK_ADMIN_PASSWORD_MIN_LENGTH:
+        raise HTTPException(status_code=503, detail="反馈收件箱暂不可用。")
+    scheme, separator, token = (authorization or "").partition(" ")
+    if (
+        not separator
+        or scheme.casefold() != "bearer"
+        or not hmac.compare_digest(token, FEEDBACK_ADMIN_PASSWORD)
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="无权访问反馈收件箱。",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+async def _feedback_rate_limit(request: Request) -> None:
+    client = request.client.host if request.client else "unknown"
+    allowed = await run_in_threadpool(
+        memory_store.record_ai_request, f"feedback:{client}", FEEDBACK_RATE_LIMIT
+    )
+    if not allowed:
+        raise HTTPException(status_code=429, detail="反馈提交过于频繁，请稍后再试。")
+
+
+@app.post("/api/feedback")
+async def submit_feedback(body: FeedbackSubmission, request: Request) -> dict:
+    if len(FEEDBACK_ADMIN_PASSWORD) < FEEDBACK_ADMIN_PASSWORD_MIN_LENGTH:
+        raise HTTPException(status_code=503, detail="反馈功能暂不可用。")
+    await _feedback_rate_limit(request)
+
+    message = body.message.strip()
+    if len(message) < 2:
+        raise HTTPException(status_code=422, detail="反馈内容至少需要 2 个字符。")
+    email = (body.email or "").strip() or None
+    if email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
+        raise HTTPException(status_code=422, detail="邮箱格式无效。")
+
+    question = body.question.strip() if body.include_context and body.question else None
+    answer = body.answer.strip() if body.include_context and body.answer else None
+    if body.include_context and (not question or not answer):
+        raise HTTPException(status_code=422, detail="当前对话内容不可用，请取消勾选后重试。")
+
+    await run_in_threadpool(
+        memory_store.save_feedback,
+        body.kind,
+        message,
+        email,
+        question,
+        answer,
+    )
+    return {"status": "received"}
+
+
+@app.get("/api/admin/feedback")
+async def feedback_inbox(
+    response: Response,
+    authorization: str | None = Header(default=None),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> dict:
+    response.headers["Cache-Control"] = "no-store"
+    _require_feedback_admin(authorization)
+    items, total = await run_in_threadpool(memory_store.list_feedback, limit, offset)
+    return {"items": items, "total": total, "limit": limit, "offset": offset}
 
 
 @app.post("/api/ai/chat")

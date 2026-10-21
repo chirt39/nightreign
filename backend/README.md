@@ -70,6 +70,14 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 - 推荐方案必须引用本次清单中的遗物实例 ID，且通过后端和前端的类型、颜色、槽位合法性校验。用户点击“应用配装到装配预览”后才会改变浏览器内的装配预览。
 - 对话记录按浏览器会话标识保存；后端不写入用户的存档或流派规则。DeepSeek API 使用量会按 DeepSeek 账户当前价格计费。
 
+## 用户反馈收件箱
+
+- 首页每条助手回答提供“回答有错？向窝反馈”，标题栏提供“向我提建议”。邮箱可留空；只有用户主动勾选“附上当前这一轮的问题与回答”时，浏览器才把这两个字段附在本次反馈中，不会发送整段历史。
+- 提交接口为 `POST /api/feedback`；管理员收件箱接口为 `GET /api/admin/feedback`，使用 `Authorization: Bearer <口令>` 鉴权。管理员页面是前端静态地址 `/admin-feedback.html`，口令只保留在页面内存，不写 URL 或浏览器存储。
+- 设置仅供后端使用的 `FEEDBACK_ADMIN_PASSWORD`，至少 32 个字符。可用 `python -c "import secrets; print(secrets.token_urlsafe(32))"` 生成随机口令，并只填写到本机 `.env` 或后端私密环境变量，不能提交到仓库或放入 `public/`。未配置或长度不足时，反馈提交和收件箱均返回服务不可用。
+- 反馈和可选邮箱/问答保存在 `AGENT_MEMORY_DB` 的 SQLite 文件中，90 天后从活动数据库删除；服务运行时每小时清理一次，启动时也会清理过期项。将 `AGENT_MEMORY_DB` 放在权限受控的持久化磁盘上；停止服务期间到期的数据会在服务重新启动后清理。若平台另有磁盘快照或数据库备份，需为备份单独设置不超过 90 天的保留期。每个客户端每分钟最多提交 5 条。
+- 若前端与 API 跨源部署，`FRONTEND_ORIGINS` 必须包含前端准确来源；CORS 已允许管理员使用的 `Authorization` 请求头。
+
 ## 容器部署
 
 项目提供 `backend/Dockerfile`，可部署到支持 Docker 的 Python 服务平台。构建上下文使用项目根目录：
@@ -78,7 +86,7 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 docker build -t nightreign-ai -f backend/Dockerfile .
 ```
 
-未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL` 和 `FRONTEND_ORIGINS`，并在服务端运行一次索引命令。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
+未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
 
 API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件或前端构建产物。
 
@@ -88,7 +96,7 @@ API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件�
 
 1. 将后端代码、`backend/knowledge_base/` 和 `public/` 中的资料文件提交到 GitHub。不要提交 `.env` 或存档文件。
 2. 在 Render 新建 **Web Service**，连接本项目 GitHub 仓库，选择 **Docker**，仓库根目录作为构建上下文，Dockerfile 路径设为 `backend/Dockerfile`。
-3. 为 Chroma 和对话 SQLite 数据库挂载持久化磁盘。在服务的私密环境变量中设置 `CHROMA_PATH`、`AGENT_MEMORY_DB`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL` 和 `FRONTEND_ORIGINS`。后者填 Sites 网站的完整 HTTPS 来源，不含末尾斜杠，例如 `https://nightreign-relic-atlas.shrewdsky2.chatgpt.site`。健康检查路径设为 `/api/health`。首次部署后运行 `python -m backend.index_knowledge`，确认 `/api/knowledge/status` 返回 `ok`。
+3. 为 Chroma 和 `AGENT_MEMORY_DB` SQLite 数据库挂载持久化磁盘。在服务的私密环境变量中设置 `CHROMA_PATH`、`AGENT_MEMORY_DB`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和至少 32 字符的 `FEEDBACK_ADMIN_PASSWORD`。后者只配置在后端私密变量，不能放入静态前端。`FRONTEND_ORIGINS` 填 Sites 网站的完整 HTTPS 来源，不含末尾斜杠，例如 `https://nightreign-relic-atlas.shrewdsky2.chatgpt.site`。健康检查路径设为 `/api/health`。首次部署后运行 `python -m backend.index_knowledge`，确认 `/api/knowledge/status` 返回 `ok`。
 4. 部署后确认 `https://<你的 Render 域名>/api/health` 返回正常结果，将该 HTTPS 根地址写入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，再构建并发布 Sites 前端，并将同一批改动同步到 GitHub。
 
 公开访问前还应在 DeepSeek 账户侧设置余额或预算提醒。应用层按请求次数封顶，不能精确限定人民币花费。

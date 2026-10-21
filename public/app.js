@@ -736,20 +736,43 @@ $('#rule-profile-delete').addEventListener('click',()=>{if(!state.activeRuleProf
 let pendingAgentPlan=null;
 const agentHistory=[];
 let agentClarificationContext=[];
+let agentCurrentFeedbackContext=null;
+let feedbackDialogContext=null;
+let feedbackDialogKind='suggestion';
 const agentSessionId=(()=>{const key='nightreign-agent-session-v1';let value;try{value=localStorage.getItem(key);if(!/^[0-9a-f-]{36}$/i.test(value||'')){value=crypto.randomUUID();localStorage.setItem(key,value)}}catch{value=crypto.randomUUID()}return value})();
 function setAgentStatus(message,error=false){const status=$('#agent-status');status.textContent=message;status.classList.toggle('error',error)}
-function appendAgentMessage(role,text){
-  const log=$('#agent-chat-log'),entry=document.createElement('p');entry.className=`agent-message ${role}`;
+function appendAgentMessage(role,text,feedbackContext=null){
+  const log=$('#agent-chat-log'),entry=document.createElement('div'),message=document.createElement('p');log.querySelector('.agent-empty')?.remove();entry.className=`agent-entry ${role}`;message.className=`agent-message ${role}`;
   const pattern=/\[([^\]]+)\]\(#effects\)/g;let last=0,match;
-  while((match=pattern.exec(String(text)))){entry.append(document.createTextNode(String(text).slice(last,match.index)));const link=document.createElement('a');link.href='#effects';link.dataset.view='effects';link.textContent=match[1];entry.append(link);last=pattern.lastIndex}
-  entry.append(document.createTextNode(String(text).slice(last)));log.append(entry);log.scrollTop=log.scrollHeight;
+  while((match=pattern.exec(String(text)))){message.append(document.createTextNode(String(text).slice(last,match.index)));const link=document.createElement('a');link.href='#effects';link.dataset.view='effects';link.textContent=match[1];message.append(link);last=pattern.lastIndex}
+  message.append(document.createTextNode(String(text).slice(last)));entry.append(message);
+  if(role==='assistant'&&feedbackContext?.question&&feedbackContext?.answer){const button=document.createElement('button');button.className='agent-feedback-trigger';button.type='button';button.textContent='回答有错？向窝反馈';button.addEventListener('click',()=>openFeedbackDialog('answer',feedbackContext));entry.append(button)}
+  log.append(entry);log.scrollTop=log.scrollHeight;
 }
 async function restoreAgentHistory(){
-  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){appendAgentMessage(message.role,message.content);agentHistory.push(message)}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
+  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else{if(context)agentCurrentFeedbackContext=context;previousQuestion=''}}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
 }
 restoreAgentHistory();
 $('#agent-question').addEventListener('input',()=>{$('#agent-question-count').textContent=`${Array.from($('#agent-question').value).length} / 400 字`});
 function requestJson(url,body){return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');if(response.status===404)throw new Error('找不到 AI 接口，请更新并重启本地 FastAPI 服务。');throw new Error(`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`)}const result=await response.json();if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');return result})}
+function openFeedbackDialog(kind,context=null){
+  const dialog=$('#feedback-dialog'),form=$('#feedback-form');if(!dialog?.showModal){setAgentStatus('当前浏览器暂不支持打开反馈表单。',true);return}
+  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();$('#feedback-status').textContent='';$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=false;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
+  const option=$('#feedback-context-option'),preview=$('#feedback-context-preview');option.hidden=!context;preview.hidden=true;
+  if(context){$('#feedback-question-preview').textContent=context.question;$('#feedback-answer-preview').textContent=context.answer}
+  dialog.showModal();$('#feedback-message').focus();
+}
+$('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
+$('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});
+$('#feedback-cancel').addEventListener('click',()=>$('#feedback-dialog').close());
+$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=false;$('#feedback-cancel').textContent='关闭'});
+$('#feedback-form').addEventListener('submit',async event=>{
+  event.preventDefault();if(!event.currentTarget.reportValidity())return;
+  const submit=$('#feedback-submit'),includeContext=Boolean(feedbackDialogContext&&$('#feedback-include-context').checked),payload={kind:feedbackDialogKind,message:$('#feedback-message').value.trim(),email:$('#feedback-email').value.trim()||null,include_context:includeContext};
+  if(includeContext){payload.question=feedbackDialogContext.question;payload.answer=feedbackDialogContext.answer}
+  submit.disabled=true;$('#feedback-status').textContent='正在提交…';
+  try{const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!response.ok)throw new Error();await response.json();$('#feedback-status').textContent='已收到反馈，谢谢你。';submit.hidden=true;$('#feedback-cancel').textContent='完成'}catch{$('#feedback-status').textContent='暂时无法提交，请稍后重试。';submit.disabled=false}
+});
 function agentInventory(){return (state.save?.relics||[]).map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}))}
 function describeAgentPlan(plan,inventory){
   const names=new Map(inventory.map(relic=>[String(relic.id),relic.name])),sections=[['normal','普通遗物'],['deep','深夜遗物']].filter(([group])=>plan[group]?.length),result=$('#agent-build-result');
@@ -773,9 +796,9 @@ $('#agent-chat-form').addEventListener('submit',async event=>{
   try{
     setAgentStatus('正在判断问题类型并查阅相关资料…');const reply=await requestJson('/api/ai/chat',{session_id:agentSessionId,question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)});
     if(reply.intent==='build'){
-      const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);appendAgentMessage('assistant',plan.summary);agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
+      const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);agentCurrentFeedbackContext={question,answer:plan.summary};appendAgentMessage('assistant',plan.summary,agentCurrentFeedbackContext);agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
     }else{
-      const answer=reply.answer||'这个问题还不够明确，请补充一下你指的角色、敌人或配装目标。';appendAgentMessage('assistant',answer);agentHistory.push({role:'user',content:question},{role:'assistant',content:answer});if(reply.intent==='clarify')agentClarificationContext.push(question);else agentClarificationContext=[];
+      const answer=reply.answer||'这个问题还不够明确，请补充一下你指的角色、敌人或配装目标。';agentCurrentFeedbackContext={question,answer};appendAgentMessage('assistant',answer,agentCurrentFeedbackContext);agentHistory.push({role:'user',content:question},{role:'assistant',content:answer});if(reply.intent==='clarify')agentClarificationContext.push(question);else agentClarificationContext=[];
       setAgentStatus(reply.intent==='clarify'?'需要你补充信息后，我再继续。':'回答已整理完成。');
     }
   }catch(error){appendAgentMessage('assistant',`暂时无法完成：${error.message||'请检查 FastAPI 服务是否启动。'}`);setAgentStatus(error.message||'AI 请求失败，请稍后重试。',true)}
