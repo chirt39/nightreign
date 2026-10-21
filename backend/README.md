@@ -95,7 +95,8 @@ done
 - `docs/UBUNTU_STATIC_DEPLOY.md` 中的静态 Nginx 示例只提供 HTTP，不会自动获得 HTTPS；它可以继续用于公网只读浏览，但要经 HTTPS 托管前端并配置好 HTTPS API 才能提交反馈或管理收件箱。
 - 后端依据 ASGI `request.url.scheme` 判断 HTTPS，不直接读取应用层可伪造的 `X-Forwarded-Proto`。TLS 在受信任反向代理终止时，需按前述 `FORWARDED_ALLOW_IPS` 仅信任实际代理源地址，让 Uvicorn 生成正确的请求 scheme；不得使用 `*`。若代理未被列入 Uvicorn 信任范围，HTTPS 外部访问会被视为 HTTP 并遭拒绝，须先修正代理信任配置。
 - 设置仅供后端使用的 `FEEDBACK_ADMIN_PASSWORD`，至少 32 个字符。可用 `python -c "import secrets; print(secrets.token_urlsafe(32))"` 生成随机口令，并只填写到本机 `.env` 或后端私密环境变量，不能提交到仓库或放入 `public/`。未配置或长度不足时，反馈提交和收件箱均返回服务不可用。
-- 反馈和可选邮箱/问答保存在 `AGENT_MEMORY_DB` 的 SQLite 文件中，90 天后从活动数据库删除；服务运行时每小时清理一次，启动时也会清理过期项。将 `AGENT_MEMORY_DB` 放在权限受控的持久化磁盘上；停止服务期间到期的数据会在服务重新启动后清理。若平台另有磁盘快照或数据库备份，需为备份单独设置不超过 90 天的保留期。每个客户端每分钟最多提交 5 条。
+- 每个客户端每分钟最多提交 5 条反馈；此外，全站默认每天最多接收 250 条，由 `FEEDBACK_REQUESTS_PER_DAY` 配置。全站计数在 UTC 每日 00:00 重置，使用与 AI 每日调用量分开的 SQLite 计数表，跨 worker 原子共享；非法或非正整数配置会记录警告并回退到 250。达到上限时接口返回 HTTP 429，不保存该条反馈。
+- 反馈和可选邮箱/问答保存在 `AGENT_MEMORY_DB` 的 SQLite 文件中，90 天后从活动数据库删除；服务运行时每小时清理一次，启动时也会清理过期项。将 `AGENT_MEMORY_DB` 放在权限受控的持久化磁盘上；停止服务期间到期的数据会在服务重新启动后清理。若平台另有磁盘快照或数据库备份，需为备份单独设置不超过 90 天的保留期。
 - 若前端与 API 跨源部署，`FRONTEND_ORIGINS` 必须包含前端准确来源；CORS 已允许管理员使用的 `Authorization` 请求头。
 
 ## 容器部署
@@ -106,7 +107,7 @@ done
 docker build -t nightreign-ai -f backend/Dockerfile .
 ```
 
-未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。只有确认反向代理的源地址/CIDR 后才设置可选变量 `FORWARDED_ALLOW_IPS`。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
+未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`FEEDBACK_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。`FEEDBACK_REQUESTS_PER_DAY` 可选，默认 250 条/UTC 日。只有确认反向代理的源地址/CIDR 后才设置可选变量 `FORWARDED_ALLOW_IPS`。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
 
 API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件或前端构建产物。
 

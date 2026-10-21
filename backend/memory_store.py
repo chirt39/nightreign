@@ -89,6 +89,10 @@ def _connect() -> Iterator[sqlite3.Connection]:
         day TEXT PRIMARY KEY,
         request_count INTEGER NOT NULL
     )""")
+    connection.execute("""CREATE TABLE IF NOT EXISTS feedback_daily_usage (
+        day TEXT PRIMARY KEY,
+        request_count INTEGER NOT NULL
+    )""")
     connection.execute("CREATE TABLE IF NOT EXISTS pending_memory_deletions (id TEXT PRIMARY KEY)")
     connection.execute("""CREATE TABLE IF NOT EXISTS feedback_submissions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -130,10 +134,24 @@ def save_feedback(
     email: str | None,
     question: str | None = None,
     answer: str | None = None,
-) -> None:
+    daily_limit: int = 250,
+) -> bool:
     created_at = datetime.now(timezone.utc)
     expires_at = created_at + FEEDBACK_RETENTION
     with _connect() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        day = created_at.date().isoformat()
+        row = connection.execute(
+            "SELECT request_count FROM feedback_daily_usage WHERE day = ?", (day,)
+        ).fetchone()
+        if row and row[0] >= daily_limit:
+            return False
+        connection.execute(
+            "INSERT INTO feedback_daily_usage(day, request_count) VALUES (?, 1) "
+            "ON CONFLICT(day) DO UPDATE SET request_count = request_count + 1",
+            (day,),
+        )
+        connection.execute("DELETE FROM feedback_daily_usage WHERE day < ?", (day,))
         connection.execute(
             "DELETE FROM feedback_submissions WHERE expires_at <= ?",
             (created_at.isoformat(),),
@@ -152,6 +170,7 @@ def save_feedback(
                 expires_at.isoformat(),
             ),
         )
+    return True
 
 
 def purge_expired_feedback() -> int:
