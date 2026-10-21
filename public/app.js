@@ -751,7 +751,24 @@ try{
 }catch{}
 const feedbackLocalDevelopmentPair=feedbackLocalPage&&feedbackLocalApi&&['http:','https:'].includes(window.location.protocol)&&['http:','https:'].includes(feedbackApiProtocol);
 const feedbackTransportSecure=(window.location.protocol==='https:'&&feedbackApiSecure)||feedbackLocalDevelopmentPair;
-const agentSessionId=(()=>{const key='nightreign-agent-session-v1';let value;try{value=localStorage.getItem(key);if(!/^[0-9a-f-]{36}$/i.test(value||'')){value=crypto.randomUUID();localStorage.setItem(key,value)}}catch{value=crypto.randomUUID()}return value})();
+function createSecureAgentUuid(){
+  const cryptoApi=globalThis.crypto;
+  if(typeof cryptoApi?.randomUUID==='function'){
+    try{const value=cryptoApi.randomUUID();if(/^[0-9a-f-]{36}$/i.test(value))return value}catch{}
+  }
+  if(typeof cryptoApi?.getRandomValues!=='function')return null;
+  try{
+    const bytes=cryptoApi.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&0x0f)|0x40;bytes[8]=(bytes[8]&0x3f)|0x80;
+    const hex=Array.from(bytes,byte=>byte.toString(16).padStart(2,'0')).join('');
+    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+  }catch{return null}
+}
+const agentSessionId=(()=>{
+  const generated=createSecureAgentUuid();if(!generated)return null;
+  const key='nightreign-agent-session-v1';
+  try{const stored=localStorage.getItem(key);if(/^[0-9a-f-]{36}$/i.test(stored||''))return stored;localStorage.setItem(key,generated)}catch{}
+  return generated;
+})();
 function setAgentStatus(message,error=false){const status=$('#agent-status');status.textContent=message;status.classList.toggle('error',error)}
 function appendAgentMessage(role,text,feedbackContext=null){
   const log=$('#agent-chat-log'),entry=document.createElement('div'),message=document.createElement('p');log.querySelector('.agent-empty')?.remove();entry.className=`agent-entry ${role}`;message.className=`agent-message ${role}`;
@@ -762,6 +779,7 @@ function appendAgentMessage(role,text,feedbackContext=null){
   log.append(entry);log.scrollTop=log.scrollHeight;
 }
 async function restoreAgentHistory(){
+  if(!agentSessionId){setAgentStatus('当前环境无法安全生成会话 ID；本页对话仍可继续，但不会读取或保存后端历史记忆。');return}
   try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else{if(context)agentCurrentFeedbackContext=context;previousQuestion=''}}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
 }
 restoreAgentHistory();
@@ -799,14 +817,14 @@ async function requestAgentBuild(question,context){
   const vessel=state.vessels.characters?.[character]?.vessels?.[key]||(state.vessels.universalVessels||[]).find(item=>item.key===key);if(!vessel)throw new Error('所选角色供具信息不可用，请重新选择。');
   const slots=[...(vessel.normalSlots||[]).map((color,index)=>({group:'normal',index,color})),...(combined?(vessel.deepSlots||[]).map((color,index)=>({group:'deep',index,color})):[])];
   const ruleEffects=Object.entries(state.effects?.effects||{}),rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([effectId,entry])=>entry.key===rule.key&&isOutOfGameRelicEffect({...entry,id:effectId}))||[];return {effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope)}});
-  const inventory=agentInventory(),body={session_id:agentSessionId,character:characterZh[character]||character,character_key:character,vessel:vesselName(key,character),vessel_key:key,mode,question,slots,rules,inventory};
+  const inventory=agentInventory(),body={character:characterZh[character]||character,character_key:character,vessel:vesselName(key,character),vessel_key:key,mode,question,slots,rules,inventory};if(agentSessionId)body.session_id=agentSessionId;
   const result=await requestJson('/api/ai/recommend',body);pendingAgentPlan={plan:result,inventory,character,key,mode};describeAgentPlan(result,inventory);setAgentStatus('配装建议已生成，请检查遗物和理由，再选择是否应用。');return result;
 }
 $('#agent-chat-form').addEventListener('submit',async event=>{
   event.preventDefault();const question=$('#agent-question').value.trim();if(!question)return;
   const button=$('#agent-send');pendingAgentPlan=null;$('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;appendAgentMessage('user',question);$('#agent-question').value='';$('#agent-question-count').textContent='0 / 400 字';button.disabled=true;
   try{
-    setAgentStatus('正在判断问题类型并查阅相关资料…');const reply=await requestJson('/api/ai/chat',{session_id:agentSessionId,question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)});
+    setAgentStatus('正在判断问题类型并查阅相关资料…');const chatBody={question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)};if(agentSessionId)chatBody.session_id=agentSessionId;const reply=await requestJson('/api/ai/chat',chatBody);
     if(reply.intent==='build'){
       const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);agentCurrentFeedbackContext={question,answer:plan.summary};appendAgentMessage('assistant',plan.summary,agentCurrentFeedbackContext);agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
     }else{
