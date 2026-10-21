@@ -521,10 +521,10 @@ function renderLoadoutSummary(){
   const detailRoot=$('#loadout-effects'),validDetails=details.filter(item=>item.relic);detailRoot.dataset.count=String(validDetails.length);
   detailRoot.innerHTML=validDetails.length?validDetails.map(({group,index,relic,active})=>`<section class="game-relic-detail ${active?'active':''}" data-detail-group="${group}" data-detail-slot="${index}"><header>${relicImage(relic)}<div><small>${group==='normal'?'普通':'深夜'} · ${esc(colorZh[relic.itemColor]||relic.itemColor)}色 · 第 ${index+1} 槽</small><strong>${esc(relicName(relic))}</strong></div></header><div class="game-effect-list">${renderEffectRows(relic)}</div></section>`).join(''):'<div class="game-relic-empty">已装配的遗物详情会显示在这里。</div>';
   if(!state.selectedEffects.size){$('#loadout-score').textContent=`已装配 ${indices.length} / ${combined?6:3} 件 · 选择目标词条后显示匹配分`;return}
-  let score=0,matched=0,missing=0;
+  let score=0,matched=0,missing=0,excluded=0;
   const stacking=stackingData();
-  for(const rule of state.rules){const found=rule.scope==='any'?[...(instances.get(rule.key+'@@normal')||[]),...(instances.get(rule.key+'@@deep')||[])]:instances.get(rule.key+'@@'+rule.scope)||[];if(found.length){score+=rule.priority==='exclude'?-rule.weight*found.length:scoreRuleInstances(found,rule,stacking);matched++}else if(rule.priority==='required')missing++}
-  $('#loadout-score').textContent=`当前目标匹配分 ${score} · 命中 ${matched} 项${missing?' · 缺少 '+missing+' 项必选':''}`;
+  for(const rule of state.rules){const found=rule.scope==='any'?[...(instances.get(rule.key+'@@normal')||[]),...(instances.get(rule.key+'@@deep')||[])]:instances.get(rule.key+'@@'+rule.scope)||[];if(found.length){if(rule.priority==='exclude'){score-=rule.weight*found.length;excluded++}else{score+=scoreRuleInstances(found,rule,stacking);matched++}}else if(rule.priority==='required')missing++}
+  $('#loadout-score').textContent=`当前目标匹配分 ${score} · 命中 ${matched} 项${missing?' · 缺少 '+missing+' 项必选':''}${excluded?' · 触发 '+excluded+' 项排除，未满足配装条件':''}`;
 }
 function renderPool(){
   if(!state.save)return;
