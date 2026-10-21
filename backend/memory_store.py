@@ -20,6 +20,7 @@ DEFAULT_DB = Path(__file__).resolve().parent.parent / "local-data" / "agent_memo
 DB_PATH = Path(os.getenv("AGENT_MEMORY_DB", str(DEFAULT_DB)))
 COLLECTION = "nightreign_browser_memory"
 MAX_EXCHANGES = max(1, int(os.getenv("AGENT_MEMORY_MAX_EXCHANGES", "5")))
+AGENT_MEMORY_RETENTION_DAYS = max(1, int(os.getenv("AGENT_MEMORY_RETENTION_DAYS", "90")))
 FEEDBACK_RETENTION = timedelta(days=90)
 
 
@@ -79,6 +80,7 @@ def _connect() -> Iterator[sqlite3.Connection]:
         created_at TEXT NOT NULL
     )""")
     connection.execute("CREATE INDEX IF NOT EXISTS messages_by_session ON messages(session_id, id)")
+    connection.execute("CREATE INDEX IF NOT EXISTS messages_by_created_at ON messages(created_at, id)")
     connection.execute("""CREATE TABLE IF NOT EXISTS ai_rate_events (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         client TEXT NOT NULL,
@@ -251,6 +253,45 @@ def consume_daily_ai_request(limit: int) -> bool:
         )
         connection.execute("DELETE FROM ai_daily_usage WHERE day < ?", (day,))
     return True
+
+
+def purge_expired_memory() -> int:
+    """Delete expired SQLite exchanges and flush their queued Chroma vector IDs."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=AGENT_MEMORY_RETENTION_DAYS)).isoformat()
+    deleted_count = 0
+    batch_size = 500
+
+    while True:
+        with _connect() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            rows = connection.execute(
+                """SELECT id, session_id, role FROM messages
+                   WHERE created_at < ? ORDER BY created_at, id LIMIT ?""",
+                (cutoff, batch_size),
+            ).fetchall()
+            if not rows:
+                break
+
+            vector_ids = [
+                f"{row['session_id']}-{row['id']}"
+                for row in rows
+                if row["role"] == "assistant"
+            ]
+            if vector_ids:
+                connection.executemany(
+                    "INSERT OR IGNORE INTO pending_memory_deletions(id) VALUES (?)",
+                    [(item,) for item in vector_ids],
+                )
+            connection.executemany(
+                "DELETE FROM messages WHERE id = ?", [(row["id"],) for row in rows]
+            )
+            deleted_count += len(rows)
+
+        if len(rows) < batch_size:
+            break
+
+    _flush_pending_memory_deletions()
+    return deleted_count
 
 
 def _prune_session(session_id: str) -> None:

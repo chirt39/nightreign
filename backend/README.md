@@ -33,6 +33,8 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 
 每个浏览器在本地存储一个随机会话标识。FastAPI 将该会话的问答存入 SQLite，并在 Chroma 中建立语义记忆索引；默认只保留最近 5 轮完整问答（可用 `AGENT_MEMORY_MAX_EXCHANGES` 调整），更早的 SQLite 记录和对应 Chroma 记录会清理。提问时只检索仍保留的记忆。助手页面不提供手动清除按钮；原始存档和遗物库存不写入对话记忆。
 
+SQLite 问答还按 UTC `created_at` 保留 90 天，可用 `AGENT_MEMORY_RETENTION_DAYS` 配置。服务启动时立即清理，之后每小时再清理一次；本机已有的旧会话按原始创建时间计算，部署启用后若已超过期限就会清理。删除过期 assistant 问答时，向量 ID 会先写入 SQLite 待删队列，再与问答删除在同一事务提交；随后尝试删除 Chroma 向量。若 Chroma 不可用，待删 ID 会保留，worker 每小时重试。此清理只删除过期问答及其 assistant 向量，不删除会话外的限流/每日计数或其他表数据。
+
 ### SQLite 文件权限
 
 POSIX 系统上，每次打开数据库前都会将数据库文件及已存在的 `-wal`、`-shm`、`-journal` 文件收紧为 `0600`；新建数据库也以 `0600` 创建。SQLite Unix VFS 新建 WAL/SHM sidecar 时使用与主数据库相同的权限，因此会保持为 `0600`。仅当数据库父目录不存在时才以 `0700` 创建；已有目录（包括 `/tmp` 或共享目录）不会被 chmod。Windows 跳过 POSIX 权限处理，沿用 SQLite 原生行为。
@@ -107,7 +109,7 @@ done
 docker build -t nightreign-ai -f backend/Dockerfile .
 ```
 
-未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`FEEDBACK_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。`FEEDBACK_REQUESTS_PER_DAY` 可选，默认 250 条/UTC 日。只有确认反向代理的源地址/CIDR 后才设置可选变量 `FORWARDED_ALLOW_IPS`。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
+未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AGENT_MEMORY_RETENTION_DAYS`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`FEEDBACK_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。`AGENT_MEMORY_RETENTION_DAYS` 可选，默认 90 天；反馈每日上限 `FEEDBACK_REQUESTS_PER_DAY` 可选，默认 250 条/UTC 日。只有确认反向代理的源地址/CIDR 后才设置可选变量 `FORWARDED_ALLOW_IPS`。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
 
 API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件或前端构建产物。
 

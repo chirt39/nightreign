@@ -137,18 +137,22 @@ class RequestBodyLimitMiddleware:
         await self.app(scope, replay_receive, send)
 
 
-async def _feedback_expiration_worker() -> None:
+async def _data_retention_worker() -> None:
     while True:
         try:
             await run_in_threadpool(memory_store.purge_expired_feedback)
         except Exception:
             logger.exception("Unable to purge expired feedback submissions.")
+        try:
+            await run_in_threadpool(memory_store.purge_expired_memory)
+        except Exception:
+            logger.exception("Unable to purge expired conversation memory or flush vector deletions.")
         await asyncio.sleep(3600)
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    cleanup_task = asyncio.create_task(_feedback_expiration_worker())
+    cleanup_task = asyncio.create_task(_data_retention_worker())
     try:
         yield
     finally:
