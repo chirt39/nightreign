@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator
 
+from chromadb.errors import NotFoundError
+
 from backend import rag_store
 
 
@@ -157,10 +159,10 @@ def _flush_pending_memory_deletions() -> None:
     db = rag_store.chroma_client()
     try:
         collection = db.get_collection(name=COLLECTION)
-    except Exception:
-        collection = None
-    if collection is not None:
         collection.delete(ids=pending)
+    except NotFoundError:
+        # The collection is confirmed absent; there are no vectors to retry.
+        pass
     with _connect() as connection:
         connection.executemany(
             "DELETE FROM pending_memory_deletions WHERE id = ?", [(item,) for item in pending]
