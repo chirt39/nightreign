@@ -214,6 +214,11 @@
 .stat-card strong{display:block;margin:0;line-height:1;font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 @media(max-width:750px){.build-relic-pool{grid-template-columns:minmax(0,1fr)}.pool-effects{grid-template-columns:1fr}.pool-relic{min-height:96px;padding:9px}.pool-relic .relic-thumb{width:44px;height:44px;flex-basis:44px}}
 
+/* Keep the slot action and the remove action as separate native controls. */
+.loadout-slot-frame{position:relative;min-width:0}
+button.loadout-slot{width:100%;font:inherit;color:inherit;appearance:none;-webkit-appearance:none;cursor:pointer}
+.loadout-slot-frame>.slot-remove{position:absolute;top:4px;right:4px;z-index:3}
+
 /* Editable build rules: readable at desktop width and stacked on narrow screens. */
 .rule-tools{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px 0;border-top:1px solid #3c4b51;border-bottom:1px solid #3c4b51}
 .rule-tools strong{font:600 16px 'Noto Serif SC',serif;color:#ead19e}
