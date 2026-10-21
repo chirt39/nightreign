@@ -33,12 +33,24 @@ function setView(view, updateUrl = true, restoreScrollY = null) {
     if (changed) history.pushState({ ...history.state, view: nextView, scrollY: 0 }, '', `#${nextView}`);
     else history.replaceState({ ...history.state, view: nextView, scrollY: window.scrollY }, '', `#${nextView}`);
   }
-  sidebarOpen.value = false;
+  closeMobileNavigation(true);
   if (restoreScrollY !== null) {
     nextTick(() => window.scrollTo({ top: restoreScrollY, behavior: 'auto' }));
   } else if (changed || updateUrl) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+}
+
+function closeMobileNavigation(returnFocus = false) {
+  if (!sidebarOpen.value) return;
+  sidebarOpen.value = false;
+  if (returnFocus) nextTick(() => document.getElementById('mobile-menu')?.focus());
+}
+
+function handleGlobalKeydown(event) {
+  if (event.key !== 'Escape' || !sidebarOpen.value) return;
+  event.preventDefault();
+  closeMobileNavigation(true);
 }
 
 function handleShellClick(event) {
@@ -99,6 +111,7 @@ onMounted(async () => {
   window.addEventListener('nightreign:navigate', handleNavigation);
   window.addEventListener('hashchange', handleHashChange);
   window.addEventListener('popstate', handlePopState);
+  document.addEventListener('keydown', handleGlobalKeydown);
   scriptsReady.value = true;
 });
 
@@ -106,6 +119,7 @@ onUnmounted(() => {
   window.removeEventListener('nightreign:navigate', handleNavigation);
   window.removeEventListener('hashchange', handleHashChange);
   window.removeEventListener('popstate', handlePopState);
+  document.removeEventListener('keydown', handleGlobalKeydown);
 });
 </script>
 
@@ -115,7 +129,7 @@ onUnmounted(() => {
     <p>必要功能暂时无法启动，请刷新页面重试。</p>
   </main>
   <div v-else class="app-shell" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
-    <aside class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
+    <aside id="mobile-navigation" class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
         <img class="brand-image" src="/nightreign-banner.png" alt="ELDEN RING NIGHTREIGN" />
         <span class="brand-caption">渡夜图鉴</span>
@@ -136,7 +150,7 @@ onUnmounted(() => {
 
     <main class="main">
       <header class="topbar">
-        <button id="mobile-menu" class="icon-button" aria-label="打开导航">☰</button>
+        <button id="mobile-menu" class="icon-button" type="button" :aria-label="sidebarOpen ? '关闭导航' : '打开导航'" :aria-expanded="sidebarOpen" aria-controls="mobile-navigation">☰</button>
         <span class="breadcrumb">ELDEN RING NIGHTREIGN <span>/</span> <b>{{ labels[currentView] }}</b></span>
         <span class="topbar-right">非官方玩家工具 <i></i> 数据快照</span>
       </header>
