@@ -290,7 +290,7 @@ def purge_expired_memory() -> int:
         if len(rows) < batch_size:
             break
 
-    _flush_pending_memory_deletions()
+    _flush_all_pending_memory_deletions()
     return deleted_count
 
 
@@ -319,13 +319,13 @@ def _prune_session(session_id: str) -> None:
         pass
 
 
-def _flush_pending_memory_deletions() -> None:
+def _flush_pending_memory_deletions() -> int:
     with _connect() as connection:
         pending = [row[0] for row in connection.execute(
             "SELECT id FROM pending_memory_deletions LIMIT 500"
         ).fetchall()]
     if not pending:
-        return
+        return 0
     db = rag_store.chroma_client()
     try:
         collection = db.get_collection(name=COLLECTION)
@@ -337,6 +337,13 @@ def _flush_pending_memory_deletions() -> None:
         connection.executemany(
             "DELETE FROM pending_memory_deletions WHERE id = ?", [(item,) for item in pending]
         )
+    return len(pending)
+
+
+def _flush_all_pending_memory_deletions() -> None:
+    """Drain all queued vector IDs; failures propagate so the caller can retry later."""
+    while _flush_pending_memory_deletions() > 0:
+        pass
 
 
 def clear(session_id: str) -> None:
