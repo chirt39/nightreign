@@ -1,6 +1,9 @@
-/* Browser-local Nightreign save editing. This module only changes decrypted
-   copies in memory; export creates a new SL2 byte stream. */
+/* Browser-local Nightreign save editor. The write path stays disabled until
+   a supported game version and in-game round trip have been verified. */
 const EDITOR_EMPTY = 0xffffffff;
+// The fixed layout has not been validated against an authorized game save and
+// in-game round trip. Keep the write path closed until that evidence exists.
+const EDITOR_WRITE_ENABLED = false;
 const EDITOR_STATE_COUNT = 5120;
 const EDITOR_ENTRY_COUNT = 3065;
 const EDITOR_STATE_SIZE = {0:8,8:88,9:16,11:8,12:80};
@@ -82,6 +85,7 @@ function createSaveEditor(arrayBuffer) {
       return {effects:[0x10,0x14,0x18].map(x=>readUint32LE(data,offset+x)),curses:[0x38,0x3c,0x40].map(x=>readUint32LE(data,offset+x))};
     },
     setRelic(handle,effects,curses){
+      if(!EDITOR_WRITE_ENABLED)throw new Error('存档写回尚未完成格式兼容性与游戏内验收，当前仅支持只读解析');
       const offset=relicOffsets.get(handle>>>0);
       if(offset===undefined)throw new Error('这件遗物不在可编辑的物品状态区');
       if(effects.length!==3||curses.length!==3)throw new Error('遗物词条数量不符');
@@ -91,6 +95,7 @@ function createSaveEditor(arrayBuffer) {
       dirty.add(0);
     },
     setVessel(heroType,vesselId,handles){
+      if(!EDITOR_WRITE_ENABLED)throw new Error('存档写回尚未完成格式兼容性与游戏内验收，当前仅支持只读解析');
       const offset=layout.vesselOffsets.get(`${heroType}:${vesselId}`);
       if(offset===undefined)throw new Error('存档中没有这一角色的指定供具');
       if(handles.length!==6||new Set(handles.filter(Boolean)).size!==handles.filter(Boolean).length)throw new Error('装配中有重复遗物');
@@ -101,6 +106,7 @@ function createSaveEditor(arrayBuffer) {
     get hasChanges(){return dirty.size>0},
     originalBytes(){return raw.slice()},
     exportBytes(){
+      if(!EDITOR_WRITE_ENABLED)throw new Error('存档写回尚未完成格式兼容性与游戏内验收，禁止导出修改后的存档');
       if(!dirty.size)throw new Error('尚无暂存的存档修改');
       const output=raw.slice();
       for(const index of dirty){

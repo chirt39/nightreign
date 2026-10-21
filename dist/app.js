@@ -3,7 +3,7 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyMeta:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const state = {enemyData:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
 const relicColorClasses = Object.freeze({Red:'red',Blue:'blue',Yellow:'yellow',Green:'green',Any:'any'});
 const relicColorClass = (relic) => {const key=String(relic?.itemColor||'Any');return `color-${Object.hasOwn(relicColorClasses,key)?relicColorClasses[key]:'any'}`};
@@ -51,19 +51,46 @@ const bossRe=/boss|首领|夜王|夜之王|夜王者/i;
 const enemyCategoryLabels={'夜王':'夜王','夜晚Boss':'夜晚首领','强敌boss':'强敌首领','中boss':'中型首领','小boss':'小型首领','boss':'Boss','封印监牢':'封印监牢','古代封印监牢':'古代封印监牢','特殊':'特殊敌人'};
 const enemyFilterOptions=[['all','全部敌人'],['boss','全部首领'],['nightlord','夜王'],['nightboss','夜晚首领'],['fieldboss','野外首领'],['sealed','封印监牢'],['ancient','古代封印监牢'],['special','特殊敌人'],['otherboss','未细分首领'],['other','其他敌人']];
 const fieldBossCategories=new Set(['强敌boss','boss','小boss','中boss']);
+// Repository evidence: rows 31700020 and 31800020 share the explicit “山顶 遗迹Boss” tag.
+// Require a recognized location on the child row and inherit location only, never category.
+const enemyLocationOnlyParents=new Map([['白金之子弓手的狼','白金之子弓手']]);
 function enemyName(r){return String(r[0]||'未知敌人')}
-function isBoss(r){return bossRe.test(enemyName(r))}
+function isBoss(r){return !enemyLocationOnlyParents.has(normalizeName(enemyName(r)))&&bossRe.test(enemyName(r))}
 function enemyGroupName(r){return enemyName(r)}
 function buildEnemyMetadata(){
-  const map=new Map();
+  const map=new Map(),locations=new Set(),categories=new Set();
   for(const row of state.enemyData.scale?.rows||[]){
     const key=normalizeName(row[0]);if(!key)continue;
-    if(!map.has(key))map.set(key,{categories:new Set(),locations:new Set()});
-    const item=map.get(key);if(row[2])item.categories.add(String(row[2]));if(row[1])item.locations.add(String(row[1]));
+    if(!map.has(key))map.set(key,[]);
+    const category=String(row[2]||''),location=String(row[1]||'');
+    map.get(key).push({category,location});
+    if(category)categories.add(category);if(location)locations.add(location);
   }
-  state.enemyMeta=map;
+  state.enemyMeta=map;state.enemyMetaLocations=locations;state.enemyMetaCategories=categories;
 }
-function enemyMetaFor(row){return state.enemyMeta.get(normalizeName(enemyName(row)))||{categories:new Set(),locations:new Set()}}
+function enemyMetaFor(row){
+  const records=state.enemyMeta.get(normalizeName(enemyName(row)))||[];
+  const context=[...enemyName(row).matchAll(/\(([^)]*)\)|（([^）]*)）|\[([^\]]*)\]|【([^】]*)】/g)].map(match=>match.slice(1).find(Boolean)||'').join(' ').toLocaleLowerCase();
+  const parentName=enemyLocationOnlyParents.get(normalizeName(enemyName(row)));
+  if(parentName&&context){
+    const recognizedLocations=[...state.enemyMetaLocations].filter(value=>context.includes(value.toLocaleLowerCase()));
+    if(recognizedLocations.length){
+      const parentRecords=state.enemyMeta.get(normalizeName(parentName))||[];
+      const locations=new Set(parentRecords.filter(record=>recognizedLocations.includes(record.location)).map(record=>record.location).filter(Boolean));
+      return {categories:new Set(),locations};
+    }
+  }
+  if(context){
+    // Qualifiers come from the scale table's known locations/categories. Once recognized,
+    // an unmatched qualifier must stay unmatched instead of inheriting sibling encounters.
+    const recognizedLocations=[...state.enemyMetaLocations].filter(value=>context.includes(value.toLocaleLowerCase())).sort((a,b)=>b.length-a.length);
+    const recognizedCategories=[...state.enemyMetaCategories].filter(value=>context.includes(value.toLocaleLowerCase()));
+    if(recognizedLocations.length)return enemyMetaFromRecords(records.filter(record=>recognizedLocations.includes(record.location)));
+    if(recognizedCategories.length)return enemyMetaFromRecords(records.filter(record=>recognizedCategories.includes(record.category)));
+  }
+  return enemyMetaFromRecords(records);
+}
+function enemyMetaFromRecords(records){return {categories:new Set(records.map(record=>record.category).filter(Boolean)),locations:new Set(records.map(record=>record.location).filter(Boolean))}}
 function matchesEnemyCategory(row,filter){
   if(filter==='all')return true;
   const categories=enemyMetaFor(row).categories;
@@ -97,6 +124,8 @@ function restoreEnemyUrlState(){
   $('#enemy-area').value=[...$('#enemy-area').options].some(option=>option.value===params.get('enemyArea'))?params.get('enemyArea'):'all';
   state.enemyPage=Math.max(1,Number(params.get('enemyPage'))||1);
   state.enemyUrlId=params.get('enemyId')||'';
+  const rawRecordIndex=params.get('enemyRecordIndex'),recordIndex=rawRecordIndex===null?'':Number(rawRecordIndex);
+  state.enemyUrlIndex=rawRecordIndex!==null&&Number.isSafeInteger(recordIndex)&&recordIndex>=0?recordIndex:null;
 }
 function syncEnemyUrl(){
   const url=new URL(location.href),params=url.searchParams;
@@ -105,8 +134,17 @@ function syncEnemyUrl(){
   type==='all'?params.delete('enemyType'):params.set('enemyType',type);
   area==='all'?params.delete('enemyArea'):params.set('enemyArea',area);
   state.enemyPage>1?params.set('enemyPage',String(state.enemyPage)):params.delete('enemyPage');
-  state.enemySelected?params.set('enemyId',String(state.enemySelected[1])):params.delete('enemyId');
+  const selectedIndex=state.enemySelected?state.enemyData.rows.indexOf(state.enemySelected):-1;
+  if(selectedIndex>=0){params.set('enemyId',String(state.enemySelected[1]));params.set('enemyRecordIndex',String(selectedIndex))}
+  else{params.delete('enemyId');params.delete('enemyRecordIndex')}
   url.search=params.toString();history.replaceState(null,'',url);
+}
+function resolveEnemyUrlMatch(filteredRows,allRows,recordIndex,enemyId){
+  if(Number.isSafeInteger(recordIndex)&&recordIndex>=0){
+    const indexedRow=allRows[recordIndex];
+    if(indexedRow&&(!enemyId||String(indexedRow[1])===enemyId))return filteredRows.find(({index})=>index===recordIndex)||null;
+  }
+  return enemyId?filteredRows.find(({row})=>String(row[1])===enemyId)||null:null;
 }
 function filterEnemies(resetPage=true){
   if(!state.enemyData)return;
@@ -116,7 +154,7 @@ function filterEnemies(resetPage=true){
   const groups=new Map();
   rows.forEach(item=>{const name=enemyGroupName(item.row);if(!groups.has(name))groups.set(name,{name,rows:[]});groups.get(name).rows.push(item)});
   state.enemyGroups=[...groups.values()];
-  if(state.enemyUrlId){const match=rows.find(({row})=>String(row[1])===state.enemyUrlId);if(match)state.enemySelected=match.row;state.enemyUrlId=''}
+  if(state.enemyUrlId||state.enemyUrlIndex!==null){const match=resolveEnemyUrlMatch(rows,state.enemyData.rows,state.enemyUrlIndex,state.enemyUrlId);if(match)state.enemySelected=match.row;state.enemyUrlId='';state.enemyUrlIndex=null}
   if(state.enemySelected&&!rows.some(({row})=>row===state.enemySelected))state.enemySelected=null;
   if(resetPage)state.enemyPage=1;renderEnemies();renderEnemyDetail(state.enemySelected);syncEnemyUrl();
 }
@@ -136,10 +174,7 @@ function renderEnemies(){
 }
 function normalizeName(s){return String(s||'').replace(/[「」『』“”‘’\s]/g,'').replace(/\([^)]*\)|（[^）]*）|\[[^\]]*\]|【[^】]*】/g,'').toLowerCase()}
 function locationFor(row){
-  const n=normalizeName(row[0]); if(!n)return [];
-  const scale=state.enemyData.scale?.rows||[];
-  const found=scale.filter(r=>{const x=normalizeName(r[0]);return x===n || (n.length>5&&x.length>5&&(x.includes(n)||n.includes(x)))}).map(r=>r[1]).filter(Boolean);
-  return [...new Set(found)].slice(0,8);
+  return [...enemyMetaFor(row).locations].slice(0,8);
 }
 // 敌人表的伤害列存的是减伤百分比；图鉴使用玩家实际造成伤害的倍率。
 function enemyDamageMultiplier(value){
@@ -353,6 +388,7 @@ async function readSave(file){
   if(!state.items||!state.effects){setSaveStatus('资料尚未载入，请稍后再试。',true);return}
   try{
     setSaveStatus(`正在本地解析 ${file.name}…`);
+    await validateSaveFileHeader(file);
     const buffer=await file.arrayBuffer();
     const parsed=parseSaveFile(buffer,state.items,state.effects);
     try{state.saveEditor=createSaveEditor(buffer);state.saveFileName=file.name}catch(editError){state.saveEditor=null;state.saveFileName=null;console.info('此存档暂不支持编辑：',editError.message)}
@@ -360,7 +396,7 @@ async function readSave(file){
     showSave(parsed);
     try{sessionStorage.setItem('nightreign-parsed-save-v2',JSON.stringify(parsed))}catch(_){/* 存储不可用时仍保留本页数据 */}
     state.equipped={normal:[null,null,null],deep:[null,null,null]};state.selectedRelicIndex=null;renderBuildWorkspace();
-    setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改，也未发送到服务器。${state.saveEditor?'可在下方编辑并导出副本。':'此存档版式暂不支持编辑。'}`);
+    setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改，也未发送到服务器。${state.saveEditor?'当前为只读模式；存档写回尚未验收。':'此存档版式暂不支持编辑。'}`);
   }catch(err){setSaveStatus('无法解析此存档：'+(err.message||String(err)),true)}
 }
 function showSave(parsed){
@@ -441,6 +477,8 @@ function renderVesselPicker(){
 }
 function closePickers(){for(const name of ['character','vessel']){$('#'+name+'-menu').hidden=true;$('#'+name+'-trigger').setAttribute('aria-expanded','false')}}
 for(const name of ['character','vessel']){
+  const picker=$('#'+name+'-trigger').closest('.visual-picker');
+  picker.addEventListener('focusout',e=>{if(!picker.contains(e.relatedTarget))closePickers()});
   $('#'+name+'-trigger').addEventListener('click',()=>{const menu=$('#'+name+'-menu'),opening=menu.hidden;closePickers();menu.hidden=!opening;$('#'+name+'-trigger').setAttribute('aria-expanded',String(opening));if(opening)menu.querySelector('[aria-selected="true"]')?.scrollIntoView({block:'nearest'})});
   $('#'+name+'-menu').addEventListener('click',e=>{const option=e.target.closest('button[data-'+name+']');if(!option)return;$('#'+name+'-select').value=option.dataset[name];$('#'+name+'-select').dispatchEvent(new Event('change'));closePickers();$('#'+name+'-trigger').focus()});
   $('#'+name+'-trigger').addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const menu=$('#'+name+'-menu');menu.hidden=false;$('#'+name+'-trigger').setAttribute('aria-expanded','true');const options=[...menu.querySelectorAll('button')],selected=options.findIndex(x=>x.getAttribute('aria-selected')==='true');options[(selected+(e.key==='ArrowDown'?1:options.length-1))%options.length]?.focus()}else if(e.key==='Escape')closePickers()});
@@ -487,20 +525,21 @@ function renderBuildWorkspace(){
   const vessel=currentVessel();if(!vessel)return;
   const combined=$('#build-mode').value==='combined';
   renderVesselPicker();
-  $('#loadout-slots').innerHTML=['normal',...(combined?['deep']:[])].map(group=>`<div class="slot-group"><h3>${group==='normal'?'普通遗物':'深夜遗物'}</h3><div class="slot-row">${(vessel[group==='deep'?'deepSlots':'normalSlots']||[]).map((color,i)=>{const index=state.equipped[group][i],r=index===null?null:state.save?.relics?.[index],active=state.slotFilterActive&&state.activeSlot.group===group&&state.activeSlot.index===i;return `<div class="loadout-slot color-${esc(color.toLowerCase())} ${active?'active':''}" data-group="${group}" data-slot="${i}" ${r?'draggable="true"':''} tabindex="0" role="button" aria-label="${group==='normal'?'普通':'深夜'}第 ${i+1} 槽，${esc(colorZh[color]||color)}色${r?'，已装配'+esc(relicName(r)):''}"><span class="slot-color">${esc(colorZh[color]||color)} · ${i+1}</span>${r?`<div class="slot-relic">${relicImage(r)}</div><button type="button" class="slot-remove" aria-label="卸下${esc(relicName(r))}">×</button>`:'<span class="slot-placeholder">＋</span>'}</div>`}).join('')}</div></div>`).join('');
+  $('#loadout-slots').innerHTML=['normal',...(combined?['deep']:[])].map(group=>`<div class="slot-group"><h3>${group==='normal'?'普通遗物':'深夜遗物'}</h3><div class="slot-row">${(vessel[group==='deep'?'deepSlots':'normalSlots']||[]).map((color,i)=>{const index=state.equipped[group][i],r=index===null?null:state.save?.relics?.[index],active=state.slotFilterActive&&state.activeSlot.group===group&&state.activeSlot.index===i,slotLabel=`${group==='normal'?'普通':'深夜'}第 ${i+1} 槽，${colorZh[color]||color}色`;return `<div class="loadout-slot-frame"><button type="button" class="loadout-slot color-${esc(color.toLowerCase())} ${active?'active':''}" data-group="${group}" data-slot="${i}" ${r?'draggable="true"':''} aria-label="选择${slotLabel}${r?'，已装配'+esc(relicName(r)):''}"><span class="slot-color">${esc(colorZh[color]||color)} · ${i+1}</span>${r?`<span class="slot-relic">${relicImage(r)}</span>`:'<span class="slot-placeholder">＋</span>'}</button>${r?`<button type="button" class="slot-remove" data-group="${group}" data-slot="${i}" aria-label="卸下${esc(relicName(r))}">×</button>`:''}</div>`}).join('')}</div></div>`).join('');
   renderLoadoutSummary();renderPool();
 }
 function renderLoadoutSummary(){
   const combined=$('#build-mode').value==='combined',indices=[...state.equipped.normal,...(combined?state.equipped.deep:[])].filter(i=>i!==null);
-  const counts=new Map();for(const group of ['normal',...(combined?['deep']:[])])for(const index of state.equipped[group])if(index!==null)for(const e of effectGroups(state.save?.relics?.[index]||{})){const key=e.key+'@@'+group;counts.set(key,(counts.get(key)||0)+1)}
+  const instances=new Map();for(const group of ['normal',...(combined?['deep']:[])])for(const index of state.equipped[group])if(index!==null)for(const effect of effectGroups(state.save?.relics?.[index]||{})){const key=effect.key+'@@'+group;if(!instances.has(key))instances.set(key,[]);instances.get(key).push({effect,group})}
   const {group:activeGroup,index:activeSlot}=state.activeSlot,details=[];
   for(const group of ['normal',...(combined?['deep']:[])])state.equipped[group].forEach((relicIndex,index)=>{if(relicIndex===null)return;details.push({group,index,relic:state.save?.relics?.[relicIndex],active:group===activeGroup&&index===activeSlot})});
   const detailRoot=$('#loadout-effects'),validDetails=details.filter(item=>item.relic);detailRoot.dataset.count=String(validDetails.length);
   detailRoot.innerHTML=validDetails.length?validDetails.map(({group,index,relic,active})=>`<section class="game-relic-detail ${active?'active':''}" data-detail-group="${group}" data-detail-slot="${index}"><header>${relicImage(relic)}<div><small>${group==='normal'?'普通':'深夜'} · ${esc(colorZh[relic.itemColor]||relic.itemColor)}色 · 第 ${index+1} 槽</small><strong>${esc(relicName(relic))}</strong></div></header><div class="game-effect-list">${renderEffectRows(relic)}</div></section>`).join(''):'<div class="game-relic-empty">已装配的遗物详情会显示在这里。</div>';
   if(!state.selectedEffects.size){$('#loadout-score').textContent=`已装配 ${indices.length} / ${combined?6:3} 件 · 选择目标词条后显示匹配分`;return}
-  let score=0,matched=0,missing=0;
-  for(const rule of state.rules){const count=rule.scope==='any'?(counts.get(rule.key+'@@normal')||0)+(counts.get(rule.key+'@@deep')||0):(counts.get(rule.key+'@@'+rule.scope)||0);if(count){score+=(rule.priority==='exclude'?-1:1)*rule.weight*Math.min(count,rule.cap);matched++}else if(rule.priority==='required')missing++}
-  $('#loadout-score').textContent=`当前目标匹配分 ${score} · 命中 ${matched} 项${missing?' · 缺少 '+missing+' 项必选':''}`;
+  let score=0,matched=0,missing=0,excluded=0;
+  const stacking=stackingData();
+  for(const rule of state.rules){const found=rule.scope==='any'?[...(instances.get(rule.key+'@@normal')||[]),...(instances.get(rule.key+'@@deep')||[])]:instances.get(rule.key+'@@'+rule.scope)||[];if(found.length){if(rule.priority==='exclude'){score-=rule.weight*found.length;excluded++}else{score+=scoreRuleInstances(found,rule,stacking);matched++}}else if(rule.priority==='required')missing++}
+  $('#loadout-score').textContent=`当前目标匹配分 ${score} · 命中 ${matched} 项${missing?' · 缺少 '+missing+' 项必选':''}${excluded?' · 触发 '+excluded+' 项排除，未满足配装条件':''}`;
 }
 function renderPool(){
   if(!state.save)return;
@@ -534,8 +573,7 @@ $('#loadout-slots').addEventListener('dragover',e=>{const slot=e.target.closest(
 $('#loadout-slots').addEventListener('dragleave',e=>e.target.closest('.loadout-slot')?.classList.remove('drag-over'));
 $('#loadout-slots').addEventListener('drop',e=>{const slot=e.target.closest('.loadout-slot');if(!slot)return;e.preventDefault();slot.classList.remove('drag-over');const index=state.dragRelicIndex;state.dragRelicIndex=null;if(Number.isInteger(index))equipRelic(index,slot.dataset.group,Number(slot.dataset.slot))});
 document.addEventListener('dragend',()=>{state.dragRelicIndex=null;$$('.loadout-slot.drag-over').forEach(x=>x.classList.remove('drag-over'))});
-$('#loadout-slots').addEventListener('click',e=>{const slot=e.target.closest('.loadout-slot');if(!slot)return;const group=slot.dataset.group,index=Number(slot.dataset.slot),pending=state.selectedRelicIndex;activateSlot(group,index);if(e.target.closest('.slot-remove')){state.equipped[group][index]=null;state.selectedRelicIndex=null;renderBuildWorkspace();return}if(pending!==null&&canEquip(pending,group,index))equipRelic(pending,group,index);else{state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent=`右侧显示能放入${group==='normal'?'普通':'深夜'}第 ${index+1} 槽的遗物，点击即可装配。`}});
-$('#loadout-slots').addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' '||e.target.closest('.slot-remove'))return;const slot=e.target.closest('.loadout-slot');if(slot){e.preventDefault();slot.click()}});
+$('#loadout-slots').addEventListener('click',e=>{const remove=e.target.closest('.slot-remove'),slot=e.target.closest('.loadout-slot'),control=remove||slot;if(!control)return;const group=control.dataset.group,index=Number(control.dataset.slot);activateSlot(group,index);if(remove){state.equipped[group][index]=null;state.selectedRelicIndex=null;renderBuildWorkspace();return}const pending=state.selectedRelicIndex;if(pending!==null&&canEquip(pending,group,index))equipRelic(pending,group,index);else{state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent=`右侧显示能放入${group==='normal'?'普通':'深夜'}第 ${index+1} 槽的遗物，点击即可装配。`}});
 $('#clear-save').addEventListener('click',()=>{try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(_){}invalidateBuildResults();state.save=null;state.saveEditor=null;state.saveFileName=null;state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;$('#relic-dashboard').hidden=true;$('#build-workspace').hidden=true;$('#build-empty').hidden=false;renderBattleRecords();if(typeof renderSaveEditorUi==='function')renderSaveEditorUi();$('#save-file').value='';setSaveStatus('已清除本页解析结果，可重新选择存档。')});
 function ownedEffects(){
   const map=new Map();
@@ -698,20 +736,43 @@ $('#rule-profile-delete').addEventListener('click',()=>{if(!state.activeRuleProf
 let pendingAgentPlan=null;
 const agentHistory=[];
 let agentClarificationContext=[];
+let agentCurrentFeedbackContext=null;
+let feedbackDialogContext=null;
+let feedbackDialogKind='suggestion';
 const agentSessionId=(()=>{const key='nightreign-agent-session-v1';let value;try{value=localStorage.getItem(key);if(!/^[0-9a-f-]{36}$/i.test(value||'')){value=crypto.randomUUID();localStorage.setItem(key,value)}}catch{value=crypto.randomUUID()}return value})();
 function setAgentStatus(message,error=false){const status=$('#agent-status');status.textContent=message;status.classList.toggle('error',error)}
-function appendAgentMessage(role,text){
-  const log=$('#agent-chat-log'),entry=document.createElement('p');entry.className=`agent-message ${role}`;
+function appendAgentMessage(role,text,feedbackContext=null){
+  const log=$('#agent-chat-log'),entry=document.createElement('div'),message=document.createElement('p');log.querySelector('.agent-empty')?.remove();entry.className=`agent-entry ${role}`;message.className=`agent-message ${role}`;
   const pattern=/\[([^\]]+)\]\(#effects\)/g;let last=0,match;
-  while((match=pattern.exec(String(text)))){entry.append(document.createTextNode(String(text).slice(last,match.index)));const link=document.createElement('a');link.href='#effects';link.dataset.view='effects';link.textContent=match[1];entry.append(link);last=pattern.lastIndex}
-  entry.append(document.createTextNode(String(text).slice(last)));log.append(entry);log.scrollTop=log.scrollHeight;
+  while((match=pattern.exec(String(text)))){message.append(document.createTextNode(String(text).slice(last,match.index)));const link=document.createElement('a');link.href='#effects';link.dataset.view='effects';link.textContent=match[1];message.append(link);last=pattern.lastIndex}
+  message.append(document.createTextNode(String(text).slice(last)));entry.append(message);
+  if(role==='assistant'&&feedbackContext?.question&&feedbackContext?.answer){const button=document.createElement('button');button.className='agent-feedback-trigger';button.type='button';button.textContent='回答有错？向窝反馈';button.addEventListener('click',()=>openFeedbackDialog('answer',feedbackContext));entry.append(button)}
+  log.append(entry);log.scrollTop=log.scrollHeight;
 }
 async function restoreAgentHistory(){
-  try{const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/ai/history?session_id=${encodeURIComponent(agentSessionId)}`);if(!response.ok)throw new Error('读取对话记忆失败');const data=await response.json();if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){appendAgentMessage(message.role,message.content);agentHistory.push(message)}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
+  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else{if(context)agentCurrentFeedbackContext=context;previousQuestion=''}}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
 }
 restoreAgentHistory();
 $('#agent-question').addEventListener('input',()=>{$('#agent-question-count').textContent=`${Array.from($('#agent-question').value).length} / 400 字`});
 function requestJson(url,body){return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');if(response.status===404)throw new Error('找不到 AI 接口，请更新并重启本地 FastAPI 服务。');throw new Error(`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`)}const result=await response.json();if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');return result})}
+function openFeedbackDialog(kind,context=null){
+  const dialog=$('#feedback-dialog'),form=$('#feedback-form');if(!dialog?.showModal){setAgentStatus('当前浏览器暂不支持打开反馈表单。',true);return}
+  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();$('#feedback-status').textContent='';$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=false;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
+  const option=$('#feedback-context-option'),preview=$('#feedback-context-preview');option.hidden=!context;preview.hidden=true;
+  if(context){$('#feedback-question-preview').textContent=context.question;$('#feedback-answer-preview').textContent=context.answer}
+  dialog.showModal();$('#feedback-message').focus();
+}
+$('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
+$('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});
+$('#feedback-cancel').addEventListener('click',()=>$('#feedback-dialog').close());
+$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=false;$('#feedback-cancel').textContent='关闭'});
+$('#feedback-form').addEventListener('submit',async event=>{
+  event.preventDefault();if(!event.currentTarget.reportValidity())return;
+  const submit=$('#feedback-submit'),includeContext=Boolean(feedbackDialogContext&&$('#feedback-include-context').checked),payload={kind:feedbackDialogKind,message:$('#feedback-message').value.trim(),email:$('#feedback-email').value.trim()||null,include_context:includeContext};
+  if(includeContext){payload.question=feedbackDialogContext.question;payload.answer=feedbackDialogContext.answer}
+  submit.disabled=true;$('#feedback-status').textContent='正在提交…';
+  try{const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!response.ok)throw new Error();await response.json();$('#feedback-status').textContent='已收到反馈，谢谢你。';submit.hidden=true;$('#feedback-cancel').textContent='完成'}catch{$('#feedback-status').textContent='暂时无法提交，请稍后重试。';submit.disabled=false}
+});
 function agentInventory(){return (state.save?.relics||[]).map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}))}
 function describeAgentPlan(plan,inventory){
   const names=new Map(inventory.map(relic=>[String(relic.id),relic.name])),sections=[['normal','普通遗物'],['deep','深夜遗物']].filter(([group])=>plan[group]?.length),result=$('#agent-build-result');
@@ -735,9 +796,9 @@ $('#agent-chat-form').addEventListener('submit',async event=>{
   try{
     setAgentStatus('正在判断问题类型并查阅相关资料…');const reply=await requestJson('/api/ai/chat',{session_id:agentSessionId,question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)});
     if(reply.intent==='build'){
-      const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);appendAgentMessage('assistant',plan.summary);agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
+      const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);agentCurrentFeedbackContext={question,answer:plan.summary};appendAgentMessage('assistant',plan.summary,agentCurrentFeedbackContext);agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
     }else{
-      const answer=reply.answer||'这个问题还不够明确，请补充一下你指的角色、敌人或配装目标。';appendAgentMessage('assistant',answer);agentHistory.push({role:'user',content:question},{role:'assistant',content:answer});if(reply.intent==='clarify')agentClarificationContext.push(question);else agentClarificationContext=[];
+      const answer=reply.answer||'这个问题还不够明确，请补充一下你指的角色、敌人或配装目标。';agentCurrentFeedbackContext={question,answer};appendAgentMessage('assistant',answer,agentCurrentFeedbackContext);agentHistory.push({role:'user',content:question},{role:'assistant',content:answer});if(reply.intent==='clarify')agentClarificationContext.push(question);else agentClarificationContext=[];
       setAgentStatus(reply.intent==='clarify'?'需要你补充信息后，我再继续。':'回答已整理完成。');
     }
   }catch(error){appendAgentMessage('assistant',`暂时无法完成：${error.message||'请检查 FastAPI 服务是否启动。'}`);setAgentStatus(error.message||'AI 请求失败，请稍后重试。',true)}
@@ -750,7 +811,30 @@ $('#agent-apply-build').addEventListener('click',()=>{
   for(const group of ['normal','deep'])for(const choice of plan[group]||[]){const index=choice.relic_id===null?null:state.save.relics.findIndex(relic=>String(relic.id)===String(choice.relic_id));if(index!==null&&(index<0||used.has(index)||!canEquip(index,group,choice.index))){setAgentStatus('方案校验失败：遗物不在当前存档中，或与所选角色供具槽位不匹配。',true);return}if(index!==null)used.add(index);next[group][choice.index]=index}
   state.equipped=next;state.selectedRelicIndex=null;renderBuildWorkspace();navigate('builds');$('#equip-status').textContent='Agent 配装已放入装配预览，可继续调整；尚未写入存档。';setAgentStatus('配装已应用到装配预览；尚未写入存档。');
 });
-function stackingData(){const map={};for(const e of Object.values(state.effects.effects||{})){const key=e.key,v=e.stackable===true?true:e.stackable==='conditional'?'conditional':false;if(!(key in map)||v===true||v==='conditional'&&map[key]===false)map[key]=v}return map}
+function stackingData(){
+  const byId={},byMode={normal:{},deep:{}},byKey={};
+  const merge=(target,key,value)=>{if(!(key in target))target[key]=value;else if(target[key]!==value)target[key]=false};
+  for(const [id,e] of Object.entries(state.effects?.effects||{})){
+    const value=e.stackable===true?true:e.stackable==='conditional'?'conditional':false;
+    byId[id]=value;
+    merge(byKey,e.key,value);
+    for(const mode of state.relicRuleEffects?.definitions?.[id]?.modes||[]){
+      if(mode==='普通')merge(byMode.normal,e.key,value);
+      if(mode==='深夜')merge(byMode.deep,e.key,value);
+    }
+  }
+  return {byId,byMode,byKey};
+}
+function scoreRuleInstances(instances,rule,stacking){
+  let nonstackable=0,conditional=0,stackable=0;
+  for(const {effect,group} of instances){
+    const id=effect.id==null?'':String(effect.id);
+    const value=id&&Object.hasOwn(stacking.byId,id)?stacking.byId[id]:Object.hasOwn(stacking.byMode[group]||{},effect.key)?stacking.byMode[group][effect.key]:stacking.byKey[effect.key];
+    if(value===true)stackable++;else if(value==='conditional')conditional++;else nonstackable++;
+  }
+  const cap=Math.max(1,Math.min(6,Number(rule.cap)||1)),full=Math.min(stackable+(nonstackable?1:0),cap),discounted=Math.min(conditional,cap-full);
+  return rule.weight*full+(discounted?rule.weight*(full?0.7*discounted:1+0.7*(discounted-1)):0);
+}
 function renderBuildResult(data){
   const results=(data.allResults?.flatMap(x=>x.results||[])||[]).filter(x=>x.requiredMet);
   state.buildResults=results.slice(0,10);
