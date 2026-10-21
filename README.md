@@ -24,11 +24,21 @@
 
 ## 运行
 
-前端使用 Vue 3、JavaScript 和 Vite。安装依赖后可启动开发服务器，生产构建仍输出静态文件到 Sites 使用的 `dist` 目录：
+前端使用 Vue 3、JavaScript 和 Vite 7.3.7。需要 Node.js 20.19+ 或 22.12+；Node.js 18 不受支持，可能因缺少 `crypto.hash` 导致启动失败。运行以下命令前，先在项目根目录安装锁文件指定的依赖：
 
 ```sh
-npm install
+npm ci
+```
+
+启动本地开发服务器：
+
+```sh
 npm run dev
+```
+
+生成生产静态文件到 Sites 使用的 `dist` 目录：
+
+```sh
 npm run build
 ```
 
