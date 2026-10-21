@@ -465,6 +465,8 @@ function renderVesselPicker(){
 }
 function closePickers(){for(const name of ['character','vessel']){$('#'+name+'-menu').hidden=true;$('#'+name+'-trigger').setAttribute('aria-expanded','false')}}
 for(const name of ['character','vessel']){
+  const picker=$('#'+name+'-trigger').closest('.visual-picker');
+  picker.addEventListener('focusout',e=>{if(!picker.contains(e.relatedTarget))closePickers()});
   $('#'+name+'-trigger').addEventListener('click',()=>{const menu=$('#'+name+'-menu'),opening=menu.hidden;closePickers();menu.hidden=!opening;$('#'+name+'-trigger').setAttribute('aria-expanded',String(opening));if(opening)menu.querySelector('[aria-selected="true"]')?.scrollIntoView({block:'nearest'})});
   $('#'+name+'-menu').addEventListener('click',e=>{const option=e.target.closest('button[data-'+name+']');if(!option)return;$('#'+name+'-select').value=option.dataset[name];$('#'+name+'-select').dispatchEvent(new Event('change'));closePickers();$('#'+name+'-trigger').focus()});
   $('#'+name+'-trigger').addEventListener('keydown',e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const menu=$('#'+name+'-menu');menu.hidden=false;$('#'+name+'-trigger').setAttribute('aria-expanded','true');const options=[...menu.querySelectorAll('button')],selected=options.findIndex(x=>x.getAttribute('aria-selected')==='true');options[(selected+(e.key==='ArrowDown'?1:options.length-1))%options.length]?.focus()}else if(e.key==='Escape')closePickers()});
