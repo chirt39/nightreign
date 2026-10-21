@@ -91,6 +91,12 @@ server {
     root /var/www/nightreign/dist;
     index index.html;
 
+    # Browser security headers for this static HTTP site.
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()" always;
+
     location / {
         try_files $uri $uri/ =404;
     }
@@ -111,6 +117,8 @@ sudo systemctl enable --now nginx
 sudo systemctl reload nginx
 ```
 
+这些响应头用于限制浏览器行为：`X-Content-Type-Options: nosniff` 阻止浏览器将资源 MIME 类型嗅探成其他类型；`X-Frame-Options: DENY` 禁止本站页面被任何站点放进 frame/iframe，降低点击劫持风险；`Referrer-Policy: strict-origin-when-cross-origin` 在跨源请求时只发送来源，不暴露路径和查询参数；`Permissions-Policy` 关闭本站未使用的摄像头、麦克风、定位、支付和 USB 能力。`always` 让这些头也出现在错误响应中。此示例仅服务 HTTP，因此不加 HSTS；页面含有 inline CSS/JS，CSP 需另行评估以免阻断现有资源，故不在此配置中启用。
+
 若服务器已有其他 Nginx 站点，不要删除默认配置或覆盖其他站点；应由管理员为该 IP/端口合并配置。确认云平台防火墙允许 TCP 80；若 Ubuntu UFW 已启用，也需允许 HTTP：
 
 ```sh
@@ -124,9 +132,10 @@ sudo ufw allow 80/tcp
 ```sh
 curl -I http://127.0.0.1/
 curl -I http://<服务器公网IP>/
+curl -sSI http://127.0.0.1/ | grep -Ei '^(HTTP/|X-Content-Type-Options:|X-Frame-Options:|Referrer-Policy:|Permissions-Policy:)'
 ```
 
-第二条命令中的 `<服务器公网IP>` 替换为实际地址，不要将真实 IP 写入仓库。响应应为 `200 OK`。Nginx 由 systemd 管理，关闭 SSH 连接不会停止站点；可用以下命令确认：
+第二条命令中的 `<服务器公网IP>` 替换为实际地址，不要将真实 IP 写入仓库。响应应为 `200 OK`，并且头部检查命令应列出配置的四个安全响应头。修改配置后先用 `sudo nginx -t` 检查语法，再重新加载 Nginx 并运行这些 `curl` 命令；本文仅提供配置示例，不会自动应用配置。Nginx 由 systemd 管理，关闭 SSH 连接不会停止站点；可用以下命令确认：
 
 ```sh
 systemctl is-enabled nginx
