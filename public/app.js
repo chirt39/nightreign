@@ -795,8 +795,23 @@ async function restoreAgentHistory(){
 restoreAgentHistory();
 $('#agent-question').addEventListener('input',()=>{$('#agent-question-count').textContent=`${Array.from($('#agent-question').value).length} / 400 字`});
 function requestJson(url,body){return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');if(response.status===404)throw new Error('找不到 AI 接口，请更新并重启本地 FastAPI 服务。');throw new Error(`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`)}const result=await response.json();if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');return result})}
+let feedbackDialogRevision=0;
+let feedbackSubmissionCount=0;
+let feedbackSubmissionSequence=0;
+function reportFeedbackOutcome(message,isError=false){
+  let region=$('#feedback-background-status');
+  if(!region){region=document.createElement('div');region.id='feedback-background-status';region.setAttribute('role','status');region.setAttribute('aria-live','polite');$('#agent-status').insertAdjacentElement('afterend',region)}
+  const line=document.createElement('p');line.className='hint';line.textContent=message;if(isError)line.style.color='#ed9a8f';region.append(line);while(region.children.length>5)region.firstElementChild.remove();
+}
+function feedbackErrorDetail(body){
+  const detail=body?.detail;
+  if(typeof detail==='string')return detail.trim();
+  if(Array.isArray(detail))return detail.map(item=>typeof item==='string'?item:item?.msg).filter(Boolean).join('；');
+  return '';
+}
 function openFeedbackDialog(kind,context=null){
   const dialog=$('#feedback-dialog'),form=$('#feedback-form');if(!dialog?.showModal){setAgentStatus('当前浏览器暂不支持打开反馈表单。',true);return}
+  feedbackDialogRevision++;
   feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();$('#feedback-status').textContent='';$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
   const option=$('#feedback-context-option'),preview=$('#feedback-context-preview');option.hidden=!context;preview.hidden=true;
   if(context){$('#feedback-question-preview').textContent=context.question;$('#feedback-answer-preview').textContent=context.answer}
@@ -805,13 +820,24 @@ function openFeedbackDialog(kind,context=null){
 $('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
 $('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});
 $('#feedback-cancel').addEventListener('click',()=>$('#feedback-dialog').close());
-$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭'});
+$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogRevision++;feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';if(feedbackSubmissionCount)reportFeedbackOutcome(`仍有 ${feedbackSubmissionCount} 条反馈请求在处理中；关闭窗口不会撤销已发送的请求。`)});
 $('#feedback-form').addEventListener('submit',async event=>{
   event.preventDefault();if(!feedbackTransportSecure){$('#feedback-submit').disabled=true;$('#feedback-transport-warning').hidden=false;return}if(!event.currentTarget.reportValidity())return;
   const submit=$('#feedback-submit'),includeContext=Boolean(feedbackDialogContext&&$('#feedback-include-context').checked),payload={kind:feedbackDialogKind,message:$('#feedback-message').value.trim(),email:$('#feedback-email').value.trim()||null,include_context:includeContext};
   if(includeContext){payload.question=feedbackDialogContext.question;payload.answer=feedbackDialogContext.answer}
-  submit.disabled=true;$('#feedback-status').textContent='正在提交…';
-  try{const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!response.ok)throw new Error();await response.json();$('#feedback-status').textContent='已收到反馈，谢谢你。';submit.hidden=true;$('#feedback-cancel').textContent='完成'}catch{$('#feedback-status').textContent='暂时无法提交，请稍后重试。';submit.disabled=false}
+  const dialog=$('#feedback-dialog'),status=$('#feedback-status'),revision=feedbackDialogRevision,submission=++feedbackSubmissionSequence;feedbackSubmissionCount++;submit.disabled=true;status.textContent='正在提交…';
+  try{
+    const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(response.status>=400&&response.status<500){let detail='';try{detail=feedbackErrorDetail(await response.json())}catch{}const error=new Error(`服务器拒绝了该反馈（HTTP ${response.status}）${detail?`：${detail}`:''}`);error.feedbackOutcome='rejected';throw error}
+    if(!response.ok){const error=new Error(`反馈服务返回 HTTP ${response.status}；请求可能已到达服务器。`);error.feedbackOutcome='uncertain';throw error}
+    await response.json();
+    if(dialog.open&&revision===feedbackDialogRevision){status.textContent='已收到反馈，谢谢你。';submit.hidden=true;$('#feedback-cancel').textContent='完成'}
+    else reportFeedbackOutcome(`第 ${submission} 条反馈已提交成功。`);
+  }catch(error){
+    const message=error?.feedbackOutcome==='rejected'||error?.feedbackOutcome==='uncertain'?error.message:'反馈提交结果无法确认（请求可能已送达服务器）；请先确认收件箱，再决定是否重新提交。';
+    if(dialog.open&&revision===feedbackDialogRevision){status.textContent=message;submit.disabled=false}
+    else reportFeedbackOutcome(`第 ${submission} 条${message}`,true);
+  }finally{feedbackSubmissionCount=Math.max(0,feedbackSubmissionCount-1)}
 });
 function agentInventory(){return (state.save?.relics||[]).map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}))}
 function describeAgentPlan(plan,inventory){
