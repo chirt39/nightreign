@@ -42,7 +42,7 @@ npm run dev
 npm run build
 ```
 
-也可以用任意 HTTP 静态文件服务托管构建后的 `dist`；直接双击 `index.html` 可能因浏览器文件读取限制无法加载 JSON。当前迁移保留原有浏览器端功能脚本，页面交互将继续逐步迁入 Vue 组件。
+也可以用任意 HTTP 静态文件服务托管构建后的 `dist`；直接双击 `index.html` 可能因浏览器文件读取限制无法加载 JSON。Ubuntu 服务器可参考 [公网 IP + Nginx 静态部署指南](docs/UBUNTU_STATIC_DEPLOY.md)。当前迁移保留原有浏览器端功能脚本，页面交互将继续逐步迁入 Vue 组件。
 
 ## 许可与归属
 
