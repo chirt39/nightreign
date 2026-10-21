@@ -104,6 +104,11 @@ onMounted(async () => {
     try {
       await loadClassicScript(file);
     } catch {
+      if (file === 'ai-config.js') {
+        window.NIGHTREIGN_AI_API_BASE = window.NIGHTREIGN_AI_API_BASE || '';
+        console.warn('AI API 配置脚本未加载，将使用当前站点默认 API 地址；若 AI 服务不可用，对话界面会显示错误。');
+        continue;
+      }
       loadError.value = true;
       return;
     }
