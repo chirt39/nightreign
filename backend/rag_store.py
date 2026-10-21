@@ -7,11 +7,13 @@ not need to load a local PyTorch/SentenceTransformer model.
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import json
 import math
 import os
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import httpx
 
@@ -23,10 +25,46 @@ ACTIVE_COLLECTION_FILE = CHROMA_PATH / "active_knowledge_collection.json"
 COLLECTION_PREFIX = "nightreign_kb_"
 GAME_CATEGORIES = ["character", "effect", "enemy", "enemy_scale", "item",
                    "manual_knowledge", "relic", "vessel"]
+
+
+def validate_api_base_url(value: str, setting_name: str) -> str:
+    """Require TLS for credentialed API endpoints, except local development."""
+    parsed = None
+    try:
+        parsed = urlsplit(value)
+        hostname = parsed.hostname
+        is_loopback = hostname == "localhost"
+        if hostname and not is_loopback:
+            try:
+                is_loopback = ipaddress.ip_address(hostname).is_loopback
+            except ValueError:
+                pass
+    except ValueError:
+        hostname = None
+        is_loopback = False
+
+    valid = (
+        parsed is not None
+        and not any(character.isspace() for character in value)
+        and hostname is not None
+        and parsed.username is None
+        and parsed.password is None
+        and not parsed.query
+        and not parsed.fragment
+        and (parsed.scheme == "https" or (parsed.scheme == "http" and is_loopback))
+    )
+    if not valid:
+        raise RuntimeError(
+            f"{setting_name} must use HTTPS; HTTP is allowed only for localhost or a loopback IP."
+        )
+    return value.rstrip("/")
+
+
 EMBEDDING_API_KEY = os.getenv("DASHSCOPE_API_KEY", "").strip()
-EMBEDDING_BASE_URL = os.getenv(
-    "DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
-).rstrip("/")
+EMBEDDING_BASE_URL = validate_api_base_url(
+    os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
+    "DASHSCOPE_BASE_URL",
+)
 EMBEDDING_MODEL = os.getenv("DASHSCOPE_EMBEDDING_MODEL", "text-embedding-v4").strip()
 EMBEDDING_DIMENSIONS = int(os.getenv("DASHSCOPE_EMBEDDING_DIMENSIONS", "512"))
 

@@ -18,7 +18,9 @@ from backend import memory_store, rag_store
 
 
 API_KEY = os.getenv("DEEPSEEK_API_KEY", "").strip()
-API_BASE = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/")
+API_BASE = rag_store.validate_api_base_url(
+    os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"), "DEEPSEEK_BASE_URL"
+)
 MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-flash")
 RATE_LIMIT = max(1, int(os.getenv("AI_REQUESTS_PER_MINUTE", "5")))
 DAILY_AI_LIMIT = max(1, int(os.getenv("AI_REQUESTS_PER_DAY", "100")))

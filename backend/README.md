@@ -41,7 +41,7 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 
 ## 本地启动
 
-1. 在项目根目录将 `.env.example` 复制为 `.env`，只在本机 `.env` 中填写 `DEEPSEEK_API_KEY` 和 `DASHSCOPE_API_KEY`。如果百炼控制台提供工作空间专属 API Host，将 `DASHSCOPE_BASE_URL` 改成控制台给出的 `compatible-mode/v1` 地址。两个 Key 均只保存在后端环境中。
+1. 在项目根目录将 `.env.example` 复制为 `.env`，只在本机 `.env` 中填写 `DEEPSEEK_API_KEY` 和 `DASHSCOPE_API_KEY`。如果百炼控制台提供工作空间专属 API Host，将 `DASHSCOPE_BASE_URL` 改成控制台给出的 `compatible-mode/v1` 地址。两个 Key 均只保存在后端环境中。`DEEPSEEK_BASE_URL` 和 `DASHSCOPE_BASE_URL` 必须使用 HTTPS；HTTP 仅允许用于 localhost 或 loopback IP 的本地开发地址，其他配置会阻止后端启动。
 2. 安装后端依赖：
 
    ```powershell
