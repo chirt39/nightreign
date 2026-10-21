@@ -358,6 +358,10 @@ function relicName(r){return relicEntry(r)?.name_zh||r.itemNameEn||r.itemNameJa|
 function relicCategory(r){return relicEntry(r)?.category||'未匹配图鉴'}
 function relicImage(r){const entry=relicEntry(r);return entry?.image?`<img class="relic-thumb" src="${esc(entry.image)}" alt="${esc(entry.name_zh)}图标" loading="lazy" draggable="false" width="58" height="58">`:'<span class="relic-thumb relic-thumb-fallback" aria-hidden="true">◇</span>'}
 function setSaveStatus(s,error=false){$('#save-status').textContent=s;$('#save-status').classList.toggle('error',error)}
+function setSaveFailureStatus(message){
+  const retainedDataNote=state.save?'本次没有替换当前数据；仍保留上次成功读取的遗物与装配。':'当前没有可用存档数据。';
+  setSaveStatus(`${message} ${retainedDataNote}`,true);
+}
 function renderBattleRecords(){
   const records=state.save?.battleRecords;
   $('#records-empty').hidden=!!state.save;
@@ -384,8 +388,8 @@ function renderBattleRecords(){
 }
 async function readSave(file){
   if(!file)return;
-  if(!/\.sl2$/i.test(file.name)){setSaveStatus('请选择 .sl2 存档文件。',true);return}
-  if(!state.items||!state.effects){setSaveStatus('资料尚未载入，请稍后再试。',true);return}
+  if(!/\.sl2$/i.test(file.name)){setSaveFailureStatus('请选择 .sl2 存档文件。');return}
+  if(!state.items||!state.effects){setSaveFailureStatus('资料尚未载入，请稍后再试。');return}
   try{
     setSaveStatus(`正在本地解析 ${file.name}…`);
     await validateSaveFileHeader(file);
@@ -397,7 +401,7 @@ async function readSave(file){
     try{sessionStorage.setItem('nightreign-parsed-save-v2',JSON.stringify(parsed))}catch(_){/* 存储不可用时仍保留本页数据 */}
     state.equipped={normal:[null,null,null],deep:[null,null,null]};state.selectedRelicIndex=null;renderBuildWorkspace();
     setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改，也未发送到服务器。${state.saveEditor?'当前为只读模式；存档写回尚未验收。':'此存档版式暂不支持编辑。'}`);
-  }catch(err){setSaveStatus('无法解析此存档：'+(err.message||String(err)),true)}
+  }catch(err){setSaveFailureStatus('无法解析此存档：'+(err?.message||String(err)))}
 }
 function showSave(parsed){
   if(!parsed||!Array.isArray(parsed.relics))throw new Error('遗物数据格式错误');
@@ -494,7 +498,13 @@ function updateVessels(){
   renderCharacterPicker();renderVesselPicker();
   renderBuildWorkspace();
 }
-function invalidateBuildResults(){if(state.worker){state.worker.terminate();state.worker=null}$('#run-build').disabled=false;state.buildResults=[];$('#build-results').innerHTML='';$('#build-status').textContent='选择目标词条后可计算推荐组合。'}
+function stopBuildWorker(worker=state.worker){
+  if(!worker)return;
+  if(state.worker===worker)state.worker=null;
+  worker.onmessage=null;worker.onerror=null;worker.onmessageerror=null;
+  try{worker.terminate()}catch(_){}
+}
+function invalidateBuildResults(){stopBuildWorker();$('#run-build').disabled=false;state.buildResults=[];$('#build-results').innerHTML='';$('#build-status').textContent='选择目标词条后可计算推荐组合。'}
 $('#character-select').addEventListener('change',()=>{invalidateBuildResults();state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;updateVessels();saveActiveRuleProfile()});
 $('#vessel-select').addEventListener('change',()=>{invalidateBuildResults();state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;renderVesselPicker();renderBuildWorkspace()});
 $('#build-mode').addEventListener('change',()=>{invalidateBuildResults();state.slotFilterActive=false;renderBuildWorkspace()});
@@ -737,9 +747,42 @@ let pendingAgentPlan=null;
 const agentHistory=[];
 let agentClarificationContext=[];
 let agentCurrentFeedbackContext=null;
+let agentHistoryRestoreRevision=0;
+let agentMemoryClearing=false;
+let agentRequestInFlight=false;
+let agentMemoryClearStage=1;
 let feedbackDialogContext=null;
 let feedbackDialogKind='suggestion';
-const agentSessionId=(()=>{const key='nightreign-agent-session-v1';let value;try{value=localStorage.getItem(key);if(!/^[0-9a-f-]{36}$/i.test(value||'')){value=crypto.randomUUID();localStorage.setItem(key,value)}}catch{value=crypto.randomUUID()}return value})();
+const feedbackPageHost=window.location.hostname.replace(/^\[|\]$/g,'').toLowerCase();
+const feedbackLocalPage=['localhost','127.0.0.1','::1'].includes(feedbackPageHost);
+let feedbackApiSecure=false,feedbackLocalApi=false,feedbackApiProtocol='';
+try{
+  const feedbackApiUrl=new URL(window.NIGHTREIGN_AI_API_BASE||window.location.origin,window.location.href);
+  const feedbackApiHost=feedbackApiUrl.hostname.replace(/^\[|\]$/g,'').toLowerCase();
+  feedbackLocalApi=['localhost','127.0.0.1','::1'].includes(feedbackApiHost);
+  feedbackApiProtocol=feedbackApiUrl.protocol;
+  feedbackApiSecure=feedbackApiProtocol==='https:';
+}catch{}
+const feedbackLocalDevelopmentPair=feedbackLocalPage&&feedbackLocalApi&&['http:','https:'].includes(window.location.protocol)&&['http:','https:'].includes(feedbackApiProtocol);
+const feedbackTransportSecure=(window.location.protocol==='https:'&&feedbackApiSecure)||feedbackLocalDevelopmentPair;
+function createSecureAgentUuid(){
+  const cryptoApi=globalThis.crypto;
+  if(typeof cryptoApi?.randomUUID==='function'){
+    try{const value=cryptoApi.randomUUID();if(/^[0-9a-f-]{36}$/i.test(value))return value}catch{}
+  }
+  if(typeof cryptoApi?.getRandomValues!=='function')return null;
+  try{
+    const bytes=cryptoApi.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&0x0f)|0x40;bytes[8]=(bytes[8]&0x3f)|0x80;
+    const hex=Array.from(bytes,byte=>byte.toString(16).padStart(2,'0')).join('');
+    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+  }catch{return null}
+}
+const agentSessionId=(()=>{
+  const generated=createSecureAgentUuid();if(!generated)return null;
+  const key='nightreign-agent-session-v1';
+  try{const stored=localStorage.getItem(key);if(/^[0-9a-f-]{36}$/i.test(stored||''))return stored;localStorage.setItem(key,generated)}catch{}
+  return generated;
+})();
 function setAgentStatus(message,error=false){const status=$('#agent-status');status.textContent=message;status.classList.toggle('error',error)}
 function appendAgentMessage(role,text,feedbackContext=null){
   const log=$('#agent-chat-log'),entry=document.createElement('div'),message=document.createElement('p');log.querySelector('.agent-empty')?.remove();entry.className=`agent-entry ${role}`;message.className=`agent-message ${role}`;
@@ -750,14 +793,59 @@ function appendAgentMessage(role,text,feedbackContext=null){
   log.append(entry);log.scrollTop=log.scrollHeight;
 }
 async function restoreAgentHistory(){
-  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else{if(context)agentCurrentFeedbackContext=context;previousQuestion=''}}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
+  if(!agentSessionId){setAgentStatus('当前环境无法安全生成会话 ID；本页对话仍可继续，但不会读取或保存后端历史记忆。');return}
+  const revision=agentHistoryRestoreRevision;
+  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(revision!==agentHistoryRestoreRevision||!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else{if(context)agentCurrentFeedbackContext=context;previousQuestion=''}}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{if(revision===agentHistoryRestoreRevision)setAgentStatus('当前无法读取已保存的对话记忆。',true)}
 }
 restoreAgentHistory();
+const agentMemoryClearDialog=$('#agent-memory-clear-dialog');
+const agentMemoryClearOpen=$('#agent-memory-clear-open');
+function updateAgentMemoryClearAvailability(){agentMemoryClearOpen.disabled=!agentSessionId||agentRequestInFlight||agentMemoryClearing}
+function setAgentMemoryClearStage(stage){
+  agentMemoryClearStage=stage;$('#agent-memory-clear-description').hidden=stage!==1;$('#agent-memory-clear-warning').hidden=stage!==2;agentMemoryClearDialog.setAttribute('aria-describedby',stage===1?'agent-memory-clear-description':'agent-memory-clear-warning');$('#agent-memory-clear-next').hidden=stage!==1;$('#agent-memory-clear-confirm').hidden=stage!==2;
+}
+agentMemoryClearOpen.addEventListener('click',()=>{
+  if(!agentSessionId){setAgentStatus('当前环境无法安全生成会话 ID，暂时不能清除服务端对话记忆。',true);return}
+  if(agentRequestInFlight||agentMemoryClearing)return;
+  setAgentMemoryClearStage(1);const status=$('#agent-memory-clear-status');status.textContent='';status.classList.remove('error');agentMemoryClearDialog.showModal();$('#agent-memory-clear-next').focus();
+});
+$('#agent-memory-clear-next').addEventListener('click',()=>{setAgentMemoryClearStage(2);$('#agent-memory-clear-confirm').focus()});
+$('#agent-memory-clear-cancel').addEventListener('click',()=>agentMemoryClearDialog.close());
+agentMemoryClearDialog.addEventListener('cancel',event=>{if(agentMemoryClearing)event.preventDefault()});
+agentMemoryClearDialog.addEventListener('close',()=>agentMemoryClearOpen.focus());
+$('#agent-memory-clear-confirm').addEventListener('click',async()=>{
+  if(agentMemoryClearing||agentRequestInFlight||!agentSessionId||agentMemoryClearStage!==2)return;
+  agentMemoryClearing=true;agentMemoryClearDialog.setAttribute('aria-busy','true');updateAgentMemoryClearAvailability();$('#agent-question').disabled=true;$('#agent-send').disabled=true;$('#agent-apply-build').disabled=true;
+  const confirmButton=$('#agent-memory-clear-confirm'),cancelButton=$('#agent-memory-clear-cancel'),status=$('#agent-memory-clear-status');confirmButton.disabled=true;cancelButton.disabled=true;status.textContent='正在清除已保存对话记忆…';status.classList.remove('error');status.focus();
+  try{
+    await requestJson('/api/ai/memory/clear',{session_id:agentSessionId});
+    agentHistoryRestoreRevision++;agentHistory.length=0;agentClarificationContext=[];agentCurrentFeedbackContext=null;pendingAgentPlan=null;
+    $('#agent-chat-log').replaceChildren();const empty=document.createElement('p');empty.className='agent-empty';empty.textContent='你好，我会判断你的问题是查阅资料还是请求配装。配装时我会在对话中确认角色、供具、普通或深夜范围及配装目标；信息不清楚时会先询问。配装只使用已读取存档中的遗物。';$('#agent-chat-log').append(empty);
+    $('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;setAgentStatus('已清除已保存对话记忆。');status.textContent='清除完成。';agentMemoryClearDialog.close();
+  }catch(error){const message=error.message||'清除失败，请稍后重试。';status.textContent=message;status.classList.add('error');setAgentStatus(message,true)}
+  finally{agentMemoryClearing=false;agentMemoryClearDialog.setAttribute('aria-busy','false');$('#agent-question').disabled=false;$('#agent-send').disabled=false;$('#agent-apply-build').disabled=false;confirmButton.disabled=false;cancelButton.disabled=false;updateAgentMemoryClearAvailability();if(agentMemoryClearDialog.open&&agentMemoryClearStage===2)confirmButton.focus();else if(!agentMemoryClearDialog.open)agentMemoryClearOpen.focus()}
+});
+updateAgentMemoryClearAvailability();
 $('#agent-question').addEventListener('input',()=>{$('#agent-question-count').textContent=`${Array.from($('#agent-question').value).length} / 400 字`});
 function requestJson(url,body){return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');if(response.status===404)throw new Error('找不到 AI 接口，请更新并重启本地 FastAPI 服务。');throw new Error(`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`)}const result=await response.json();if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');return result})}
+let feedbackDialogRevision=0;
+let feedbackSubmissionCount=0;
+let feedbackSubmissionSequence=0;
+function reportFeedbackOutcome(message,isError=false){
+  let region=$('#feedback-background-status');
+  if(!region){region=document.createElement('div');region.id='feedback-background-status';region.setAttribute('role','status');region.setAttribute('aria-live','polite');$('#agent-status').insertAdjacentElement('afterend',region)}
+  const line=document.createElement('p');line.className='hint';line.textContent=message;if(isError)line.style.color='#ed9a8f';region.append(line);while(region.children.length>5)region.firstElementChild.remove();
+}
+function feedbackErrorDetail(body){
+  const detail=body?.detail;
+  if(typeof detail==='string')return detail.trim();
+  if(Array.isArray(detail))return detail.map(item=>typeof item==='string'?item:item?.msg).filter(Boolean).join('；');
+  return '';
+}
 function openFeedbackDialog(kind,context=null){
   const dialog=$('#feedback-dialog'),form=$('#feedback-form');if(!dialog?.showModal){setAgentStatus('当前浏览器暂不支持打开反馈表单。',true);return}
-  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();$('#feedback-status').textContent='';$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=false;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
+  feedbackDialogRevision++;
+  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();$('#feedback-status').textContent='';$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
   const option=$('#feedback-context-option'),preview=$('#feedback-context-preview');option.hidden=!context;preview.hidden=true;
   if(context){$('#feedback-question-preview').textContent=context.question;$('#feedback-answer-preview').textContent=context.answer}
   dialog.showModal();$('#feedback-message').focus();
@@ -765,13 +853,24 @@ function openFeedbackDialog(kind,context=null){
 $('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
 $('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});
 $('#feedback-cancel').addEventListener('click',()=>$('#feedback-dialog').close());
-$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=false;$('#feedback-cancel').textContent='关闭'});
+$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogRevision++;feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';if(feedbackSubmissionCount)reportFeedbackOutcome(`仍有 ${feedbackSubmissionCount} 条反馈请求在处理中；关闭窗口不会撤销已发送的请求。`)});
 $('#feedback-form').addEventListener('submit',async event=>{
-  event.preventDefault();if(!event.currentTarget.reportValidity())return;
+  event.preventDefault();if(!feedbackTransportSecure){$('#feedback-submit').disabled=true;$('#feedback-transport-warning').hidden=false;return}if(!event.currentTarget.reportValidity())return;
   const submit=$('#feedback-submit'),includeContext=Boolean(feedbackDialogContext&&$('#feedback-include-context').checked),payload={kind:feedbackDialogKind,message:$('#feedback-message').value.trim(),email:$('#feedback-email').value.trim()||null,include_context:includeContext};
   if(includeContext){payload.question=feedbackDialogContext.question;payload.answer=feedbackDialogContext.answer}
-  submit.disabled=true;$('#feedback-status').textContent='正在提交…';
-  try{const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!response.ok)throw new Error();await response.json();$('#feedback-status').textContent='已收到反馈，谢谢你。';submit.hidden=true;$('#feedback-cancel').textContent='完成'}catch{$('#feedback-status').textContent='暂时无法提交，请稍后重试。';submit.disabled=false}
+  const dialog=$('#feedback-dialog'),status=$('#feedback-status'),revision=feedbackDialogRevision,submission=++feedbackSubmissionSequence;feedbackSubmissionCount++;submit.disabled=true;status.textContent='正在提交…';
+  try{
+    const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(response.status>=400&&response.status<500){let detail='';try{detail=feedbackErrorDetail(await response.json())}catch{}const error=new Error(`服务器拒绝了该反馈（HTTP ${response.status}）${detail?`：${detail}`:''}`);error.feedbackOutcome='rejected';throw error}
+    if(!response.ok){const error=new Error(`反馈服务返回 HTTP ${response.status}；请求可能已到达服务器。`);error.feedbackOutcome='uncertain';throw error}
+    await response.json();
+    if(dialog.open&&revision===feedbackDialogRevision){status.textContent='已收到反馈，谢谢你。';submit.hidden=true;$('#feedback-cancel').textContent='完成'}
+    else reportFeedbackOutcome(`第 ${submission} 条反馈已提交成功。`);
+  }catch(error){
+    const message=error?.feedbackOutcome==='rejected'||error?.feedbackOutcome==='uncertain'?error.message:'反馈提交结果无法确认（请求可能已送达服务器）；请先确认收件箱，再决定是否重新提交。';
+    if(dialog.open&&revision===feedbackDialogRevision){status.textContent=message;submit.disabled=false}
+    else reportFeedbackOutcome(`第 ${submission} 条${message}`,true);
+  }finally{feedbackSubmissionCount=Math.max(0,feedbackSubmissionCount-1)}
 });
 function agentInventory(){return (state.save?.relics||[]).map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}))}
 function describeAgentPlan(plan,inventory){
@@ -787,14 +886,14 @@ async function requestAgentBuild(question,context){
   const vessel=state.vessels.characters?.[character]?.vessels?.[key]||(state.vessels.universalVessels||[]).find(item=>item.key===key);if(!vessel)throw new Error('所选角色供具信息不可用，请重新选择。');
   const slots=[...(vessel.normalSlots||[]).map((color,index)=>({group:'normal',index,color})),...(combined?(vessel.deepSlots||[]).map((color,index)=>({group:'deep',index,color})):[])];
   const ruleEffects=Object.entries(state.effects?.effects||{}),rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([effectId,entry])=>entry.key===rule.key&&isOutOfGameRelicEffect({...entry,id:effectId}))||[];return {effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope)}});
-  const inventory=agentInventory(),body={session_id:agentSessionId,character:characterZh[character]||character,character_key:character,vessel:vesselName(key,character),vessel_key:key,mode,question,slots,rules,inventory};
+  const inventory=agentInventory(),body={character:characterZh[character]||character,character_key:character,vessel:vesselName(key,character),vessel_key:key,mode,question,slots,rules,inventory};if(agentSessionId)body.session_id=agentSessionId;
   const result=await requestJson('/api/ai/recommend',body);pendingAgentPlan={plan:result,inventory,character,key,mode};describeAgentPlan(result,inventory);setAgentStatus('配装建议已生成，请检查遗物和理由，再选择是否应用。');return result;
 }
 $('#agent-chat-form').addEventListener('submit',async event=>{
-  event.preventDefault();const question=$('#agent-question').value.trim();if(!question)return;
-  const button=$('#agent-send');pendingAgentPlan=null;$('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;appendAgentMessage('user',question);$('#agent-question').value='';$('#agent-question-count').textContent='0 / 400 字';button.disabled=true;
+  event.preventDefault();if(agentMemoryClearing||agentRequestInFlight)return;const question=$('#agent-question').value.trim();if(!question)return;
+  const button=$('#agent-send');agentRequestInFlight=true;updateAgentMemoryClearAvailability();pendingAgentPlan=null;$('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;appendAgentMessage('user',question);$('#agent-question').value='';$('#agent-question-count').textContent='0 / 400 字';button.disabled=true;
   try{
-    setAgentStatus('正在判断问题类型并查阅相关资料…');const reply=await requestJson('/api/ai/chat',{session_id:agentSessionId,question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)});
+    setAgentStatus('正在判断问题类型并查阅相关资料…');const chatBody={question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)};if(agentSessionId)chatBody.session_id=agentSessionId;const reply=await requestJson('/api/ai/chat',chatBody);
     if(reply.intent==='build'){
       const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);agentCurrentFeedbackContext={question,answer:plan.summary};appendAgentMessage('assistant',plan.summary,agentCurrentFeedbackContext);agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
     }else{
@@ -802,7 +901,7 @@ $('#agent-chat-form').addEventListener('submit',async event=>{
       setAgentStatus(reply.intent==='clarify'?'需要你补充信息后，我再继续。':'回答已整理完成。');
     }
   }catch(error){appendAgentMessage('assistant',`暂时无法完成：${error.message||'请检查 FastAPI 服务是否启动。'}`);setAgentStatus(error.message||'AI 请求失败，请稍后重试。',true)}
-  finally{button.disabled=false}
+  finally{button.disabled=false;agentRequestInFlight=false;updateAgentMemoryClearAvailability()}
 });
 $('#agent-apply-build').addEventListener('click',()=>{
   if(!pendingAgentPlan||!state.save)return;const {character,key,mode,plan}=pendingAgentPlan;
@@ -852,18 +951,32 @@ $('#build-results').addEventListener('click',e=>{const btn=e.target.closest('[da
   const vessel=result.vessel?.key;if(vessel&&[...$('#vessel-select').options].some(option=>option.value===vessel))$('#vessel-select').value=vessel;
   const config=currentVessel(),normal=placeRecommended(result.normalRelics||result.relics||[],config.normalSlots),deep=$('#build-mode').value==='combined'?placeRecommended(result.deepRelics||[],config.deepSlots):[null,null,null];
   if(!normal||!deep){$('#build-status').textContent='此方案无法放入当前供具槽位，请更换供具后重试。';return}
-  state.equipped={normal,deep};state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent='已在上方槽位预览推荐方案，可继续拖拽调整。';$('#loadout-slots').scrollIntoView({behavior:'smooth',block:'center'});
+  state.equipped={normal,deep};state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent='已在上方槽位预览推荐方案，可继续拖拽调整。';const scrollBehavior=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';$('#loadout-slots').scrollIntoView({behavior:scrollBehavior,block:'center'});
 });
 $('#run-build').addEventListener('click',()=>{
   if(!state.save)return navigate('relics');
   if(!state.rules.length){$('#build-status').textContent='请先添加至少一项规则。';return}
   if($('#build-mode').value==='normal'&&state.rules.some(r=>r.scope==='deep'&&r.priority==='required')){$('#build-status').textContent='仅普通模式无法满足“深夜必选”规则，请切换组合模式或调整规则。';return}
-  if(state.worker)state.worker.terminate();
-  const btn=$('#run-build');btn.disabled=true;$('#build-status').textContent='正在计算供具槽位与遗物组合…';$('#build-results').innerHTML='';
-    const worker=new Worker('./relic-optimizer.js');state.worker=worker;
-  worker.onmessage=e=>{const d=e.data;if(d.progress){$('#build-status').textContent=`正在计算 ${d.progress.current}/${d.progress.total} 个供具…`;return}btn.disabled=false;worker.terminate();state.worker=null;if(d.error){$('#build-status').textContent='计算失败：'+d.error;return}renderBuildResult(d.result);$('#build-status').textContent=state.buildResults.length?`计算完成 · ${state.buildResults.length} 套满足必选条件的组合`:'没有满足全部必选条件的组合';};
-  worker.onerror=e=>{btn.disabled=false;worker.terminate();state.worker=null;$('#build-status').textContent='计算失败：'+e.message};
-  worker.postMessage({relics:state.save.relics,effectSpecs:buildSpecs(),vesselsData:state.vessels,stackingData:stackingData(),params:{character:$('#build-character-select').value,vessel:undefined,characterVesselsOnly:true,combined:$('#build-mode').value==='combined',candidates:25,top:10}});
+  stopBuildWorker();
+  const btn=$('#run-build');btn.disabled=true;state.buildResults=[];$('#build-status').textContent='正在计算供具槽位与遗物组合…';$('#build-results').innerHTML='';
+  let worker;
+  try{
+    const payload={relics:state.save.relics,effectSpecs:buildSpecs(),vesselsData:state.vessels,stackingData:stackingData(),params:{character:$('#build-character-select').value,vessel:undefined,characterVesselsOnly:true,combined:$('#build-mode').value==='combined',candidates:25,top:10}};
+    worker=new Worker('./relic-optimizer.js');state.worker=worker;
+    const fail=error=>{if(state.worker!==worker)return;stopBuildWorker(worker);btn.disabled=false;$('#build-status').textContent='计算失败：'+(error?.message||'后台计算发生错误')};
+    worker.onmessage=e=>{
+      if(state.worker!==worker)return;
+      const data=e.data||{};
+      if(data.progress){$('#build-status').textContent=`正在计算 ${data.progress.current}/${data.progress.total} 个供具…`;return}
+      stopBuildWorker(worker);btn.disabled=false;
+      if(data.error){$('#build-status').textContent='计算失败：'+data.error;return}
+      try{renderBuildResult(data.result);$('#build-status').textContent=state.buildResults.length?`计算完成 · ${state.buildResults.length} 套满足必选条件的组合`:'没有满足全部必选条件的组合'}
+      catch(error){state.buildResults=[];$('#build-results').innerHTML='';$('#build-status').textContent='计算失败：'+error.message}
+    };
+    worker.onerror=fail;
+    worker.onmessageerror=fail;
+    worker.postMessage(payload);
+  }catch(error){stopBuildWorker(worker);btn.disabled=false;$('#build-status').textContent='计算失败：'+error.message}
 });
 
 loadCatalogs();navigate(location.hash.slice(1)||'overview');

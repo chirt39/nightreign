@@ -612,6 +612,21 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .agent-chat-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#91a3b3;font-size:11px}
 #agent-status{margin:9px 0 0}
 #agent-status.error{color:#ed9a8f}
+.agent-memory-tools{display:flex;align-items:center;gap:9px;margin-top:6px;color:#8497a6;font-size:11px}
+.agent-memory-clear-open{padding:2px 0;border:0;background:none;color:#aeb8bd;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.agent-memory-clear-open:hover{color:#e5c783}
+.agent-memory-clear-open:disabled{color:#667783;cursor:not-allowed}
+.agent-memory-dialog{width:min(480px,calc(100% - 24px));padding:0;border:1px solid #596575;border-radius:4px;background:#14212b;color:#e5e6df;box-shadow:0 24px 80px #0009}
+.agent-memory-dialog::backdrop{background:#071018c9;backdrop-filter:blur(3px)}
+.agent-memory-dialog-content{padding:22px}
+.agent-memory-dialog-content>.eyebrow{margin:0 0 4px;color:#a99a78;font-size:10px;letter-spacing:.12em}
+.agent-memory-dialog-content h2{margin:0 0 12px;color:#e7d0a0;font:600 21px 'Noto Serif SC',serif}
+.agent-memory-dialog-content>p:not(.eyebrow){color:#bbc6c8;font-size:13px;line-height:1.7}
+.agent-memory-dialog-content .agent-memory-clear-warning{padding:10px;border-left:2px solid #c77766;background:#261d20;color:#f0c1b6}
+.agent-memory-clear-status{min-height:1.5em;margin:8px 0;color:#aebcba;font-size:12px}
+.agent-memory-clear-status.error{color:#ed9a8f}
+.agent-memory-dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.agent-memory-dialog-actions button[hidden]{display:none}
 #agent-build-result{margin-top:10px;padding:12px;border-left:2px solid #c8a466;background:#111e2d;line-height:1.6}
 #agent-apply-build{margin-top:10px}
 .feedback-dialog{width:min(620px,calc(100% - 24px));max-height:min(88vh,820px);padding:0;border:1px solid #596575;border-radius:4px;background:#14212b;color:#e5e6df;box-shadow:0 24px 80px #0009}
@@ -634,7 +649,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .feedback-form-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
 #feedback-status{color:#aebcba;font-size:12px}
 #feedback-status:empty{display:none}
-@media(max-width:600px){#view-overview .home-agent{padding:14px}.home-agent-heading{flex-direction:column;align-items:flex-start;gap:12px}.feedback-suggestion-open{margin-top:0}.agent-entry{max-width:100%}.feedback-form{padding:16px}}
+@media(max-width:600px){#view-overview .home-agent{padding:14px}.home-agent-heading{flex-direction:column;align-items:flex-start;gap:12px}.feedback-suggestion-open{margin-top:0}.agent-entry{max-width:100%}.feedback-form{padding:16px}.agent-memory-tools{align-items:flex-start;flex-direction:column;gap:3px}.agent-memory-dialog-content{padding:16px}}
 
 /* Searchable relic effect glossary. */
 .effect-encyclopedia{padding:18px;border:1px solid #35495d;background:linear-gradient(150deg,#172638,#142231)}
