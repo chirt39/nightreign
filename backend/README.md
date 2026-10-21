@@ -76,7 +76,8 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 
 - 首页每条助手回答提供“回答有错？向窝反馈”，标题栏提供“向我提建议”。邮箱可留空；只有用户主动勾选“附上当前这一轮的问题与回答”时，浏览器才把这两个字段附在本次反馈中，不会发送整段历史。
 - 提交接口为 `POST /api/feedback`；管理员收件箱接口为 `GET /api/admin/feedback`，使用 `Authorization: Bearer <口令>` 鉴权。管理员页面是前端静态地址 `/admin-feedback.html`，口令只保留在页面内存，不写 URL 或浏览器存储。
-- 管理员收件箱和口令提交必须使用 HTTPS。公网 HTTP 部署仍可访问站点的只读功能，但收件箱页面会禁用登录，后端也会拒绝 HTTP 收件箱请求；本机 `localhost`、`127.0.0.1` 和 `[::1]` 的开发访问允许 HTTP，且后端要求连接客户端确实来自回环地址。有 `Origin` 请求头时，后端拒绝非 HTTPS 公网来源，只保留本机回环开发例外。
+- `POST /api/feedback`（可能包含可选邮箱及用户勾选的本轮问答）和管理员收件箱都必须使用 HTTPS。公网 HTTP 部署仍可访问站点的只读功能，但反馈弹窗会提示并禁用提交，后端也会拒绝 HTTP 反馈请求；本机 `localhost`、`127.0.0.1` 和 `[::1]` 的开发访问允许 HTTP，且后端要求连接客户端确实来自回环地址。有 `Origin` 请求头时，后端拒绝非 HTTPS 公网来源，只保留本机回环开发例外。
+- `docs/UBUNTU_STATIC_DEPLOY.md` 中的静态 Nginx 示例只提供 HTTP，不会自动获得 HTTPS；它可以继续用于公网只读浏览，但要经 HTTPS 托管前端并配置好 HTTPS API 才能提交反馈或管理收件箱。
 - 后端依据 ASGI `request.url.scheme` 判断 HTTPS，不直接读取应用层可伪造的 `X-Forwarded-Proto`。TLS 在受信任反向代理终止时，需按前述 `FORWARDED_ALLOW_IPS` 仅信任实际代理源地址，让 Uvicorn 生成正确的请求 scheme；不得使用 `*`。若代理未被列入 Uvicorn 信任范围，HTTPS 外部访问会被视为 HTTP 并遭拒绝，须先修正代理信任配置。
 - 设置仅供后端使用的 `FEEDBACK_ADMIN_PASSWORD`，至少 32 个字符。可用 `python -c "import secrets; print(secrets.token_urlsafe(32))"` 生成随机口令，并只填写到本机 `.env` 或后端私密环境变量，不能提交到仓库或放入 `public/`。未配置或长度不足时，反馈提交和收件箱均返回服务不可用。
 - 反馈和可选邮箱/问答保存在 `AGENT_MEMORY_DB` 的 SQLite 文件中，90 天后从活动数据库删除；服务运行时每小时清理一次，启动时也会清理过期项。将 `AGENT_MEMORY_DB` 放在权限受控的持久化磁盘上；停止服务期间到期的数据会在服务重新启动后清理。若平台另有磁盘快照或数据库备份，需为备份单独设置不超过 90 天的保留期。每个客户端每分钟最多提交 5 条。

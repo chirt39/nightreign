@@ -844,6 +844,7 @@ async def _feedback_rate_limit(request: Request) -> None:
 
 @app.post("/api/feedback")
 async def submit_feedback(body: FeedbackSubmission, request: Request) -> dict:
+    _require_secure_feedback_admin_transport(request)
     if len(FEEDBACK_ADMIN_PASSWORD) < FEEDBACK_ADMIN_PASSWORD_MIN_LENGTH:
         raise HTTPException(status_code=503, detail="反馈功能暂不可用。")
     await _feedback_rate_limit(request)
@@ -873,6 +874,7 @@ async def submit_feedback(body: FeedbackSubmission, request: Request) -> dict:
 
 @app.get("/api/admin/feedback")
 async def feedback_inbox(
+    request: Request,
     response: Response,
     authorization: str | None = Header(default=None),
     limit: int = Query(default=50, ge=1, le=100),

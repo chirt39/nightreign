@@ -33,6 +33,7 @@ defineProps({ active: Boolean });
                 <p><strong>本轮问题</strong><span id="feedback-question-preview"></span></p>
                 <p><strong>助手回答</strong><span id="feedback-answer-preview"></span></p>
               </div>
+              <p id="feedback-transport-warning" class="feedback-context-preview" role="alert" hidden>公网反馈需要使用 HTTPS 页面和 HTTPS API，当前连接不安全，已禁用提交。请改用 HTTPS；本机 localhost、127.0.0.1 或 [::1] 开发访问可使用 HTTP。HTTP 公网主站仍可浏览。</p>
               <div class="feedback-form-actions"><span id="feedback-status" role="status" aria-live="polite"></span><button id="feedback-submit" class="button primary" type="submit">提交反馈</button></div>
             </form>
           </dialog>

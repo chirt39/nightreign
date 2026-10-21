@@ -739,6 +739,18 @@ let agentClarificationContext=[];
 let agentCurrentFeedbackContext=null;
 let feedbackDialogContext=null;
 let feedbackDialogKind='suggestion';
+const feedbackPageHost=window.location.hostname.replace(/^\[|\]$/g,'').toLowerCase();
+const feedbackLocalPage=['localhost','127.0.0.1','::1'].includes(feedbackPageHost);
+let feedbackApiSecure=false,feedbackLocalApi=false,feedbackApiProtocol='';
+try{
+  const feedbackApiUrl=new URL(window.NIGHTREIGN_AI_API_BASE||window.location.origin,window.location.href);
+  const feedbackApiHost=feedbackApiUrl.hostname.replace(/^\[|\]$/g,'').toLowerCase();
+  feedbackLocalApi=['localhost','127.0.0.1','::1'].includes(feedbackApiHost);
+  feedbackApiProtocol=feedbackApiUrl.protocol;
+  feedbackApiSecure=feedbackApiProtocol==='https:';
+}catch{}
+const feedbackLocalDevelopmentPair=feedbackLocalPage&&feedbackLocalApi&&['http:','https:'].includes(window.location.protocol)&&['http:','https:'].includes(feedbackApiProtocol);
+const feedbackTransportSecure=(window.location.protocol==='https:'&&feedbackApiSecure)||feedbackLocalDevelopmentPair;
 const agentSessionId=(()=>{const key='nightreign-agent-session-v1';let value;try{value=localStorage.getItem(key);if(!/^[0-9a-f-]{36}$/i.test(value||'')){value=crypto.randomUUID();localStorage.setItem(key,value)}}catch{value=crypto.randomUUID()}return value})();
 function setAgentStatus(message,error=false){const status=$('#agent-status');status.textContent=message;status.classList.toggle('error',error)}
 function appendAgentMessage(role,text,feedbackContext=null){
@@ -757,7 +769,7 @@ $('#agent-question').addEventListener('input',()=>{$('#agent-question-count').te
 function requestJson(url,body){return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');if(response.status===404)throw new Error('找不到 AI 接口，请更新并重启本地 FastAPI 服务。');throw new Error(`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`)}const result=await response.json();if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');return result})}
 function openFeedbackDialog(kind,context=null){
   const dialog=$('#feedback-dialog'),form=$('#feedback-form');if(!dialog?.showModal){setAgentStatus('当前浏览器暂不支持打开反馈表单。',true);return}
-  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();$('#feedback-status').textContent='';$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=false;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
+  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();$('#feedback-status').textContent='';$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
   const option=$('#feedback-context-option'),preview=$('#feedback-context-preview');option.hidden=!context;preview.hidden=true;
   if(context){$('#feedback-question-preview').textContent=context.question;$('#feedback-answer-preview').textContent=context.answer}
   dialog.showModal();$('#feedback-message').focus();
@@ -765,9 +777,9 @@ function openFeedbackDialog(kind,context=null){
 $('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
 $('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});
 $('#feedback-cancel').addEventListener('click',()=>$('#feedback-dialog').close());
-$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=false;$('#feedback-cancel').textContent='关闭'});
+$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭'});
 $('#feedback-form').addEventListener('submit',async event=>{
-  event.preventDefault();if(!event.currentTarget.reportValidity())return;
+  event.preventDefault();if(!feedbackTransportSecure){$('#feedback-submit').disabled=true;$('#feedback-transport-warning').hidden=false;return}if(!event.currentTarget.reportValidity())return;
   const submit=$('#feedback-submit'),includeContext=Boolean(feedbackDialogContext&&$('#feedback-include-context').checked),payload={kind:feedbackDialogKind,message:$('#feedback-message').value.trim(),email:$('#feedback-email').value.trim()||null,include_context:includeContext};
   if(includeContext){payload.question=feedbackDialogContext.question;payload.answer=feedbackDialogContext.answer}
   submit.disabled=true;$('#feedback-status').textContent='正在提交…';
