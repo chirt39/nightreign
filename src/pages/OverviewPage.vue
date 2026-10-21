@@ -10,7 +10,7 @@ defineProps({ active: Boolean });
             <div id="agent-chat-log" class="agent-chat-log" role="log" aria-live="polite" aria-label="助手对话记录"><p class="agent-empty">你好，我会判断你的问题是查阅资料还是请求配装。配装时我会在对话中确认角色、供具、普通或深夜范围及配装目标；信息不清楚时会先询问。配装只使用已读取存档中的遗物。</p></div>
             <form id="agent-chat-form" class="agent-chat-form">
               <label class="agent-question-label" for="agent-question">你的问题</label>
-              <textarea id="agent-question" minlength="2" maxlength="400" required placeholder="例如：追踪者的专属词条有哪些？／请只用普通遗物，为复仇者搭配偏输出的装配。"></textarea>
+              <textarea id="agent-question" name="question" minlength="2" maxlength="400" required placeholder="例如：追踪者的专属词条有哪些？／请只用普通遗物，为复仇者搭配偏输出的装配。"></textarea>
               <div class="agent-chat-actions"><span id="agent-question-count">0 / 400 字</span><button id="agent-send" class="button primary" type="submit">发送</button></div>
             </form>
             <p id="agent-status" class="hint" role="status" aria-live="polite">配装时只使用已读取的本机存档遗物；角色、供具或范围不明确时会先向你确认。</p>
@@ -22,9 +22,9 @@ defineProps({ active: Boolean });
               <div class="feedback-form-heading"><div><p class="eyebrow">ROUNDtable MESSAGE</p><h2 id="feedback-title">向窝反馈</h2></div><button id="feedback-cancel" class="button ghost" type="button">关闭</button></div>
               <p id="feedback-kind-label" class="feedback-kind-label"></p>
               <label class="feedback-label" for="feedback-message">补充说明</label>
-              <textarea id="feedback-message" minlength="2" maxlength="4000" required placeholder="告诉我们哪里不准确，或描述你的建议。"></textarea>
+              <textarea id="feedback-message" name="message" minlength="2" maxlength="4000" required placeholder="告诉我们哪里不准确，或描述你的建议。"></textarea>
               <label class="feedback-label" for="feedback-email">邮箱（可选，便于后续联系）</label>
-              <input id="feedback-email" type="email" maxlength="254" autocomplete="email" placeholder="name@example.com">
+              <input id="feedback-email" name="email" type="email" maxlength="254" autocomplete="email" spellcheck="false" placeholder="name@example.com">
               <label id="feedback-context-option" class="feedback-context-option" hidden>
                 <input id="feedback-include-context" type="checkbox">
                 <span>附上当前这一轮的问题与回答（默认不附）</span>
