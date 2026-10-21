@@ -951,7 +951,7 @@ $('#build-results').addEventListener('click',e=>{const btn=e.target.closest('[da
   const vessel=result.vessel?.key;if(vessel&&[...$('#vessel-select').options].some(option=>option.value===vessel))$('#vessel-select').value=vessel;
   const config=currentVessel(),normal=placeRecommended(result.normalRelics||result.relics||[],config.normalSlots),deep=$('#build-mode').value==='combined'?placeRecommended(result.deepRelics||[],config.deepSlots):[null,null,null];
   if(!normal||!deep){$('#build-status').textContent='此方案无法放入当前供具槽位，请更换供具后重试。';return}
-  state.equipped={normal,deep};state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent='已在上方槽位预览推荐方案，可继续拖拽调整。';$('#loadout-slots').scrollIntoView({behavior:'smooth',block:'center'});
+  state.equipped={normal,deep};state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent='已在上方槽位预览推荐方案，可继续拖拽调整。';const scrollBehavior=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';$('#loadout-slots').scrollIntoView({behavior:scrollBehavior,block:'center'});
 });
 $('#run-build').addEventListener('click',()=>{
   if(!state.save)return navigate('relics');
