@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
+import stat
 import time
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
@@ -22,9 +23,51 @@ MAX_EXCHANGES = max(1, int(os.getenv("AGENT_MEMORY_MAX_EXCHANGES", "5")))
 FEEDBACK_RETENTION = timedelta(days=90)
 
 
+def _restrict_posix_file_permissions(path: Path, create: bool = False) -> None:
+    if os.name != "posix":
+        return
+
+    flags = os.O_RDWR | getattr(os, "O_NONBLOCK", 0)
+    nofollow = getattr(os, "O_NOFOLLOW", None)
+    if nofollow is None and path.is_symlink():
+        raise OSError(f"Refusing to change permissions on a symlink: {path}")
+    if nofollow is not None:
+        flags |= nofollow
+    if create:
+        flags |= os.O_CREAT
+
+    try:
+        descriptor = os.open(path, flags, 0o600) if create else os.open(path, flags)
+    except FileNotFoundError:
+        if create:
+            raise
+        return
+
+    try:
+        file_stat = os.fstat(descriptor)
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise OSError(f"SQLite file must be a regular file: {path}")
+        if nofollow is None:
+            path_stat = path.lstat()
+            if (file_stat.st_dev, file_stat.st_ino) != (path_stat.st_dev, path_stat.st_ino):
+                raise OSError(f"SQLite file path changed while opening: {path}")
+        os.fchmod(descriptor, 0o600)
+    finally:
+        os.close(descriptor)
+
+
+def _secure_sqlite_file_permissions() -> None:
+    if os.name != "posix":
+        return
+    _restrict_posix_file_permissions(DB_PATH, create=True)
+    for suffix in ("-wal", "-shm", "-journal"):
+        _restrict_posix_file_permissions(Path(f"{DB_PATH}{suffix}"))
+
+
 @contextmanager
 def _connect() -> Iterator[sqlite3.Connection]:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    _secure_sqlite_file_permissions()
     connection = sqlite3.connect(DB_PATH, timeout=10)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA journal_mode=WAL")

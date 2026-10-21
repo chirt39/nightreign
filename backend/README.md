@@ -33,6 +33,21 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 
 每个浏览器在本地存储一个随机会话标识。FastAPI 将该会话的问答存入 SQLite，并在 Chroma 中建立语义记忆索引；默认只保留最近 5 轮完整问答（可用 `AGENT_MEMORY_MAX_EXCHANGES` 调整），更早的 SQLite 记录和对应 Chroma 记录会清理。提问时只检索仍保留的记忆。助手页面不提供手动清除按钮；原始存档和遗物库存不写入对话记忆。
 
+### SQLite 文件权限
+
+POSIX 系统上，每次打开数据库前都会将数据库文件及已存在的 `-wal`、`-shm`、`-journal` 文件收紧为 `0600`；新建数据库也以 `0600` 创建。SQLite Unix VFS 新建 WAL/SHM sidecar 时使用与主数据库相同的权限，因此会保持为 `0600`。仅当数据库父目录不存在时才以 `0700` 创建；已有目录（包括 `/tmp` 或共享目录）不会被 chmod。Windows 跳过 POSIX 权限处理，沿用 SQLite 原生行为。
+
+在 Ubuntu 上可核对数据库及当前存在的 sidecar 权限；每个文件应显示 `600`：
+
+```sh
+db_path="${AGENT_MEMORY_DB:-local-data/agent_memory.sqlite3}"
+for file in "$db_path" "$db_path-wal" "$db_path-shm" "$db_path-journal"; do
+    if [ -e "$file" ]; then
+        stat -c '%a %n' "$file"
+    fi
+done
+```
+
 `GET /api/health` 是 AI 服务就绪检查：要求知识库源语料可读且非空、Chroma 活动集合可用、索引记录数与源语料条数一致，并且 DeepSeek 生成 API Key 和百炼向量 API Key 均已配置；全部满足返回 HTTP 200，否则返回 HTTP 503 和逐项检查状态（`deepseek_api`、`dashscope_api`、`knowledge_source`、`chroma`）。该接口不调用 DeepSeek 或百炼，避免健康检查产生模型费用。`GET /api/knowledge/status` 可查看索引与源语料计数。
 
 ### RAG 检索评估
