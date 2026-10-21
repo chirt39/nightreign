@@ -14,9 +14,20 @@ defineProps({ active: Boolean });
               <div class="agent-chat-actions"><span id="agent-question-count">0 / 400 字</span><button id="agent-send" class="button primary" type="submit">发送</button></div>
             </form>
             <p id="agent-status" class="hint" role="status" aria-live="polite">配装时只使用已读取的本机存档遗物；角色、供具或范围不明确时会先向你确认。</p>
+            <div class="agent-memory-tools"><button id="agent-memory-clear-open" class="agent-memory-clear-open" type="button" aria-haspopup="dialog" aria-controls="agent-memory-clear-dialog">清除已保存对话记忆</button><span>只删除助手保存的问答，不影响本机存档。</span></div>
             <div id="agent-build-result" hidden></div>
             <button id="agent-apply-build" class="button primary" type="button" hidden>应用配装到装配预览</button>
           </section>
+          <dialog id="agent-memory-clear-dialog" class="agent-memory-dialog" aria-labelledby="agent-memory-clear-title" aria-describedby="agent-memory-clear-description">
+            <section class="agent-memory-dialog-content">
+              <p class="eyebrow">MEMORY SETTINGS</p>
+              <h2 id="agent-memory-clear-title">清除已保存对话记忆</h2>
+              <p id="agent-memory-clear-description">这会删除此浏览器会话保存在服务端的助手问答，并清空当前页面的对话记录。遗物存档和装配内容不会受影响。</p>
+              <p id="agent-memory-clear-warning" class="agent-memory-clear-warning" hidden>此操作无法撤销。确定要永久清除此会话的已保存对话记忆吗？</p>
+              <p id="agent-memory-clear-status" class="agent-memory-clear-status" role="status" aria-live="polite" tabindex="-1"></p>
+              <div class="agent-memory-dialog-actions"><button id="agent-memory-clear-cancel" class="button ghost" type="button">取消</button><button id="agent-memory-clear-next" class="button ghost" type="button">继续</button><button id="agent-memory-clear-confirm" class="button primary" type="button" hidden>永久清除记忆</button></div>
+            </section>
+          </dialog>
           <dialog id="feedback-dialog" class="feedback-dialog" aria-labelledby="feedback-title">
             <form id="feedback-form" class="feedback-form">
               <div class="feedback-form-heading"><div><p class="eyebrow">ROUNDtable MESSAGE</p><h2 id="feedback-title">向窝反馈</h2></div><button id="feedback-cancel" class="button ghost" type="button">关闭</button></div>

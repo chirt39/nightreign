@@ -747,6 +747,10 @@ let pendingAgentPlan=null;
 const agentHistory=[];
 let agentClarificationContext=[];
 let agentCurrentFeedbackContext=null;
+let agentHistoryRestoreRevision=0;
+let agentMemoryClearing=false;
+let agentRequestInFlight=false;
+let agentMemoryClearStage=1;
 let feedbackDialogContext=null;
 let feedbackDialogKind='suggestion';
 const feedbackPageHost=window.location.hostname.replace(/^\[|\]$/g,'').toLowerCase();
@@ -790,9 +794,38 @@ function appendAgentMessage(role,text,feedbackContext=null){
 }
 async function restoreAgentHistory(){
   if(!agentSessionId){setAgentStatus('当前环境无法安全生成会话 ID；本页对话仍可继续，但不会读取或保存后端历史记忆。');return}
-  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else{if(context)agentCurrentFeedbackContext=context;previousQuestion=''}}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
+  const revision=agentHistoryRestoreRevision;
+  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(revision!==agentHistoryRestoreRevision||!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else{if(context)agentCurrentFeedbackContext=context;previousQuestion=''}}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{if(revision===agentHistoryRestoreRevision)setAgentStatus('当前无法读取已保存的对话记忆。',true)}
 }
 restoreAgentHistory();
+const agentMemoryClearDialog=$('#agent-memory-clear-dialog');
+const agentMemoryClearOpen=$('#agent-memory-clear-open');
+function updateAgentMemoryClearAvailability(){agentMemoryClearOpen.disabled=!agentSessionId||agentRequestInFlight||agentMemoryClearing}
+function setAgentMemoryClearStage(stage){
+  agentMemoryClearStage=stage;$('#agent-memory-clear-description').hidden=stage!==1;$('#agent-memory-clear-warning').hidden=stage!==2;agentMemoryClearDialog.setAttribute('aria-describedby',stage===1?'agent-memory-clear-description':'agent-memory-clear-warning');$('#agent-memory-clear-next').hidden=stage!==1;$('#agent-memory-clear-confirm').hidden=stage!==2;
+}
+agentMemoryClearOpen.addEventListener('click',()=>{
+  if(!agentSessionId){setAgentStatus('当前环境无法安全生成会话 ID，暂时不能清除服务端对话记忆。',true);return}
+  if(agentRequestInFlight||agentMemoryClearing)return;
+  setAgentMemoryClearStage(1);const status=$('#agent-memory-clear-status');status.textContent='';status.classList.remove('error');agentMemoryClearDialog.showModal();$('#agent-memory-clear-next').focus();
+});
+$('#agent-memory-clear-next').addEventListener('click',()=>{setAgentMemoryClearStage(2);$('#agent-memory-clear-confirm').focus()});
+$('#agent-memory-clear-cancel').addEventListener('click',()=>agentMemoryClearDialog.close());
+agentMemoryClearDialog.addEventListener('cancel',event=>{if(agentMemoryClearing)event.preventDefault()});
+agentMemoryClearDialog.addEventListener('close',()=>agentMemoryClearOpen.focus());
+$('#agent-memory-clear-confirm').addEventListener('click',async()=>{
+  if(agentMemoryClearing||agentRequestInFlight||!agentSessionId||agentMemoryClearStage!==2)return;
+  agentMemoryClearing=true;agentMemoryClearDialog.setAttribute('aria-busy','true');updateAgentMemoryClearAvailability();$('#agent-question').disabled=true;$('#agent-send').disabled=true;$('#agent-apply-build').disabled=true;
+  const confirmButton=$('#agent-memory-clear-confirm'),cancelButton=$('#agent-memory-clear-cancel'),status=$('#agent-memory-clear-status');confirmButton.disabled=true;cancelButton.disabled=true;status.textContent='正在清除已保存对话记忆…';status.classList.remove('error');status.focus();
+  try{
+    await requestJson('/api/ai/memory/clear',{session_id:agentSessionId});
+    agentHistoryRestoreRevision++;agentHistory.length=0;agentClarificationContext=[];agentCurrentFeedbackContext=null;pendingAgentPlan=null;
+    $('#agent-chat-log').replaceChildren();const empty=document.createElement('p');empty.className='agent-empty';empty.textContent='你好，我会判断你的问题是查阅资料还是请求配装。配装时我会在对话中确认角色、供具、普通或深夜范围及配装目标；信息不清楚时会先询问。配装只使用已读取存档中的遗物。';$('#agent-chat-log').append(empty);
+    $('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;setAgentStatus('已清除已保存对话记忆。');status.textContent='清除完成。';agentMemoryClearDialog.close();
+  }catch(error){const message=error.message||'清除失败，请稍后重试。';status.textContent=message;status.classList.add('error');setAgentStatus(message,true)}
+  finally{agentMemoryClearing=false;agentMemoryClearDialog.setAttribute('aria-busy','false');$('#agent-question').disabled=false;$('#agent-send').disabled=false;$('#agent-apply-build').disabled=false;confirmButton.disabled=false;cancelButton.disabled=false;updateAgentMemoryClearAvailability();if(agentMemoryClearDialog.open&&agentMemoryClearStage===2)confirmButton.focus();else if(!agentMemoryClearDialog.open)agentMemoryClearOpen.focus()}
+});
+updateAgentMemoryClearAvailability();
 $('#agent-question').addEventListener('input',()=>{$('#agent-question-count').textContent=`${Array.from($('#agent-question').value).length} / 400 字`});
 function requestJson(url,body){return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');if(response.status===404)throw new Error('找不到 AI 接口，请更新并重启本地 FastAPI 服务。');throw new Error(`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`)}const result=await response.json();if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');return result})}
 let feedbackDialogRevision=0;
@@ -857,8 +890,8 @@ async function requestAgentBuild(question,context){
   const result=await requestJson('/api/ai/recommend',body);pendingAgentPlan={plan:result,inventory,character,key,mode};describeAgentPlan(result,inventory);setAgentStatus('配装建议已生成，请检查遗物和理由，再选择是否应用。');return result;
 }
 $('#agent-chat-form').addEventListener('submit',async event=>{
-  event.preventDefault();const question=$('#agent-question').value.trim();if(!question)return;
-  const button=$('#agent-send');pendingAgentPlan=null;$('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;appendAgentMessage('user',question);$('#agent-question').value='';$('#agent-question-count').textContent='0 / 400 字';button.disabled=true;
+  event.preventDefault();if(agentMemoryClearing||agentRequestInFlight)return;const question=$('#agent-question').value.trim();if(!question)return;
+  const button=$('#agent-send');agentRequestInFlight=true;updateAgentMemoryClearAvailability();pendingAgentPlan=null;$('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;appendAgentMessage('user',question);$('#agent-question').value='';$('#agent-question-count').textContent='0 / 400 字';button.disabled=true;
   try{
     setAgentStatus('正在判断问题类型并查阅相关资料…');const chatBody={question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)};if(agentSessionId)chatBody.session_id=agentSessionId;const reply=await requestJson('/api/ai/chat',chatBody);
     if(reply.intent==='build'){
@@ -868,7 +901,7 @@ $('#agent-chat-form').addEventListener('submit',async event=>{
       setAgentStatus(reply.intent==='clarify'?'需要你补充信息后，我再继续。':'回答已整理完成。');
     }
   }catch(error){appendAgentMessage('assistant',`暂时无法完成：${error.message||'请检查 FastAPI 服务是否启动。'}`);setAgentStatus(error.message||'AI 请求失败，请稍后重试。',true)}
-  finally{button.disabled=false}
+  finally{button.disabled=false;agentRequestInFlight=false;updateAgentMemoryClearAvailability()}
 });
 $('#agent-apply-build').addEventListener('click',()=>{
   if(!pendingAgentPlan||!state.save)return;const {character,key,mode,plan}=pendingAgentPlan;
