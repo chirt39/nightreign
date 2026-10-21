@@ -517,8 +517,12 @@ function parseSaveFile(arrayBuffer, itemsData, effectsData) {
   // Get character name
   const characterName = getCharacterName(entries);
 
-  // Parse relics from Entry 0 only
-  const entry0 = entries[0];
+  // Relics live in original BND4 Entry 0. decryptSaveFile() may skip malformed
+  // entries, so the first successfully decrypted entry is not necessarily 0.
+  const entry0 = entries.find(entry => entry.index === 0);
+  if (!entry0) {
+    throw new Error('存档主要数据条目损坏或缺失，无法读取遗物。');
+  }
   const relics = parseRelicsFromEntry(entry0.cleanData, validItems, validEffects);
 
   // Set coordinates
