@@ -79,10 +79,16 @@ function handleNavigation(event) {
 }
 
 function handleHashChange() {
+  if (location.hash === '#main-content') return;
   setView(location.hash.slice(1), false);
 }
 
 function handlePopState(event) {
+  if (location.hash === '#main-content') {
+    const view = event.state?.view in labels ? event.state.view : currentView.value;
+    setView(view, false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0);
+    return;
+  }
   setView(location.hash.slice(1), false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0);
 }
 
@@ -134,6 +140,7 @@ onUnmounted(() => {
     <p>必要功能暂时无法启动，请刷新页面重试。</p>
   </main>
   <div v-else class="app-shell" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
+    <a class="skip-link" href="#main-content">跳转到主要内容</a>
     <aside id="mobile-navigation" class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
         <img class="brand-image" src="/nightreign-banner.png" alt="ELDEN RING NIGHTREIGN" />
@@ -153,7 +160,7 @@ onUnmounted(() => {
       <div class="side-bottom"><span class="pulse-dot"></span> 离线资料 · 本地解析<br /><small>存档始终留在你的浏览器中</small></div>
     </aside>
 
-    <main class="main">
+    <main id="main-content" class="main" tabindex="-1">
       <header class="topbar">
         <button id="mobile-menu" class="icon-button" type="button" :aria-label="sidebarOpen ? '关闭导航' : '打开导航'" :aria-expanded="sidebarOpen" aria-controls="mobile-navigation">☰</button>
         <span class="breadcrumb">ELDEN RING NIGHTREIGN <span>/</span> <b>{{ labels[currentView] }}</b></span>
