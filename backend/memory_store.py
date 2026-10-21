@@ -169,11 +169,17 @@ def _flush_pending_memory_deletions() -> None:
 
 def clear(session_id: str) -> None:
     db = rag_store.chroma_client()
-    try:
+    collections = db.list_collections()
+    collection_exists = any(
+        getattr(collection, "name", collection) == COLLECTION
+        for collection in collections
+    )
+    if collection_exists:
         collection = db.get_collection(name=COLLECTION)
         collection.delete(where={"session_id": session_id})
-    except Exception:
-        pass
+
+    # Keep SQLite history until vector deletion is confirmed. If this SQL
+    # transaction fails after Chroma deletion, retrying the delete is safe.
     with _connect() as connection:
         connection.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))
         connection.execute(
