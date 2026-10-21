@@ -376,6 +376,7 @@ async function readSave(file){
   if(!state.items||!state.effects){setSaveStatus('资料尚未载入，请稍后再试。',true);return}
   try{
     setSaveStatus(`正在本地解析 ${file.name}…`);
+    await validateSaveFileHeader(file);
     const buffer=await file.arrayBuffer();
     const parsed=parseSaveFile(buffer,state.items,state.effects);
     try{state.saveEditor=createSaveEditor(buffer);state.saveFileName=file.name}catch(editError){state.saveEditor=null;state.saveFileName=null;console.info('此存档暂不支持编辑：',editError.message)}

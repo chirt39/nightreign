@@ -13,6 +13,7 @@ const BND4_ENTRY_HEADER_LEN = 32;
 const SLOT_SIZE_FULL = 80;
 const SLOT_SIZE_SMALL = 16;
 const EMPTY_EFFECT = 0xFFFFFFFF;
+const BND4_MAGIC = [0x42, 0x4E, 0x44, 0x34];
 
 const VALID_B3_VALUES = new Set([0x80, 0x83, 0x81, 0x82, 0x84, 0x85]);
 const VALID_B4_VALUES = new Set([0x80, 0x90, 0xc0]);
@@ -138,6 +139,27 @@ function decryptAES(iv, encryptedPayload) {
 // === BND4 Entry Processing ===
 
 /**
+ * Validate the fixed BND4 header and declared entry-table boundary using only
+ * a small prefix read, before the caller allocates the complete file buffer.
+ * @param {File|Blob} file - user-selected local save file
+ */
+async function validateSaveFileHeader(file) {
+  const header = new Uint8Array(await file.slice(0, BND4_HEADER_LEN).arrayBuffer());
+  if (!startsWithAt(header, BND4_MAGIC, 0)) {
+    throw new Error('文件标记不匹配，请选择有效的 PC 版 .sl2 存档。');
+  }
+  if (file.size < BND4_HEADER_LEN || header.length < BND4_HEADER_LEN) {
+    throw new Error('存档文件头不完整，请选择完整的 .sl2 文件。');
+  }
+
+  const numEntries = readUint32LE(header, 12);
+  const entryTableEnd = BND4_HEADER_LEN + BND4_ENTRY_HEADER_LEN * numEntries;
+  if (entryTableEnd > file.size) {
+    throw new Error('存档条目表不完整，请选择完整的 .sl2 文件。');
+  }
+}
+
+/**
  * Decrypt a BND4 save file
  * @param {ArrayBuffer} arrayBuffer - raw file data
  * @returns {Array} array of BND4 entry objects with clean_data
@@ -146,7 +168,7 @@ function decryptSaveFile(arrayBuffer) {
   const raw = new Uint8Array(arrayBuffer);
 
   // Check BND4 header
-  if (!startsWithAt(raw, [0x42, 0x4E, 0x44, 0x34], 0)) { // "BND4"
+  if (!startsWithAt(raw, BND4_MAGIC, 0)) {
     throw new Error("BND4 header not found! This doesn't appear to be a valid SL2 file.");
   }
 
