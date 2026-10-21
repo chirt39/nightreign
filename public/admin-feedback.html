@@ -107,12 +107,12 @@
       }catch(error){if(generation!==inboxGeneration||error.name==='AbortError')return false;throw error}
       finally{inboxRequests.delete(controller)}
     }
-    function lockInbox(message,isError=false){
+    function lockInbox(message,isError=false,shouldFocus=true){
       inboxGeneration++;for(const controller of inboxRequests)controller.abort();inboxRequests.clear();
       adminToken='';offset=0;total=0;passwordInput.value='';inboxList.replaceChildren();inboxEmpty.hidden=true;
       pagination.hidden=true;pageLabel.textContent='';previousButton.disabled=true;nextButton.disabled=true;
       inbox.hidden=true;loginForm.hidden=false;loginButton.disabled=!secureAdminContext;passwordInput.disabled=!secureAdminContext;setStatus(message,isError);
-      if(secureAdminContext)passwordInput.focus();
+      if(shouldFocus&&secureAdminContext)passwordInput.focus();
     }
     function logoutInbox(){
       lockInbox('已退出收件箱。');
@@ -136,6 +136,8 @@
     logoutButton.addEventListener('click',logoutInbox);
     previousButton.addEventListener('click',async()=>{if(offset>0)try{await loadInbox(adminToken,Math.max(0,offset-PAGE_SIZE))}catch(error){handleInboxLoadError(error,'暂时无法载入上一页。')}});
     nextButton.addEventListener('click',async()=>{if(offset+PAGE_SIZE<total)try{await loadInbox(adminToken,offset+PAGE_SIZE)}catch(error){handleInboxLoadError(error,'暂时无法载入下一页。')}});
+    window.addEventListener('pagehide',()=>lockInbox('',false,false));
+    window.addEventListener('pageshow',event=>{if(event.persisted)lockInbox('页面已从浏览器缓存恢复，请重新验证管理员口令。')});
   </script>
 </body>
 </html>
