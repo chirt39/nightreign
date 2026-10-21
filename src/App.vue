@@ -19,6 +19,8 @@ const labels = {
 };
 const currentView = ref(location.hash.slice(1) in labels ? location.hash.slice(1) : 'overview');
 const sidebarOpen = ref(false);
+const scriptsReady = ref(false);
+const loadError = ref(false);
 
 function setView(view, updateUrl = true, restoreScrollY = null) {
   const nextView = view in labels ? view : 'overview';
@@ -86,18 +88,18 @@ function loadClassicScript(file) {
 onMounted(async () => {
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   history.replaceState({ ...history.state, view: currentView.value, scrollY: window.scrollY }, '', location.href);
-  window.addEventListener('nightreign:navigate', handleNavigation);
-  window.addEventListener('hashchange', handleHashChange);
-  window.addEventListener('popstate', handlePopState);
   for (const file of ['crypto-js.min.js', 'relic-parser.js', 'save-editor.js', 'ai-config.js', 'app.js?v=20261021-enemy-record-url', 'save-editor-ui.js']) {
     try {
       await loadClassicScript(file);
-    } catch (error) {
-      console.error(error);
-      loadError.value = error instanceof Error ? error.message : '前端脚本启动失败';
+    } catch {
+      loadError.value = true;
       return;
     }
   }
+  window.addEventListener('nightreign:navigate', handleNavigation);
+  window.addEventListener('hashchange', handleHashChange);
+  window.addEventListener('popstate', handlePopState);
+  scriptsReady.value = true;
 });
 
 onUnmounted(() => {
@@ -108,7 +110,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="app-shell" @click="handleShellClick">
+  <main v-if="loadError" class="app-load-error" role="alert" tabindex="-1">
+    <h1>页面未能完整加载</h1>
+    <p>必要功能暂时无法启动，请刷新页面重试。</p>
+  </main>
+  <div v-else class="app-shell" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
     <aside class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
         <img class="brand-image" src="/nightreign-banner.png" alt="ELDEN RING NIGHTREIGN" />
