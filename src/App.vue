@@ -21,6 +21,7 @@ const currentView = ref(location.hash.slice(1) in labels ? location.hash.slice(1
 const sidebarOpen = ref(false);
 const scriptsReady = ref(false);
 const loadError = ref(false);
+const classicScriptVersions = typeof __CLASSIC_SCRIPT_VERSIONS__ === 'undefined' ? null : __CLASSIC_SCRIPT_VERSIONS__;
 
 function setView(view, updateUrl = true, restoreScrollY = null) {
   const nextView = view in labels ? view : 'overview';
@@ -106,9 +107,19 @@ function loadClassicScript(file) {
 onMounted(async () => {
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   history.replaceState({ ...history.state, view: currentView.value, scrollY: window.scrollY }, '', location.href);
-  for (const file of ['crypto-js.min.js', 'relic-parser.js', 'save-editor.js', 'ai-config.js', 'app.js?v=20261021-enemy-record-url', 'save-editor-ui.js']) {
+  if (!classicScriptVersions) {
+    console.error('动态脚本版本配置缺失，页面功能无法启动。');
+    loadError.value = true;
+    return;
+  }
+  for (const [file, version] of Object.entries(classicScriptVersions)) {
+    if (!version) {
+      window.NIGHTREIGN_AI_API_BASE = window.NIGHTREIGN_AI_API_BASE || '';
+      console.warn('AI API 配置脚本缺失，已使用当前站点默认 API 地址。');
+      continue;
+    }
     try {
-      await loadClassicScript(file);
+      await loadClassicScript(`${file}?v=${version}`);
     } catch {
       if (file === 'ai-config.js') {
         window.NIGHTREIGN_AI_API_BASE = window.NIGHTREIGN_AI_API_BASE || '';
