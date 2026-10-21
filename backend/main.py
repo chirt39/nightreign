@@ -705,9 +705,15 @@ class MemoryAction(StrictModel):
     session_id: str = Field(pattern=r"^[0-9a-fA-F-]{36}$")
 
 
-@app.get("/api/ai/history")
-async def chat_history(session_id: str) -> dict:
-    if not re.fullmatch(r"[0-9a-fA-F-]{36}", session_id):
+@app.post("/api/ai/history")
+async def chat_history(request: Request) -> dict:
+    # Parse manually so validation errors never echo the bearer session ID.
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="对话记忆请求格式无效。") from None
+    session_id = body.get("session_id") if isinstance(body, dict) else None
+    if not isinstance(session_id, str) or not re.fullmatch(r"[0-9a-fA-F-]{36}", session_id):
         raise HTTPException(status_code=422, detail="会话标识无效。")
     return {"messages": await run_in_threadpool(memory_store.history, session_id)}
 

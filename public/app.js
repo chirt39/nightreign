@@ -745,7 +745,7 @@ function appendAgentMessage(role,text){
   entry.append(document.createTextNode(String(text).slice(last)));log.append(entry);log.scrollTop=log.scrollHeight;
 }
 async function restoreAgentHistory(){
-  try{const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/ai/history?session_id=${encodeURIComponent(agentSessionId)}`);if(!response.ok)throw new Error('读取对话记忆失败');const data=await response.json();if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){appendAgentMessage(message.role,message.content);agentHistory.push(message)}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
+  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){appendAgentMessage(message.role,message.content);agentHistory.push(message)}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{setAgentStatus('当前无法读取已保存的对话记忆。',true)}
 }
 restoreAgentHistory();
 $('#agent-question').addEventListener('input',()=>{$('#agent-question-count').textContent=`${Array.from($('#agent-question').value).length} / 400 字`});
