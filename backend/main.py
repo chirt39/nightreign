@@ -31,6 +31,7 @@ API_BASE = rag_store.validate_api_base_url(
 MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-flash")
 RATE_LIMIT = positive_int_setting("AI_REQUESTS_PER_MINUTE", 5)
 DAILY_AI_LIMIT = positive_int_setting("AI_REQUESTS_PER_DAY", 100)
+MEMORY_ENDPOINT_RATE_LIMIT = positive_int_setting("MEMORY_ENDPOINT_REQUESTS_PER_MINUTE", 30)
 logger = logging.getLogger(__name__)
 
 
@@ -488,6 +489,15 @@ async def _rate_limit(request: Request) -> None:
         raise HTTPException(status_code=429, detail="你提问得有点频繁，请稍等片刻再继续咨询。")
 
 
+async def _memory_endpoint_rate_limit(request: Request) -> None:
+    client = request.client.host if request.client else "unknown"
+    allowed = await run_in_threadpool(
+        memory_store.record_ai_request, f"memory:{client}", MEMORY_ENDPOINT_RATE_LIMIT
+    )
+    if not allowed:
+        raise HTTPException(status_code=429, detail="对话记忆操作过于频繁，请稍后再试。")
+
+
 async def _reserve_daily_ai_request() -> None:
     allowed = await run_in_threadpool(memory_store.consume_daily_ai_request, DAILY_AI_LIMIT)
     if not allowed:
@@ -758,6 +768,7 @@ class FeedbackSubmission(StrictModel):
 
 @app.post("/api/ai/history")
 async def chat_history(request: Request) -> dict:
+    await _memory_endpoint_rate_limit(request)
     # Parse manually so validation errors never echo the bearer session ID.
     try:
         body = await request.json()
@@ -770,7 +781,8 @@ async def chat_history(request: Request) -> dict:
 
 
 @app.post("/api/ai/memory/clear")
-async def clear_memory(body: MemoryAction) -> dict:
+async def clear_memory(body: MemoryAction, request: Request) -> dict:
+    await _memory_endpoint_rate_limit(request)
     try:
         await run_in_threadpool(memory_store.clear, body.session_id)
     except Exception as exc:

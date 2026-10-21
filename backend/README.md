@@ -35,7 +35,7 @@ Chroma 数据默认保存在 `local-data/chroma`，对话记录保存在 `local-
 
 SQLite 问答还按 UTC `created_at` 保留 90 天，可用正整数 `AGENT_MEMORY_RETENTION_DAYS` 配置，单位为天。服务启动时立即清理，之后每小时再清理一次；本机已有的旧会话按原始创建时间计算，部署启用后若已超过期限就会清理。删除过期 assistant 问答时，向量 ID 会先写入 SQLite 待删队列，再与问答删除在同一事务提交；随后尝试删除 Chroma 向量。若 Chroma 不可用，待删 ID 会保留，worker 每小时重试。此清理只删除过期问答及其 assistant 向量，不删除会话外的限流/每日计数或其他表数据。
 
-`AI_REQUESTS_PER_MINUTE` 和 `AI_REQUESTS_PER_DAY` 必须为正整数，分别表示每个客户端每分钟和每天可调用 AI 的次数；默认值为 5 和 100。`DASHSCOPE_EMBEDDING_DIMENSIONS` 也必须为正整数，默认 512 维（`text-embedding-v4` 支持该维度）。以上配置若不是正整数，服务会记录 warning 并采用对应默认值。
+`AI_REQUESTS_PER_MINUTE` 和 `AI_REQUESTS_PER_DAY` 必须为正整数，分别表示每个客户端每分钟和每天可调用 AI 的次数；默认值为 5 和 100。`MEMORY_ENDPOINT_REQUESTS_PER_MINUTE` 是 history 与 memory-clear 接口共用的每 IP 每分钟上限，默认 30；它使用独立计数，不占用 AI 请求配额。`DASHSCOPE_EMBEDDING_DIMENSIONS` 也必须为正整数，默认 512 维（`text-embedding-v4` 支持该维度）。以上配置若不是正整数，服务会记录 warning 并采用对应默认值。
 
 ### SQLite 文件权限
 
@@ -83,7 +83,7 @@ done
 - 对话每条消息限 2–400 字，仅接收黑夜君临相关主题；最多携带 8 条近期对话消息，不接收文件、图片或工具调用。确认配装条件后，提交给配装接口的问题合并后限 8–240 字。
 - 每个客户端 IP 每分钟最多请求 5 次。配装请求最多 900 件遗物、6 个槽位和 40 条当前流派规则。
 - 每个 HTTP 请求体最多 750,000 字节；服务端先检查声明长度，再按 ASGI 请求流累计实际字节数，超限返回 HTTP 413，只暂存上限内的数据，不累积超限后的剩余请求体。
-- 所有 AI 接口共享同一客户端每分钟限流；默认全站每天最多发起 100 次 DeepSeek 请求（UTC 日界线重置），分别由 `AI_REQUESTS_PER_MINUTE` 和 `AI_REQUESTS_PER_DAY` 配置。计数保存在 `AGENT_MEMORY_DB` 的 SQLite 数据库中，单机多进程共享；多服务器部署需改用 Redis 等共享限流存储。
+- DeepSeek 请求接口共享同一客户端每分钟限流；默认全站每天最多发起 100 次 DeepSeek 请求（UTC 日界线重置），分别由 `AI_REQUESTS_PER_MINUTE` 和 `AI_REQUESTS_PER_DAY` 配置。history 与 memory-clear 接口另有独立的每 IP 每分钟限流，由 `MEMORY_ENDPOINT_REQUESTS_PER_MINUTE` 配置，默认 30 次，避免读取或删除记忆的请求消耗 AI 配额。计数保存在 `AGENT_MEMORY_DB` 的 SQLite 数据库中，单机多进程共享；多服务器部署需改用 Redis 等共享限流存储。
 - Uvicorn 依赖范围为 `uvicorn[standard]>=0.30,<1.0`，没有锁定精确版本；Docker 构建会安装满足范围的版本。Uvicorn 默认已启用 `X-Forwarded-*` 解析，且默认只信任 `FORWARDED_ALLOW_IPS` 环境变量指定的来源或 `127.0.0.1`。Docker 启动命令显式启用该解析，并读取可选的 `FORWARDED_ALLOW_IPS`（逗号分隔的 IP/CIDR），默认值为 `127.0.0.1`。
 - Ubuntu 上由同机 Caddy 代理到 loopback 地址时，使用 `FORWARDED_ALLOW_IPS=127.0.0.1`；若 Uvicorn 实际看到的代理地址是 `::1` 或容器网桥地址，应只配置该代理的准确地址/CIDR，并限制后端端口只能由该代理访问。Caddy 的 `reverse_proxy` 会生成/追加 `X-Forwarded-*`，默认忽略客户端传入的这些值，避免直接转发伪造值。不要设为 `*`，也不要信任任意公网来源。
 - Render Web Service 的入口代理地址不等于 loopback。未把该代理加入可信列表时，Uvicorn 会忽略其 `X-Forwarded-For`，限流只能按入口代理地址计数，访客可能共享每分钟额度。Render 文档说明可从 `X-Forwarded-For` 读取原始客户端 IP（[Render DDoS 防护说明](https://render.com/articles/how-render-handles-ddos-attacks)），但部署前必须取得并核实适用于该服务的代理 IP/CIDR，再配置 `FORWARDED_ALLOW_IPS`；在可信地址可核实前不要使用通配符。若无法取得可信代理范围，就保留安全默认值并接受共享限流，或改为直接连接客户端的受支持拓扑。
@@ -111,7 +111,7 @@ done
 docker build -t nightreign-ai -f backend/Dockerfile .
 ```
 
-未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AGENT_MEMORY_RETENTION_DAYS`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`FEEDBACK_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。`AGENT_MEMORY_RETENTION_DAYS` 可选，默认 90 天；反馈每日上限 `FEEDBACK_REQUESTS_PER_DAY` 可选，默认 250 条/UTC 日。只有确认反向代理的源地址/CIDR 后才设置可选变量 `FORWARDED_ALLOW_IPS`。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
+未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AGENT_MEMORY_RETENTION_DAYS`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`MEMORY_ENDPOINT_REQUESTS_PER_MINUTE`、`FEEDBACK_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。`AGENT_MEMORY_RETENTION_DAYS` 可选，默认 90 天；memory endpoint 每 IP 每分钟上限 `MEMORY_ENDPOINT_REQUESTS_PER_MINUTE` 可选，默认 30 次；反馈每日上限 `FEEDBACK_REQUESTS_PER_DAY` 可选，默认 250 条/UTC 日。只有确认反向代理的源地址/CIDR 后才设置可选变量 `FORWARDED_ALLOW_IPS`。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
 
 API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件或前端构建产物。
 
