@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import hmac
+import ipaddress
 import json
 import logging
 import os
@@ -10,6 +11,7 @@ from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Literal
+from urllib.parse import urlsplit
 
 import httpx
 from fastapi import FastAPI, Header, HTTPException, Query, Request, Response
@@ -784,6 +786,53 @@ def _require_feedback_admin(authorization: str | None) -> None:
         )
 
 
+def _is_localhost_name(hostname: str | None) -> bool:
+    return (hostname or "").strip("[]").casefold() in {"localhost", "127.0.0.1", "::1"}
+
+
+def _is_loopback_client(request: Request) -> bool:
+    if request.client is None:
+        return False
+    try:
+        return ipaddress.ip_address(request.client.host).is_loopback
+    except ValueError:
+        return False
+
+
+def _is_localhost_development_request(request: Request) -> bool:
+    return _is_localhost_name(request.url.hostname) and _is_loopback_client(request)
+
+
+def _origin_is_secure_or_local(origin: str, request: Request) -> bool:
+    try:
+        parsed_origin = urlsplit(origin)
+    except ValueError:
+        return False
+    if parsed_origin.scheme.casefold() == "https":
+        return bool(parsed_origin.hostname)
+    return (
+        parsed_origin.scheme.casefold() == "http"
+        and _is_localhost_name(parsed_origin.hostname)
+        and _is_loopback_client(request)
+    )
+
+
+def _require_secure_feedback_admin_transport(request: Request) -> None:
+    local_development = _is_localhost_development_request(request)
+    if request.url.scheme.casefold() != "https" and not local_development:
+        raise HTTPException(
+            status_code=403,
+            detail="反馈收件箱仅允许通过 HTTPS 访问（本机 localhost 开发除外）。",
+        )
+
+    origin = request.headers.get("origin")
+    if origin is not None and not _origin_is_secure_or_local(origin, request):
+        raise HTTPException(
+            status_code=403,
+            detail="反馈收件箱拒绝来自非 HTTPS 公网来源的请求。",
+        )
+
+
 async def _feedback_rate_limit(request: Request) -> None:
     client = request.client.host if request.client else "unknown"
     allowed = await run_in_threadpool(
@@ -830,6 +879,7 @@ async def feedback_inbox(
     offset: int = Query(default=0, ge=0),
 ) -> dict:
     response.headers["Cache-Control"] = "no-store"
+    _require_secure_feedback_admin_transport(request)
     _require_feedback_admin(authorization)
     items, total = await run_in_threadpool(memory_store.list_feedback, limit, offset)
     return {"items": items, "total": total, "limit": limit, "offset": offset}
