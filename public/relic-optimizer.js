@@ -763,8 +763,29 @@ class RelicOptimizer {
       let mustInclude = candidates.filter(r => wantedIds.has(r.id));
       // Cap must_include to prevent unbounded candidate lists (esp. for "Any" slots)
       if (mustInclude.length > candidatesPerSlot) {
-        mustInclude.sort((a, b) => this.scoreRelic(b) - this.scoreRelic(a));
-        mustInclude = mustInclude.slice(0, candidatesPerSlot);
+        const ranked = mustInclude.map(relic => ({
+          relic,
+          score: this.scoreRelic(relic),
+          required: new Set(this._getSpecUnits(relic).map(unit => unit >> 2).filter(idx => this._isRequired[idx])),
+          blocked: this._getExcludeKeys(relic).some(key => this.excludeLookup[key].priority === 'required'),
+        }));
+        const selected = [], selectedIds = new Set(), covered = new Set();
+        while (selected.length < candidatesPerSlot) {
+          let best = null, bestGain = 0;
+          for (const entry of ranked) {
+            if (selectedIds.has(entry.relic.id) || entry.blocked) continue;
+            const gain = [...entry.required].filter(idx => !covered.has(idx)).length;
+            if (gain > bestGain || (gain && gain === bestGain && entry.score > best.score)) {
+              best = entry; bestGain = gain;
+            }
+          }
+          if (!best) break;
+          selected.push(best.relic); selectedIds.add(best.relic.id);
+          for (const idx of best.required) covered.add(idx);
+        }
+        mustInclude = selected.concat(ranked.filter(entry => !selectedIds.has(entry.relic.id))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, candidatesPerSlot - selected.length).map(entry => entry.relic));
       }
       const mustIds = new Set(mustInclude.map(r => r.id));
 
