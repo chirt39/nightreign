@@ -31,7 +31,17 @@ window.navigateTo=navigate;
 
 async function loadCatalogs(){
   try{
-    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData]=await Promise.all(['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json'].map(async name=>{const url='./'+name+(name==='effect_names_zh.json'?'?v=20261018-zh-audit':name==='effect_encyclopedia.json'?'?v=20261019-four-groups':'');const r=await fetch(url);if(!r.ok)throw new Error(name+' 读取失败');return r.json()}));
+    const catalogFiles=['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json'];
+    const catalogVersions=window.NIGHTREIGN_CATALOG_VERSIONS;
+    if(!catalogVersions||typeof catalogVersions!=='object')throw new Error('数据版本信息缺失，请刷新页面重试。');
+    const catalogs=await Promise.all(catalogFiles.map(async name=>{
+      const version=catalogVersions[name];
+      if(typeof version!=='string'||! /^[a-f0-9]{12}$/i.test(version))throw new Error(`${name} 的内容哈希缺失或无效，请刷新页面重试。`);
+      const response=await fetch(`./${name}?v=${version}`);
+      if(!response.ok)throw new Error(name+' 读取失败');
+      return response.json();
+    }));
+    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData]=catalogs;
     Object.assign(state,{enemyData:enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData});
     buildEffectCategoryIndex();
     renderEffectEncyclopedia();

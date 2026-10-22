@@ -22,6 +22,7 @@ const sidebarOpen = ref(false);
 const scriptsReady = ref(false);
 const loadError = ref(false);
 const classicScriptVersions = typeof __CLASSIC_SCRIPT_VERSIONS__ === 'undefined' ? null : __CLASSIC_SCRIPT_VERSIONS__;
+const catalogJsonVersions = typeof __CATALOG_JSON_VERSIONS__ === 'undefined' ? null : __CATALOG_JSON_VERSIONS__;
 
 function setView(view, updateUrl = true, restoreScrollY = null) {
   const nextView = view in labels ? view : 'overview';
@@ -112,6 +113,12 @@ onMounted(async () => {
     loadError.value = true;
     return;
   }
+  if (!catalogJsonVersions || typeof catalogJsonVersions !== 'object') {
+    console.error('图鉴数据版本配置缺失，页面功能无法启动。');
+    loadError.value = true;
+    return;
+  }
+  window.NIGHTREIGN_CATALOG_VERSIONS = catalogJsonVersions;
   for (const [file, version] of Object.entries(classicScriptVersions)) {
     if (!version) {
       window.NIGHTREIGN_AI_API_BASE = window.NIGHTREIGN_AI_API_BASE || '';
