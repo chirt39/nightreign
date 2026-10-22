@@ -642,6 +642,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .feedback-form-heading .eyebrow{margin:0 0 4px}
 .feedback-form-heading h2{margin:0;color:#e7d0a0;font:600 21px 'Noto Serif SC',serif}
 .feedback-kind-label{margin:0;color:#9eafb7;font-size:12px}
+.feedback-privacy-note{margin:0;padding:9px 11px;border-left:2px solid #46586a;background:#111d2b;color:#9eafb7;font-size:11px;line-height:1.65}
 .feedback-label{color:#c4cfd4;font-size:12px}
 #feedback-message,#feedback-email{width:100%;padding:10px 12px;border:1px solid #53677e;border-radius:3px;background:#101b29;color:#e6e8df;font:inherit}
 #feedback-message{min-height:115px;resize:vertical}
