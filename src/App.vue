@@ -198,6 +198,7 @@ onUnmounted(() => {
         <SourcesPage :active="currentView === 'sources'" />
       </div>
       <footer>渡夜图鉴 · 玩家制作的非官方工具</footer>
+      <div id="feedback-background-status" class="feedback-background-status" role="status" aria-live="polite" aria-relevant="additions text"></div>
     </main>
   </div>
 </template>

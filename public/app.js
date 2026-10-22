@@ -863,7 +863,7 @@ let feedbackSubmissionSequence=0;
 function feedbackPendingMessage(){return `仍有 ${feedbackSubmissionCount} 条反馈请求正在提交；关闭弹窗不会取消请求，请等待完成后再提交，以免重复入库。`}
 function reportFeedbackOutcome(message,isError=false){
   let region=$('#feedback-background-status');
-  if(!region){region=document.createElement('div');region.id='feedback-background-status';region.setAttribute('role','status');region.setAttribute('aria-live','polite');$('#agent-status').insertAdjacentElement('afterend',region)}
+  if(!region)return;
   const line=document.createElement('p');line.className='hint';line.textContent=message;if(isError)line.style.color='#ed9a8f';region.append(line);while(region.children.length>5)region.firstElementChild.remove();
 }
 function feedbackErrorDetail(body){
