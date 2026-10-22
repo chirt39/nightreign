@@ -277,7 +277,10 @@ def rebuild(batch_size: int = 10) -> dict:
 
 
 @lru_cache(maxsize=1)
-def _lexical_index() -> tuple[list[dict], list[list[str]], dict[str, int], float]:
+def _lexical_index(
+    mtime_ns: int, size: int
+) -> tuple[list[dict], list[list[str]], dict[str, int], float]:
+    del mtime_ns, size
     import jieba
 
     records = corpus_records()
@@ -298,7 +301,10 @@ def _lexical_index() -> tuple[list[dict], list[list[str]], dict[str, int], float
 def _lexical_search(question: str, selected_categories: list[str], limit: int) -> list[dict]:
     import jieba
 
-    records, documents, document_frequency, average_length = _lexical_index()
+    corpus_stat = CORPUS.stat()
+    records, documents, document_frequency, average_length = _lexical_index(
+        corpus_stat.st_mtime_ns, corpus_stat.st_size
+    )
     query_terms = [term.casefold() for term in jieba.cut(question) if term.strip()]
     if not query_terms:
         return []
