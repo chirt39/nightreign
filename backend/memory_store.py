@@ -140,10 +140,10 @@ def save_feedback(
     answer: str | None = None,
     daily_limit: int = 250,
 ) -> bool:
-    created_at = datetime.now(timezone.utc)
-    expires_at = created_at + FEEDBACK_RETENTION
     with _connect() as connection:
         connection.execute("BEGIN IMMEDIATE")
+        created_at = datetime.now(timezone.utc)
+        expires_at = created_at + FEEDBACK_RETENTION
         day = created_at.date().isoformat()
         row = connection.execute(
             "SELECT request_count FROM feedback_daily_usage WHERE day = ?", (day,)
@@ -222,9 +222,9 @@ def append_exchange(session_id: str, question: str, answer: str) -> None:
 
 def record_ai_request(client: str, per_minute: int) -> bool:
     """Atomically enforce a shared per-client window across API endpoints/workers."""
-    now = time.time()
     with _connect() as connection:
         connection.execute("BEGIN IMMEDIATE")
+        now = time.time()
         connection.execute("DELETE FROM ai_rate_events WHERE created_at <= ?", (now - 60,))
         count = connection.execute(
             "SELECT COUNT(*) FROM ai_rate_events WHERE client = ? AND created_at > ?",
