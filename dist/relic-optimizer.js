@@ -112,6 +112,13 @@ class WorstFirstHeap {
 // === RelicOptimizer ===
 class RelicOptimizer {
   constructor(relics, effectSpecs, vesselsData, stackingData) {
+    const instanceIds = new Set();
+    for (const relic of relics) {
+      if (relic?.id == null) throw new Error('遗物缺少实例 ID，无法安全计算配装');
+      const id = String(relic.id);
+      if (instanceIds.has(id)) throw new Error(`遗物实例 #${id} 重复，无法安全计算配装`);
+      instanceIds.add(id);
+    }
     this.allRelics = relics;
     this.effectSpecs = effectSpecs;
     this.vesselsData = vesselsData;
