@@ -183,7 +183,10 @@ onUnmounted(() => {
       <header class="topbar">
         <button id="mobile-menu" class="icon-button" type="button" :aria-label="sidebarOpen ? '关闭导航' : '打开导航'" :aria-expanded="sidebarOpen" aria-controls="mobile-navigation">☰</button>
         <span class="breadcrumb">ELDEN RING NIGHTREIGN <span>/</span> <b>{{ labels[currentView] }}</b></span>
-        <span class="topbar-right">非官方玩家工具 <i></i> 数据快照</span>
+        <div class="topbar-tools">
+          <span class="topbar-right">非官方玩家工具 <i></i> 数据快照</span>
+          <button id="feedback-suggestion-open" class="button ghost topbar-feedback" type="button">向我提建议</button>
+        </div>
       </header>
       <div class="content">
         <OverviewPage :active="currentView === 'overview'" />
