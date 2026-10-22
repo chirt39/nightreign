@@ -50,6 +50,12 @@ ALLOWED_ORIGINS = [
 
 
 MAX_REQUEST_BODY_BYTES = 750_000
+PRIVATE_AI_RESPONSE_PATHS = {
+    "/api/ai/chat",
+    "/api/ai/recommend",
+    "/api/ai/history",
+    "/api/ai/memory/clear",
+}
 
 
 class RequestBodyLimitMiddleware:
@@ -124,6 +130,35 @@ class RequestBodyLimitMiddleware:
         await self.app(scope, replay_receive, send)
 
 
+class NoStorePrivateAiResponsesMiddleware:
+    """Prevent caches from retaining personalized AI response bodies."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if (
+            scope["type"] != "http"
+            or scope.get("method") != "POST"
+            or scope.get("path") not in PRIVATE_AI_RESPONSE_PATHS
+        ):
+            await self.app(scope, receive, send)
+            return
+
+        async def send_no_store(message):
+            if message["type"] == "http.response.start":
+                headers = [
+                    (name, value)
+                    for name, value in message.get("headers", [])
+                    if name.lower() != b"cache-control"
+                ]
+                headers.append((b"cache-control", b"no-store"))
+                message = {**message, "headers": headers}
+            await send(message)
+
+        await self.app(scope, receive, send_no_store)
+
+
 async def _data_retention_worker() -> None:
     while True:
         try:
@@ -160,6 +195,7 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "Authorization"],
 )
+app.add_middleware(NoStorePrivateAiResponsesMiddleware)
 
 ALLOWED_COLORS = {"Red", "Blue", "Yellow", "Green", "Any"}
 TOPIC_TERMS = (
