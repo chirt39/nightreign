@@ -902,7 +902,7 @@ $('#feedback-form').addEventListener('submit',async event=>{
     else reportFeedbackOutcome(`第 ${submission} 条${message}`,true);
   }finally{feedbackSubmissionCount=Math.max(0,feedbackSubmissionCount-1);if(dialog.open&&revision!==feedbackDialogRevision&&status.dataset.pendingSubmission==='true'){if(feedbackSubmissionCount>0)status.textContent=feedbackPendingMessage();else{delete status.dataset.pendingSubmission;status.textContent='';submit.disabled=!feedbackTransportSecure}}}
 });
-function agentInventory(){return (state.save?.relics||[]).map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}))}
+function agentInventory(){return (state.save?.relics||[]).map(relic=>{const effects=effectGroups(relic).map(effect=>({key:effect.key,name:ruleEffectName(effect)})).filter(effect=>effect.key&&effect.name).slice(0,12);return {id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effects.map(effect=>effect.name),effect_keys:effects.map(effect=>effect.key)}})}
 function describeAgentPlan(plan,inventory){
   const names=new Map(inventory.map(relic=>[String(relic.id),relic.name])),sections=[['normal','普通遗物'],['deep','深夜遗物']].filter(([group])=>plan[group]?.length),result=$('#agent-build-result');
   result.replaceChildren();const summary=document.createElement('p');summary.className='ai-plan-summary';summary.textContent=plan.summary;result.append(summary);
@@ -915,7 +915,7 @@ async function requestAgentBuild(question,context){
   const character=context.character_key,key=context.vessel_key,mode=context.build_scope,combined=mode==='combined';
   const vessel=state.vessels.characters?.[character]?.vessels?.[key]||(state.vessels.universalVessels||[]).find(item=>item.key===key);if(!vessel)throw new Error('所选角色供具信息不可用，请重新选择。');
   const slots=[...(vessel.normalSlots||[]).map((color,index)=>({group:'normal',index,color})),...(combined?(vessel.deepSlots||[]).map((color,index)=>({group:'deep',index,color})):[])];
-  const ruleEffects=Object.entries(state.effects?.effects||{}),rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([effectId,entry])=>entry.key===rule.key&&isOutOfGameRelicEffect({...entry,id:effectId}))||[];return {effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope)}});
+  const ruleEffects=Object.entries(state.effects?.effects||{}),rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([effectId,entry])=>entry.key===rule.key&&isOutOfGameRelicEffect({...entry,id:effectId}))||[];return {key:rule.key,effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope),cap:rule.cap}});
   const inventory=agentInventory(),body={character:characterZh[character]||character,character_key:character,vessel:vesselName(key,character),vessel_key:key,mode,question,slots,rules,inventory};if(agentSessionId)body.session_id=agentSessionId;
   const result=await requestJson('/api/ai/recommend',body);pendingAgentPlan={plan:result,inventory,character,key,mode};describeAgentPlan(result,inventory);setAgentStatus('配装建议已生成，请检查遗物和理由，再选择是否应用。');return result;
 }

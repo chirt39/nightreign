@@ -93,6 +93,7 @@ done
 - Render Web Service 的入口代理地址不等于 loopback。未把该代理加入可信列表时，Uvicorn 会忽略其 `X-Forwarded-For`，限流只能按入口代理地址计数，访客可能共享每分钟额度。Render 文档说明可从 `X-Forwarded-For` 读取原始客户端 IP（[Render DDoS 防护说明](https://render.com/articles/how-render-handles-ddos-attacks)），但部署前必须取得并核实适用于该服务的代理 IP/CIDR，再配置 `FORWARDED_ALLOW_IPS`；在可信地址可核实前不要使用通配符。若无法取得可信代理范围，就保留安全默认值并接受共享限流，或改为直接连接客户端的受支持拓扑。
 - 请求次数上限不能精确限制人民币费用，实际花费仍取决于模型、输入长度和输出长度；还应在 DeepSeek 账户侧设置余额或预算提醒。CORS 只约束浏览器，不是 API 认证或防刷手段。
 - 推荐方案必须引用本次清单中的遗物实例 ID，且通过后端和前端的类型、颜色、槽位合法性校验。用户点击“应用配装到装配预览”后才会改变浏览器内的装配预览。
+- `/api/ai/recommend` 的每件 `inventory` 同时提交自然语言 `effects` 和按位置对应的稳定 `effect_keys`；每条 `rules` 同时提交稳定 `key`、模型提示用的自然语言 `effect`、`scope` 和 1–6 的 `cap`。后端拒绝字段缺失或数组长度不匹配的请求，并在解析模型方案后按 `key` 与遗物 `kind`/规则 `scope` 核验：`required` 至少命中 `cap` 次，`exclude` 不得命中。武器转换按普通槽位序号、再按深夜槽位序号验收，只有第一条已选转换生效；不适用本次模式或库存种类的规则不计入验收。相同显示名称的不同词条按稳定 key 分别处理。
 - 对话记录按浏览器会话标识保存；后端不写入用户的存档或流派规则。DeepSeek API 使用量会按 DeepSeek 账户当前价格计费。
 
 ## 用户反馈收件箱
