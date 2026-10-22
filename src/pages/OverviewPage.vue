@@ -7,10 +7,11 @@ defineProps({ active: Boolean });
           <div class="hero"><div class="hero-content"><p class="eyebrow">NIGHTFARER EXPEDITION · LIMVELD</p><h1>黑夜还没有<br><em>结束</em></h1><p class="hero-copy">选择渡夜者，探索宁姆韦德，在远征尽头迎战夜王。查阅敌人资料、解析遗物，并为下一场出击整备装配。</p><div class="hero-actions"><button class="button primary" data-go="relics">解析遗物存档 <span>↗</span></button><button class="button ghost" data-go="enemies">查阅敌人图鉴 <span>→</span></button></div></div><div class="hero-caption">LIMVELD · THREE-DAY EXPEDITION</div></div>
           <section class="home-agent panel">
             <div class="home-agent-heading"><div><p class="eyebrow">NIGHTREIGN GUIDE</p><h2>黑夜君临助手</h2><p>帮渡夜者解答黑夜君临问题。</p></div><button id="feedback-suggestion-open" class="button ghost feedback-suggestion-open" type="button">向我提建议</button></div>
+            <p id="agent-transport-warning" class="agent-transport-warning" role="alert" hidden>AI 助手只会通过安全连接发送问题与相关数据。请使用 HTTPS 页面和 HTTPS API；本机开发可让页面与 API 都通过 localhost、127.0.0.1 或 [::1] 访问。当前连接不安全，问答、历史记忆读取/清除和配装请求已禁用。</p>
             <div id="agent-chat-log" class="agent-chat-log" role="log" aria-live="polite" aria-label="助手对话记录"><p class="agent-empty">你好，我会判断你的问题是查阅资料还是请求配装。配装时我会在对话中确认角色、供具、普通或深夜范围及配装目标；信息不清楚时会先询问。配装只使用已读取存档中的遗物。</p></div>
             <form id="agent-chat-form" class="agent-chat-form">
               <label class="agent-question-label" for="agent-question">你的问题</label>
-              <textarea id="agent-question" name="question" minlength="2" maxlength="400" required placeholder="例如：追踪者的专属词条有哪些？／请只用普通遗物，为复仇者搭配偏输出的装配。"></textarea>
+              <textarea id="agent-question" name="question" minlength="2" maxlength="400" required aria-describedby="agent-transport-warning agent-status" placeholder="例如：追踪者的专属词条有哪些？／请只用普通遗物，为复仇者搭配偏输出的装配。"></textarea>
               <div class="agent-chat-actions"><span id="agent-question-count">0 / 400 字</span><button id="agent-send" class="button primary" type="submit">发送</button></div>
             </form>
             <p id="agent-status" class="hint" role="status" aria-live="polite">配装时只使用已读取的本机存档遗物；角色、供具或范围不明确时会先向你确认。</p>
