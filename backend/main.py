@@ -473,6 +473,7 @@ async def knowledge_status() -> dict:
 
 @app.post("/api/ai/recommend")
 async def recommend(body: AdviceRequest, request: Request) -> dict:
+    _require_secure_ai_transport(request)
     await _rate_limit(request)
     _validate_scope(body)
     if not API_KEY:
@@ -563,6 +564,7 @@ class FeedbackSubmission(StrictModel):
 
 @app.post("/api/ai/history")
 async def chat_history(request: Request) -> dict:
+    _require_secure_ai_transport(request)
     await _memory_endpoint_rate_limit(request)
     # Parse manually so validation errors never echo the bearer session ID.
     try:
@@ -577,6 +579,7 @@ async def chat_history(request: Request) -> dict:
 
 @app.post("/api/ai/memory/clear")
 async def clear_memory(body: MemoryAction, request: Request) -> dict:
+    _require_secure_ai_transport(request)
     await _memory_endpoint_rate_limit(request)
     try:
         await run_in_threadpool(memory_store.clear, body.session_id)
@@ -602,7 +605,13 @@ def _require_feedback_admin(authorization: str | None) -> None:
 
 
 def _is_localhost_name(hostname: str | None) -> bool:
-    return (hostname or "").strip("[]").casefold() in {"localhost", "127.0.0.1", "::1"}
+    normalized = (hostname or "").strip("[]").casefold()
+    if normalized == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(normalized).is_loopback
+    except ValueError:
+        return False
 
 
 def _is_loopback_client(request: Request) -> bool:
@@ -619,33 +628,69 @@ def _is_localhost_development_request(request: Request) -> bool:
 
 
 def _origin_is_secure_or_local(origin: str, request: Request) -> bool:
+    if any(character.isspace() for character in origin):
+        return False
     try:
         parsed_origin = urlsplit(origin)
+        hostname = parsed_origin.hostname
+        _ = parsed_origin.port
     except ValueError:
         return False
-    if parsed_origin.scheme.casefold() == "https":
-        return bool(parsed_origin.hostname)
+    if (
+        hostname is None
+        or parsed_origin.username is not None
+        or parsed_origin.password is not None
+        or parsed_origin.path
+        or parsed_origin.query
+        or parsed_origin.fragment
+    ):
+        return False
+
+    scheme = parsed_origin.scheme.casefold()
+    origin_is_loopback = _is_localhost_name(hostname)
+    if scheme == "https" and not origin_is_loopback:
+        return True
     return (
-        parsed_origin.scheme.casefold() == "http"
-        and _is_localhost_name(parsed_origin.hostname)
-        and _is_loopback_client(request)
+        scheme in {"https", "http"}
+        and origin_is_loopback
+        and _is_localhost_development_request(request)
     )
 
 
-def _require_secure_feedback_admin_transport(request: Request) -> None:
+def _require_secure_transport(
+    request: Request,
+    insecure_scheme_detail: str,
+    insecure_origin_detail: str,
+) -> None:
     local_development = _is_localhost_development_request(request)
     if request.url.scheme.casefold() != "https" and not local_development:
         raise HTTPException(
             status_code=403,
-            detail="反馈收件箱仅允许通过 HTTPS 访问（本机 localhost 开发除外）。",
+            detail=insecure_scheme_detail,
         )
 
     origin = request.headers.get("origin")
     if origin is not None and not _origin_is_secure_or_local(origin, request):
         raise HTTPException(
             status_code=403,
-            detail="反馈收件箱拒绝来自非 HTTPS 公网来源的请求。",
+            detail=insecure_origin_detail,
         )
+
+
+def _require_secure_feedback_admin_transport(request: Request) -> None:
+    _require_secure_transport(
+        request,
+        "反馈收件箱仅允许通过 HTTPS 访问（本机 localhost 开发除外）。",
+        "反馈收件箱拒绝来自非 HTTPS 公网来源的请求。",
+    )
+
+
+def _require_secure_ai_transport(request: Request) -> None:
+    _require_secure_transport(
+        request,
+        "AI 接口仅允许通过 HTTPS 访问（本机 localhost 开发除外）。",
+        "AI 接口拒绝来自非 HTTPS 公网来源的请求。",
+    )
 
 
 async def _feedback_rate_limit(request: Request) -> None:
@@ -710,6 +755,7 @@ async def feedback_inbox(
 
 @app.post("/api/ai/chat")
 async def chat(body: ChatRequest, request: Request) -> dict:
+    _require_secure_ai_transport(request)
     await _rate_limit(request)
     saved_history = (await run_in_threadpool(memory_store.recent, body.session_id, 8)) if body.session_id else [
         {"role": message.role, "content": message.content} for message in body.history[-8:]]
