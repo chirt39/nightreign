@@ -44,6 +44,7 @@ FEEDBACK_REQUESTS_PER_DAY = positive_int_setting("FEEDBACK_REQUESTS_PER_DAY", 25
 FEEDBACK_ADMIN_PASSWORD = os.getenv("FEEDBACK_ADMIN_PASSWORD", "")
 FEEDBACK_ADMIN_PASSWORD_MIN_LENGTH = 32
 FEEDBACK_RATE_LIMIT = 5
+MAX_FEEDBACK_OFFSET = (1 << 63) - 1
 ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
@@ -794,7 +795,7 @@ async def feedback_inbox(
     response: Response,
     authorization: str | None = Header(default=None),
     limit: int = Query(default=50, ge=1, le=100),
-    offset: int = Query(default=0, ge=0),
+    offset: int = Query(default=0, ge=0, le=MAX_FEEDBACK_OFFSET),
 ) -> dict:
     response.headers["Cache-Control"] = "no-store"
     _require_secure_feedback_admin_transport(request)

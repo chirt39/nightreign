@@ -98,6 +98,7 @@ done
 
 - 首页每条助手回答提供“回答有错？向窝反馈”，标题栏提供“向我提建议”。邮箱可留空；只有用户主动勾选“附上当前这一轮的问题与回答”时，浏览器才把这两个字段附在本次反馈中，不会发送整段历史。
 - 提交接口为 `POST /api/feedback`；管理员收件箱接口为 `GET /api/admin/feedback`，使用 `Authorization: Bearer <口令>` 鉴权。管理员页面是前端静态地址 `/admin-feedback.html`，口令只保留在页面内存，不写 URL 或浏览器存储。
+- 收件箱分页每页为 1–100 条；`offset` 必须是非负的 SQLite 64 位整数。
 - `POST /api/feedback`（可能包含可选邮箱及用户勾选的本轮问答）和管理员收件箱都必须使用 HTTPS。公网 HTTP 部署仅支持只读浏览：助手会提示连接要求、禁用 AI 输入/发送和记忆操作，并在网络请求前拦截 `/api/ai/*`；反馈弹窗也会提示并禁用提交，后端会拒绝 HTTP 反馈请求。本机 `localhost`、`127.0.0.1` 和 `[::1]` 的开发访问允许 HTTP，且后端要求请求主机名与连接客户端地址都确实来自回环地址。有 `Origin` 请求头时，后端拒绝非 HTTPS 公网来源，只保留本机回环开发例外。
 - `docs/UBUNTU_STATIC_DEPLOY.md` 中的静态 Nginx 示例只提供 HTTP，不会自动获得 HTTPS；它可用于公网只读浏览。要使用 AI 或提交反馈，需通过 HTTPS 托管前端并配置 HTTPS API；管理收件箱也必须使用 HTTPS。
 - 后端依据 ASGI `request.url.scheme` 判断 HTTPS，不直接读取应用层可伪造的 `X-Forwarded-Proto`。TLS 在受信任反向代理终止时，需按前述 `FORWARDED_ALLOW_IPS` 仅信任实际代理源地址，让 Uvicorn 生成正确的请求 scheme；不得使用 `*`。若代理未被列入 Uvicorn 信任范围，HTTPS 外部访问会被视为 HTTP 并遭拒绝，须先修正代理信任配置。
