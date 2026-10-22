@@ -364,9 +364,13 @@ function renderEffectRows(relic,showId=false){
 }
 function relicType(r){return r.itemType||'Relic'}
 function relicEntry(r){return state.relicCatalog?.items?.[r.itemKey]||null}
+function safeCatalogUrl(value){
+  if(typeof value!=='string'||!value.trim())return '';
+  try{const url=new URL(value,window.location.href);return url.protocol==='http:'||url.protocol==='https:'?url.href:''}catch{return ''}
+}
 function relicName(r){return relicEntry(r)?.name_zh||r.itemNameEn||r.itemNameJa||r.itemKey||`遗物 #${r.itemId}`}
 function relicCategory(r){return relicEntry(r)?.category||'未匹配图鉴'}
-function relicImage(r){const entry=relicEntry(r);return entry?.image?`<img class="relic-thumb" src="${esc(entry.image)}" alt="${esc(entry.name_zh)}图标" loading="lazy" draggable="false" width="58" height="58">`:'<span class="relic-thumb relic-thumb-fallback" aria-hidden="true">◇</span>'}
+function relicImage(r){const entry=relicEntry(r),imageUrl=safeCatalogUrl(entry?.image);return imageUrl?`<img class="relic-thumb" src="${esc(imageUrl)}" alt="${esc(entry.name_zh)}图标" loading="lazy" draggable="false" width="58" height="58">`:'<span class="relic-thumb relic-thumb-fallback" aria-hidden="true">◇</span>'}
 function setSaveStatus(s,error=false){$('#save-status').textContent=s;$('#save-status').classList.toggle('error',error)}
 function setSaveFailureStatus(message){
   const retainedDataNote=state.save?'本次没有替换当前数据；仍保留上次成功读取的遗物与装配。':'当前没有可用存档数据。';
@@ -457,7 +461,7 @@ function renderRelics(){
   state.relicPage=Math.min(Math.max(state.relicPage,1),pages);
   const start=(state.relicPage-1)*RELIC_PAGE_SIZE,rows=state.relicFiltered.slice(start,start+RELIC_PAGE_SIZE);
   $('#relic-count').textContent=total?`第 ${start+1}–${start+rows.length} 件 / 共 ${total} 件`:'0 件';
-  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${entry?.source_page?`<a href="${esc(entry.source_page)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
+  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),sourcePage=safeCatalogUrl(entry?.source_page),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${sourcePage?`<a href="${esc(sourcePage)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
   if(typeof decorateRelicEditorCards==='function')decorateRelicEditorCards(rows);
   renderPagination('relic-pagination',total,RELIC_PAGE_SIZE,state.relicPage);
 }
