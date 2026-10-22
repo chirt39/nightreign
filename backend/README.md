@@ -113,6 +113,8 @@ done
 docker build -t nightreign-ai -f backend/Dockerfile .
 ```
 
+容器启动命令会用 `exec` 将 Uvicorn 替换为 PID 1 进程，使容器停止时的 `SIGTERM` 能交给 Uvicorn 进行优雅关停。
+
 未来部署服务时需配置持久化磁盘、`CHROMA_PATH`、`AGENT_MEMORY_DB`、`AGENT_MEMORY_MAX_EXCHANGES`、`AGENT_MEMORY_RETENTION_DAYS`、`AI_REQUESTS_PER_MINUTE`、`AI_REQUESTS_PER_DAY`、`MEMORY_ENDPOINT_REQUESTS_PER_MINUTE`、`FEEDBACK_REQUESTS_PER_DAY`、`DEEPSEEK_API_KEY`、`DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`FRONTEND_ORIGINS` 和后端私密变量 `FEEDBACK_ADMIN_PASSWORD`，并在服务端运行一次索引命令。`AGENT_MEMORY_RETENTION_DAYS` 可选，默认 90 天；memory endpoint 每 IP 每分钟上限 `MEMORY_ENDPOINT_REQUESTS_PER_MINUTE` 可选，默认 30 次；反馈每日上限 `FEEDBACK_REQUESTS_PER_DAY` 可选，默认 250 条/UTC 日。只有确认反向代理的源地址/CIDR 后才设置可选变量 `FORWARDED_ALLOW_IPS`。本机 Chroma 和 SQLite 数据不会自动迁移；也可将源语料复制到服务端后重建索引，这会调用百炼 API。服务监听平台注入的 `PORT`，健康检查地址为 `/api/health`。部署成功后，将服务的 HTTPS 根地址填入 `public/ai-config.js` 的 `window.NIGHTREIGN_AI_API_BASE`，重新构建并发布前端。每次 Sites 发布按 `docs/RELEASES.md` 记录 Git 提交 SHA、Sites 版本、语料摘要和回退版本；GitHub 推送本身不代表 Sites 已上线。
 
 API 密钥只保存在 FastAPI 服务端，不能填入任何 `public/` 文件或前端构建产物。
