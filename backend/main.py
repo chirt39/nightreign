@@ -955,6 +955,8 @@ async def chat(body: ChatRequest, request: Request) -> dict:
         raise HTTPException(status_code=502, detail="DeepSeek 暂时无法完成请求，请稍后重试。") from exc
     except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError) as exc:
         raise HTTPException(status_code=502, detail="连接 DeepSeek 失败或返回格式异常，请稍后重试。") from exc
+    if choice.get("finish_reason") == "length":
+        raise HTTPException(status_code=502, detail="模型回答超过输出长度，内容被截断。请缩短问题后重试。")
     if not isinstance(content, str) or not content.strip():
         raise HTTPException(status_code=502, detail="模型没有返回有效回答，请稍后重试。")
     try:
