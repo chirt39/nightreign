@@ -790,6 +790,7 @@ const feedbackTransportSecure=(window.location.protocol==='https:'&&feedbackApiS
 const aiTransportSecure=feedbackTransportSecure;
 const agentTransportWarning=$('#agent-transport-warning');
 agentTransportWarning.hidden=aiTransportSecure;
+$('#agent-question').setAttribute('aria-describedby',aiTransportSecure?'agent-status':'agent-transport-warning agent-status');
 if(!aiTransportSecure){$('#agent-question').disabled=true;$('#agent-send').disabled=true}
 function createSecureAgentUuid(){
   const cryptoApi=globalThis.crypto;
