@@ -744,27 +744,51 @@ class RelicOptimizer {
   }
 
   _buildSlotCandidates(slotColors, filtered, candidatesPerSlot) {
+    // A required exclusion makes every combination containing this relic invalid.
+    // Remove it before both target ranking and filler selection.
+    const eligible = filtered.filter(r => !this._getExcludeKeys(r)
+      .some(key => this.excludeLookup[key].priority === 'required'));
     const byColor = {};
-    for (const r of filtered) {
+    for (const r of eligible) {
       const c = r.itemColor || '';
       if (!byColor[c]) byColor[c] = [];
       byColor[c].push(r);
     }
 
     const wantedIds = new Set();
-    for (const r of filtered) {
+    for (const r of eligible) {
       if (this._getSpecKeys(r).length > 0) wantedIds.add(r.id);
     }
 
     const slotCandidates = [];
     for (const slotColor of slotColors) {
-      const candidates = slotColor === 'Any' ? filtered : (byColor[slotColor] || []);
+      const candidates = slotColor === 'Any' ? eligible : (byColor[slotColor] || []);
 
       let mustInclude = candidates.filter(r => wantedIds.has(r.id));
       // Cap must_include to prevent unbounded candidate lists (esp. for "Any" slots)
       if (mustInclude.length > candidatesPerSlot) {
-        mustInclude.sort((a, b) => this.scoreRelic(b) - this.scoreRelic(a));
-        mustInclude = mustInclude.slice(0, candidatesPerSlot);
+        const ranked = mustInclude.map(relic => ({
+          relic,
+          score: this.scoreRelic(relic),
+          required: new Set(this._getSpecUnits(relic).map(unit => unit >> 2).filter(idx => this._isRequired[idx])),
+        }));
+        const selected = [], selectedIds = new Set(), covered = new Set();
+        while (selected.length < candidatesPerSlot) {
+          let best = null, bestGain = 0;
+          for (const entry of ranked) {
+            if (selectedIds.has(entry.relic.id)) continue;
+            const gain = [...entry.required].filter(idx => !covered.has(idx)).length;
+            if (gain > bestGain || (gain && gain === bestGain && entry.score > best.score)) {
+              best = entry; bestGain = gain;
+            }
+          }
+          if (!best) break;
+          selected.push(best.relic); selectedIds.add(best.relic.id);
+          for (const idx of best.required) covered.add(idx);
+        }
+        mustInclude = selected.concat(ranked.filter(entry => !selectedIds.has(entry.relic.id))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, candidatesPerSlot - selected.length).map(entry => entry.relic));
       }
       const mustIds = new Set(mustInclude.map(r => r.id));
 

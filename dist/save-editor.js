@@ -60,7 +60,8 @@ function editorLoadoutLayout(data, relicOffsets) {
 }
 
 function createSaveEditor(arrayBuffer) {
-  const raw=new Uint8Array(arrayBuffer.slice(0)),entryMeta=new Map(),fullEntries=new Map(),cleanEntries=new Map();
+  // Keep a read-only view of the original bytes; edits are staged in decrypted copies.
+  const raw=new Uint8Array(arrayBuffer),entryMeta=new Map(),fullEntries=new Map(),cleanEntries=new Map();
   if(!startsWithAt(raw,[0x42,0x4e,0x44,0x34],0))throw new Error('仅支持 PC 版 BND4 .sl2 存档');
   for(const index of [0,10]){
     const meta=editorEntryMeta(raw,index);

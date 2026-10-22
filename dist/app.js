@@ -364,9 +364,21 @@ function renderEffectRows(relic,showId=false){
 }
 function relicType(r){return r.itemType||'Relic'}
 function relicEntry(r){return state.relicCatalog?.items?.[r.itemKey]||null}
+function safeSourceUrl(value){
+  if(typeof value!=='string'||!value.trim())return '';
+  try{const url=new URL(value,window.location.href);return url.protocol==='http:'||url.protocol==='https:'?url.href:''}catch{return ''}
+}
+function safeRelicImageUrl(value){
+  if(typeof value!=='string'||!value.trim())return '';
+  try{
+    const url=new URL(value,window.location.href),directory=new URL('./relic-images/',window.location.href);
+    if((url.protocol!=='http:'&&url.protocol!=='https:')||url.origin!==window.location.origin||url.origin!==directory.origin||url.search||url.hash||!url.pathname.startsWith(directory.pathname))return '';
+    return /^[A-Za-z0-9._-]+\.png$/i.test(url.pathname.slice(directory.pathname.length))?url.href:'';
+  }catch{return ''}
+}
 function relicName(r){return relicEntry(r)?.name_zh||r.itemNameEn||r.itemNameJa||r.itemKey||`遗物 #${r.itemId}`}
 function relicCategory(r){return relicEntry(r)?.category||'未匹配图鉴'}
-function relicImage(r){const entry=relicEntry(r);return entry?.image?`<img class="relic-thumb" src="${esc(entry.image)}" alt="${esc(entry.name_zh)}图标" loading="lazy" draggable="false" width="58" height="58">`:'<span class="relic-thumb relic-thumb-fallback" aria-hidden="true">◇</span>'}
+function relicImage(r){const entry=relicEntry(r),imageUrl=safeRelicImageUrl(entry?.image);return imageUrl?`<img class="relic-thumb" src="${esc(imageUrl)}" alt="${esc(entry.name_zh)}图标" loading="lazy" draggable="false" width="58" height="58">`:'<span class="relic-thumb relic-thumb-fallback" aria-hidden="true">◇</span>'}
 function setSaveStatus(s,error=false){$('#save-status').textContent=s;$('#save-status').classList.toggle('error',error)}
 function setSaveFailureStatus(message){
   const retainedDataNote=state.save?'本次没有替换当前数据；仍保留上次成功读取的遗物与装配。':'当前没有可用存档数据。';
@@ -457,7 +469,7 @@ function renderRelics(){
   state.relicPage=Math.min(Math.max(state.relicPage,1),pages);
   const start=(state.relicPage-1)*RELIC_PAGE_SIZE,rows=state.relicFiltered.slice(start,start+RELIC_PAGE_SIZE);
   $('#relic-count').textContent=total?`第 ${start+1}–${start+rows.length} 件 / 共 ${total} 件`:'0 件';
-  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${entry?.source_page?`<a href="${esc(entry.source_page)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
+  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),sourcePage=safeSourceUrl(entry?.source_page),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${sourcePage?`<a href="${esc(sourcePage)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
   if(typeof decorateRelicEditorCards==='function')decorateRelicEditorCards(rows);
   renderPagination('relic-pagination',total,RELIC_PAGE_SIZE,state.relicPage);
 }
@@ -778,6 +790,7 @@ const feedbackTransportSecure=(window.location.protocol==='https:'&&feedbackApiS
 const aiTransportSecure=feedbackTransportSecure;
 const agentTransportWarning=$('#agent-transport-warning');
 agentTransportWarning.hidden=aiTransportSecure;
+$('#agent-question').setAttribute('aria-describedby',aiTransportSecure?'agent-status':'agent-transport-warning agent-status');
 if(!aiTransportSecure){$('#agent-question').disabled=true;$('#agent-send').disabled=true}
 function createSecureAgentUuid(){
   const cryptoApi=globalThis.crypto;
@@ -847,9 +860,10 @@ function requestJson(url,body){if(url.startsWith('/api/ai/')&&!aiTransportSecure
 let feedbackDialogRevision=0;
 let feedbackSubmissionCount=0;
 let feedbackSubmissionSequence=0;
+function feedbackPendingMessage(){return `仍有 ${feedbackSubmissionCount} 条反馈请求正在提交；关闭弹窗不会取消请求，请等待完成后再提交，以免重复入库。`}
 function reportFeedbackOutcome(message,isError=false){
   let region=$('#feedback-background-status');
-  if(!region){region=document.createElement('div');region.id='feedback-background-status';region.setAttribute('role','status');region.setAttribute('aria-live','polite');$('#agent-status').insertAdjacentElement('afterend',region)}
+  if(!region)return;
   const line=document.createElement('p');line.className='hint';line.textContent=message;if(isError)line.style.color='#ed9a8f';region.append(line);while(region.children.length>5)region.firstElementChild.remove();
 }
 function feedbackErrorDetail(body){
@@ -861,7 +875,7 @@ function feedbackErrorDetail(body){
 function openFeedbackDialog(kind,context=null){
   const dialog=$('#feedback-dialog'),form=$('#feedback-form');if(!dialog?.showModal){setAgentStatus('当前浏览器暂不支持打开反馈表单。',true);return}
   feedbackDialogRevision++;
-  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();$('#feedback-status').textContent='';$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
+  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();const status=$('#feedback-status'),submit=$('#feedback-submit'),hasPendingSubmission=feedbackSubmissionCount>0;status.textContent=hasPendingSubmission?feedbackPendingMessage():'';if(hasPendingSubmission)status.dataset.pendingSubmission='true';else delete status.dataset.pendingSubmission;submit.hidden=false;submit.disabled=!feedbackTransportSecure||hasPendingSubmission;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
   const option=$('#feedback-context-option'),preview=$('#feedback-context-preview');option.hidden=!context;preview.hidden=true;
   if(context){$('#feedback-question-preview').textContent=context.question;$('#feedback-answer-preview').textContent=context.answer}
   dialog.showModal();$('#feedback-message').focus();
@@ -869,12 +883,12 @@ function openFeedbackDialog(kind,context=null){
 $('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
 $('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});
 $('#feedback-cancel').addEventListener('click',()=>$('#feedback-dialog').close());
-$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogRevision++;feedbackDialogContext=null;$('#feedback-form').reset();$('#feedback-status').textContent='';$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';if(feedbackSubmissionCount)reportFeedbackOutcome(`仍有 ${feedbackSubmissionCount} 条反馈请求在处理中；关闭窗口不会撤销已发送的请求。`)});
+$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogRevision++;feedbackDialogContext=null;$('#feedback-form').reset();const status=$('#feedback-status');status.textContent='';delete status.dataset.pendingSubmission;$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';if(feedbackSubmissionCount)reportFeedbackOutcome(`仍有 ${feedbackSubmissionCount} 条反馈请求在处理中；关闭窗口不会撤销已发送的请求。`)});
 $('#feedback-form').addEventListener('submit',async event=>{
-  event.preventDefault();if(!feedbackTransportSecure){$('#feedback-submit').disabled=true;$('#feedback-transport-warning').hidden=false;return}if(!event.currentTarget.reportValidity())return;
-  const submit=$('#feedback-submit'),includeContext=Boolean(feedbackDialogContext&&$('#feedback-include-context').checked),payload={kind:feedbackDialogKind,message:$('#feedback-message').value.trim(),email:$('#feedback-email').value.trim()||null,include_context:includeContext};
+  event.preventDefault();const submit=$('#feedback-submit'),status=$('#feedback-status');if(feedbackSubmissionCount>0){submit.disabled=true;status.dataset.pendingSubmission='true';status.textContent=feedbackPendingMessage();return}if(!feedbackTransportSecure){submit.disabled=true;$('#feedback-transport-warning').hidden=false;return}if(!event.currentTarget.reportValidity())return;
+  const includeContext=Boolean(feedbackDialogContext&&$('#feedback-include-context').checked),payload={kind:feedbackDialogKind,message:$('#feedback-message').value.trim(),email:$('#feedback-email').value.trim()||null,include_context:includeContext};
   if(includeContext){payload.question=feedbackDialogContext.question;payload.answer=feedbackDialogContext.answer}
-  const dialog=$('#feedback-dialog'),status=$('#feedback-status'),revision=feedbackDialogRevision,submission=++feedbackSubmissionSequence;feedbackSubmissionCount++;submit.disabled=true;status.textContent='正在提交…';
+  const dialog=$('#feedback-dialog'),revision=feedbackDialogRevision,submission=++feedbackSubmissionSequence;feedbackSubmissionCount++;submit.disabled=true;delete status.dataset.pendingSubmission;status.textContent='正在提交…';
   try{
     const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(response.status>=400&&response.status<500){let detail='';try{detail=feedbackErrorDetail(await response.json())}catch{}const error=new Error(`服务器拒绝了该反馈（HTTP ${response.status}）${detail?`：${detail}`:''}`);error.feedbackOutcome='rejected';throw error}
@@ -886,9 +900,9 @@ $('#feedback-form').addEventListener('submit',async event=>{
     const message=error?.feedbackOutcome==='rejected'||error?.feedbackOutcome==='uncertain'?error.message:'反馈提交结果无法确认（请求可能已送达服务器）；请先确认收件箱，再决定是否重新提交。';
     if(dialog.open&&revision===feedbackDialogRevision){status.textContent=message;submit.disabled=false}
     else reportFeedbackOutcome(`第 ${submission} 条${message}`,true);
-  }finally{feedbackSubmissionCount=Math.max(0,feedbackSubmissionCount-1)}
+  }finally{feedbackSubmissionCount=Math.max(0,feedbackSubmissionCount-1);if(dialog.open&&revision!==feedbackDialogRevision&&status.dataset.pendingSubmission==='true'){if(feedbackSubmissionCount>0)status.textContent=feedbackPendingMessage();else{delete status.dataset.pendingSubmission;status.textContent='';submit.disabled=!feedbackTransportSecure}}}
 });
-function agentInventory(){return (state.save?.relics||[]).map(relic=>({id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effectGroups(relic).map(effect=>ruleEffectName(effect)).filter(Boolean).slice(0,12)}))}
+function agentInventory(){return (state.save?.relics||[]).map(relic=>{const effects=effectGroups(relic).map(effect=>({key:effect.key,name:ruleEffectName(effect)})).filter(effect=>effect.key&&effect.name).slice(0,12);return {id:String(relic.id),name:relicName(relic),kind:relicType(relic)==='DeepRelic'?'deep':'normal',color:['Red','Blue','Yellow','Green','Any'].includes(relic.itemColor)?relic.itemColor:'Any',effects:effects.map(effect=>effect.name),effect_keys:effects.map(effect=>effect.key)}})}
 function describeAgentPlan(plan,inventory){
   const names=new Map(inventory.map(relic=>[String(relic.id),relic.name])),sections=[['normal','普通遗物'],['deep','深夜遗物']].filter(([group])=>plan[group]?.length),result=$('#agent-build-result');
   result.replaceChildren();const summary=document.createElement('p');summary.className='ai-plan-summary';summary.textContent=plan.summary;result.append(summary);
@@ -901,7 +915,7 @@ async function requestAgentBuild(question,context){
   const character=context.character_key,key=context.vessel_key,mode=context.build_scope,combined=mode==='combined';
   const vessel=state.vessels.characters?.[character]?.vessels?.[key]||(state.vessels.universalVessels||[]).find(item=>item.key===key);if(!vessel)throw new Error('所选角色供具信息不可用，请重新选择。');
   const slots=[...(vessel.normalSlots||[]).map((color,index)=>({group:'normal',index,color})),...(combined?(vessel.deepSlots||[]).map((color,index)=>({group:'deep',index,color})):[])];
-  const ruleEffects=Object.entries(state.effects?.effects||{}),rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([effectId,entry])=>entry.key===rule.key&&isOutOfGameRelicEffect({...entry,id:effectId}))||[];return {effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope)}});
+  const ruleEffects=Object.entries(state.effects?.effects||{}),rules=effectiveRules().map(rule=>{const [id,effect]=ruleEffects.find(([effectId,entry])=>entry.key===rule.key&&isOutOfGameRelicEffect({...entry,id:effectId}))||[];return {key:rule.key,effect:id?ruleEffectName({...effect,id}):rule.key,priority:rule.priority,scope:normalizeRuleScope(rule.key,rule.scope),cap:rule.cap}});
   const inventory=agentInventory(),body={character:characterZh[character]||character,character_key:character,vessel:vesselName(key,character),vessel_key:key,mode,question,slots,rules,inventory};if(agentSessionId)body.session_id=agentSessionId;
   const result=await requestJson('/api/ai/recommend',body);pendingAgentPlan={plan:result,inventory,character,key,mode};describeAgentPlan(result,inventory);setAgentStatus('配装建议已生成，请检查遗物和理由，再选择是否应用。');return result;
 }
