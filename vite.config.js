@@ -23,6 +23,7 @@ const catalogJsonFiles = [
   'relic_rule_effects.json',
   'effect_encyclopedia.json',
 ];
+const stylesheetFiles = ['style.css', 'game-ui.css'];
 const classicScriptVersions = Object.fromEntries(classicScriptFiles.map((file) => {
   const path = fileURLToPath(new URL(`./public/${file}`, import.meta.url));
   if (!existsSync(path)) {
@@ -43,9 +44,27 @@ const catalogJsonVersions = Object.fromEntries(catalogJsonFiles.map((file) => {
   const content = readFileSync(path);
   return [file, createHash('sha256').update(content).digest('hex').slice(0, 12)];
 }));
+const stylesheetVersions = Object.fromEntries(stylesheetFiles.map((file) => {
+  const path = fileURLToPath(new URL(`./public/${file}`, import.meta.url));
+  if (!existsSync(path)) {
+    throw new Error(`[stylesheets] Required public/${file} is missing; cannot generate its SHA-256 cache key.`);
+  }
+  const content = readFileSync(path);
+  return [file, createHash('sha256').update(content).digest('hex').slice(0, 12)];
+}));
+
+const stylesheetCacheKeyPlugin = {
+  name: 'stylesheet-content-cache-keys',
+  transformIndexHtml(html) {
+    return html.replace(
+      /(<link\b[^>]*\bhref=["'])\/(style\.css|game-ui\.css)(?:\?[^"']*)?(["'][^>]*>)/gi,
+      (_match, prefix, file, suffix) => `${prefix}/${file}?v=${stylesheetVersions[file]}${suffix}`,
+    );
+  },
+};
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), stylesheetCacheKeyPlugin],
   publicDir: 'public',
   define: {
     __CLASSIC_SCRIPT_VERSIONS__: JSON.stringify(classicScriptVersions),
