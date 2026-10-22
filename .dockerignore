@@ -13,3 +13,9 @@ local-data
 *.sl2.tmp
 __pycache__
 *.pyc
+
+# The backend uses game JSON and hand-written game knowledge only.
+public/*
+!public/*.json
+docs/*
+!docs/NIGHTREIGN_KNOWLEDGE.md
