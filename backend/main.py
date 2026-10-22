@@ -368,6 +368,10 @@ def _validate_scope(body: AdviceRequest) -> None:
             status_code=422,
             detail="问题需要围绕《黑夜君临》的角色、武器、遗物、词条或战斗配装。",
         )
+    if body.mode == "normal" and any(
+        rule.priority == "required" and rule.scope == "deep" for rule in body.rules
+    ):
+        raise HTTPException(status_code=422, detail="仅普通遗物模式无法满足深夜必选词条，请改用组合模式或调整规则。")
     if not any(slot.group == "normal" for slot in body.slots):
         raise HTTPException(status_code=422, detail="至少需要一个普通遗物槽位。")
     roster = _vessel_catalog()
