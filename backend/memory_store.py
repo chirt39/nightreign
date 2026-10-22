@@ -88,6 +88,7 @@ def _connect() -> Iterator[sqlite3.Connection]:
         created_at REAL NOT NULL
     )""")
     connection.execute("CREATE INDEX IF NOT EXISTS ai_rate_events_by_client ON ai_rate_events(client, created_at)")
+    connection.execute("CREATE INDEX IF NOT EXISTS ai_rate_events_by_created_at ON ai_rate_events(created_at)")
     connection.execute("""CREATE TABLE IF NOT EXISTS ai_daily_usage (
         day TEXT PRIMARY KEY,
         request_count INTEGER NOT NULL
