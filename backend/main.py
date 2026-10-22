@@ -32,6 +32,11 @@ MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-flash")
 RATE_LIMIT = positive_int_setting("AI_REQUESTS_PER_MINUTE", 5)
 DAILY_AI_LIMIT = positive_int_setting("AI_REQUESTS_PER_DAY", 100)
 MEMORY_ENDPOINT_RATE_LIMIT = positive_int_setting("MEMORY_ENDPOINT_REQUESTS_PER_MINUTE", 30)
+DEEPSEEK_CONNECT_TIMEOUT = 10.0
+DEEPSEEK_READ_TIMEOUT = 60.0
+DEEPSEEK_WRITE_TIMEOUT = 30.0
+DEEPSEEK_POOL_TIMEOUT = 10.0
+DEEPSEEK_OVERALL_TIMEOUT = 120.0
 logger = logging.getLogger(__name__)
 
 
@@ -553,11 +558,20 @@ async def recommend(body: AdviceRequest, request: Request) -> dict:
 
     await _reserve_daily_ai_request()
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(60, connect=10)) as client:
-            response = await client.post(
-                f"{API_BASE}/chat/completions",
-                headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
-                json=payload,
+        timeout = httpx.Timeout(
+            connect=DEEPSEEK_CONNECT_TIMEOUT,
+            read=DEEPSEEK_READ_TIMEOUT,
+            write=DEEPSEEK_WRITE_TIMEOUT,
+            pool=DEEPSEEK_POOL_TIMEOUT,
+        )
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await asyncio.wait_for(
+                client.post(
+                    f"{API_BASE}/chat/completions",
+                    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+                    json=payload,
+                ),
+                timeout=DEEPSEEK_OVERALL_TIMEOUT,
             )
         response.raise_for_status()
         result = response.json()
@@ -565,7 +579,7 @@ async def recommend(body: AdviceRequest, request: Request) -> dict:
         finish_reason = choice.get("finish_reason")
         message = choice.get("message") or {}
         content = message.get("content")
-    except httpx.TimeoutException as exc:
+    except (httpx.TimeoutException, asyncio.TimeoutError) as exc:
         raise HTTPException(status_code=504, detail="DeepSeek 响应超时，请稍后重试。") from exc
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code in (401, 403):
@@ -820,6 +834,8 @@ async def chat(body: ChatRequest, request: Request) -> dict:
         categories = ["effect", "manual_knowledge"]
     try:
         retrieved = await run_in_threadpool(rag_store.search, retrieval_query, categories)
+    except rag_store.EmbeddingTimeoutError as exc:
+        raise HTTPException(status_code=504, detail="百炼向量检索超时，请稍后重试。") from exc
     except Exception as exc:
         raise HTTPException(status_code=503, detail="知识库不可用。请检查 Chroma 数据目录和百炼向量 API 配置，并运行 python -m backend.index_knowledge。") from exc
     sources = [
@@ -888,17 +904,26 @@ async def chat(body: ChatRequest, request: Request) -> dict:
     }
     await _reserve_daily_ai_request()
     try:
-        async with httpx.AsyncClient(timeout=httpx.Timeout(60, connect=10)) as client:
-            response = await client.post(
-                f"{API_BASE}/chat/completions",
-                headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
-                json=payload,
+        timeout = httpx.Timeout(
+            connect=DEEPSEEK_CONNECT_TIMEOUT,
+            read=DEEPSEEK_READ_TIMEOUT,
+            write=DEEPSEEK_WRITE_TIMEOUT,
+            pool=DEEPSEEK_POOL_TIMEOUT,
+        )
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await asyncio.wait_for(
+                client.post(
+                    f"{API_BASE}/chat/completions",
+                    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+                    json=payload,
+                ),
+                timeout=DEEPSEEK_OVERALL_TIMEOUT,
             )
         response.raise_for_status()
         result = response.json()
         choice = result["choices"][0]
         content = (choice.get("message") or {}).get("content")
-    except httpx.TimeoutException as exc:
+    except (httpx.TimeoutException, asyncio.TimeoutError) as exc:
         raise HTTPException(status_code=504, detail="DeepSeek 响应超时，请稍后重试。") from exc
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code in (401, 403):

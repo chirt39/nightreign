@@ -85,6 +85,7 @@ done
 - 每个 HTTP 请求体最多 750,000 字节；服务端先检查声明长度，再按 ASGI 请求流累计实际字节数，超限返回 HTTP 413，只暂存上限内的数据，不累积超限后的剩余请求体。
 - `POST /api/ai/chat`、`/api/ai/recommend`、`/api/ai/history` 和 `/api/ai/memory/clear` 在公网必须通过 HTTPS；后端仅检查 ASGI `request.url.scheme`，并拒绝非 HTTPS 公网 `Origin`。前端复用反馈的连接安全规则，在发出 `/api/ai/*` 请求前拦截不安全连接，并禁用助手输入、历史恢复和清除记忆。HTTPS 页面可连接跨源 HTTPS API；本机开发允许页面和 API 均通过 `localhost`、`127.0.0.1` 或 `[::1]` 访问的 HTTP 回环组合。后端还会校验实际客户端地址确为 loopback。
 - 这四个 AI POST 接口的响应都带有 `Cache-Control: no-store`，包括路由错误和请求体限制错误，避免浏览器或中间缓存保存个性化回答、配装结果及会话历史。此响应头控制缓存行为，不代替客户端的隐私数据处理。
+- DeepSeek 上游请求的 connect/read/write/pool 超时分别为 10/60/30/10 秒，整次请求最多 120 秒；embedding 分别为 10/45/30/10 秒，单批请求最多 60 秒。超出总时限会取消异步 HTTP 请求并释放连接；AI 路由将上游超时映射为 HTTP 504，不向用户返回上游响应正文。
 - DeepSeek 请求接口共享同一客户端每分钟限流；默认全站每天最多发起 100 次 DeepSeek 请求（UTC 日界线重置），分别由 `AI_REQUESTS_PER_MINUTE` 和 `AI_REQUESTS_PER_DAY` 配置。history 与 memory-clear 接口另有独立的每 IP 每分钟限流，由 `MEMORY_ENDPOINT_REQUESTS_PER_MINUTE` 配置，默认 30 次，避免读取或删除记忆的请求消耗 AI 配额。计数保存在 `AGENT_MEMORY_DB` 的 SQLite 数据库中，单机多进程共享；多服务器部署需改用 Redis 等共享限流存储。
 - Uvicorn 依赖范围为 `uvicorn[standard]>=0.30,<1.0`，没有锁定精确版本；Docker 构建会安装满足范围的版本。Uvicorn 默认已启用 `X-Forwarded-*` 解析，且默认只信任 `FORWARDED_ALLOW_IPS` 环境变量指定的来源或 `127.0.0.1`。Docker 启动命令显式启用该解析，并读取可选的 `FORWARDED_ALLOW_IPS`（逗号分隔的 IP/CIDR），默认值为 `127.0.0.1`。
 - Ubuntu 上由同机 Caddy 代理到 loopback 地址时，使用 `FORWARDED_ALLOW_IPS=127.0.0.1`；若 Uvicorn 实际看到的代理地址是 `::1` 或容器网桥地址，应只配置该代理的准确地址/CIDR，并限制后端端口只能由该代理访问。Caddy 的 `reverse_proxy` 会生成/追加 `X-Forwarded-*`，默认忽略客户端传入的这些值，避免直接转发伪造值。不要设为 `*`，也不要信任任意公网来源。

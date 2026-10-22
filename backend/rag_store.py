@@ -6,6 +6,7 @@ not need to load a local PyTorch/SentenceTransformer model.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import ipaddress
 import json
@@ -69,6 +70,15 @@ EMBEDDING_BASE_URL = validate_api_base_url(
 )
 EMBEDDING_MODEL = os.getenv("DASHSCOPE_EMBEDDING_MODEL", "text-embedding-v4").strip()
 EMBEDDING_DIMENSIONS = positive_int_setting("DASHSCOPE_EMBEDDING_DIMENSIONS", 512)
+EMBEDDING_CONNECT_TIMEOUT = 10.0
+EMBEDDING_READ_TIMEOUT = 45.0
+EMBEDDING_WRITE_TIMEOUT = 30.0
+EMBEDDING_POOL_TIMEOUT = 10.0
+EMBEDDING_OVERALL_TIMEOUT = 60.0
+
+
+class EmbeddingTimeoutError(TimeoutError):
+    """The embedding provider exceeded its request deadline."""
 
 
 @lru_cache(maxsize=1)
@@ -79,15 +89,7 @@ def _chroma():
     return chromadb.PersistentClient(path=str(CHROMA_PATH))
 
 
-@lru_cache(maxsize=1)
-def _embedding_client() -> httpx.Client:
-    return httpx.Client(
-        timeout=httpx.Timeout(45, connect=10),
-        headers={"Authorization": f"Bearer {EMBEDDING_API_KEY}", "Content-Type": "application/json"},
-    )
-
-
-def embed_texts(texts: list[str]) -> list[list[float]]:
+async def _embed_texts(texts: list[str]) -> list[list[float]]:
     """Generate vectors via DashScope's OpenAI-compatible embeddings endpoint."""
     if not EMBEDDING_API_KEY:
         raise RuntimeError("缺少 DASHSCOPE_API_KEY，无法生成检索向量。")
@@ -95,38 +97,63 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
         return []
 
     vectors: list[list[float] | None] = [None] * len(texts)
-    # text-embedding-v4 accepts at most ten texts per synchronous request.
-    for offset in range(0, len(texts), 10):
-        batch = texts[offset:offset + 10]
-        response = _embedding_client().post(
-            f"{EMBEDDING_BASE_URL}/embeddings",
-            json={"model": EMBEDDING_MODEL, "input": batch,
-                  "dimensions": EMBEDDING_DIMENSIONS, "encoding_format": "float"},
-        )
-        try:
-            response.raise_for_status()
-        except httpx.HTTPStatusError as error:
-            # Include the provider's diagnostic so indexing failures can be
-            # corrected without exposing request headers or the API key.
-            detail = response.text[:1000].strip()
-            raise RuntimeError(
-                f"百炼向量接口请求失败（HTTP {response.status_code}）：{detail or '未返回错误详情'}"
-            ) from error
-        payload = response.json()
-        data = payload.get("data")
-        if not isinstance(data, list) or len(data) != len(batch):
-            raise RuntimeError("百炼向量接口返回数量与请求文本数量不一致。")
-        for row in data:
-            index = row.get("index")
-            vector = row.get("embedding")
-            if not isinstance(index, int) or index < 0 or index >= len(batch) or not isinstance(vector, list):
-                raise RuntimeError("百炼向量接口返回格式无效。")
-            vectors[offset + index] = vector
+    timeout = httpx.Timeout(
+        connect=EMBEDDING_CONNECT_TIMEOUT,
+        read=EMBEDDING_READ_TIMEOUT,
+        write=EMBEDDING_WRITE_TIMEOUT,
+        pool=EMBEDDING_POOL_TIMEOUT,
+    )
+    async with httpx.AsyncClient(
+        timeout=timeout,
+        headers={"Authorization": f"Bearer {EMBEDDING_API_KEY}", "Content-Type": "application/json"},
+    ) as client:
+        # text-embedding-v4 accepts at most ten texts per synchronous request.
+        for offset in range(0, len(texts), 10):
+            batch = texts[offset:offset + 10]
+            try:
+                response = await asyncio.wait_for(
+                    client.post(
+                        f"{EMBEDDING_BASE_URL}/embeddings",
+                        json={"model": EMBEDDING_MODEL, "input": batch,
+                              "dimensions": EMBEDDING_DIMENSIONS, "encoding_format": "float"},
+                    ),
+                    timeout=EMBEDDING_OVERALL_TIMEOUT,
+                )
+            except (httpx.TimeoutException, asyncio.TimeoutError) as error:
+                raise EmbeddingTimeoutError("百炼向量接口请求超时。") from error
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as error:
+                # Include the provider's diagnostic so indexing failures can be
+                # corrected without exposing request headers or the API key.
+                detail = response.text[:1000].strip()
+                raise RuntimeError(
+                    f"百炼向量接口请求失败（HTTP {response.status_code}）：{detail or '未返回错误详情'}"
+                ) from error
+            payload = response.json()
+            data = payload.get("data")
+            if not isinstance(data, list) or len(data) != len(batch):
+                raise RuntimeError("百炼向量接口返回数量与请求文本数量不一致。")
+            for row in data:
+                index = row.get("index")
+                vector = row.get("embedding")
+                if not isinstance(index, int) or index < 0 or index >= len(batch) or not isinstance(vector, list):
+                    raise RuntimeError("百炼向量接口返回格式无效。")
+                vectors[offset + index] = vector
 
     result = [vector for vector in vectors if vector is not None]
     if len(result) != len(texts) or any(len(vector) != EMBEDDING_DIMENSIONS for vector in result):
         raise RuntimeError("百炼向量维度与配置不一致，请检查模型和向量维数设置。")
     return result
+
+
+def embed_texts(texts: list[str]) -> list[list[float]]:
+    """Run the deadline-bounded async embedding client from synchronous callers."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(_embed_texts(texts))
+    raise RuntimeError("embed_texts must run outside an active event loop.")
 
 
 def embed_query(text: str) -> list[float]:
