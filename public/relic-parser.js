@@ -198,6 +198,13 @@ function decryptSaveFile(arrayBuffer) {
       continue;
     }
 
+    // The entry stores a 16-byte IV followed by non-empty AES-CBC ciphertext.
+    // Reject missing or partial ciphertext blocks before passing bytes to CryptoJS.
+    if (entrySize < IV_SIZE * 2 || (entrySize - IV_SIZE) % IV_SIZE !== 0) {
+      console.warn(`Entry #${i} has invalid encrypted payload length - skipping`);
+      continue;
+    }
+
     if (entryDataOffset <= 0 || entryDataOffset >= raw.length ||
         entryDataOffset + entrySize > raw.length) {
       console.warn(`Entry #${i} has invalid data offset: ${entryDataOffset} - skipping`);
