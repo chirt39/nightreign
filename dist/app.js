@@ -124,7 +124,7 @@ function enemyCategoryLabel(row){
 function setupEnemyFilters(){
   const rows=state.enemyData.rows;
   $('#enemy-filter').innerHTML=enemyFilterOptions.map(([key,label])=>{const count=key==='all'?rows.length:rows.filter(row=>matchesEnemyCategory(row,key)).length;return `<option value="${key}">${label} · ${count.toLocaleString('zh-CN')}</option>`}).join('');
-  const areas=[...new Set([...state.enemyMeta.values()].flatMap(item=>[...item.locations]))];
+  const areas=[...state.enemyMetaLocations];
   $('#enemy-area').innerHTML='<option value="all">全部区域 / 遭遇</option>'+areas.map(area=>`<option value="${esc(area)}">${esc(area)}</option>`).join('');
 }
 function restoreEnemyUrlState(){

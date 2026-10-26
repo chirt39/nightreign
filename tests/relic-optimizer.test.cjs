@@ -152,7 +152,7 @@ test('all slot enumeration shapes use the same conditional score', () => {
   assert.equal(opt._enumerateCombos([[a], [b]], ['Red', 'Blue'])[0][0], 17);
 });
 
-test('concentration bonus counts different target keys and exclusions still invalidate a result', () => {
+test('concentration bonus counts different target keys and required exclusions leave no candidates', () => {
   const specs = [
     { key: 'core', priority: 'required', scope: 'any', weight: 10, cap: 1 },
     { key: 'high', priority: 'preferred', weight: 100, cap: 1 },
@@ -161,12 +161,10 @@ test('concentration bonus counts different target keys and exclusions still inva
   const relics = [relic(1, ['core', 'high']), relic(2, []), relic(3, ['bad'])];
   const opt = optimizer(relics, specs, { core: false, high: true, bad: false });
   assert.equal(opt.scoreRelic(relics[0]), 115);
-  const result = opt.optimizeCombined(['Red', 'Red', 'Red'], ['Red', 'Red', 'Red'], {
+  const results = opt.optimizeCombined(['Red', 'Red', 'Red'], ['Red', 'Red', 'Red'], {
     normalTypes: ['Relic'], deepTypes: [], candidatesPerSlot: 3, topN: 1,
-  })[0];
-  assert.equal(result.score, 15);
-  assert.equal(result.required_met, false);
-  assert.equal(result.excluded_present.has('bad'), true);
+  });
+  assert.equal(results.length, 0);
 
   const duplicate = optimizer([relic(4, ['high', 'high'])], [specs[1]], { high: true });
   assert.equal(duplicate.scoreRelic(duplicate.allRelics[0]), 100);
