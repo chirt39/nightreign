@@ -10,10 +10,11 @@ function feedbackUrl() {
 }
 
 export function setupFeedback() {
-  const footer = document.querySelector('.main footer');
-  if (!footer) return;
+  const sources = document.querySelector('#view-sources');
+  if (!sources || sources.querySelector('#heybox-feedback')) return;
 
   const panel = document.createElement('section');
+  panel.id = 'heybox-feedback';
   panel.className = 'heybox-feedback panel';
   panel.innerHTML = [
     '<div><h2>反馈与建议</h2><p>欢迎指出资料错误或提出改进建议。反馈匿名提交，不需要账号或联系方式。</p></div>',
@@ -27,7 +28,7 @@ export function setupFeedback() {
     '<p id="heybox-feedback-status" role="status" aria-live="polite"></p>',
     '</form>',
   ].join('');
-  footer.before(panel);
+  sources.append(panel);
 
   const form = panel.querySelector('form');
   const submit = form.querySelector('[type="submit"]');
