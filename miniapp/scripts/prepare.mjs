@@ -27,7 +27,7 @@ async function replaceGeneratedDirectory(source, destination, filter) {
 
 function safePublicAsset(source) {
   const name = source.toLowerCase();
-  return !(/\.sl2(?:\.|$)/.test(name) || /(?:^|[\\/])\.env(?:\.|$)/.test(name));
+  return !(/\.sl2(?:\.|$)/.test(name) || /\.html?$/.test(name) || /(?:^|[\\/])\.env(?:\.|$)/.test(name));
 }
 
 async function rewriteVue(directory) {
