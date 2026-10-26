@@ -6,6 +6,14 @@ const miniappRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const siteRoot = resolve(miniappRoot, '..');
 const generatedSource = join(miniappRoot, '.generated-src');
 const generatedPublic = join(miniappRoot, '.generated-public');
+const miniappQuickNav = [
+  ['enemies', '◉', '图鉴'],
+  ['relics', '◇', '遗物仪式'],
+  ['records', '▤', '日志'],
+  ['builds', '⌘', '遗物装配'],
+  ['effects', '✧', '词条图鉴'],
+  ['sources', 'ⓘ', '资料说明'],
+].map(([view, icon, label]) => `<button type="button" data-go="${view}"><span aria-hidden="true">${icon}</span><b>${label}</b></button>`).join('');
 
 async function replaceGeneratedDirectory(source, destination, filter) {
   const withinMiniapp = relative(miniappRoot, destination);
@@ -34,6 +42,12 @@ async function rewriteVue(directory) {
       }
       if (entry.name === 'App.vue') {
         updated = updated.replace(/script\.src = [^;]+;/, 'script.src = import.meta.env.BASE_URL + file;');
+      }
+      if (entry.name === 'OverviewPage.vue') {
+        updated = updated.replace('<section class="home-agent panel">', '<nav class="heybox-home-nav" aria-label="快速导航">' + miniappQuickNav + '</nav>\n<section class="home-agent panel">');
+      }
+      if (entry.name === 'RelicsPage.vue') {
+        updated = updated.replace(/<p class="hint">遗物中文名与图标对照[\s\S]*?<\/p>/, '');
       }
       updated = updated.replaceAll('存档始终留在你的浏览器中', '存档只在当前设备解析');
       updated = updated.replaceAll('文件只在当前浏览器内解析', '文件只在当前设备解析');
