@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:miniapp": "npm --prefix miniapp run build"
   },
   "dependencies": {
     "vue": "^3.5.22"

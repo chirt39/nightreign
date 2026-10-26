@@ -13,6 +13,9 @@ local-data/
 tmp/
 tmpdist/
 node_modules/
+miniapp/.generated-src/
+miniapp/.generated-public/
+miniapp/dist/
 __pycache__/
 *.py[cod]
 .DS_Store
