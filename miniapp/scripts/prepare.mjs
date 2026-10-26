@@ -6,14 +6,15 @@ const miniappRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const siteRoot = resolve(miniappRoot, '..');
 const generatedSource = join(miniappRoot, '.generated-src');
 const generatedPublic = join(miniappRoot, '.generated-public');
+const miniappIcon = paths => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
 const miniappQuickNav = [
-  ['enemies', '◉', '图鉴'],
-  ['relics', '◇', '遗物仪式'],
-  ['records', '▤', '日志'],
-  ['builds', '⌘', '遗物装配'],
-  ['effects', '✧', '词条图鉴'],
-  ['sources', 'ⓘ', '资料说明'],
-].map(([view, icon, label]) => `<button type="button" data-go="${view}"><span aria-hidden="true">${icon}</span><b>${label}</b></button>`).join('');
+  ['enemies', '图鉴', '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/><path d="M4 5.5v13A2.5 2.5 0 0 1 6.5 16H20"/><path d="M9 7h7M9 10h7"/>'],
+  ['relics', '遗物仪式', '<path d="m12 2.8 8.8 9.2-8.8 9.2L3.2 12z"/><path d="M12 7.2 16.6 12 12 16.8 7.4 12z"/>'],
+  ['records', '远征日志', '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 12h7M9 16h7"/>'],
+  ['builds', '遗物装配', '<path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v6H4zM14 15h6v6h-6z"/>'],
+  ['effects', '词条图鉴', '<path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1"/><circle cx="12" cy="12" r="4"/>'],
+  ['sources', '资料说明', '<circle cx="12" cy="12" r="9"/><path d="M9.7 9a2.4 2.4 0 0 1 4.6 1c0 1.7-2.3 2.1-2.3 3.8M12 17h.01"/>'],
+].map(([view, label, paths]) => `<button type="button" data-go="${view}">${miniappIcon(paths)}<b>${label}</b><span class="heybox-home-nav-arrow" aria-hidden="true">↗</span></button>`).join('');
 
 async function replaceGeneratedDirectory(source, destination, filter) {
   const withinMiniapp = relative(miniappRoot, destination);
@@ -44,7 +45,7 @@ async function rewriteVue(directory) {
         updated = updated.replace(/script\.src = [^;]+;/, 'script.src = import.meta.env.BASE_URL + file;');
       }
       if (entry.name === 'OverviewPage.vue') {
-        updated = updated.replace('<section class="home-agent panel">', '<nav class="heybox-home-nav" aria-label="快速导航">' + miniappQuickNav + '</nav>\n<section class="home-agent panel">');
+        updated = updated.replace('<section class="home-agent panel">', '<section class="heybox-home-shortcuts" aria-labelledby="heybox-shortcuts-title"><div class="heybox-home-nav-heading"><div><p class="eyebrow">EXPEDITION ROUTES</p><h2 id="heybox-shortcuts-title">快速入口</h2></div><span>功能一览</span></div><nav class="heybox-home-nav" aria-label="快速导航">' + miniappQuickNav + '</nav></section>\n<section class="home-agent panel">');
       }
       if (entry.name === 'RelicsPage.vue') {
         updated = updated.replace(/<p class="hint">遗物中文名与图标对照[\s\S]*?<\/p>/, '');
