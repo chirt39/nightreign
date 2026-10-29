@@ -382,7 +382,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .nav-link.active .nav-icon{border-color:#a98c5d;box-shadow:0 0 9px #b99d6430}
 .nav-link:hover:not(.active){background:#202c3a}
 .nav-link:hover:not(.active) .nav-icon{border-color:#718096;box-shadow:none}
-#view-overview .feature-card:focus-visible,.enemy-row:focus-visible,.enemy-variant:focus-visible{outline:2px solid #d5b477;outline-offset:2px}
+#view-overview .feature-card:focus-visible,.enemy-row:focus-visible,.enemy-variant:focus-visible{outline:1px solid #91a5ba;outline-offset:2px}
 .enemy-row.active,.enemy-variant.active{background:#b99b6418;color:#f1d8a5}
 .enemy-row.active{box-shadow:inset 3px 0 #d5b477}
 .enemy-variant.active{box-shadow:inset 2px 0 #d5b477}
@@ -420,7 +420,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .save-edit-bar[hidden],.vessel-editor[hidden]{display:none}
 .save-edit-bar h2{font-size:21px;margin:5px 0}.save-edit-bar p{margin:5px 0 9px;color:#aeb9c8}.save-edit-bar strong{color:#d7b875;font-weight:600}.save-edit-bar strong.error{color:#ef9a8d}
 .save-edit-actions,.vessel-editor{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.save-edit-actions .button,.vessel-editor .button{white-space:nowrap}
-.relic-edit-button{margin:10px 14px 14px;padding:8px 12px;width:calc(100% - 28px);border:1px solid #8f7652;background:#263343;color:#e2c78b;cursor:pointer;text-align:center}.relic-edit-button:hover,.relic-edit-button:focus-visible{background:#35475c;outline:1px solid #d4bb86}
+.relic-edit-button{margin:10px 14px 14px;padding:8px 12px;width:calc(100% - 28px);border:1px solid #8f7652;background:#263343;color:#e2c78b;cursor:pointer;text-align:center}.relic-edit-button:hover,.relic-edit-button:focus-visible{background:#35475c}
 .relic-edit-dialog{width:min(720px,92vw);max-height:88vh;overflow:auto;padding:0;color:#e4e8ef;background:#172333;border:1px solid #b9a374;box-shadow:0 30px 80px #000b}.relic-edit-dialog::backdrop{background:#050b14c9}
 .relic-edit-dialog form{padding:23px}.relic-edit-dialog header,.relic-edit-dialog footer{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.relic-edit-dialog h2{margin:5px 0;font-size:23px}.relic-edit-dialog header p{margin:3px 0;color:#aeb9c8}.relic-edit-dialog header button{border:0;background:none;color:#d3d8e1;font-size:28px;cursor:pointer}.relic-edit-dialog footer{justify-content:flex-end;margin-top:22px}
 .relic-edit-pair{display:grid;grid-template-columns:38px 1fr 1fr;gap:12px;align-items:end;padding:13px 0;border-bottom:1px solid #64758b56}.relic-edit-index{display:grid;place-items:center;width:30px;height:30px;border:1px solid #b9a374;color:#e2c78b}.relic-edit-pair label{display:grid;gap:6px;color:#bfc8d3;font-size:13px}.relic-edit-pair input{width:100%;padding:10px 12px;border:1px solid #5d7087;background:#121d2b;color:#f0f2f5;font:inherit}.relic-edit-pair input:focus{outline:1px solid #d8bd7c}
@@ -690,7 +690,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 
 /* Shared art direction: quiet stone panels, clear hierarchy, and separate relic color from rarity. */
 :root{--ui-gold:#d3b77b;--ui-panel:#172638;--ui-line:#394d64}
-:focus-visible{outline:2px solid #e3c985!important;outline-offset:2px}
+:focus-visible{outline:1px solid #91a5ba!important;outline-offset:2px}
 .page-intro{position:relative;padding:16px 20px 17px 22px;border-left:2px solid var(--ui-gold);border-bottom:1px solid #b89b6433;background:linear-gradient(100deg,#1b2b3fbb 0%,#17263a66 58%,transparent 100%)}
 .page-intro:before{position:absolute;top:0;left:0;width:42px;height:1px;background:linear-gradient(90deg,#e0c88e,transparent);content:""}
 .page-intro .eyebrow{margin-bottom:6px;color:#cbb27e;letter-spacing:.18em}
