@@ -64,8 +64,8 @@ const enemyFilterOptions=[['all','全部敌人'],['boss','全部首领'],['night
 const fieldBossCategories=new Set(['强敌boss','boss','小boss','中boss']);
 const enemyExcludedNumericSourceIds=new Set(['30200100','30200110','30208000','30208020','30208010','30200120']);
 const enemyPrimarySourceIds=new Set(['30200000','30200030','30200010a','30200020']);
-const enemyExplicitVariantPairs=new Map([['30200010b','30200000'],['45803020b','45803020a']]);
-const enemyUnpairedDisasterIds=new Set(['44700010b','71000110b','30200010b','30000010b','30000110b','30001010b','45803020b','36612010b','36615010b','36622010b']);
+const enemyExplicitVariantPairs=new Map([['30200010b','30200000'],['45803020b','45803020a'],['30000010b','30000010a'],['30000110b','30000110a'],['30001010b','30001010a'],['36622010b','36622010a']]);
+const enemyUnpairedDisasterIds=new Set(['44700010b','71000110b','36612010b','36615010b']);
 // Repository evidence: rows 31700020 and 31800020 share the explicit “山顶 遗迹Boss” tag.
 // Require a recognized location on the child row and inherit location only, never category.
 const enemyLocationOnlyParents=new Map([['白金之子弓手的狼','白金之子弓手']]);
@@ -112,7 +112,7 @@ function buildEnemyDisplayIndex(){
 function enemySourceNote(row){
   const sourceName=stripDisasterMarker(enemyName(row));
   const context=[...sourceName.matchAll(/\(([^)]*)\)|（([^）]*)）|\[([^\]]*)\]|【([^】]*)】/g)].map(match=>match.slice(1).find(Boolean)||'').join(' ').toLocaleLowerCase();
-  const locations=locationFor(row).filter(location=>context.includes(location.toLocaleLowerCase()));
+  const locations=[...state.enemyMetaLocations].filter(location=>context.includes(location.toLocaleLowerCase()));
   const independent=isIndependentDisaster(row);
   return {sourceName,locations,variant:enemyName(row).includes('[灾域]')?(independent?'独立记录':'灾域版'):'普通版'};
 }
