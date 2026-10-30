@@ -1,7 +1,9 @@
-/* Editing controls for the existing relic, loadout and record screens. */
+/* Read-only save status and backup controls. Write-back awaits format and
+   in-game round-trip validation for an authorized save version. */
+const SAVE_EDITOR_WRITE_ENABLED=false;
 const saveEditBar=document.createElement('section');
 saveEditBar.id='save-edit-bar';saveEditBar.className='save-edit-bar';saveEditBar.hidden=true;
-saveEditBar.innerHTML='<div><span class="card-kicker">SAVE WORKSHOP / 存档工坊</span><h2>编辑并导出存档</h2><p>词条和供具修改先暂存在当前页面。原文件不会被覆盖，也不会上传。</p><strong id="save-edit-state">尚无修改</strong></div><div class="save-edit-actions"><button type="button" class="button ghost" id="save-backup">下载原始备份</button><button type="button" class="button primary" id="save-export" disabled>下载修改后的 .sl2</button></div>';
+saveEditBar.innerHTML='<div><span class="card-kicker">SAVE WORKSHOP / 存档工坊</span><h2>存档写回尚未验收</h2><p>当前仅支持只读解析。固定偏移与档案标记尚不能证明存档版本兼容，暂不提供词条或供具修改与导出。</p><strong id="save-edit-state">只读模式</strong></div><div class="save-edit-actions"><button type="button" class="button ghost" id="save-backup">下载原始备份</button></div>';
 $('#relic-dashboard').before(saveEditBar);
 
 const vesselEditor=document.createElement('div');
@@ -17,16 +19,16 @@ document.body.append(relicDialog);
 function editorSetStatus(message,error=false){
   $('#save-edit-state').textContent=message;
   $('#save-edit-state').classList.toggle('error',error);
-  $('#save-export').disabled=!state.saveEditor?.hasChanges;
+  const exportButton=$('#save-export');if(exportButton)exportButton.disabled=!state.saveEditor?.hasChanges;
 }
 function renderSaveEditorUi(){
   const available=!!state.saveEditor;
-  saveEditBar.hidden=!available;vesselEditor.hidden=!available;
+  saveEditBar.hidden=!available;vesselEditor.hidden=true;
   if(!available){if(relicDialog.open)relicDialog.close();return}
-  editorSetStatus(state.saveEditor.hasChanges?'已暂存修改，可下载新存档':'尚无修改');
+  editorSetStatus(SAVE_EDITOR_WRITE_ENABLED?(state.saveEditor.hasChanges?'已暂存修改，可下载新存档':'尚无修改'):'只读模式 · 写回未验收');
 }
 function decorateRelicEditorCards(rows){
-  if(!state.saveEditor)return;
+  if(!state.saveEditor||!SAVE_EDITOR_WRITE_ENABLED)return;
   $$('#relic-list article.relic-card').forEach((card,index)=>{
     const relic=rows[index];if(!relic||!state.saveEditor.readRelic(relic.id))return;
     const button=document.createElement('button');button.type='button';button.className='relic-edit-button';
@@ -136,7 +138,8 @@ function editorDownload(bytes,name){
 $('#save-backup').addEventListener('click',()=>{
   if(state.saveEditor)editorDownload(state.saveEditor.originalBytes(),(state.saveFileName||'NR0000.sl2').replace(/\.sl2$/i,'.backup.sl2'));
 });
-$('#save-export').addEventListener('click',()=>{
+const saveExportButton=$('#save-export');
+if(saveExportButton)saveExportButton.addEventListener('click',()=>{
   try{
     const bytes=state.saveEditor.exportBytes();
     editorDownload(bytes,(state.saveFileName||'NR0000.sl2').replace(/\.sl2$/i,'.edited.sl2'));
