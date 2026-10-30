@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+from collections import defaultdict
 from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
