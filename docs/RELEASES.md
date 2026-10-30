@@ -45,3 +45,18 @@ PR [#8](https://github.com/chirt39/nightreign/pull/8) 合并 SHA：`a5b615f1035d
 | `dist/enemy-image-verified.json` | `867fb446f64fbdafe412118ccede68f94a89b63653298c3168e1c470750f6494` |
 
 产物位于 `/var/www/nightreign/releases/7bc5405aff17a0b6f040fa4d88981fbb321b5953`，上一静态版本 `/var/www/nightreign/releases/a5b615f1035d932486ec67dc59ec38120d178df1` 保留用于回退，旧 bundle 也继续保留以兼容缓存中的 HTML。公网直连验收首页、健康检查及 11 个唯一图片 URL 均返回 HTTP 200，图片响应非空；verified JSON 的构建哈希用于前端缓存版本。后端未变更或重启，仍运行 `nightreign-ai:219771cf`；数据库、`.env` 和 TLS 配置均未改动。
+
+### 图鉴纠错与地点差异静态发布（2026-10-30）
+
+代码 PR [#13](https://github.com/chirt39/nightreign/pull/13) 合并 SHA：`67c3697fc46f9ebead37ad17895d05bf6ce38b65`。该提交通过 `npm ci` 与生产构建，仅更新静态前端；差异面板比较当前敌人记录中可见的倍率、抗性、韧性与地点，不修改数据。纠错复用 `suggestion` 收件类型，以 `【图鉴纠错】` 前缀和当前敌人 ID／规范链接标记，不附对话上下文。
+
+| 静态文件 | SHA-256 |
+| --- | --- |
+| `dist/index.html` | `d33612c45ecf7c92a7934de7d86cce3fb55d8c35c8834eb518e834326361fe7c` |
+| `dist/assets/index-D9-U4rJj.js` | `9f0344aa64c8a55c0f3161f0e481123411ccee8403ebe37d6df65901bbf14b73` |
+| `dist/app.js` | `414fc82918aa2c1e68eb5406cd8581fe8ad9560e5a11f682fb3691cf2517b133` |
+| `dist/game-ui.css` | `f415512777a8fc0a3167b11312bdbf966a357863a9e2baf5b6d101dc46da60e1` |
+| `dist/admin-feedback.html` | `9f071f7248ae31e9cf6a7a86fb42550c37f9e77dce94edf06b1433e2d55d7b5f` |
+| `dist/enemy-image-verified.json`（沿用前版） | `867fb446f64fbdafe412118ccede68f94a89b63653298c3168e1c470750f6494` |
+
+发布目录为 `/var/www/nightreign/releases/67c3697fc46f9ebead37ad17895d05bf6ce38b65`；前一静态版本 `/var/www/nightreign/releases/7bc5405aff17a0b6f040fa4d88981fbb321b5953` 保留用于回退。公网验收首页、脚本、样式、管理页、`/api/health` 与 `/api/knowledge/status` 均返回 200；知识源和 Chroma 各 5,349 条，敌人数据 1,683 行，12 个已核验图片条目对应 11 个唯一资源且均成功加载。纠错验收标记在收件箱只匹配一条 suggestion 记录，无邮箱或问答上下文。后端镜像仍为 `nightreign-ai:219771cf`，容器 ID `38e3b5f819c2a73957e54ae7ce867152ab96bc6181875c236f0af5e5568a7d58`，启动时间未变；数据库、`.env` 和 TLS 均未修改。
