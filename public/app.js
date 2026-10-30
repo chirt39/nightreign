@@ -298,13 +298,23 @@ function enemyDamageMultiplier(value){
 }
 function enemyDamageText(value){const multiplier=enemyDamageMultiplier(value);return multiplier==null?'未收录':`×${fmt(multiplier)}`}
 function enemyMetricDisplay(row,index){return index>=5&&index<=12?enemyDamageText(row[index]):String(row[index]).toLowerCase()==='immune'?'免疫':fmt(row[index])}
-function enemyLocationValueNotes(records,index,prefix=''){
-  const byLocation=new Map();
-  for(const {row} of records){const value=enemyMetricDisplay(row,index),sourceLocations=enemySourceNote(row).locations,locations=sourceLocations.length?sourceLocations:['出现地点未收录'];for(const location of locations){if(!byLocation.has(location))byLocation.set(location,new Set());byLocation.get(location).add(value)}}
-  if(!byLocation.size)return '';
-  return `<small class="enemy-location-diff">${[...byLocation].map(([location,values])=>`<span>${prefix}${esc(location)}：${[...values].map(esc).join(' / ')}</span>`).join('')}</small>`;
+function enemyLocationDifferences(entity){
+  const groups=entity?.statGroups||[],records=groups.flatMap(group=>group.records),differences=new Map();
+  const metricIndexes=[...Array(21)].map((_,offset)=>offset+5).concat(27,[...Array(4)].map((_,offset)=>offset+38),[...Array(16)].map((_,offset)=>offset+42));
+  for(const index of metricIndexes){
+    const byLocation=new Map(),allValues=new Set();
+    for(const {row} of records){const value=enemyMetricDisplay(row,index),sourceLocations=enemySourceNote(row).locations,locations=sourceLocations.length?sourceLocations:['出现地点未收录'];allValues.add(value);for(const location of locations){if(!byLocation.has(location))byLocation.set(location,new Set());byLocation.get(location).add(value)}}
+    if(allValues.size>1)differences.set(index,byLocation);
+  }
+  return differences;
 }
-function enemyAttributeLocationNotes(entity,index){const groups=entity?.statGroups||[],values=new Set(groups.flatMap(group=>group.records.map(({row})=>enemyMetricDisplay(row,index))));return values.size>1?enemyLocationValueNotes(groups.flatMap(group=>group.records),index):''}
+function enemyLocationDifferencesMarkup(differences,columns){
+  if(!differences.size)return '';
+  const rows=[];
+  for(const [index,byLocation] of differences)for(const [location,values] of byLocation){const pending=values.size>1;rows.push(`<tr><th scope="row">${esc(columns[index].label.replace(/^伤害[·．]/,'').replace(/^耐受[·．]/,''))}</th><td>${esc(location)}</td><td>${[...values].map(esc).join(' / ')}${pending?'<small class="enemy-difference-pending">待核对</small>':''}</td></tr>`)}
+  return `<details id="enemy-location-differences" class="detail-section enemy-location-differences" open><summary><span>地点与记录差异</span><small>${rows.length} 条</small></summary><div class="enemy-health-table-wrap"><table class="enemy-health-table"><thead><tr><th scope="col">资料项</th><th scope="col">地点</th><th scope="col">数值</th></tr></thead><tbody>${rows.join('')}</tbody></table></div></details>`;
+}
+function enemyAttributeDifferenceLink(differences,index){return differences.has(index)?'<button type="button" class="enemy-difference-link" data-enemy-difference-open>地点差异</button>':''}
 function enemyElementSummary(row){
   const elements=[[9,'魔'],[10,'火'],[11,'雷'],[12,'圣']].map(([index,name])=>({name,value:enemyDamageMultiplier(row[index])})).filter(item=>item.value!=null);
   if(!elements.length)return '<div class="enemy-element-empty">四属性倍率未收录</div>';
@@ -338,12 +348,12 @@ function enemyDetailImageMarkup(record,name){
 }
 function renderEnemyDetail(r){
   if(!r){$('#enemy-detail').innerHTML='<div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>';$('#enemy-detail').scrollTop=0;return}
-  const entity=state.enemyEntities.get(enemyEntityKey(r)),dataGroups=entity?.statGroups||[],selectedGroup=dataGroups[0],dataRow=selectedGroup?.anchor.row||r,c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录';
-  const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=damage?c[i].label.replace(/^伤害[·．]/,''):i>=13&&i<=19?c[i].label.replace(/^耐受[·．]/,''):c[i].label;return `<div class="${indexes.length>8?'resist':'kv'} ${tone}"><span>${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeLocationNotes(entity,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${indexes.length} 项</small></summary>${core?'':extra}<div class="${indexes.length>8?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
+  const entity=state.enemyEntities.get(enemyEntityKey(r)),dataGroups=entity?.statGroups||[],selectedGroup=dataGroups[0],dataRow=selectedGroup?.anchor.row||r,c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录',locationDifferences=enemyLocationDifferences(entity),selectedIndex=state.enemyData.rows.indexOf(dataRow),enemyId=String(dataRow[1]??'');
+  const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=damage?c[i].label.replace(/^伤害[·．]/,''):i>=13&&i<=19?c[i].label.replace(/^耐受[·．]/,''):c[i].label;return `<div class="${indexes.length>8?'resist':'kv'} ${tone}"><span>${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${indexes.length} 项</small></summary>${core?'':extra}<div class="${indexes.length>8?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
   const combatSections=`<div class="enemy-combat-grid">${section('伤害倍率',[5,6,7,8,9,10,11,12],true)}${section('异常状态抗性',[13,14,15,16,17,18,19,20,21,22,23],true)}</div>`;
-  const detailValues=selectedGroup?`${section('核心属性',[24,25,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
+  const detailValues=selectedGroup?`${section('核心属性',[24,25,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${enemyLocationDifferencesMarkup(locationDifferences,c)}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
   const displayName=entity?.name||enemyDisplayName(r),portrait=enemyDetailImageMarkup(dataRow,displayName);
-  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${portrait}<div><span class="card-kicker">${esc(enemyCategoryLabel(dataRow))} / 怪物分类</span><h2>${esc(displayName)}</h2></div></div><span class="badge enemy-category-badge">${esc(enemyCategoryLabel(dataRow))}</span></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>${detailValues}`;
+  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${portrait}<div><span class="card-kicker">${esc(enemyCategoryLabel(dataRow))} / 怪物分类</span><h2>${esc(displayName)}</h2></div></div><div class="enemy-detail-actions"><button type="button" class="enemy-report-trigger" data-enemy-report-open data-enemy-index="${selectedIndex}" data-enemy-id="${esc(enemyId)}">资料有误？</button><span class="badge enemy-category-badge">${esc(enemyCategoryLabel(dataRow))}</span></div></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>${detailValues}`;
   $('#enemy-detail').scrollTop=0;
 }
 $('#enemy-detail').addEventListener('error',event=>{
@@ -1005,7 +1015,9 @@ function requestJson(url,body){if(url.startsWith('/api/ai/')&&!aiTransportSecure
 let feedbackDialogRevision=0;
 let feedbackSubmissionCount=0;
 let feedbackSubmissionSequence=0;
+let feedbackDialogCorrectionTarget=null;
 function feedbackPendingMessage(){return `仍有 ${feedbackSubmissionCount} 条反馈请求正在提交；关闭弹窗不会取消请求，请等待完成后再提交，以免重复入库。`}
+function feedbackPrivacyNote(){return $('#feedback-privacy-note')||$('.feedback-privacy-note')}
 function reportFeedbackOutcome(message,isError=false){
   let region=$('#feedback-background-status');
   if(!region)return;
@@ -1017,21 +1029,28 @@ function feedbackErrorDetail(body){
   if(Array.isArray(detail))return detail.map(item=>typeof item==='string'?item:item?.msg).filter(Boolean).join('；');
   return '';
 }
-function openFeedbackDialog(kind,context=null){
+function openFeedbackDialog(kind,context=null,correctionTarget=null){
   const dialog=$('#feedback-dialog'),form=$('#feedback-form');if(!dialog?.showModal){setAgentStatus('当前浏览器暂不支持打开反馈表单。',true);return}
+  const typeWrap=$('#feedback-correction-type-wrap'),typeSelect=$('#feedback-correction-type');if(correctionTarget&&(!typeWrap||!typeSelect)){setAgentStatus('纠错表单需要更新后的页面结构，请刷新页面后重试。',true);return}
   feedbackDialogRevision++;
-  feedbackDialogKind=kind;feedbackDialogContext=context;form.reset();const status=$('#feedback-status'),submit=$('#feedback-submit'),hasPendingSubmission=feedbackSubmissionCount>0;status.textContent=hasPendingSubmission?feedbackPendingMessage():'';if(hasPendingSubmission)status.dataset.pendingSubmission='true';else delete status.dataset.pendingSubmission;submit.hidden=false;submit.disabled=!feedbackTransportSecure||hasPendingSubmission;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=kind==='answer'?'反馈这条助手回答':'向我们提出建议';
-  const option=$('#feedback-context-option'),preview=$('#feedback-context-preview');option.hidden=!context;preview.hidden=true;
+  feedbackDialogKind=kind;feedbackDialogContext=correctionTarget?null:context;feedbackDialogCorrectionTarget=correctionTarget;form.reset();const status=$('#feedback-status'),submit=$('#feedback-submit'),hasPendingSubmission=feedbackSubmissionCount>0;status.textContent=hasPendingSubmission?feedbackPendingMessage():'';if(hasPendingSubmission)status.dataset.pendingSubmission='true';else delete status.dataset.pendingSubmission;submit.hidden=false;submit.disabled=!feedbackTransportSecure||hasPendingSubmission;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=correctionTarget?'报告图鉴资料问题':kind==='answer'?'反馈这条助手回答':'向我们提出建议';
+  const option=$('#feedback-context-option'),preview=$('#feedback-context-preview');if(option)option.hidden=!feedbackDialogContext;if(preview)preview.hidden=true;if(typeWrap)typeWrap.hidden=!correctionTarget;if(typeSelect){typeSelect.hidden=!correctionTarget;typeSelect.required=Boolean(correctionTarget)}$('#feedback-message').maxLength=correctionTarget?Math.max(0,4000-correctionPrefix(correctionTarget,typeSelect.value).length):4000;
+  const privacyNote=feedbackPrivacyNote();if(privacyNote)privacyNote.textContent=correctionTarget?'纠错仅包含本页敌人资料和你填写的说明，不会附带助手对话或本机存档。邮箱为选填项；反馈最多保留 90 天。':'提交内容由站点维护者查看；邮箱为选填项。只有勾选后，本轮问答才会随反馈提交。反馈及随附问答最多保留 90 天。';
   if(context){$('#feedback-question-preview').textContent=context.question;$('#feedback-answer-preview').textContent=context.answer}
   dialog.showModal();$('#feedback-message').focus();
 }
 $('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
+$('#enemy-detail').addEventListener('click',event=>{const differenceButton=event.target.closest('[data-enemy-difference-open]');if(differenceButton){$('#enemy-location-differences')?.scrollIntoView({behavior:'smooth',block:'start'});return}const button=event.target.closest('[data-enemy-report-open]');if(!button)return;const index=Number(button.dataset.enemyIndex),row=state.enemyData?.rows[index];if(!row||String(row[1])!==button.dataset.enemyId)return;const entity=state.enemyEntities.get(enemyEntityKey(row)),name=entity?.name||enemyDisplayName(row),url=new URL(`${location.origin}${location.pathname}`);url.searchParams.set('enemyId',String(row[1]));url.searchParams.set('enemyRecordIndex',String(index));url.hash='enemies';openFeedbackDialog('suggestion',null,{id:String(row[1]),name,url:url.href})});
+function correctionPrefix(target,type){const labels={image:'图片',location:'地点',category:'分类',multiplier:'倍率',resistance:'抗性',other:'其他'};return `【图鉴纠错】\n敌人：${target.name}\nID：${target.id}\n页面：${target.url}\n纠错类型：${labels[type]||labels.other}\n说明：`}
+$('#feedback-correction-type')?.addEventListener('change',event=>{if(feedbackDialogCorrectionTarget)$('#feedback-message').maxLength=Math.max(0,4000-correctionPrefix(feedbackDialogCorrectionTarget,event.target.value).length)});
 $('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});
 $('#feedback-cancel').addEventListener('click',()=>$('#feedback-dialog').close());
-$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogRevision++;feedbackDialogContext=null;$('#feedback-form').reset();const status=$('#feedback-status');status.textContent='';delete status.dataset.pendingSubmission;$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';if(feedbackSubmissionCount)reportFeedbackOutcome(`仍有 ${feedbackSubmissionCount} 条反馈请求在处理中；关闭窗口不会撤销已发送的请求。`)});
+$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogRevision++;feedbackDialogContext=null;feedbackDialogCorrectionTarget=null;$('#feedback-form').reset();const typeWrap=$('#feedback-correction-type-wrap'),typeSelect=$('#feedback-correction-type'),privacyNote=feedbackPrivacyNote();if(typeWrap)typeWrap.hidden=true;if(typeSelect){typeSelect.hidden=true;typeSelect.required=false}$('#feedback-message').maxLength=4000;if(privacyNote)privacyNote.textContent='提交内容由站点维护者查看；邮箱为选填项。只有勾选后，本轮问答才会随反馈提交。反馈及随附问答最多保留 90 天。';const status=$('#feedback-status');status.textContent='';delete status.dataset.pendingSubmission;$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';if(feedbackSubmissionCount)reportFeedbackOutcome(`仍有 ${feedbackSubmissionCount} 条反馈请求在处理中；关闭窗口不会撤销已发送的请求。`)});
 $('#feedback-form').addEventListener('submit',async event=>{
   event.preventDefault();const submit=$('#feedback-submit'),status=$('#feedback-status');if(feedbackSubmissionCount>0){submit.disabled=true;status.dataset.pendingSubmission='true';status.textContent=feedbackPendingMessage();return}if(!feedbackTransportSecure){submit.disabled=true;$('#feedback-transport-warning').hidden=false;return}if(!event.currentTarget.reportValidity())return;
-  const includeContext=Boolean(feedbackDialogContext&&$('#feedback-include-context').checked),payload={kind:feedbackDialogKind,message:$('#feedback-message').value.trim(),email:$('#feedback-email').value.trim()||null,include_context:includeContext};
+  const correctionTarget=feedbackDialogCorrectionTarget,includeContext=Boolean(!correctionTarget&&feedbackDialogContext&&$('#feedback-include-context').checked),details=$('#feedback-message').value.trim(),message=correctionTarget?`${correctionPrefix(correctionTarget,$('#feedback-correction-type').value)}${details}`:details;
+  if(message.length>4000){status.textContent='反馈内容过长，请缩短说明后重试。';return}
+  const payload={kind:feedbackDialogKind,message,email:$('#feedback-email').value.trim()||null,include_context:includeContext};
   if(includeContext){payload.question=feedbackDialogContext.question;payload.answer=feedbackDialogContext.answer}
   const dialog=$('#feedback-dialog'),revision=feedbackDialogRevision,submission=++feedbackSubmissionSequence;feedbackSubmissionCount++;submit.disabled=true;delete status.dataset.pendingSubmission;status.textContent='正在提交…';
   try{
