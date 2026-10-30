@@ -72,3 +72,18 @@ PR [#8](https://github.com/chirt39/nightreign/pull/8) 合并 SHA：`a5b615f1035d
 | `dist/enemy-image-verified.json`（沿用前版） | `867fb446f64fbdafe412118ccede68f94a89b63653298c3168e1c470750f6494` |
 
 发布目录为 `/var/www/nightreign/releases/67c3697fc46f9ebead37ad17895d05bf6ce38b65`；前一静态版本 `/var/www/nightreign/releases/7bc5405aff17a0b6f040fa4d88981fbb321b5953` 保留用于回退。公网验收首页、脚本、样式、管理页、`/api/health` 与 `/api/knowledge/status` 均返回 200；知识源和 Chroma 各 5,349 条，敌人数据 1,683 行，12 个已核验图片条目对应 11 个唯一资源且均成功加载。纠错验收标记在收件箱只匹配一条 suggestion 记录，无邮箱或问答上下文。后端镜像仍为 `nightreign-ai:219771cf`，容器 ID `38e3b5f819c2a73957e54ae7ce867152ab96bc6181875c236f0af5e5568a7d58`，启动时间未变；数据库、`.env` 和 TLS 均未修改。
+
+### 敌人图片校正与导航图标静态发布（2026-10-30）
+
+PR [#19](https://github.com/chirt39/nightreign/pull/19) 与 [#20](https://github.com/chirt39/nightreign/pull/20) 均按获批 head 合并，最终合并 SHA：`739f0c7b511a45a2405ca85a65f4158a7e6e1d8a`。从该提交执行 `npm ci` 与生产构建，仅更新静态前端：删除错误的敌人数据行 `46600010` 及其图片映射，并将效果／词条导航图标替换为 [effects-battle-record.png](NAVIGATION_ICON_SOURCES.md) 所记录的本地资源。
+
+| 静态文件 | SHA-256 |
+| --- | --- |
+| `dist/index.html` | `b8eb4107147cbce86546373d566fbff66e4103b9dc422183e2fe6b78c93d6db4` |
+| `dist/assets/index-CFvKm3Xh.js` | `dc6932bf8572907453852d5e0a247a21fbd0a754947c4492dbfb44d98fa111a2` |
+| `dist/enemy-data.json` | `9c5080877d4382b30800d35fce64745156f513c110eb263b11af8fb66aae57f8` |
+| `dist/enemy-image-map.json` | `eafcc439b48ec7253d5614f1494f9915271ccf8f33bef795028f59c0438c9b1f` |
+| `dist/enemy-image-verified.json` | `60a0abb6dfc977b924bb37ad7c1ee2aaa520df5a6b1d3b4ae7e021ef91386395` |
+| `dist/nav-icons/effects-battle-record.png` | `2d3ed152a60d3692f760c14bed0dd5afb386a4233f015227138ba696eacdd342` |
+
+当前静态目录为 `/var/www/nightreign/releases/739f0c7b511a45a2405ca85a65f4158a7e6e1d8a`，回退目录 `/var/www/nightreign/releases/6d73b5e003b90f7f194fb6dcf45d15c9b3cb70a2` 保留。公网直连源站确认首页引用新 bundle、新图标返回 200 且 MIME 为 `image/png`，缺图 SVG 返回 200 且 MIME 为 `image/svg+xml`；敌人数据为 1,682 行且不含 `46600010`，图片映射不含该 ID，11 个已核验条目对应 11 个唯一图片资源。线上实体显示数为 272，其中 261 个仍显示缺图占位。`/api/health` 与 `/api/knowledge/status` 均返回 200，知识源与索引各 5,349 条。后端容器仍为 `nightreign-ai:219771cf`（容器 ID `38e3b5f819c2a73957e54ae7ce867152ab96bc6181875c236f0af5e5568a7d58`，启动时间 `2026-10-30T01:55:31.595111499Z`）；数据库、`.env`、TLS 与 AI 索引未变更。
