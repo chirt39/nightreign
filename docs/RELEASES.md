@@ -20,6 +20,12 @@
 
 ## 阿里云正式站点
 
+### 伤害倍率与异常抗性图标静态发布（2026-10-30）
+
+PR [#17](https://github.com/chirt39/nightreign/pull/17) 合并 SHA：`6d73b5e003b90f7f194fb6dcf45d15c9b3cb70a2`。从该提交 fresh build；新 bundle `index-C_Grs9yu.js` 的 SHA-256 为 `76370a9df3772b6030e5fcdbe87910b9e072d2d12a356d307d9351cf52ee95d3`，新增 14 个本地图标见 [ENEMY_ATTRIBUTE_ICONS.md](ENEMY_ATTRIBUTE_ICONS.md)。来源和许可状态按该清单记录，不代表许可已核实。
+
+当前静态目录：`/var/www/nightreign/releases/6d73b5e003b90f7f194fb6dcf45d15c9b3cb70a2`；回退目录：`/var/www/nightreign/releases/746d874dd080da527b1843f37bd2a0a3a2ff57f9`。14 个 PNG 公网返回 200 且 MIME 为 `image/png`；既有怪物图片映射与缺图 SVG 保留。总控线上 UI 验收 18 处图标加载正常，骤死和核心属性无图标。health/knowledge 均为 200；后端仍运行 `nightreign-ai:219771cf`，数据库、`.env`、TLS 未变。
+
 ### 缺图占位静态发布（2026-10-30）
 
 PR [#15](https://github.com/chirt39/nightreign/pull/15) 合并 SHA：`746d874dd080da527b1843f37bd2a0a3a2ff57f9`。全新构建 bundle 为 `index-C4il7fVS.js`（SHA-256 `89bd6ae9989a6e3fad92f45b78462880cca7888f9d6a0e41514f78a2f6fed6f4`）；占位 SVG `image-pending.svg`（SHA-256 `a7aedf3ee34d31c325121c18c9a023a899130ef2ef702b419198f588776ae51b`）。
