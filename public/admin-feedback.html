@@ -80,7 +80,8 @@
       for(const item of items){
         const card=document.createElement('article');card.className='feedback-card';
         const header=document.createElement('header');
-        addText(header,'span','kind',item.kind==='answer'?'回答有错':'建议');
+        const isEnemyCorrection=item.kind==='suggestion'&&typeof item.message==='string'&&item.message.startsWith('【图鉴纠错】');
+        addText(header,'span',`kind${isEnemyCorrection?' enemy-correction-kind':''}`,isEnemyCorrection?'图鉴纠错':item.kind==='answer'?'回答有错':'建议');
         const time=document.createElement('time');time.className='created';time.dateTime=item.created_at;time.textContent=new Date(item.created_at).toLocaleString('zh-CN');header.append(time);card.append(header);
         addText(card,'p','message',item.message);
         if(item.email)addText(card,'p','email',`联系邮箱：${item.email}`);

@@ -34,7 +34,11 @@ defineProps({ active: Boolean });
             <form id="feedback-form" class="feedback-form">
               <div class="feedback-form-heading"><div><p class="eyebrow">ROUNDtable MESSAGE</p><h2 id="feedback-title">向窝反馈</h2></div><button id="feedback-cancel" class="button ghost" type="button">关闭</button></div>
               <p id="feedback-kind-label" class="feedback-kind-label"></p>
-              <p class="feedback-privacy-note">提交内容由站点维护者查看；邮箱为选填项。只有勾选后，本轮问答才会随反馈提交。反馈及随附问答最多保留 90 天。</p>
+              <p id="feedback-privacy-note" class="feedback-privacy-note">提交内容由站点维护者查看；邮箱为选填项。只有勾选后，本轮问答才会随反馈提交。反馈及随附问答最多保留 90 天。</p>
+              <label id="feedback-correction-type-wrap" class="feedback-label" for="feedback-correction-type" hidden>纠错类型</label>
+              <select id="feedback-correction-type" name="correction_type" hidden>
+                <option value="image">图片</option><option value="location">地点</option><option value="category">分类</option><option value="multiplier">倍率</option><option value="resistance">抗性</option><option value="other">其他</option>
+              </select>
               <label class="feedback-label" for="feedback-message">补充说明</label>
               <textarea id="feedback-message" name="message" minlength="2" maxlength="4000" required placeholder="告诉我们哪里不准确，或描述你的建议。"></textarea>
               <label class="feedback-label" for="feedback-email">邮箱（可选，便于后续联系）</label>
