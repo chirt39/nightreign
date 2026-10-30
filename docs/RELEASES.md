@@ -20,6 +20,12 @@
 
 ## 阿里云正式站点
 
+### 缺图占位静态发布（2026-10-30）
+
+PR [#15](https://github.com/chirt39/nightreign/pull/15) 合并 SHA：`746d874dd080da527b1843f37bd2a0a3a2ff57f9`。全新构建 bundle 为 `index-C4il7fVS.js`（SHA-256 `89bd6ae9989a6e3fad92f45b78462880cca7888f9d6a0e41514f78a2f6fed6f4`）；占位 SVG `image-pending.svg`（SHA-256 `a7aedf3ee34d31c325121c18c9a023a899130ef2ef702b419198f588776ae51b`）。
+
+当前静态目录：`/var/www/nightreign/releases/746d874dd080da527b1843f37bd2a0a3a2ff57f9`；回退目录：`/var/www/nightreign/releases/67c3697fc46f9ebead37ad17895d05bf6ce38b65`。占位 SVG 公网返回 200 且 MIME 为 `image/svg+xml`；现有 12 个映射／11 个唯一图片资源保留，另有 261 个缺图项显示占位，敌人数据为 1,683 行。线上 UI 验收已通过。后端仍运行 `nightreign-ai:219771cf`；数据库、`.env`、TLS 未变。
+
 | 部署日期 | Git SHA | 正式入口 | 后端镜像 | 健康状态 | TLS 续期 |
 | --- | --- | --- | --- | --- | --- |
 | 2026-10-30 | `219771cf03375723c69a777fd918ca25dfd382c2`（PR [#6](https://github.com/chirt39/nightreign/pull/6)） | [nightreign.cn](https://nightreign.cn) / [www.nightreign.cn](https://www.nightreign.cn) | `nightreign-ai:219771cf`，镜像 ID `sha256:cca846d8ae2c6865e33ca5e20832bfcd844bcc3d124c3108365f4f5c3059a760` | `/api/health` 与 `/api/knowledge/status` 均为 200；源语料及 Chroma 索引各 5,349 条 | Let's Encrypt，证书到期日 2027-01-28；`certbot.timer` 已启用，续期 dry-run 成功 |
