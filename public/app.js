@@ -298,6 +298,8 @@ function enemyDamageMultiplier(value){
 }
 function enemyDamageText(value){const multiplier=enemyDamageMultiplier(value);return multiplier==null?'未收录':`×${fmt(multiplier)}`}
 function enemyMetricDisplay(row,index){return index>=5&&index<=12?enemyDamageText(row[index]):String(row[index]).toLowerCase()==='immune'?'免疫':fmt(row[index])}
+const enemyMetricIconFiles=new Map([[5,'damage-physical'],[6,'damage-slash'],[7,'damage-strike'],[8,'damage-pierce'],[9,'damage-magic'],[10,'damage-fire'],[11,'damage-lightning'],[12,'damage-holy'],[13,'status-poison'],[14,'status-rot'],[15,'status-bleed'],[16,'status-frost'],[17,'status-sleep'],[18,'status-madness'],[20,'status-bleed'],[21,'status-frost'],[22,'status-sleep'],[23,'status-madness']]);
+function enemyMetricIconMarkup(index){const file=enemyMetricIconFiles.get(index);return file?`<img class="enemy-metric-icon" src="./enemy-attribute-icons/${file}.png" alt="" aria-hidden="true" width="18" height="18" decoding="async">`:''}
 function enemyLocationDifferences(entity){
   const groups=entity?.statGroups||[],records=groups.flatMap(group=>group.records),differences=new Map();
   const metricIndexes=[...Array(21)].map((_,offset)=>offset+5).concat(27,[...Array(4)].map((_,offset)=>offset+38),[...Array(16)].map((_,offset)=>offset+42));
@@ -350,7 +352,7 @@ function enemyDetailImageMarkup(record,name){
 function renderEnemyDetail(r){
   if(!r){$('#enemy-detail').innerHTML='<div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>';$('#enemy-detail').scrollTop=0;return}
   const entity=state.enemyEntities.get(enemyEntityKey(r)),dataGroups=entity?.statGroups||[],selectedGroup=dataGroups[0],dataRow=selectedGroup?.anchor.row||r,c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录',locationDifferences=enemyLocationDifferences(entity),selectedIndex=state.enemyData.rows.indexOf(dataRow),enemyId=String(dataRow[1]??'');
-  const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=damage?c[i].label.replace(/^伤害[·．]/,''):i>=13&&i<=19?c[i].label.replace(/^耐受[·．]/,''):c[i].label;return `<div class="${indexes.length>8?'resist':'kv'} ${tone}"><span>${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${indexes.length} 项</small></summary>${core?'':extra}<div class="${indexes.length>8?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
+  const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=damage?c[i].label.replace(/^伤害[·．]/,''):i>=13&&i<=19?c[i].label.replace(/^耐受[·．]/,''):c[i].label;return `<div class="${indexes.length>8?'resist':'kv'} ${tone}"><span class="enemy-metric-label">${enemyMetricIconMarkup(i)}${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${indexes.length} 项</small></summary>${core?'':extra}<div class="${indexes.length>8?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
   const combatSections=`<div class="enemy-combat-grid">${section('伤害倍率',[5,6,7,8,9,10,11,12],true)}${section('异常状态抗性',[13,14,15,16,17,18,19,20,21,22,23],true)}</div>`;
   const detailValues=selectedGroup?`${section('核心属性',[24,25,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${enemyLocationDifferencesMarkup(locationDifferences,c)}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
   const displayName=entity?.name||enemyDisplayName(r),portrait=enemyDetailImageMarkup(dataRow,displayName);
@@ -358,7 +360,9 @@ function renderEnemyDetail(r){
   $('#enemy-detail').scrollTop=0;
 }
 $('#enemy-detail').addEventListener('error',event=>{
-  if(!(event.target instanceof HTMLImageElement)||!event.target.classList.contains('enemy-detail-image'))return;
+  if(!(event.target instanceof HTMLImageElement))return;
+  if(event.target.classList.contains('enemy-metric-icon')){event.target.hidden=true;return}
+  if(!event.target.classList.contains('enemy-detail-image'))return;
   if(event.target.classList.contains('enemy-detail-placeholder')){event.target.remove();return}
   const placeholder=document.createElement('img');placeholder.className='enemy-detail-image enemy-detail-placeholder';placeholder.src='./enemy-images/image-pending.svg';placeholder.alt=`${event.target.alt}：图片待补`;placeholder.width=80;placeholder.height=80;placeholder.decoding='async';event.target.replaceWith(placeholder);
 },true);
