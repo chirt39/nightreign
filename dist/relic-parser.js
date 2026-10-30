@@ -13,6 +13,7 @@ const BND4_ENTRY_HEADER_LEN = 32;
 const SLOT_SIZE_FULL = 80;
 const SLOT_SIZE_SMALL = 16;
 const EMPTY_EFFECT = 0xFFFFFFFF;
+const BND4_MAGIC = [0x42, 0x4E, 0x44, 0x34];
 
 const VALID_B3_VALUES = new Set([0x80, 0x83, 0x81, 0x82, 0x84, 0x85]);
 const VALID_B4_VALUES = new Set([0x80, 0x90, 0xc0]);
@@ -138,19 +139,54 @@ function decryptAES(iv, encryptedPayload) {
 // === BND4 Entry Processing ===
 
 /**
+ * Validate the fixed BND4 header, entry table, and declared metadata end.
+ * The header's 64-bit HeadersEnd field must fit the parser's 32-bit entry
+ * offsets and include the complete directory table.
+ * @param {Uint8Array} header - at least one BND4 header
+ * @param {number} fileSize - total input byte length
+ * @returns {{numEntries:number, headersEnd:number}}
+ */
+function validateBND4DirectoryBounds(header, fileSize) {
+  if (header.length < BND4_HEADER_LEN) {
+    throw new Error('存档文件头不完整，请选择完整的 .sl2 文件。');
+  }
+  if (!startsWithAt(header, BND4_MAGIC, 0)) {
+    throw new Error('文件标记不匹配，请选择有效的 PC 版 .sl2 存档。');
+  }
+
+  const numEntries = readUint32LE(header, 12);
+  const entryTableEnd = BND4_HEADER_LEN + BND4_ENTRY_HEADER_LEN * numEntries;
+  if (entryTableEnd > fileSize) {
+    throw new Error('存档条目表不完整，请选择完整的 .sl2 文件。');
+  }
+
+  const headersEnd = readUint32LE(header, 40);
+  const headersEndHigh = readUint32LE(header, 44);
+  if (headersEndHigh !== 0 || headersEnd < entryTableEnd || headersEnd > fileSize) {
+    throw new Error('存档目录边界无效，请确认文件完整且格式受支持。');
+  }
+
+  return {numEntries, headersEnd};
+}
+
+/**
+ * Validate the BND4 structure using only a small prefix read, before the caller
+ * allocates the complete file buffer.
+ * @param {File|Blob} file - user-selected local save file
+ */
+async function validateSaveFileHeader(file) {
+  const header = new Uint8Array(await file.slice(0, BND4_HEADER_LEN).arrayBuffer());
+  validateBND4DirectoryBounds(header, file.size);
+}
+
+/**
  * Decrypt a BND4 save file
  * @param {ArrayBuffer} arrayBuffer - raw file data
  * @returns {Array} array of BND4 entry objects with clean_data
  */
 function decryptSaveFile(arrayBuffer) {
   const raw = new Uint8Array(arrayBuffer);
-
-  // Check BND4 header
-  if (!startsWithAt(raw, [0x42, 0x4E, 0x44, 0x34], 0)) { // "BND4"
-    throw new Error("BND4 header not found! This doesn't appear to be a valid SL2 file.");
-  }
-
-  const numEntries = readUint32LE(raw, 12);
+  const {numEntries, headersEnd} = validateBND4DirectoryBounds(raw, raw.length);
   const entries = [];
 
   for (let i = 0; i < numEntries; i++) {
@@ -176,7 +212,14 @@ function decryptSaveFile(arrayBuffer) {
       continue;
     }
 
-    if (entryDataOffset <= 0 || entryDataOffset >= raw.length ||
+    // The entry stores a 16-byte IV followed by non-empty AES-CBC ciphertext.
+    // Reject missing or partial ciphertext blocks before passing bytes to CryptoJS.
+    if (entrySize < IV_SIZE * 2 || (entrySize - IV_SIZE) % IV_SIZE !== 0) {
+      console.warn(`Entry #${i} has invalid encrypted payload length - skipping`);
+      continue;
+    }
+
+    if (entryDataOffset < headersEnd || entryDataOffset >= raw.length ||
         entryDataOffset + entrySize > raw.length) {
       console.warn(`Entry #${i} has invalid data offset: ${entryDataOffset} - skipping`);
       continue;
@@ -517,8 +560,12 @@ function parseSaveFile(arrayBuffer, itemsData, effectsData) {
   // Get character name
   const characterName = getCharacterName(entries);
 
-  // Parse relics from Entry 0 only
-  const entry0 = entries[0];
+  // Relics live in original BND4 Entry 0. decryptSaveFile() may skip malformed
+  // entries, so the first successfully decrypted entry is not necessarily 0.
+  const entry0 = entries.find(entry => entry.index === 0);
+  if (!entry0) {
+    throw new Error('存档主要数据条目损坏或缺失，无法读取遗物。');
+  }
   const relics = parseRelicsFromEntry(entry0.cleanData, validItems, validEffects);
 
   // Set coordinates

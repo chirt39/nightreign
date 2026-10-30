@@ -13,5 +13,7 @@ local-data/
 tmp/
 tmpdist/
 node_modules/
+__pycache__/
+*.py[cod]
 .DS_Store
 Thumbs.db

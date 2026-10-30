@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | 怪物属性与抗性 | `public/enemy-data.json` | 夜之数据 Wiki、用户提供的 Boss 倍率表 | ID、同名变体、魔火雷圣倍率、异常抗性、遭遇位置、版本 |
 | 遗物基础数据 | `public/items_data.json`、`public/relic_catalog_zh.json` | ERN_RelicForge、Biligame、5gamers | 道具 key、中文名、图片、普通／深夜／独特、专属或夜王类型 |
-| 词条与分类 | `public/effects_data.json`、`public/effect_names_zh.json`、`public/quickref_effects_zh.json`、`public/relic_rule_effects.json` | 夜之数据 Wiki、NightreignQuickRef | 原始效果 ID、等级、中文文案、局内／局外、负面配对、可叠加性 |
+| 词条与分类 | `public/effects_data.json`、`public/effect_names_zh.json`、`public/quickref_effects_zh.json`、`public/relic_rule_effects.json`、`public/effect_encyclopedia.json` | 夜之数据 Wiki、NightreignQuickRef（图鉴快照固定为提交 `3e23450094c18125ae5665927ed240b18189a040`） | 原始效果 ID、等级、中文文案、局内／局外、深夜局内／深夜局外、负面配对、可叠加性 |
 | 器皿 | `public/vessels_data.json` | ERN_RelicForge、人工中文对照 | 槽位顺序、颜色、角色限制 |
 | 存档结构与战绩 | `public/relic-parser.js`、`public/save-editor.js` | 当前实现、游戏样本、逆向证据 | 文件版本、字段偏移、类型、数值边界、与游戏画面逐项一致 |
 | 图片 | `public/relic-images/`、`public/character-images/`、`public/nav-icons/` | 用户提供与第三方页面 | 一一对应、来源、许可、缺失时的替代图 |
