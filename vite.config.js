@@ -22,6 +22,7 @@ const catalogJsonFiles = [
   'relic_catalog_zh.json',
   'relic_rule_effects.json',
   'effect_encyclopedia.json',
+  'enemy-image-verified.json',
 ];
 const stylesheetFiles = ['style.css', 'game-ui.css'];
 const classicScriptVersions = Object.fromEntries(classicScriptFiles.map((file) => {
