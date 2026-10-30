@@ -87,3 +87,16 @@ PR [#19](https://github.com/chirt39/nightreign/pull/19) 与 [#20](https://github
 | `dist/nav-icons/effects-battle-record.png` | `2d3ed152a60d3692f760c14bed0dd5afb386a4233f015227138ba696eacdd342` |
 
 当前静态目录为 `/var/www/nightreign/releases/739f0c7b511a45a2405ca85a65f4158a7e6e1d8a`，回退目录 `/var/www/nightreign/releases/6d73b5e003b90f7f194fb6dcf45d15c9b3cb70a2` 保留。公网直连源站确认首页引用新 bundle、新图标返回 200 且 MIME 为 `image/png`，缺图 SVG 返回 200 且 MIME 为 `image/svg+xml`；敌人数据为 1,682 行且不含 `46600010`，图片映射不含该 ID，11 个已核验条目对应 11 个唯一图片资源。线上实体显示数为 272，其中 261 个仍显示缺图占位。`/api/health` 与 `/api/knowledge/status` 均返回 200，知识源与索引各 5,349 条。后端容器仍为 `nightreign-ai:219771cf`（容器 ID `38e3b5f819c2a73957e54ae7ce867152ab96bc6181875c236f0af5e5568a7d58`，启动时间 `2026-10-30T01:55:31.595111499Z`）；数据库、`.env`、TLS 与 AI 索引未变更。
+
+### 敌人详情导航与属性标签静态发布（2026-10-31）
+
+PR [#22](https://github.com/chirt39/nightreign/pull/22) 精确 head `2522ba8f26c46852af0638200f36e8781e125b03` 合并，合并 SHA：`af7b60654a7699ad5d3133dc00f787e4af4b8a67`。从合并提交执行 `npm ci` 与生产构建。`app.js` 与 `game-ui.css` 的版本哈希会注入 Vue bundle 和首页，所以发布更新以下四个静态文件；其余静态文件沿用上一发布目录，包括数据、图片和图标，旧 bundle 也保留以兼容缓存中的旧首页。
+
+| 静态文件 | SHA-256 |
+| --- | --- |
+| `dist/index.html` | `09f9b1c346c87d1d2d88e85f344394eedf84152efb2f46af9c6d17fba3dcdb59` |
+| `dist/assets/index-CgC5quq4.js` | `9d378bceff5309fe1636e8e1a52f61eac329730e06920337f357a2d8e9205cf8` |
+| `dist/app.js` | `9bd62cc9f711413f37152b10d3abfff1895d7dc8cfe412583fc3ee47be861c8a` |
+| `dist/game-ui.css` | `8feceee5446f0090b6f518c325c4cb06c748f6da87432829c0f89165cfd1a4a1` |
+
+当前静态目录为 `/var/www/nightreign/releases/af7b60654a7699ad5d3133dc00f787e4af4b8a67`，回退目录 `/var/www/nightreign/releases/739f0c7b511a45a2405ca85a65f4158a7e6e1d8a` 保留。公网直连源站确认首页引用新 bundle，四个文件均返回 200 且响应哈希与构建产物一致；新 bundle 对应 `game-ui.css` 版本键 `8feceee5446f` 和 `app.js` 哈希前缀 `9bd62cc9f711`，上一版 bundle 仍可访问。UI 验收覆盖筛选结果内上一只／下一只、跨页定位和 URL 更新、首尾与单项／零项禁用、筛选及普通／永夜状态保留、刷新恢复，以及四项标签移除“承受·”而保留原数值、图标和数据。后端仍为 `nightreign-ai:219771cf`（容器 ID `38e3b5f819c2a73957e54ae7ce867152ab96bc6181875c236f0af5e5568a7d58`，启动时间未变）；数据库、`.env`、TLS 与 AI 索引未变更。
