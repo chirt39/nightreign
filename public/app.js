@@ -339,11 +339,12 @@ function enemyHealthSection(entity){
   return `<details class="detail-section enemy-health-section" open><summary><span>生命值</span></summary><div class="enemy-health-table-wrap"><table class="enemy-health-table"><thead><tr><th>版本</th><th>出现地点</th>${values}</tr></thead><tbody>${entries.map(entry=>`<tr><th scope="row"><span class="enemy-health-kind ${entry.version==='灾域'?'disaster':''}">${entry.version}</span></th><td>${esc(entry.location)}</td>${merged?`<td class="enemy-health-value">${esc(entry.first)}</td>`:`<td class="enemy-health-value">${esc(entry.first)}</td><td class="enemy-health-value">${esc(entry.second)}</td>`}</tr>`).join('')}</tbody></table></div></details>`;
 }
 function enemyHealthSections(entity){return enemyHealthSection(entity)}
+function enemyDetailPlaceholderMarkup(name){
+  return `<img class="enemy-detail-image enemy-detail-placeholder" src="./enemy-images/image-pending.svg" alt="${esc(name)}：图片待补" width="80" height="80" decoding="async">`;
+}
 function enemyDetailImageMarkup(record,name){
-  const images=state.enemyImageManifest?.images,id=String(record?.[1]??'');
-  if(!id||!images||!Object.hasOwn(images,id))return '';
-  const entry=images[id],path=entry?.path;
-  if(entry?.matchStatus!=='verified'||typeof path!=='string'||!/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(path))return '';
+  const images=state.enemyImageManifest?.images,id=String(record?.[1]??''),entry=images&&id&&Object.hasOwn(images,id)?images[id]:null,path=entry?.path;
+  if(entry?.matchStatus!=='verified'||typeof path!=='string'||!/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(path))return enemyDetailPlaceholderMarkup(name);
   return `<img class="enemy-detail-image" src="./${esc(path)}" alt="${esc(name)}" width="80" height="80" decoding="async">`;
 }
 function renderEnemyDetail(r){
@@ -357,7 +358,9 @@ function renderEnemyDetail(r){
   $('#enemy-detail').scrollTop=0;
 }
 $('#enemy-detail').addEventListener('error',event=>{
-  if(event.target instanceof HTMLImageElement&&event.target.classList.contains('enemy-detail-image'))event.target.remove();
+  if(!(event.target instanceof HTMLImageElement)||!event.target.classList.contains('enemy-detail-image'))return;
+  if(event.target.classList.contains('enemy-detail-placeholder')){event.target.remove();return}
+  const placeholder=document.createElement('img');placeholder.className='enemy-detail-image enemy-detail-placeholder';placeholder.src='./enemy-images/image-pending.svg';placeholder.alt=`${event.target.alt}：图片待补`;placeholder.width=80;placeholder.height=80;placeholder.decoding='async';event.target.replaceWith(placeholder);
 },true);
 $('#enemy-search').addEventListener('input',filterEnemies);$('#enemy-filter').addEventListener('change',filterEnemies);$('#enemy-area').addEventListener('change',filterEnemies);
 $('#enemy-list').addEventListener('click',e=>{const btn=e.target.closest('[data-enemy-index]');if(!btn)return;state.enemySelected=state.enemyData.rows[Number(btn.dataset.enemyIndex)];renderEnemies();renderEnemyDetail(state.enemySelected);syncEnemyUrl()});
