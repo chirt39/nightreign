@@ -75,7 +75,7 @@ PR [#8](https://github.com/chirt39/nightreign/pull/8) 合并 SHA：`a5b615f1035d
 
 ### 敌人图片校正与导航图标静态发布（2026-10-30）
 
-PR [#19](https://github.com/chirt39/nightreign/pull/19) 与 [#20](https://github.com/chirt39/nightreign/pull/20) 均按获批 head 合并，最终合并 SHA：`739f0c7b511a45a2405ca85a65f4158a7e6e1d8a`。从该提交执行 `npm ci` 与生产构建，仅更新静态前端：删除错误的敌人数据行 `46600010` 及其图片映射，并将效果／词条导航图标替换为 [effects-battle-record.png](NAVIGATION_ICON_SOURCES.md) 所记录的本地资源。
+PR [#19](https://github.com/chirt39/nightreign/pull/19) 与 [#20](https://github.com/chirt39/nightreign/pull/20) 均按获批 head 合并，最终合并 SHA：`739f0c7b511a45a2405ca85a65f4158a7e6e1d8a`。从该提交执行 `npm ci` 与生产构建，仅更新静态前端：删除用户指定的随机突袭事件数据行 `46600010` 及其图片映射，并将效果／词条导航图标替换为 [effects-battle-record.png](NAVIGATION_ICON_SOURCES.md) 所记录的本地资源。
 
 | 静态文件 | SHA-256 |
 | --- | --- |
