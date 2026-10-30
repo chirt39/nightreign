@@ -32,7 +32,7 @@
 | `46600000` | 魔像守卫 | `enemy-images/46600010.jpg` | [编号 46600010](https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746600010) | [NPC FullBody 46600010.jpg](https://patchwiki.biligame.com/images/eldenring/7/73/19neq4nrio7wy58wprc0237bc6siexg.jpg) | 本地与来源图都显示持戟、带发光胸甲和塔形头部的魔像守卫。 |
 | `46600010` | 魔像守卫（随机突袭事件） | `enemy-images/46600010.jpg` | [编号 46600010](https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746600010) | [NPC FullBody 46600010.jpg](https://patchwiki.biligame.com/images/eldenring/7/73/19neq4nrio7wy58wprc0237bc6siexg.jpg) | 此锚点自身也在旧映射中精确指向同一路径；按该 ID 单独记录，不从同名实体继承。 |
 
-来源原图只用作视觉参照；本地素材是仓库既有的 100×100 缩图，尺寸与 SHA-1 和来源原图不同是预期的裁切／缩放差异，不能据此声称字节相同。参考原图曾临时下载到仓库外的 `E:\海斗\tmp` 供比对，没有将新图片加入仓库。三项 `assetOrigin` 均记录为 `legacy-repository`，因为本地素材的历史来源尚未独立追溯。
+来源原图只用作视觉参照；本地素材是仓库既有的 100×100 缩图，尺寸与 SHA-1 和来源原图不同是预期的裁切／缩放差异，不能据此声称字节相同。参考原图曾临时下载到仓库外的 `E:\海斗\tmp` 供比对，没有将新图片加入仓库。全部已启用项的 `assetOrigin` 均记录为 `legacy-repository`，因为本地素材的历史来源尚未独立追溯。
 
 基于原始候选基线 `6677572`，共有 273 个实体默认锚点；其中 30 个锚点 ID 在旧映射表中精确命中。30 项中，12 个外观核验通过、1 个发现名称冲突、17 个仍无法完成视觉核验。清单只纳入已确认项目。
 
