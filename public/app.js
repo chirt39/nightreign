@@ -256,11 +256,13 @@ function syncEnemyUrl(){
   url.search=params.toString();history.replaceState(null,'',url);
 }
 function resolveEnemyUrlMatch(filteredRows,allRows,recordIndex,enemyId){
+  let selectedRecord=null;
   if(Number.isSafeInteger(recordIndex)&&recordIndex>=0){
     const indexedRow=allRows[recordIndex];
-    if(indexedRow&&(!enemyId||String(indexedRow[1])===enemyId))return filteredRows.find(({index})=>index===recordIndex)||null;
+    if(indexedRow&&(!enemyId||String(indexedRow[1])===enemyId)){selectedRecord={row:indexedRow,index:recordIndex};const exact=filteredRows.find(({index})=>index===recordIndex);if(exact)return exact}
   }
-  return enemyId?filteredRows.find(({row})=>String(row[1])===enemyId)||null:null;
+  if(!selectedRecord&&enemyId){const index=allRows.findIndex(row=>String(row[1])===enemyId);if(index>=0){selectedRecord={row:allRows[index],index};const exact=filteredRows.find(({index:filteredIndex})=>filteredIndex===index);if(exact)return exact}}
+  return selectedRecord&&filteredRows.some(({row})=>enemyEntityKey(row)===enemyEntityKey(selectedRecord.row))?selectedRecord:null;
 }
 function filterEnemies(resetPage=true){
   if(!state.enemyData)return;
@@ -271,7 +273,7 @@ function filterEnemies(resetPage=true){
   rows.forEach(item=>{const key=enemyEntityKey(item.row);if(!groups.has(key)){const entity=state.enemyEntities.get(key);if(!entity)return;groups.set(key,{...entity,filteredRecords:[],filteredPairedDisaster:[],filteredSourceOnly:[]})}const group=groups.get(key);if(enemyExcludedNumericSourceIds.has(String(item.row[1])))group.filteredSourceOnly.push(item);else if(enemyName(item.row).includes('[灾域]')&&key.startsWith('enemy:'))group.filteredPairedDisaster.push(item);else group.filteredRecords.push(item)});
   state.enemyGroups=[...groups.values()];
   if(state.enemyUrlId||state.enemyUrlIndex!==null){const match=resolveEnemyUrlMatch(rows,state.enemyData.rows,state.enemyUrlIndex,state.enemyUrlId);if(match){state.enemySelected=match.row;const selectedGroupIndex=state.enemyGroups.findIndex(group=>group.key===enemyEntityKey(state.enemySelected));if(!resetPage&&selectedGroupIndex>=0)state.enemyPage=Math.floor(selectedGroupIndex/state.enemyPageSize)+1}state.enemyUrlId='';state.enemyUrlIndex=null}
-  if(state.enemySelected&&!rows.some(({row})=>row===state.enemySelected)){const match=rows.find(({row})=>enemyEntityKey(row)===enemyEntityKey(state.enemySelected));state.enemySelected=match?.row||null}
+  if(state.enemySelected&&!rows.some(({row})=>enemyEntityKey(row)===enemyEntityKey(state.enemySelected)))state.enemySelected=null
   if(resetPage)state.enemyPage=1;renderEnemies();renderEnemyDetail(state.enemySelected);syncEnemyUrl();
 }
 function renderEnemies(){
@@ -287,6 +289,18 @@ function renderEnemies(){
   }).join(''):'<div class="empty-state"><h3>没有找到记录</h3><p>试试其他名称或 ID。</p></div>';
   renderPagination('enemy-pagination',total,state.enemyPageSize,state.enemyPage);
 }
+function enemyDetailGroupIndex(row=state.enemySelected){return row?state.enemyGroups.findIndex(group=>group.key===enemyEntityKey(row)):-1}
+function enemyDetailNavigationMarkup(groupIndex=enemyDetailGroupIndex()){
+  const total=state.enemyGroups.length,selected=groupIndex>=0&&groupIndex<total;
+  return `<div class="enemy-detail-navigation" role="group" aria-label="切换敌人"><button type="button" data-enemy-step="-1" aria-label="上一只敌人" ${!selected||groupIndex===0?'disabled':''}>上一只</button><button type="button" data-enemy-step="1" aria-label="下一只敌人" ${!selected||groupIndex===total-1?'disabled':''}>下一只</button></div>`;
+}
+function navigateEnemyDetail(step){
+  const currentIndex=enemyDetailGroupIndex(),targetIndex=currentIndex+step;
+  if(currentIndex<0||targetIndex<0||targetIndex>=state.enemyGroups.length)return;
+  const group=state.enemyGroups[targetIndex],record=group.statGroups[0]?.anchor||group.filteredRecords[0]||group.filteredPairedDisaster[0]||group.filteredSourceOnly[0],row=record?.row;
+  if(!row)return;
+  state.enemySelected=row;state.enemyPage=Math.floor(targetIndex/state.enemyPageSize)+1;renderEnemies();$('#enemy-list').scrollTop=0;$('#enemy-list .enemy-row.active')?.scrollIntoView({block:'nearest'});renderEnemyDetail(row);syncEnemyUrl();
+}
 function normalizeName(s){return String(s||'').replace(/[「」『』“”‘’\s]/g,'').replace(/\([^)]*\)|（[^）]*）|\[[^\]]*\]|【[^】]*】/g,'').toLowerCase()}
 function locationFor(row){
   return [...enemyMetaFor(row).locations].slice(0,8);
@@ -298,6 +312,7 @@ function enemyDamageMultiplier(value){
 }
 function enemyDamageText(value){const multiplier=enemyDamageMultiplier(value);return multiplier==null?'未收录':`×${fmt(multiplier)}`}
 function enemyMetricDisplay(row,index){return index>=5&&index<=12?enemyDamageText(row[index]):String(row[index]).toLowerCase()==='immune'?'免疫':fmt(row[index])}
+function enemyMetricLabel(label,index){if(index>=5&&index<=12)return label.replace(/^伤害[·．]/,'');if(index>=13&&index<=19)return label.replace(/^耐受[·．]/,'');if(index>=20&&index<=23)return label.replace(/^承受[·．]/,'');return label}
 const enemyMetricIconFiles=new Map([[5,'damage-physical'],[6,'damage-slash'],[7,'damage-strike'],[8,'damage-pierce'],[9,'damage-magic'],[10,'damage-fire'],[11,'damage-lightning'],[12,'damage-holy'],[13,'status-poison'],[14,'status-rot'],[15,'status-bleed'],[16,'status-frost'],[17,'status-sleep'],[18,'status-madness'],[20,'status-bleed'],[21,'status-frost'],[22,'status-sleep'],[23,'status-madness']]);
 function enemyMetricIconMarkup(index){const file=enemyMetricIconFiles.get(index);return file?`<img class="enemy-metric-icon" src="./enemy-attribute-icons/${file}.png" alt="" aria-hidden="true" width="18" height="18" decoding="async">`:''}
 function enemyLocationDifferences(entity){
@@ -313,7 +328,7 @@ function enemyLocationDifferences(entity){
 function enemyLocationDifferencesMarkup(differences,columns){
   if(!differences.size)return '';
   const rows=[];
-  for(const [index,byLocation] of differences)for(const [location,values] of byLocation){const pending=values.size>1;rows.push(`<tr><th scope="row">${esc(columns[index].label.replace(/^伤害[·．]/,'').replace(/^耐受[·．]/,''))}</th><td>${esc(location)}</td><td>${[...values].map(esc).join(' / ')}${pending?'<small class="enemy-difference-pending">待核对</small>':''}</td></tr>`)}
+  for(const [index,byLocation] of differences)for(const [location,values] of byLocation){const pending=values.size>1;rows.push(`<tr><th scope="row">${esc(enemyMetricLabel(columns[index].label,index))}</th><td>${esc(location)}</td><td>${[...values].map(esc).join(' / ')}${pending?'<small class="enemy-difference-pending">待核对</small>':''}</td></tr>`)}
   return `<details id="enemy-location-differences" class="detail-section enemy-location-differences" open><summary><span>地点与记录差异</span><small>${rows.length} 条</small></summary><div class="enemy-health-table-wrap"><table class="enemy-health-table"><thead><tr><th scope="col">资料项</th><th scope="col">地点</th><th scope="col">数值</th></tr></thead><tbody>${rows.join('')}</tbody></table></div></details>`;
 }
 function enemyAttributeDifferenceLink(differences,index){return differences.has(index)?'<button type="button" class="enemy-difference-link" data-enemy-difference-open>地点差异</button>':''}
@@ -350,13 +365,13 @@ function enemyDetailImageMarkup(record,name){
   return `<img class="enemy-detail-image" src="./${esc(path)}" alt="${esc(name)}" width="80" height="80" decoding="async">`;
 }
 function renderEnemyDetail(r){
-  if(!r){$('#enemy-detail').innerHTML='<div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>';$('#enemy-detail').scrollTop=0;return}
+  if(!r){$('#enemy-detail').innerHTML=`<div class="enemy-detail-actions enemy-detail-actions-empty">${enemyDetailNavigationMarkup(-1)}</div><div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>`;$('#enemy-detail').scrollTop=0;return}
   const entity=state.enemyEntities.get(enemyEntityKey(r)),dataGroups=entity?.statGroups||[],selectedGroup=dataGroups[0],dataRow=selectedGroup?.anchor.row||r,c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录',locationDifferences=enemyLocationDifferences(entity),selectedIndex=state.enemyData.rows.indexOf(dataRow),enemyId=String(dataRow[1]??'');
-  const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=damage?c[i].label.replace(/^伤害[·．]/,''):i>=13&&i<=19?c[i].label.replace(/^耐受[·．]/,''):c[i].label;return `<div class="${indexes.length>8?'resist':'kv'} ${tone}"><span class="enemy-metric-label">${enemyMetricIconMarkup(i)}${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${indexes.length} 项</small></summary>${core?'':extra}<div class="${indexes.length>8?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
+  const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=enemyMetricLabel(c[i].label,i);return `<div class="${indexes.length>8?'resist':'kv'} ${tone}"><span class="enemy-metric-label">${enemyMetricIconMarkup(i)}${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${indexes.length} 项</small></summary>${core?'':extra}<div class="${indexes.length>8?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
   const combatSections=`<div class="enemy-combat-grid">${section('伤害倍率',[5,6,7,8,9,10,11,12],true)}${section('异常状态抗性',[13,14,15,16,17,18,19,20,21,22,23],true)}</div>`;
   const detailValues=selectedGroup?`${section('核心属性',[24,25,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${enemyLocationDifferencesMarkup(locationDifferences,c)}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
   const displayName=entity?.name||enemyDisplayName(r),portrait=enemyDetailImageMarkup(dataRow,displayName);
-  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${portrait}<div><span class="card-kicker">${esc(enemyCategoryLabel(dataRow))} / 怪物分类</span><h2>${esc(displayName)}</h2></div></div><div class="enemy-detail-actions"><button type="button" class="enemy-report-trigger" data-enemy-report-open data-enemy-index="${selectedIndex}" data-enemy-id="${esc(enemyId)}">资料有误？</button><span class="badge enemy-category-badge">${esc(enemyCategoryLabel(dataRow))}</span></div></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>${detailValues}`;
+  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${portrait}<div><span class="card-kicker">${esc(enemyCategoryLabel(dataRow))} / 怪物分类</span><h2>${esc(displayName)}</h2></div></div><div class="enemy-detail-actions">${enemyDetailNavigationMarkup()}<button type="button" class="enemy-report-trigger" data-enemy-report-open data-enemy-index="${selectedIndex}" data-enemy-id="${esc(enemyId)}">资料有误？</button><span class="badge enemy-category-badge">${esc(enemyCategoryLabel(dataRow))}</span></div></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>${detailValues}`;
   $('#enemy-detail').scrollTop=0;
 }
 $('#enemy-detail').addEventListener('error',event=>{
@@ -1047,7 +1062,7 @@ function openFeedbackDialog(kind,context=null,correctionTarget=null){
   dialog.showModal();$('#feedback-message').focus();
 }
 $('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
-$('#enemy-detail').addEventListener('click',event=>{const differenceButton=event.target.closest('[data-enemy-difference-open]');if(differenceButton){const differences=$('#enemy-location-differences');if(differences&&!differences.open)differences.open=true;differences?.scrollIntoView({behavior:'smooth',block:'start'});return}const button=event.target.closest('[data-enemy-report-open]');if(!button)return;const index=Number(button.dataset.enemyIndex),row=state.enemyData?.rows[index];if(!row||String(row[1])!==button.dataset.enemyId)return;const entity=state.enemyEntities.get(enemyEntityKey(row)),name=entity?.name||enemyDisplayName(row),url=new URL(`${location.origin}${location.pathname}`);url.searchParams.set('enemyId',String(row[1]));url.searchParams.set('enemyRecordIndex',String(index));url.hash='enemies';openFeedbackDialog('suggestion',null,{id:String(row[1]),name,url:url.href})});
+$('#enemy-detail').addEventListener('click',event=>{const enemyStepButton=event.target.closest('[data-enemy-step]');if(enemyStepButton){navigateEnemyDetail(Number(enemyStepButton.dataset.enemyStep));return}const differenceButton=event.target.closest('[data-enemy-difference-open]');if(differenceButton){const differences=$('#enemy-location-differences');if(differences&&!differences.open)differences.open=true;differences?.scrollIntoView({behavior:'smooth',block:'start'});return}const button=event.target.closest('[data-enemy-report-open]');if(!button)return;const index=Number(button.dataset.enemyIndex),row=state.enemyData?.rows[index];if(!row||String(row[1])!==button.dataset.enemyId)return;const entity=state.enemyEntities.get(enemyEntityKey(row)),name=entity?.name||enemyDisplayName(row),url=new URL(`${location.origin}${location.pathname}`);url.searchParams.set('enemyId',String(row[1]));url.searchParams.set('enemyRecordIndex',String(index));url.hash='enemies';openFeedbackDialog('suggestion',null,{id:String(row[1]),name,url:url.href})});
 function correctionPrefix(target,type){const labels={image:'图片',location:'地点',category:'分类',multiplier:'倍率',resistance:'抗性',other:'其他'};return `【图鉴纠错】\n敌人：${target.name}\nID：${target.id}\n页面：${target.url}\n纠错类型：${labels[type]||labels.other}\n说明：`}
 $('#feedback-correction-type')?.addEventListener('change',event=>{if(feedbackDialogCorrectionTarget)$('#feedback-message').maxLength=Math.max(0,4000-correctionPrefix(feedbackDialogCorrectionTarget,event.target.value).length)});
 $('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});

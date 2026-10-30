@@ -805,6 +805,11 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-enemies .enemy-detail .detail-top>.enemy-category-badge{flex:0 0 auto}
 @media(max-width:480px){#view-enemies .enemy-detail .enemy-detail-title{gap:8px}#view-enemies .enemy-detail .enemy-detail-image{flex-basis:64px;width:64px;height:64px}#view-enemies .enemy-detail .detail-top{align-items:flex-start}}
 #view-enemies .enemy-detail-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+#view-enemies .enemy-detail-navigation{display:flex;gap:4px}
+#view-enemies .enemy-detail-navigation button{min-height:30px;padding:4px 8px;border:1px solid #46586b;background:#1c2630;color:#d6dfdf;font-size:11px;white-space:nowrap}
+#view-enemies .enemy-detail-navigation button:hover:not(:disabled){border-color:#a98c5d;color:#f2d89e}
+#view-enemies .enemy-detail-navigation button:disabled{cursor:not-allowed;opacity:.45}
+#view-enemies .enemy-detail-actions-empty{justify-content:flex-end;margin-bottom:12px}
 #view-enemies .enemy-report-trigger{min-height:30px;padding:4px 9px;border:1px solid #796b4d;background:#1c2630;color:#dec998;font-size:11px;cursor:pointer}
 #view-enemies .enemy-report-trigger:hover{border-color:#d1ad69;background:#27303a;color:#f2d89e}
 #view-enemies .enemy-difference-link{display:inline-block;margin-top:3px;padding:0;border:0;background:none;color:#d6b879;font:inherit;font-size:10px;text-decoration:none;cursor:pointer}
@@ -816,4 +821,4 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .feedback-form select#feedback-correction-type{width:100%;min-height:42px;padding:9px 11px;border:1px solid #53677e;border-radius:3px;background:#101b29;color:#e6e8df;font:inherit}
 .feedback-form select#feedback-correction-type:focus{outline:1px solid #c8a466;border-color:#c8a466}
 #feedback-context-option[hidden],#feedback-correction-type-wrap[hidden],#feedback-correction-type[hidden]{display:none!important}
-@media(max-width:480px){#view-enemies .enemy-detail-actions{align-items:flex-end;flex-direction:column;gap:5px}#view-enemies .enemy-report-trigger{min-height:28px;padding:3px 7px;font-size:10px}}
+@media(max-width:480px){#view-enemies .enemy-detail-actions{align-items:flex-end;flex-direction:column;gap:5px}#view-enemies .enemy-report-trigger{min-height:28px;padding:3px 7px;font-size:10px}#view-enemies .enemy-detail-navigation button{min-height:27px;padding:3px 6px;font-size:10px}}
