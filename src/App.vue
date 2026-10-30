@@ -197,7 +197,10 @@ onUnmounted(() => {
         <EffectsPage :active="currentView === 'effects'" />
         <SourcesPage :active="currentView === 'sources'" />
       </div>
-      <footer>渡夜图鉴 · 玩家制作的非官方工具</footer>
+      <footer>
+        <span>渡夜图鉴 · 玩家制作的非官方工具</span>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a>
+      </footer>
       <div id="feedback-background-status" class="feedback-background-status" role="status" aria-live="polite" aria-relevant="additions text"></div>
     </main>
   </div>

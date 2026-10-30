@@ -15,3 +15,4 @@
   *,*::before,*::after{animation:none!important;scroll-behavior:auto!important;transition:none!important}
   .button:hover,.feature-card:hover{transform:none}
 }
+footer a{text-decoration:underline;text-underline-offset:2px}

@@ -25,10 +25,43 @@ Store the backend environment file outside the public document root with mode
 `FEEDBACK_ADMIN_PASSWORD` server-side with at least 32 random characters. Do
 not put credentials in this repository or in the static build.
 
-The Nginx template forwards the public scheme to Uvicorn. For later HTTPS
-termination, configure `FORWARDED_ALLOW_IPS` to trust only the actual Docker
-proxy peer address discovered on the server; do not use `*`. Nginx replaces
-`X-Forwarded-For` with the connected client address instead of appending a
-visitor-supplied forwarding chain. Until a TLS
-certificate and HTTPS server block are reviewed and installed, public AI and
-feedback actions remain unavailable by design.
+The Nginx template forwards the public scheme to Uvicorn. Configure
+`FORWARDED_ALLOW_IPS` to trust only the actual Docker proxy peer address
+discovered on the server; do not use `*`. Nginx replaces `X-Forwarded-For`
+with the connected client address instead of appending a visitor-supplied
+forwarding chain.
+
+## HTTPS and certificate renewal
+
+On Ubuntu, install the distribution packages after the HTTP site configuration
+is active and both DNS names resolve to this server:
+
+```sh
+sudo apt-get update
+sudo apt-get install -y certbot python3-certbot-nginx
+sudo certbot --nginx --non-interactive --agree-tos \
+  --register-unsafely-without-email --redirect \
+  -d nightreign.cn -d www.nightreign.cn
+```
+
+Certbot obtains a free Let's Encrypt certificate, installs the HTTPS server
+configuration and redirects HTTP to HTTPS. With no registration email, expiry
+notices are unavailable. Keep certificate files under `/etc/letsencrypt/`; do
+not copy them into this repository or the static release.
+
+Enable the systemd renewal timer and install the deploy hook so a renewed
+certificate reloads Nginx:
+
+```sh
+sudo install -m 0755 deploy/certbot-reload-nginx.sh \
+  /etc/letsencrypt/renewal-hooks/deploy/nightreign-reload-nginx
+sudo systemctl enable --now certbot.timer
+systemctl list-timers --all certbot.timer
+sudo certbot renew --dry-run
+```
+
+The Nginx template overwrites `X-Forwarded-For` with the TCP peer address and
+sets `X-Forwarded-Proto` from the active scheme. The backend must trust only
+the Docker gateway address observed for its Nginx peer. Once HTTPS is active,
+AI and feedback routes can be tested over HTTPS; do not relax the backend's
+HTTPS checks for HTTP.
