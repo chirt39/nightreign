@@ -3,7 +3,7 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),enemyEntities:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const state = {enemyData:null,enemyImageManifest:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),enemyEntities:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
 const relicColorClasses = Object.freeze({Red:'red',Blue:'blue',Yellow:'yellow',Green:'green',Any:'any'});
 const relicColorClass = (relic) => {const key=String(relic?.itemColor||'Any');return `color-${Object.hasOwn(relicColorClasses,key)?relicColorClasses[key]:'any'}`};
@@ -34,6 +34,7 @@ async function loadCatalogs(){
     const catalogFiles=['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json'];
     const catalogVersions=window.NIGHTREIGN_CATALOG_VERSIONS;
     if(!catalogVersions||typeof catalogVersions!=='object')throw new Error('数据版本信息缺失，请刷新页面重试。');
+    const enemyImageManifestPromise=loadEnemyImageManifest(catalogVersions['enemy-image-verified.json']);
     const catalogs=await Promise.all(catalogFiles.map(async name=>{
       const version=catalogVersions[name];
       if(typeof version!=='string'||! /^[a-f0-9]{12}$/i.test(version))throw new Error(`${name} 的内容哈希缺失或无效，请刷新页面重试。`);
@@ -43,6 +44,11 @@ async function loadCatalogs(){
     }));
     const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData]=catalogs;
     Object.assign(state,{enemyData:enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData});
+    enemyImageManifestPromise.then(manifest=>{
+      if(manifest?.schemaVersion!==1||!manifest.images||typeof manifest.images!=='object'||Array.isArray(manifest.images))return;
+      state.enemyImageManifest=manifest;
+      if(state.enemySelected)renderEnemyDetail(state.enemySelected);
+    });
     buildEffectCategoryIndex();
     renderEffectEncyclopedia();
     $('#nav-enemy-count').textContent=enemy.rows.length.toLocaleString('zh-CN');
@@ -56,6 +62,13 @@ async function loadCatalogs(){
     $('#save-status').textContent='资料已就绪，可选择存档。';
     restoreSave();
   }catch(err){$('#enemy-count').textContent='资料载入失败';$('#save-status').textContent='资料载入失败：'+err.message;$('#save-status').classList.add('error')}
+}
+async function loadEnemyImageManifest(version){
+  if(typeof version!=='string'||! /^[a-f0-9]{12}$/i.test(version))return null;
+  try{
+    const response=await fetch(`./enemy-image-verified.json?v=${version}`);
+    return response.ok?await response.json():null;
+  }catch{return null}
 }
 
 const bossRe=/boss|首领|夜王|夜之王|夜王者/i;
@@ -316,15 +329,26 @@ function enemyHealthSection(entity){
   return `<details class="detail-section enemy-health-section" open><summary><span>生命值</span></summary><div class="enemy-health-table-wrap"><table class="enemy-health-table"><thead><tr><th>版本</th><th>出现地点</th>${values}</tr></thead><tbody>${entries.map(entry=>`<tr><th scope="row"><span class="enemy-health-kind ${entry.version==='灾域'?'disaster':''}">${entry.version}</span></th><td>${esc(entry.location)}</td>${merged?`<td class="enemy-health-value">${esc(entry.first)}</td>`:`<td class="enemy-health-value">${esc(entry.first)}</td><td class="enemy-health-value">${esc(entry.second)}</td>`}</tr>`).join('')}</tbody></table></div></details>`;
 }
 function enemyHealthSections(entity){return enemyHealthSection(entity)}
+function enemyDetailImageMarkup(record,name){
+  const images=state.enemyImageManifest?.images,id=String(record?.[1]??'');
+  if(!id||!images||!Object.hasOwn(images,id))return '';
+  const entry=images[id],path=entry?.path;
+  if(entry?.matchStatus!=='verified'||typeof path!=='string'||!/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(path))return '';
+  return `<img class="enemy-detail-image" src="./${esc(path)}" alt="${esc(name)}" width="80" height="80" decoding="async">`;
+}
 function renderEnemyDetail(r){
   if(!r){$('#enemy-detail').innerHTML='<div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>';$('#enemy-detail').scrollTop=0;return}
   const entity=state.enemyEntities.get(enemyEntityKey(r)),dataGroups=entity?.statGroups||[],selectedGroup=dataGroups[0],dataRow=selectedGroup?.anchor.row||r,c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录';
   const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=damage?c[i].label.replace(/^伤害[·．]/,''):i>=13&&i<=19?c[i].label.replace(/^耐受[·．]/,''):c[i].label;return `<div class="${indexes.length>8?'resist':'kv'} ${tone}"><span>${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeLocationNotes(entity,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${indexes.length} 项</small></summary>${core?'':extra}<div class="${indexes.length>8?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
   const combatSections=`<div class="enemy-combat-grid">${section('伤害倍率',[5,6,7,8,9,10,11,12],true)}${section('异常状态抗性',[13,14,15,16,17,18,19,20,21,22,23],true)}</div>`;
   const detailValues=selectedGroup?`${section('核心属性',[24,25,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
-  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title"><div><span class="card-kicker">${esc(enemyCategoryLabel(dataRow))} / 怪物分类</span><h2>${esc(entity?.name||enemyDisplayName(r))}</h2></div></div><span class="badge enemy-category-badge">${esc(enemyCategoryLabel(dataRow))}</span></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>${detailValues}`;
+  const displayName=entity?.name||enemyDisplayName(r),portrait=enemyDetailImageMarkup(dataRow,displayName);
+  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${portrait}<div><span class="card-kicker">${esc(enemyCategoryLabel(dataRow))} / 怪物分类</span><h2>${esc(displayName)}</h2></div></div><span class="badge enemy-category-badge">${esc(enemyCategoryLabel(dataRow))}</span></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>${detailValues}`;
   $('#enemy-detail').scrollTop=0;
 }
+$('#enemy-detail').addEventListener('error',event=>{
+  if(event.target instanceof HTMLImageElement&&event.target.classList.contains('enemy-detail-image'))event.target.remove();
+},true);
 $('#enemy-search').addEventListener('input',filterEnemies);$('#enemy-filter').addEventListener('change',filterEnemies);$('#enemy-area').addEventListener('change',filterEnemies);
 $('#enemy-list').addEventListener('click',e=>{const btn=e.target.closest('[data-enemy-index]');if(!btn)return;state.enemySelected=state.enemyData.rows[Number(btn.dataset.enemyIndex)];renderEnemies();renderEnemyDetail(state.enemySelected);syncEnemyUrl()});
 $('#enemy-pagination').addEventListener('click',e=>{const step=e.target.closest('[data-step]');if(!step)return;state.enemyPage+=Number(step.dataset.step);renderEnemies();syncEnemyUrl();$('#enemy-list').scrollTop=0});

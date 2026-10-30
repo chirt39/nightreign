@@ -794,3 +794,8 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-enemies .enemy-damage-note{padding:2px 8px 4px;font-size:10px;line-height:1.35}
 @media(max-width:850px){#view-enemies .enemy-detail .enemy-core-properties .kv-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:480px){#view-enemies .enemy-detail .enemy-core-properties .kv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#view-enemies .enemy-detail .enemy-detail-title{flex:1;gap:12px}
+#view-enemies .enemy-detail .enemy-detail-title>div{flex:1;min-width:0}
+#view-enemies .enemy-detail .enemy-detail-image{display:block;flex:0 0 80px;width:80px;height:80px;object-fit:cover;border:1px solid #536477;border-radius:3px}
+#view-enemies .enemy-detail .detail-top>.enemy-category-badge{flex:0 0 auto}
+@media(max-width:480px){#view-enemies .enemy-detail .enemy-detail-title{gap:8px}#view-enemies .enemy-detail .enemy-detail-image{flex-basis:64px;width:64px;height:64px}#view-enemies .enemy-detail .detail-top{align-items:flex-start}}
