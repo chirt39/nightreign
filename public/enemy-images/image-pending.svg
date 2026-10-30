@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-labelledby="title">
+  <title id="title">图片待补</title>
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1d304a"/>
+      <stop offset="1" stop-color="#0d192a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="38%" r="55%">
+      <stop offset="0" stop-color="#67718a" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#16243a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="1" y="1" width="78" height="78" rx="2" fill="url(#ground)"/>
+  <rect x="5" y="5" width="70" height="70" rx="1" fill="url(#glow)" stroke="#806b43" stroke-opacity=".7"/>
+  <path d="M9 18V9h9M62 9h9v9M9 62v9h9M62 71h9v-9" fill="none" stroke="#c5a563" stroke-width="1.4"/>
+  <path d="M40 20 51 28l-3 17-8 8-8-8-3-17z" fill="#23344b" stroke="#9e8550" stroke-width="1.5"/>
+  <path d="m33 32 5 2m9-2-5 2M36 43h8m-4 9v6" fill="none" stroke="#c5a563" stroke-linecap="round" stroke-width="1.5"/>
+  <path d="M24 61h32" stroke="#6f5a38" stroke-width="1"/>
+  <text x="40" y="69" fill="#e2c98b" font-family="system-ui,'Noto Sans SC',sans-serif" font-size="9" letter-spacing="1" text-anchor="middle">图片待补</text>
+</svg>
