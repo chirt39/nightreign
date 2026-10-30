@@ -29,6 +29,7 @@ defineProps({ active: Boolean });
               <div class="agent-memory-dialog-actions"><button id="agent-memory-clear-cancel" class="button ghost" type="button">取消</button><button id="agent-memory-clear-next" class="button ghost" type="button">继续</button><button id="agent-memory-clear-confirm" class="button primary" type="button" hidden>永久清除记忆</button></div>
             </section>
           </dialog>
+          <Teleport to="body">
           <dialog id="feedback-dialog" class="feedback-dialog" aria-labelledby="feedback-title">
             <form id="feedback-form" class="feedback-form">
               <div class="feedback-form-heading"><div><p class="eyebrow">ROUNDtable MESSAGE</p><h2 id="feedback-title">向窝反馈</h2></div><button id="feedback-cancel" class="button ghost" type="button">关闭</button></div>
@@ -50,6 +51,7 @@ defineProps({ active: Boolean });
               <div class="feedback-form-actions"><span id="feedback-status" role="status" aria-live="polite"></span><button id="feedback-submit" class="button primary" type="submit">提交反馈</button></div>
             </form>
           </dialog>
+          </Teleport>
           <div class="section-heading"><div><p class="eyebrow">EXPEDITION DESK</p><h2>远征控制台</h2></div><p>从情报到配装，一处完成</p></div>
           <div class="feature-grid"><button class="feature-card" data-go="enemies"><img class="feature-icon-image" src="/nav-icons/bestiary.webp" alt=""><div><span class="card-kicker">01 / BESTIARY</span><h3>图鉴</h3><p>浏览敌人分类与遭遇资料，查看伤害倍率、异常抗性与韧性等属性。</p><span class="text-link">查阅图鉴 ↗</span></div></button><button class="feature-card" data-go="relics"><img class="feature-icon-image" src="/nav-icons/relic-rite.png" alt=""><div><span class="card-kicker">02 / RELIC RITE</span><h3>遗物仪式</h3><p>解析本地游戏存档，筛选角色拥有的遗物与全部词条。</p><span class="text-link">读取存档 ↗</span></div></button><button class="feature-card" data-go="builds"><img class="feature-icon-image" src="/nav-icons/relic-equip.png" alt=""><div><span class="card-kicker">03 / RELIC EQUIPMENT</span><h3>遗物装配</h3><p>选择渡夜者与器皿，从已拥有的遗物中装配并查看组合效果。</p><span class="text-link">开始装配 ↗</span></div></button></div>
           <div class="note-panel"><span class="note-icon">i</span><div><strong>关于资料完整度</strong><p>敌人属性与抗性来自社区整理数据。遭遇位置仅显示可核对的信息；部分敌人的刷新点和场景可能不完整。</p></div></div>
