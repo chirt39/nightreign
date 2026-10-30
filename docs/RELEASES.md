@@ -100,3 +100,15 @@ PR [#22](https://github.com/chirt39/nightreign/pull/22) 精确 head `2522ba8f26c
 | `dist/game-ui.css` | `8feceee5446f0090b6f518c325c4cb06c748f6da87432829c0f89165cfd1a4a1` |
 
 当前静态目录为 `/var/www/nightreign/releases/af7b60654a7699ad5d3133dc00f787e4af4b8a67`，回退目录 `/var/www/nightreign/releases/739f0c7b511a45a2405ca85a65f4158a7e6e1d8a` 保留。公网直连源站确认首页引用新 bundle，四个文件均返回 200 且响应哈希与构建产物一致；新 bundle 对应 `game-ui.css` 版本键 `8feceee5446f` 和 `app.js` 哈希前缀 `9bd62cc9f711`，上一版 bundle 仍可访问。UI 验收覆盖筛选结果内上一只／下一只、跨页定位和 URL 更新、首尾与单项／零项禁用、筛选及普通／永夜状态保留、刷新恢复，以及四项标签移除“承受·”而保留原数值、图标和数据。后端仍为 `nightreign-ai:219771cf`（容器 ID `38e3b5f819c2a73957e54ae7ce867152ab96bc6181875c236f0af5e5568a7d58`，启动时间未变）；数据库、`.env`、TLS 与 AI 索引未变更。
+
+### 抗性显示项更正静态发布（2026-10-31）
+
+PR [#24](https://github.com/chirt39/nightreign/pull/24) 精确 head `a43e5ea12c7e4a02fcc0ba8a6de56b0188960b79` 合并，合并 SHA：`91dbf541cd3fb6c117c56a59ebf87b6328528b76`。从该提交执行 `npm ci` 与生产构建。用户更正为：隐藏原字段 20..23 的显示标签（详情和差异表均隐藏，不删除底层数据），并将“物理普通”显示为“普通”、“猩红腐败”显示为“腐败”；其余显示数据保持。
+
+| 实际更新的静态文件 | SHA-256 |
+| --- | --- |
+| `dist/index.html` | `25283853db426008838d8402e9e754f205488dd0ed5f4e37531367fb291c4b00` |
+| `dist/assets/index-DzB8KekG.js` | `538eaac578442c125ef47b84d669545f64856d1d243f69c93e5d304265ffe6a7` |
+| `dist/app.js` | `3ce348ad6cc5912ca5b5f880151bb9e10b5529cf12c65ab9e42df8ff17ed9e79` |
+
+`dist/game-ui.css` 未变化，沿用 SHA-256 `8feceee5446f0090b6f518c325c4cb06c748f6da87432829c0f89165cfd1a4a1`；新首页继续使用版本键 `8feceee5446f`，新 bundle 内嵌 `app.js` 哈希前缀 `3ce348ad6cc5`。当前静态目录为 `/var/www/nightreign/releases/91dbf541cd3fb6c117c56a59ebf87b6328528b76`，回退目录 `/var/www/nightreign/releases/af7b60654a7699ad5d3133dc00f787e4af4b8a67` 保留；旧 bundle `index-CgC5quq4.js` 继续可访问。公网直连源站确认首页、新 bundle、`app.js`、未变化 CSS 与上一版 bundle 均返回 200，哈希与当前 release 相符。正式站 UI 验收确认 7 项抗性保留，差异候选为 38 项，字段 20..23 不出现在详情／差异表；其他数据、名称、图标和图片未改。后端仍为 `nightreign-ai:219771cf`（容器 ID `38e3b5f819c2a73957e54ae7ce867152ab96bc6181875c236f0af5e5568a7d58`，启动时间未变）；数据库、`.env`、TLS 与 AI 索引未变更。
