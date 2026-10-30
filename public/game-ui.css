@@ -805,7 +805,8 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-enemies .enemy-difference-link{display:inline-block;margin-top:3px;padding:0;border:0;background:none;color:#d6b879;font:inherit;font-size:10px;text-decoration:none;cursor:pointer}
 #view-enemies .enemy-difference-link:hover{text-decoration:underline}
 #view-enemies .enemy-location-differences{margin:8px 0}
-#view-enemies .enemy-location-differences .enemy-health-table{min-width:0}
+#view-enemies .enemy-location-differences .enemy-health-table{min-width:410px}
+#view-enemies .enemy-location-differences .enemy-health-table tbody th{width:7em;min-width:7em;white-space:nowrap}
 #view-enemies .enemy-difference-pending{display:inline-block;margin-left:7px;padding:1px 5px;border:1px solid #766344;border-radius:2px;color:#e5c987;font-size:10px;white-space:nowrap}
 .feedback-form select#feedback-correction-type{width:100%;min-height:42px;padding:9px 11px;border:1px solid #53677e;border-radius:3px;background:#101b29;color:#e6e8df;font:inherit}
 .feedback-form select#feedback-correction-type:focus{outline:1px solid #c8a466;border-color:#c8a466}
