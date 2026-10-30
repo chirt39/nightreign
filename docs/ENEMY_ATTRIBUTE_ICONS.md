@@ -26,4 +26,6 @@
 | 18、23 | 发狂、承受·发狂 | `status-madness.png` | https://patchwiki.biligame.com/images/nightreign/d/d3/30ngd7ncfx6ide1zf4x5rup3i08o8du.png |
 | 19 | 骤死 | 不使用图标 | — |
 
+列索引 20..23 的“承受·”图标对应关系仅为历史复用记录；当前这四项已从详情及差异表隐藏，敌人底层数据仍保留。
+
 图标存放于 `public/enemy-attribute-icons/`，不修改敌人数据文件或图片审核白名单。
