@@ -2,6 +2,15 @@
   "schemaVersion": 1,
   "updatedAt": "2026-10-30",
   "images": {
+    "34700000": {
+      "path": "enemy-images/34700020.jpg",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B734700020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/9/92/fujzfj09wmb03qoha7l1polhp0lwau0.jpg",
+      "assetOrigin": "legacy-repository",
+      "matchStatus": "verified",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-10-30"
+    },
     "39000000": {
       "path": "enemy-images/39000020.jpg",
       "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B739000020",
