@@ -1,5 +1,33 @@
 {
   "schemaVersion": 1,
   "updatedAt": "2026-10-30",
-  "images": {}
+  "images": {
+    "39000000": {
+      "path": "enemy-images/39000020.jpg",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B739000020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/b/b8/80srx1jxsqgsdd1ng2uol3ng3xffb8l.jpg",
+      "assetOrigin": "legacy-repository",
+      "matchStatus": "verified",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-10-30"
+    },
+    "45000010": {
+      "path": "enemy-images/45000010.jpg",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B745000010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/e/ec/iprc8ugso44v7w5bs30vao9lcvyzyz7.jpg",
+      "assetOrigin": "legacy-repository",
+      "matchStatus": "verified",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-10-30"
+    },
+    "49500010": {
+      "path": "enemy-images/49500010.jpg",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B749500010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/f/f0/1mdyhscal3f25lqiscyph759d5z8dx7.jpg",
+      "assetOrigin": "legacy-repository",
+      "matchStatus": "verified",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-10-30"
+    }
+  }
 }

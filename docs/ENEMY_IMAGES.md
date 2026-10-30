@@ -1,42 +1,36 @@
 # 怪物图片核验清单
 
-状态：首批来源候选已核对页面元数据；本地缩图的视觉身份尚未核实，因此可显示清单暂为空。图片许可仍未核实。当前范围只引用 `public/enemy-images/` 已跟踪的图片，不新增、下载或改写素材。
+状态：已核验 3 个详情锚点图片，可显示清单只引用仓库内既有素材。核验表示本地缩图与来源页展示的怪物外观相符，不表示本地文件就是来源原图或已取得再分发许可；许可均标为 `unverified`。
 
 ## 消费契约
 
-`public/enemy-image-verified.json` 只列可以在详情标题旁显示的记录，键为当前敌人记录的原始 ID。前端以详情的默认数据组锚点 ID 精确查找 `images[id]`；没有记录就保留纯文字标题。不得按名称模糊匹配、去掉 ID 末尾的 `a`／`b`，或把同名夜王／永夜王、普通／灾域、武器、体型、阶段之间的图互相继承。
+`public/enemy-image-verified.json` 只列可在详情标题旁显示的图片，键为当前敌人记录的原始 ID。前端以详情默认数据组锚点 ID 精确查找 `images[id]`；没有记录就保留纯文字标题。不得按名称模糊匹配、去掉 ID 末尾的 `a`／`b`，或把同名夜王／永夜王、普通／灾域、武器、体型、阶段之间的图互相继承。
 
 每项记录包含：
 
 - `path`：已存在的站内相对图片路径。
-- `sourcePage`：核验过名称与怪物编号的 Wiki 页面。
-- `sourceImage`：来源图片的原始 URL。
-- `matchStatus`：只有当前详情锚点 ID、本地映射与来源图片视觉内容确认相符后，才能标为 `verified`。仅编号或文件名相同不够。
+- `sourcePage`、`sourceImage`：用于核对名称、编号和外观的 Wiki 页面及图片 URL；它们不证明仓库内旧素材的来源链。
+- `assetOrigin`：当前素材来自仓库已有资源；历史来源尚未独立追溯。
+- `matchStatus`：只有当前详情锚点 ID、本地映射与来源图片外观确认相符后，才能标为 `verified`。仅编号或文件名相同不够。
 - `licenseStatus`：`unverified` 表示尚未确认第三方图片的再分发许可；不代表已取得授权。
 - `checkedAt`：核对日期。
 
 ## 已核验并可显示
 
-目前没有。`public/enemy-image-verified.json` 的 `images` 为空，所以前端不会显示图片；其余详情仍使用纯文字标题。
-
-## 已查来源但需视觉复核
-
-这两项满足当前实体锚点 ID、旧映射键和 Wiki 页面编号／文件名对应，但本地文件与 Wiki 原图字节不同。由于本次不获取远程图片，无法核实本地缩图是否与来源图呈现同一模型，故不加入可显示清单。
-
-| 当前详情锚点 ID | 本地记录 | 本地图片 | Wiki 来源页 | Wiki 原图 | 本地／来源大小 |
+| 当前详情锚点 ID | 本地记录 | 本地图片 | 外观参考页 | 来源图片 | 核对说明 |
 | --- | --- | --- | --- | --- | --- |
-| `45000010` | 飞龙（原野Boss） | `enemy-images/45000010.jpg` | [编号 45000010](https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B745000010) | [NPC FullBody 45000010.jpg](https://patchwiki.biligame.com/images/eldenring/e/ec/iprc8ugso44v7w5bs30vao9lcvyzyz7.jpg) | 2,600 / 274,204 字节；SHA-1 不同 |
-| `49500010` | 提比娅的唤声船（夜晚Boss） | `enemy-images/49500010.jpg` | [编号 49500010](https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B749500010) | [NPC FullBody 49500010.jpg](https://patchwiki.biligame.com/images/eldenring/f/f0/1mdyhscal3f25lqiscyph759d5z8dx7.jpg) | 4,277 / 353,848 字节；SHA-1 不同 |
+| `39000000` | 火焰习武修士 | `enemy-images/39000020.jpg` | [编号 39000020](https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B739000020) | [NPC FullBody 39000020.jpg](https://patchwiki.biligame.com/images/eldenring/b/b8/80srx1jxsqgsdd1ng2uol3ng3xffb8l.jpg) | 本地红衣火焰修士缩图与来源图外观一致；来源编号不同于锚点 ID，但旧映射为该锚点提供此图。 |
+| `45000010` | 飞龙（原野Boss） | `enemy-images/45000010.jpg` | [编号 45000010](https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B745000010) | [NPC FullBody 45000010.jpg](https://patchwiki.biligame.com/images/eldenring/e/ec/iprc8ugso44v7w5bs30vao9lcvyzyz7.jpg) | 同 ID 飞龙外观核对通过；来源页／原图仅作视觉参考，未确认本地图片与其字节相同或存在裁切关系。 |
+| `49500010` | 提比娅的唤声船（夜晚Boss） | `enemy-images/49500010.jpg` | [编号 49500010](https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B749500010) | [NPC FullBody 49500010.jpg](https://patchwiki.biligame.com/images/eldenring/f/f0/1mdyhscal3f25lqiscyph759d5z8dx7.jpg) | 本地与来源图均呈现幽灵船Boss；中文本地名称存在译写差异。 |
 
-来源图片 URL、文件名、大小和 SHA-1 来自 Wiki 文件元数据；本次未请求图片二进制。两张本地图片都已在 `origin/main` 跟踪。当前共有 273 个实体默认锚点，已核验且可显示数量为 0。
+来源原图只用作视觉参照；本地素材是仓库既有的 100×100 缩图，尺寸与 SHA-1 和来源原图不同是预期的裁切／缩放差异，不能据此声称字节相同。参考原图曾临时下载到仓库外的 `E:\海斗\tmp` 供比对，没有将新图片加入仓库。三项 `assetOrigin` 均记录为 `legacy-repository`，因为本地素材的历史来源尚未独立追溯。
+
+基于 `origin/main`（`6677572`），共有 273 个实体默认锚点；其中 30 个锚点 ID 在旧映射表中精确命中，3 个已完成外观核验，另 27 个仍未核验。清单只纳入已确认项目。
 
 ## 待补与冲突
 
-基于 `origin/main`（`6677572`）的当前数据和实体分组；参考 [BWiki《小怪一览》](https://wiki.biligame.com/eldenring/%E5%B0%8F%E6%80%AA%E4%B8%80%E8%A7%88)：
-
 - 旧图片映射有 373 个键、指向 175 张 JPG；175 张均已在 Git 跟踪且文件存在。
 - 有任一旧图片映射的实体 60 个；其中 31 个实体的已映射记录只落到一个图片路径，另 29 个实体落到多个路径。单一路径只是候选，不能代替来源页、锚点 ID 与变体核对。
-- 详情默认锚点 ID 能在旧映射表中精确命中的实体为 30 个；上面两项仅核实了页面编号和文件名，剩余 28 项未逐项核对。当前全部 30 项都还没有视觉身份确认。
 - 213 个实体没有图片映射。
 - 29 个夜王实体全部没有已核验图片；32 个夜晚首领实体中 28 个无旧映射图片。这两组可能与上述数量交叉，不应相加。
 - “白金之子”实体当前指向 11 个不同图片路径，“失乡骑士”指向 6 个；需按具体 ID 和模型变体选择，不能为实体名指定一张通用图。
@@ -45,4 +39,4 @@
 
 ## 来源与许可
 
-旧的 `public/enemy-image-map.json` 只保存 ID 到本地路径，没有逐图的来源页、图片文件名或许可状态。本次获准使用的是已随公开站点分发的现有素材，未新增图片。来源许可继续如实标记为 `unverified`；这个状态不阻止未来接入已视觉核验的既有图片。以后新增或替换素材时，应单独核对来源与许可，并记录来源页、来源图片、匹配状态、许可状态和日期。项目的一般许可要求见 [数据来源台账](DATA.md#许可与发布门槛)。
+旧的 `public/enemy-image-map.json` 只保存 ID 到本地路径，没有逐图的来源页、图片文件名或许可状态。本次只引用已随公开站点分发的现有素材，没有将来源图下载进仓库。来源许可继续如实标记为 `unverified`；这个状态不阻止未来接入已视觉核验的既有图片。以后新增或替换素材时，应单独核对来源与许可，并记录来源页、来源图片、匹配状态、许可状态和日期。项目的一般许可要求见 [数据来源台账](DATA.md#许可与发布门槛)。
