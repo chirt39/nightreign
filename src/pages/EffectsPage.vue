@@ -7,7 +7,7 @@ defineProps({ active: Boolean });
     <div class="page-intro">
       <p class="eyebrow">NIGHTREIGN / RELIC EFFECTS</p>
       <h1>词条图鉴</h1>
-      <p>按局外、局内、深夜局外和深夜局内查找词条，查看效果说明与叠加信息。<a href="https://github.com/xxiixi/NightreignQuickRef/tree/3e23450094c18125ae5665927ed240b18189a040/src/data/zh-CN" target="_blank" rel="noreferrer">查看 NightreignQuickRef 中文资料 ↗</a></p>
+      <p>按局外、局内、深夜局外和深夜局内查找词条，查看效果说明与叠加信息。</p>
     </div>
     <div class="effect-encyclopedia panel">
       <div class="effect-encyclopedia-categories" role="group" aria-label="词条所属类别">
