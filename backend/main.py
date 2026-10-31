@@ -869,8 +869,17 @@ async def feedback_inbox(
     return {"items": items, "total": total, "limit": limit, "offset": offset}
 
 
+_REMOVED_ENEMY_FIELD_VALUE_RE = re.compile(
+    r"(?:出血|冻伤|催眠|发狂|韧性)[\s、，,和及的]{0,12}承受(?:值|率)"
+    r"|承受(?:值|率)[\s、，,和及的]{0,12}(?:出血|冻伤|催眠|发狂|韧性)"
+)
+
+
 def _contains_removed_enemy_field(text: str) -> bool:
-    return any(label in text for label in build_knowledge_base.REMOVED_ENEMY_FIELD_LABELS)
+    return (
+        any(label in text for label in build_knowledge_base.REMOVED_ENEMY_FIELD_LABELS)
+        or _REMOVED_ENEMY_FIELD_VALUE_RE.search(text) is not None
+    )
 
 
 def _filter_recalled_context(items: list[str]) -> list[str]:
