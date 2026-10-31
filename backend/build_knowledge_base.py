@@ -13,6 +13,25 @@ PUBLIC = ROOT / "public"
 DOCS = ROOT / "docs"
 OUTPUT = Path(__file__).resolve().parent / "knowledge_base" / "nightreign_knowledge.jsonl"
 
+# These entities and fields were explicitly removed from the public dataset.
+# Keep the filter here so stale source files or image mappings cannot restore
+# them to the AI corpus.
+REMOVED_ENEMY_IDS = frozenset({
+    "46801010", "75200010", "43710020", "43110020", "43111320",
+    "43738030", "43738130", "43530130", "43134030", "75600010",
+    "75600110", "75600130", "75700030", "75700020", "75700010",
+    "43630400", "75400010", "21300010", "40001020", "46004080",
+})
+REMOVED_ENEMY_COLUMN_POSITIONS = frozenset({20, 21, 22, 23, 25})
+REMOVED_ENEMY_FIELD_KEYS = frozenset({
+    "removed_20", "removed_21", "removed_22", "removed_23", "removed_25",
+    "bleedResist", "frostResist", "sleepResist", "madnessResist", "poiseResist",
+})
+REMOVED_ENEMY_FIELD_LABELS = frozenset({
+    "出血承受率", "冻伤承受率", "催眠承受率", "发狂承受率", "韧性承受率",
+    "承受·出血", "承受·冻伤", "承受·催眠", "承受·发狂", "承受·韧性",
+})
+
 CHARACTER_ZH = {
     "追跡者": "追踪者", "守護者": "守护者", "鉄の目": "铁之眼", "レディ": "女爵",
     "無頼漢": "无赖", "復讐者": "复仇者", "隠者": "隐士", "執行者": "执行者",
@@ -71,14 +90,22 @@ def build() -> list[dict[str, Any]]:
     for row in enemy_data.get("rows", []):
         values = {col.get("k", ""): row[i] for i, col in enumerate(enemy_columns) if i < len(row)}
         name, enemy_id = compact(values.get("name")), compact(values.get("id"))
+        if enemy_id in REMOVED_ENEMY_IDS:
+            continue
         enemy_id_counts[enemy_id] = enemy_id_counts.get(enemy_id, 0) + 1
         record_id = f"enemy:{enemy_id}" if enemy_id_counts[enemy_id] == 1 else f"enemy:{enemy_id}:{enemy_id_counts[enemy_id]}"
         fields: list[str] = []
         damage_values: list[tuple[str, float]] = []
-        for col in enemy_columns:
+        for index, col in enumerate(enemy_columns):
             key = col.get("k", "")
             label = col.get("label", key)
             value = values.get(key)
+            if (index in REMOVED_ENEMY_COLUMN_POSITIONS
+                    or key in REMOVED_ENEMY_FIELD_KEYS
+                    or label in REMOVED_ENEMY_FIELD_LABELS
+                    or col.get("group") == "removed"
+                    or col.get("kind") == "removed"):
+                continue
             if value in (None, ""):
                 continue
             if col.get("group") == "伤害倍率":
@@ -223,6 +250,8 @@ def build() -> list[dict[str, Any]]:
 
     # Enemy portraits make the image map searchable by enemy ID.
     for enemy_id, image_path in load_public("enemy-image-map.json").items():
+        if str(enemy_id) in REMOVED_ENEMY_IDS:
+            continue
         add(records, "enemy_image", f"敌人图片映射｜ID {enemy_id}", f"敌人ID：{enemy_id}｜本地图片：{image_path}",
             "public/enemy-image-map.json", [enemy_id, "敌人 图片 头像"], f"enemy-image:{enemy_id}")
 

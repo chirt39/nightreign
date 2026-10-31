@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from backend.build_knowledge_base import REMOVED_ENEMY_FIELD_LABELS, REMOVED_ENEMY_IDS
 from backend.config import positive_int_setting
 
 
@@ -203,6 +204,34 @@ def _activate_collection(name: str) -> None:
     temporary.replace(ACTIVE_COLLECTION_FILE)
 
 
+def _embedding_input(row: dict) -> str:
+    return f"{row['title']}。{row['content']}"
+
+
+def _record_metadata(row: dict) -> dict[str, str]:
+    return {
+        "category": str(row["category"]), "title": str(row["title"]),
+        "source": str(row["source"]),
+        "search_text": f"{row['title']} {row['content']} {row.get('keywords', '')}",
+    }
+
+
+def _validate_corpus_records(records: list[dict]) -> None:
+    """Fail closed if removed enemy entities or fields return to the corpus."""
+    for row in records:
+        category = row.get("category")
+        record_id = str(row.get("id", ""))
+        if category in {"enemy", "enemy_image"}:
+            enemy_id = record_id.split(":", 2)[1] if ":" in record_id else ""
+            if enemy_id in REMOVED_ENEMY_IDS:
+                raise ValueError(f"知识库包含已移除的敌人 ID：{enemy_id}")
+        if category == "enemy":
+            text = f"{row.get('title', '')} {row.get('content', '')} {row.get('keywords', '')}"
+            found = next((label for label in REMOVED_ENEMY_FIELD_LABELS if label in text), None)
+            if found:
+                raise ValueError(f"敌人知识库包含已移除字段：{found}")
+
+
 def status() -> dict:
     collection = _get_active_collection()
     count = int(collection.count()) if collection is not None else 0
@@ -228,17 +257,16 @@ def rebuild(batch_size: int = 10) -> dict:
     records = corpus_records()
     if not records:
         raise ValueError("知识库语料为空，请先运行 python -m backend.index_knowledge。")
+    _validate_corpus_records(records)
     digest = hashlib.sha256(
         CORPUS.read_bytes() + f"{EMBEDDING_MODEL}:{EMBEDDING_DIMENSIONS}".encode()
     ).hexdigest()[:16]
     collection_name = f"{COLLECTION_PREFIX}{digest}"
     db = _chroma()
 
+    active = _get_active_collection()
     if collection_name in db.list_collections():
         collection = db.get_collection(name=collection_name)
-        if int(collection.count()) == len(records):
-            _activate_collection(collection_name)
-            return {"collection": collection_name, "record_count": len(records), "reused": True}
     else:
         collection = db.create_collection(
             name=collection_name,
@@ -246,34 +274,83 @@ def rebuild(batch_size: int = 10) -> dict:
                       "embedding_dimensions": EMBEDDING_DIMENSIONS},
         )
 
-    # Keep completed batches in the inactive collection if an API request
-    # fails. A later rebuild can resume without embedding or billing those
-    # already indexed records again.
+    # Reuse vectors only when the old and new embedding inputs are byte-for-byte
+    # identical and the active collection uses the configured model/dimensions.
+    old_rows: dict[str, tuple[str, list[float]]] = {}
+    if (active is not None and active.name != collection_name
+            and (active.metadata or {}).get("embedding_model") == EMBEDDING_MODEL
+            and (active.metadata or {}).get("embedding_dimensions") == EMBEDDING_DIMENSIONS):
+        previous = active.get(include=["documents", "metadatas", "embeddings"])
+        old_ids = previous.get("ids", [])
+        old_docs = previous.get("documents", [])
+        old_metadata = previous.get("metadatas", [])
+        old_embeddings = previous.get("embeddings", [])
+        for old_id, document, metadata, vector in zip(old_ids, old_docs, old_metadata, old_embeddings):
+            title = (metadata or {}).get("title")
+            if title is not None and document is not None and vector is not None:
+                old_rows[str(old_id)] = (f"{title}。{document}", list(vector))
+
+    # Keep completed batches in the inactive collection after failures. A later
+    # rebuild verifies each record before reusing it, so stale partial rows are
+    # corrected instead of being trusted by ID alone.
     chunk_size = min(max(batch_size, 1), 10)
     for offset in range(0, len(records), chunk_size):
         batch = records[offset:offset + chunk_size]
         ids = [str(row["id"]) for row in batch]
-        present = set(collection.get(ids=ids, include=[]) .get("ids", []))
-        pending = [row for row, row_id in zip(batch, ids) if row_id not in present]
-        if not pending:
+        present = collection.get(ids=ids, include=["documents", "metadatas"])
+        present_by_id = {
+            record_id: (document, metadata or {})
+            for record_id, document, metadata in zip(
+                present.get("ids", []), present.get("documents", []), present.get("metadatas", [])
+            )
+        }
+        rows_to_upsert: list[dict] = []
+        vectors_by_id: dict[str, list[float]] = {}
+        changed: list[dict] = []
+        for row, row_id in zip(batch, ids):
+            metadata = _record_metadata(row)
+            existing = present_by_id.get(row_id)
+            if existing == (str(row["content"]), metadata):
+                continue
+            rows_to_upsert.append(row)
+            old = old_rows.get(row_id)
+            if old and old[0] == _embedding_input(row) and len(old[1]) == EMBEDDING_DIMENSIONS:
+                vectors_by_id[row_id] = old[1]
+            else:
+                changed.append(row)
+        if not rows_to_upsert:
             continue
-        texts = [f"{row['title']}。{row['content']}" for row in pending]
-        vectors = embed_texts(texts)
+        if changed:
+            embedded = embed_texts([_embedding_input(row) for row in changed])
+            vectors_by_id.update({str(row["id"]): vector for row, vector in zip(changed, embedded)})
         collection.upsert(
-            ids=[str(row["id"]) for row in pending],
-            embeddings=vectors,
-            documents=[str(row["content"]) for row in pending],
-            metadatas=[{
-                "category": str(row["category"]), "title": str(row["title"]),
-                "source": str(row["source"]),
-                "search_text": f"{row['title']} {row['content']} {row.get('keywords', '')}",
-            } for row in pending],
+            ids=[str(row["id"]) for row in rows_to_upsert],
+            embeddings=[vectors_by_id[str(row["id"])] for row in rows_to_upsert],
+            documents=[str(row["content"]) for row in rows_to_upsert],
+            metadatas=[_record_metadata(row) for row in rows_to_upsert],
         )
-    if int(collection.count()) != len(records):
+
+    expected_ids = {str(row["id"]) for row in records}
+    indexed = collection.get(include=["documents", "metadatas"])
+    indexed_ids = set(indexed.get("ids", []))
+    extras = indexed_ids - expected_ids
+    if extras:
+        collection.delete(ids=sorted(extras))
+        indexed = collection.get(include=["documents", "metadatas"])
+        indexed_ids = set(indexed.get("ids", []))
+    if indexed_ids != expected_ids or int(collection.count()) != len(records):
         raise RuntimeError("Chroma 索引数量与源语料不一致。")
+    _validate_corpus_records([
+        {"id": record_id, "category": (metadata or {}).get("category"),
+         "title": (metadata or {}).get("title"), "content": document}
+        for record_id, document, metadata in zip(
+            indexed.get("ids", []), indexed.get("documents", []), indexed.get("metadatas", [])
+        )
+    ])
     _activate_collection(collection_name)
 
-    return {"collection": collection_name, "record_count": len(records), "reused": False}
+    return {"collection": collection_name, "record_count": len(records),
+            "reused": bool(active is not None and active.name == collection_name)}
 
 
 @lru_cache(maxsize=1)
