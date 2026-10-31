@@ -28,14 +28,19 @@ class EnemyCorpusCleanupTests(unittest.TestCase):
         self.assertTrue(any(row["category"] == "enemy_scale" for row in records))
 
     def test_recalled_context_filters_only_removed_field_answers(self):
+        composite_answer = "出血、冻伤、催眠、发狂的承受值均为0.5，因此这些异常状态也不容易生效。"
+        self.assertTrue(main._contains_removed_enemy_field(composite_answer))
+        self.assertFalse(main._contains_removed_enemy_field("承受火焰伤害时要躲避。"))
         recalled = [
             "\u7528\u6237\u66fe\u95ee\uff1a\u51fa\u8840\u627f\u53d7\u7387\u662f\u591a\u5c11\uff1f\uff1b\u52a9\u624b\u66fe\u7b54\uff1a\u51fa\u8840\u627f\u53d7\u7387\u662f 75%\u3002",
+            f"用户曾问：黑剑弱点是什么？；助手曾答：{composite_answer}",
             "\u7528\u6237\u66fe\u95ee\uff1a\u5982\u4f55\u63d0\u9ad8\u751f\u5b58\uff1f\uff1b\u52a9\u624b\u66fe\u7b54\uff1a\u4f18\u5148\u9009\u62e9\u751f\u547d\u503c\u548c\u9632\u5fa1\u8bcd\u6761\u3002",
         ]
         self.assertEqual(
             main._filter_recalled_context(recalled),
             [
                 "\u7528\u6237\u66fe\u95ee\uff1a\u51fa\u8840\u627f\u53d7\u7387\u662f\u591a\u5c11\uff1f",
+                "用户曾问：黑剑弱点是什么？",
                 "\u7528\u6237\u66fe\u95ee\uff1a\u5982\u4f55\u63d0\u9ad8\u751f\u5b58\uff1f\uff1b\u52a9\u624b\u66fe\u7b54\uff1a\u4f18\u5148\u9009\u62e9\u751f\u547d\u503c\u548c\u9632\u5fa1\u8bcd\u6761\u3002",
             ],
         )
@@ -172,9 +177,12 @@ class PromptCaptureTests(unittest.IsolatedAsyncioTestCase):
             {"role": "user", "content": "\u67d0\u654c\u4eba\u7684\u51fa\u8840\u627f\u53d7\u7387\u662f\u591a\u5c11\uff1f"},
             {"role": "assistant", "content": "\u666e\u901a\u56de\u7b54\uff1a\u5e94\u5bf9\u65b9\u5f0f\u662f\u4fdd\u6301\u8ddd\u79bb\u3002"},
             {"role": "assistant", "content": "\u65e7\u7b54\u6848\uff1a\u51fa\u8840\u627f\u53d7\u7387\u662f 75%\u3002"},
+            {"role": "assistant", "content": "出血、冻伤、催眠、发狂的承受值均为0.5，因此这些异常状态也不容易生效。"},
+            {"role": "assistant", "content": "承受火焰伤害时要躲避。"},
         ]
         recalled = [
             "\u7528\u6237\u66fe\u95ee\uff1a\u67d0\u654c\u4eba\u7684\u51fa\u8840\u627f\u53d7\u7387\u662f\u591a\u5c11\uff1f\uff1b\u52a9\u624b\u66fe\u7b54\uff1a\u65e7\u7b54\u6848\uff1a\u51fa\u8840\u627f\u53d7\u7387\u662f 75%\u3002",
+            "用户曾问：黑剑弱点是什么？；助手曾答：出血、冻伤、催眠、发狂的承受值均为0.5，因此这些异常状态也不容易生效。",
             "\u7528\u6237\u66fe\u95ee\uff1a\u5982\u4f55\u63d0\u9ad8\u751f\u5b58\uff1f\uff1b\u52a9\u624b\u66fe\u7b54\uff1a\u4f18\u5148\u9009\u62e9\u751f\u547d\u503c\u548c\u9632\u5fa1\u8bcd\u6761\u3002",
         ]
         body = main.ChatRequest(
@@ -201,11 +209,13 @@ class PromptCaptureTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("出血承受率", serialized)
         self.assertIn("某敌人的出血承受率是多少？", serialized)
         self.assertNotIn("75%", serialized)
+        self.assertNotIn("0.5", serialized)
         user_payload = json.loads(messages[-1]["content"])
         self.assertIn("\u666e\u901a\u56de\u7b54\uff1a\u5e94\u5bf9\u65b9\u5f0f\u662f\u4fdd\u6301\u8ddd\u79bb\u3002", serialized)
         self.assertIn("\u4f18\u5148\u9009\u62e9\u751f\u547d\u503c\u548c\u9632\u5fa1\u8bcd\u6761\u3002", serialized)
-        self.assertEqual([row["role"] for row in user_payload["conversation_history"]], ["user", "assistant"])
-        self.assertEqual(len(user_payload["relevant_past_conversation"]), 2)
+        self.assertIn("承受火焰伤害时要躲避。", serialized)
+        self.assertEqual([row["role"] for row in user_payload["conversation_history"]], ["user", "assistant", "assistant"])
+        self.assertEqual(len(user_payload["relevant_past_conversation"]), 3)
 
 
 if __name__ == "__main__":
