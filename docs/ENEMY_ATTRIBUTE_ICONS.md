@@ -20,12 +20,12 @@
 | 12 | 神圣 | `damage-holy.png` | https://patchwiki.biligame.com/images/nightreign/5/58/buhd3qkh81kijol5pucs2q754b72tbu.png |
 | 13 | 毒素 | `status-poison.png` | https://patchwiki.biligame.com/images/nightreign/d/d9/eeiplvwscsvlv39q70fzjw6d7iiwrqe.png |
 | 14 | 腐败 | `status-rot.png` | https://patchwiki.biligame.com/images/nightreign/c/c4/mlqmejtek9097qtcdm15h2luhjlxvi5.png |
-| 15、20 | 出血、承受·出血 | `status-bleed.png` | https://patchwiki.biligame.com/images/nightreign/f/f7/fbxxuujofqdlpptii6ohi68duphnoe3.png |
-| 16、21 | 冻伤、承受·冻伤 | `status-frost.png` | https://patchwiki.biligame.com/images/nightreign/1/1b/1vd2qpd0ib48t648i5dezv8emu42syc.png |
-| 17、22 | 催眠、承受·催眠 | `status-sleep.png` | https://patchwiki.biligame.com/images/nightreign/5/5b/d3549ey5gky3gf1149en7nn4aryyhqd.png |
-| 18、23 | 发狂、承受·发狂 | `status-madness.png` | https://patchwiki.biligame.com/images/nightreign/d/d3/30ngd7ncfx6ide1zf4x5rup3i08o8du.png |
+| 15 | 出血 | `status-bleed.png` | https://patchwiki.biligame.com/images/nightreign/f/f7/fbxxuujofqdlpptii6ohi68duphnoe3.png |
+| 16 | 冻伤 | `status-frost.png` | https://patchwiki.biligame.com/images/nightreign/1/1b/1vd2qpd0ib48t648i5dezv8emu42syc.png |
+| 17 | 催眠 | `status-sleep.png` | https://patchwiki.biligame.com/images/nightreign/5/5b/d3549ey5gky3gf1149en7nn4aryyhqd.png |
+| 18 | 发狂 | `status-madness.png` | https://patchwiki.biligame.com/images/nightreign/d/d3/30ngd7ncfx6ide1zf4x5rup3i08o8du.png |
 | 19 | 骤死 | 不使用图标 | — |
 
-列索引 20..23 的“承受·”图标对应关系仅为历史复用记录；当前这四项已从详情及差异表隐藏，敌人底层数据仍保留。
+列索引 20–23、25 已退役并使用 removed 元数据占位；对应数据槽均为 `null`。列槽保留以避免其余索引迁移，这些位置不再建立图标映射。
 
-图标存放于 `public/enemy-attribute-icons/`，不修改敌人数据文件或图片审核白名单。
+图标存放于 `public/enemy-attribute-icons/`；本次数据清理未改动图标文件或图片审核白名单。
