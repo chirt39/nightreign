@@ -112,3 +112,33 @@ PR [#24](https://github.com/chirt39/nightreign/pull/24) 精确 head `a43e5ea12c7
 | `dist/app.js` | `3ce348ad6cc5912ca5b5f880151bb9e10b5529cf12c65ab9e42df8ff17ed9e79` |
 
 `dist/game-ui.css` 未变化，沿用 SHA-256 `8feceee5446f0090b6f518c325c4cb06c748f6da87432829c0f89165cfd1a4a1`；新首页继续使用版本键 `8feceee5446f`，新 bundle 内嵌 `app.js` 哈希前缀 `3ce348ad6cc5`。当前静态目录为 `/var/www/nightreign/releases/91dbf541cd3fb6c117c56a59ebf87b6328528b76`，回退目录 `/var/www/nightreign/releases/af7b60654a7699ad5d3133dc00f787e4af4b8a67` 保留；旧 bundle `index-CgC5quq4.js` 继续可访问。公网直连源站确认首页、新 bundle、`app.js`、未变化 CSS 与上一版 bundle 均返回 200，哈希与当前 release 相符。正式站 UI 验收确认 7 项抗性保留，差异候选为 38 项，字段 20..23 不出现在详情／差异表；其他数据、名称、图标和图片未改。后端仍为 `nightreign-ai:219771cf`（容器 ID `38e3b5f819c2a73957e54ae7ce867152ab96bc6181875c236f0af5e5568a7d58`，启动时间未变）；数据库、`.env`、TLS 与 AI 索引未变更。
+
+### 敌人图鉴退役字段清理与知识库发布（2026-11-01）
+
+数据 PR [#26](https://github.com/chirt39/nightreign/pull/26)、前端 PR [#27](https://github.com/chirt39/nightreign/pull/27) 和后端 PR [#28](https://github.com/chirt39/nightreign/pull/28) 完成后，对应发布代码 SHA：`bc8f6a8d0851ae5afc55d0fd7822097af47df438`。从该提交干净构建静态站点并部署后端与新版知识库。敌人数据现有 1,662 行、58 列，前端显示 254 个敌人实体组，差异候选从 38 项更新为 37 项。按批准范围删除 20 条敌人记录，并从全部剩余 1,662 行清空“出血承受率、冻伤承受率、催眠承受率、发狂承受率、韧性承受率”；详情、差异视图和 AI 语料均不再提供这些字段，其他属性与伤害倍率保留。11 个已核验图片条目及对应资源保持不变，已核验图片清单未变；全量敌人图片映射同步移除被删除 ID 的映射（包括 `40001020`）。前端同时新增固定按钮、取消图鉴大页脚、增加备案侧栏、调整两处文案并移除 QuickRef 外链。被删除的 20 个 ID 为：`75600110`、`46801010`、`43710020`、`43630400`、`46004080`、`43530130`、`40001020`、`43134030`、`75700010`、`75700020`、`75600010`、`43738130`、`43738030`、`21300010`、`43110020`、`75600130`、`43111320`、`75700030`、`75400010`、`75200010`。
+
+新版语料与 Chroma 索引各 5,284 条，active collection 为 `nightreign_kb_a604700b2fd1b263`，嵌入模型 `text-embedding-v4`、512 维。迁移对 1,662 条变更后的敌人记录重新嵌入，按完全相同的嵌入文本复用了 3,622 条向量；新 collection 验证完成后才切换活动指针。旧语料 5,349 条中有 43 条敌人记录不在当时的源 JSON 中，这些历史残留也随重建清除。旧 collection `nightreign_kb_0a1c636e27834e91` 及旧运行容器保留。迁移前一致性快照位于 `/home/admin/nightreign-backups/pre-release-bc8f6a8d-20261101/local-data.tar.gz`，SHA-256 为 `e93900c321fcf9752f0695f332910dae07046c2434079a965e1fc212737134ac`；未删除 SQLite 对话、长期记忆或反馈记录。
+
+静态发布目录为 `/var/www/nightreign/releases/bc8f6a8d0851ae5afc55d0fd7822097af47df438`，先前目录 `/var/www/nightreign/releases/91dbf541cd3fb6c117c56a59ebf87b6328528b76` 保留。公网直连源站响应与干净构建哈希一致：
+
+| 静态文件 | SHA-256 |
+| --- | --- |
+| `index.html` | `ae89087881e8d7f9b14e22505a536e4dd72bf36501f806ab18363ad8d67818a4` |
+| `assets/index-DZ_tnRlR.js` | `94364bac08e5902245a1ec52cb6b050451a92605c41031329c5912329ff8d60a` |
+| `app.js` | `988ba8c01d0c47710ffd949ba567ce85d1c9188c41ae4b0b58a20aa20d637d49` |
+| `game-ui.css` | `f953677ac7094b4efaa6bf52c6d60813cededa889c0407ffc6e954d6c72651d8` |
+| `enemy-data.json` | `be833d24b9746bac8c3d102009d39841d8b538a3a081da77a69f529e8388e3e5` |
+| `enemy-image-map.json` | `a435cdfaaacc1a5da07511bca87dd8b14f48a915739ac1e246388bcef0b8ddac` |
+| `enemy-image-verified.json` | `60a0abb6dfc977b924bb37ad7c1ee2aaa520df5a6b1d3b4ae7e021ef91386395` |
+
+发布时后端镜像 `nightreign-ai:bc8f6a8d`（镜像 ID `sha256:67da2ce5b21ddfd2bc87e9dccc536793cd1aa178be31f6ada3f1aa4392406e7a`）的容器 ID 为 `4cf0dcf1b0da8792126ab90572ab4804cceea0cef802bb4cb698262578d140aa`。健康与知识库状态均为 200，源语料和索引为 5,284 条；正式站图鉴、词条及建议弹窗由总控验收，截图保存在 `E:\海斗\tmp\enemy-cleanup-live-20261101.png`。
+
+### 历史助手答案窄字段过滤热修复（2026-11-01）
+
+PR [#29](https://github.com/chirt39/nightreign/pull/29) head `f5ea51c9b7f033c24409e87007d6c2a903311114`，合并 SHA：`4e0ba2820db1460229c78d7e0d4092d9c408d7d4`。修正精确字段标签匹配无法拦截“出血、冻伤、催眠、发狂的承受值均为……”这类旧助手答案的问题；只匹配五个退役字段名与“承受值／承受率”的组合，普通“承受火焰伤害”语义仍可进入上下文。补充了已保存会话和长期记忆 prompt 回归测试，`python -m unittest tests.test_ai_enemy_data_cleanup` 的 4 项测试通过。热修复只更新后端，不重建静态资源、Chroma collection 或向量。
+
+当前后端镜像 `nightreign-ai:4e0ba282`（镜像 ID `sha256:4a154f3045c6435f9c142f64b6d1a1254c0926dd10c5b11fdc0570c24c2b110d`），容器 ID `5b2312526605d173dc81d46b9f1ab946bcdebba3b89f977316a7a7ca8265923a`。`/api/health` 和 `/api/knowledge/status` 返回 200，语料／索引仍各 5,284 条，活动 collection 仍为 `nightreign_kb_a604700b2fd1b263`。热修复前容器保留为 `nightreign-api-rollback-f5ea51c`（镜像 `nightreign-ai:bc8f6a8d`）。
+
+最终热修复上线后进行的唯一一次真实 AI 验收，提问“黑剑敌人的出血、冻伤、催眠、发狂承受值各是多少？”。答复：“当前图鉴已不再提供出血、冻伤、催眠、发狂等异常状态的承受率数值，因此无法给出黑剑眷属这几项的具体承受值。可以确认的是：黑剑眷属（原野Boss与要塞楼顶Boss两个版本）在图鉴中出血、冻伤、催眠、发狂均标注为免疫。”答复没有提供退役字段的数值。
+
+快速回退后端热修复：停止并改名当前 `nightreign-api`，将 `nightreign-api-rollback-f5ea51c` 改回 `nightreign-api` 后启动；无需更改活动 collection 指针。完整回退本次数据／静态发布时，后端回到 `nightreign-api-rollback-bc8f6a8d`（镜像标签 `nightreign-ai:rollback-bc8f6a8d`），活动指针改回 `/home/admin/nightreign/local-data/chroma/active_knowledge_collection.json` 中的旧 collection `nightreign_kb_0a1c636e27834e91`，并将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/91dbf541cd3fb6c117c56a59ebf87b6328528b76`。
