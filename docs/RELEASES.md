@@ -143,12 +143,12 @@ PR [#29](https://github.com/chirt39/nightreign/pull/29) head `f5ea51c9b7f033c244
 
 快速回退后端热修复：停止并改名当前 `nightreign-api`，将 `nightreign-api-rollback-f5ea51c` 改回 `nightreign-api` 后启动；无需更改活动 collection 指针。完整回退本次数据／静态发布时，后端回到 `nightreign-api-rollback-bc8f6a8d`（镜像标签 `nightreign-ai:rollback-bc8f6a8d`），活动指针改回 `/home/admin/nightreign/local-data/chroma/active_knowledge_collection.json` 中的旧 collection `nightreign_kb_0a1c636e27834e91`，并将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/91dbf541cd3fb6c117c56a59ebf87b6328528b76`。
 
-### AI 对话限流与反馈可靠性（已部署；提示词补丁待部署）
+### AI 对话限流与反馈可靠性（已部署）
 
 - AI 每 IP 滚动限额默认由 5 提升至 20 次／分钟；每日模型请求上限仍为 100。限流与每日额度响应返回由服务端计算的 `Retry-After`，并在 CORS 暴露该头。代码默认、`.env.example` 与生产 `.env` 均为 20/100。
 - 对话历史超过单条 1,200 字符时返回中文校验说明；反馈支持最多 10 轮上下文、总计最多 20,000 Unicode 字符，取消上下文时不持久化对话。新增 SQLite 可空 JSON 列为旧数据库做增量迁移，管理员列表兼容旧的单轮记录。保留 90 天反馈期限。
 - AI 回答增加 `answer_format: "markdown"`，提示模型优先使用敌人弱点/倍率/抗性表格和遗物词条/效果/触发条件表格；来源未确认时不推断“无条件”。可验证敌人图仅在检索实体唯一、ID 精确一致且本地图像清单标为 verified 时返回本地 ID。
-- 正常历史助手回答仍可用于连续追问；只过滤包含五个退役敌人字段的旧回答片段。实现与本次发布均未重建知识库或调用 embedding；发布仅执行 SQLite 可空列增量迁移。
+- 正常历史助手回答仍可用于连续追问；只过滤包含五个退役敌人字段的旧回答片段。开发、mock 验证与工程部署均未批量重嵌知识库；工程部署仅执行 SQLite 可空列增量迁移。真实问答按正常检索和对话记忆路径处理，可能触发查询或记忆 embedding，这不属于批量重嵌。
 - 针对性验证：`python -m unittest tests.test_ai_chat_feedback_reliability tests.test_ai_enemy_data_cleanup tests.test_request_size_limit tests.test_knowledge_status`（20 项通过；部署前完成，不调用真实模型或 embedding API）。
 
 ### 联合对话与反馈体验发布（2026-11-01）
@@ -175,6 +175,16 @@ PR [#29](https://github.com/chirt39/nightreign/pull/29) head `f5ea51c9b7f033c244
 
 总控完成唯一一次正式站真实 AI 查询：“请用表格列出白金之子的伤害倍率和异常状态抗性，最后简短标出最有效的伤害类型。”新会话无旧历史；回答成功渲染为 2 张表（8 行与 9 行），突出圣属性 ×1.4、雷属性 ×1.2；聊天日志 `clientWidth` 与 `scrollWidth` 均为 904。正式站反馈弹窗能正常打开，当前会话显示 1 轮，默认 0 轮勾选，计数为 0/10 和 0/20000；关闭时没有提交生产反馈。其他多轮上下文、长回答、管理员兼容、取消提交和 429 倒计时场景由总控此前的本地 UI 证据与 20 项 mock 回归覆盖；未在生产提交多轮反馈，也未为验证限额发起 20 次请求。正式回答截图：`E:\海斗\tmp\chat-answer-live-20261101.png`。
 
-该真实回答同时发现提示词表述问题：普通敌人查询开头主动提到五个已退役字段，抗性标签使用了“物理普通／猩红腐败耐受”。本 PR 将作窄修正：只有用户明确询问时才说明五字段不可提供；普通查询不提退役/移除；展示名使用“普通／腐败”，抗性项保留图鉴提供的七项且标签不加“耐受／承受”。`python -m unittest tests.test_ai_enemy_data_cleanup.PromptCaptureTests` 的 1 项 mocked prompt 测试、`compileall` 与 `git diff --check` 通过；修正后的回答文案尚未部署，不会再发起真实 AI 请求。
+该真实回答同时发现提示词表述问题：普通敌人查询开头主动提到五个已退役字段，抗性标签使用了“物理普通／猩红腐败耐受”。PR #33 将回答约束收窄为：只有用户明确询问时才说明五字段不可提供；普通查询不主动提及五项的退役、移除或缺失；展示名使用“普通／腐败”，抗性项保留图鉴提供的七项且标签不加“耐受／承受”。`python -m unittest tests.test_ai_enemy_data_cleanup.PromptCaptureTests` 的 1 项 mock prompt 测试验证了提示词内容；修正后未再次发起真实 AI 问答。
 
-回退后端：停止当前 `nightreign-api`，将 `nightreign-api-rollback-4e0ba282` 恢复为 `nightreign-api` 并启动；从备份恢复 `/home/admin/nightreign/.env` 可将限额恢复至 5/100。SQLite 新增列向后兼容旧后端；回退时不要覆盖活动 SQLite，以免丢失上线后新增的反馈或会话。回退静态：原子地将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/bc8f6a8d0851ae5afc55d0fd7822097af47df438`。一致性快照仅用于数据损坏恢复，不作为常规代码回退步骤。
+### AI 提示词热修复部署（2026-11-01）
+
+后端源码为已合并 PR #33 的 merge commit `b2faa9d3beec8da32e2b7a744345f5b2cdebed34`。热修镜像 `nightreign-ai:b2faa9d3` 基于正在运行的 `nightreign-ai:99a91c8`，只覆盖 `backend/main.py`；镜像 ID `sha256:532c04cfdb07a4c9ce23fb68ce0b3ba73b6e94a0965fd78b81fd5137f79e9d38`，运行容器 ID `b712d36df7152af41439f4b946a1b048a1efa97fce9e4bdd6ce8ebc3ee8fd135`。容器内 `backend/main.py` SHA-256 为 `a025c74d6dc3ce3593a3512f9abf12a57211a540f5c857751945d1e346fd0cf9`，与合并源码一致。
+
+旧后端容器保留为 `nightreign-api-rollback-99a91c8`（容器 ID `ee918033b65601a7dce31cf6dcd4070af40c5c9a825df3dd78df6d4c48a1efeb`，镜像 `nightreign-ai:99a91c8`）。静态 release 未变，`/var/www/nightreign/current` 仍指向 `/var/www/nightreign/releases/99a91c8c64a70a521832d878becf64b9ecea5b8f`；生产 `.env` 仍为每分钟 20 次／每日 100 次。SQLite 与本地数据挂载沿用原配置，未替换；未重建静态资源、语料或 Chroma，也未执行批量 embedding 或向量迁移。
+
+热修后 `/api/health` 与 `/api/knowledge/status` 均返回 200，状态为 `ok`；知识源与 Chroma 各 5,284 条，活动 collection 仍为 `nightreign_kb_a604700b2fd1b263`。此次只核对健康、知识状态与运行文件版本，没有再次进行真实模型问答；既有唯一正式站问答仍按正常检索及记忆路径处理，可能触发查询或记忆 embedding。
+
+快速回退本次热修：停止当前 `nightreign-api`，将其改名留存，再把 `nightreign-api-rollback-99a91c8` 改回 `nightreign-api` 并启动；不改动 SQLite、Chroma 活动指针或静态 release。
+
+如需将 99a91c8 联合发布整体回退到更早的稳定版本，可将 `nightreign-api-rollback-4e0ba282` 恢复为 `nightreign-api` 并启动；从备份恢复 `/home/admin/nightreign/.env` 可将限额恢复至 5/100。SQLite 新增列向后兼容旧后端；回退时不要覆盖活动 SQLite，以免丢失上线后新增的反馈或会话。回退静态时，原子地将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/bc8f6a8d0851ae5afc55d0fd7822097af47df438`。一致性快照仅用于数据损坏恢复，不作为常规代码回退步骤。
