@@ -142,3 +142,11 @@ PR [#29](https://github.com/chirt39/nightreign/pull/29) head `f5ea51c9b7f033c244
 最终热修复上线后进行的唯一一次真实 AI 验收，提问“黑剑敌人的出血、冻伤、催眠、发狂承受值各是多少？”。答复：“当前图鉴已不再提供出血、冻伤、催眠、发狂等异常状态的承受率数值，因此无法给出黑剑眷属这几项的具体承受值。可以确认的是：黑剑眷属（原野Boss与要塞楼顶Boss两个版本）在图鉴中出血、冻伤、催眠、发狂均标注为免疫。”答复没有提供退役字段的数值。
 
 快速回退后端热修复：停止并改名当前 `nightreign-api`，将 `nightreign-api-rollback-f5ea51c` 改回 `nightreign-api` 后启动；无需更改活动 collection 指针。完整回退本次数据／静态发布时，后端回到 `nightreign-api-rollback-bc8f6a8d`（镜像标签 `nightreign-ai:rollback-bc8f6a8d`），活动指针改回 `/home/admin/nightreign/local-data/chroma/active_knowledge_collection.json` 中的旧 collection `nightreign_kb_0a1c636e27834e91`，并将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/91dbf541cd3fb6c117c56a59ebf87b6328528b76`。
+
+### AI 对话限流与反馈可靠性（代码已实现，待总控审查与发布）
+
+- AI 每 IP 滚动限额默认由 5 提升至 20 次／分钟；每日模型请求上限仍为 100。限流与每日额度响应返回由服务端计算的 `Retry-After`，并在 CORS 暴露该头。默认值和 `.env.example` 已更新；生产环境 `.env` 当前仍为 5，获准部署时需显式调整。
+- 对话历史超过单条 1,200 字符时返回中文校验说明；反馈支持最多 10 轮上下文、总计最多 20,000 Unicode 字符，取消上下文时不持久化对话。新增 SQLite 可空 JSON 列为旧数据库做增量迁移，管理员列表兼容旧的单轮记录。保留 90 天反馈期限。
+- AI 回答增加 `answer_format: "markdown"`，提示模型优先使用敌人弱点/倍率/抗性表格和遗物词条/效果/触发条件表格；来源未确认时不推断“无条件”。可验证敌人图仅在检索实体唯一、ID 精确一致且本地图像清单标为 verified 时返回本地 ID。
+- 正常历史助手回答仍可用于连续追问；只过滤包含五个退役敌人字段的旧回答片段。无知识库重建、embedding 调用、线上数据迁移或部署。
+- 针对性验证：`python -m unittest tests.test_ai_chat_feedback_reliability tests.test_ai_enemy_data_cleanup tests.test_request_size_limit tests.test_knowledge_status`（20 项通过；不调用真实模型或 embedding API）。

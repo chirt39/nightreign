@@ -16,6 +16,8 @@ from urllib.parse import urlsplit
 
 import httpx
 from fastapi import FastAPI, Header, HTTPException, Query, Request, Response
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -30,7 +32,7 @@ API_BASE = rag_store.validate_api_base_url(
     os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"), "DEEPSEEK_BASE_URL"
 )
 MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-flash")
-RATE_LIMIT = positive_int_setting("AI_REQUESTS_PER_MINUTE", 5)
+RATE_LIMIT = positive_int_setting("AI_REQUESTS_PER_MINUTE", 20)
 DAILY_AI_LIMIT = positive_int_setting("AI_REQUESTS_PER_DAY", 100)
 MEMORY_ENDPOINT_RATE_LIMIT = positive_int_setting("MEMORY_ENDPOINT_REQUESTS_PER_MINUTE", 30)
 DEEPSEEK_CONNECT_TIMEOUT = 10.0
@@ -201,8 +203,32 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "Authorization"],
+    expose_headers=["Retry-After"],
 )
 app.add_middleware(NoStorePrivateAiResponsesMiddleware)
+
+
+@app.exception_handler(RequestValidationError)
+async def readable_request_validation_error(request: Request, exc: RequestValidationError):
+    if request.url.path not in {"/api/ai/chat", "/api/feedback"}:
+        return await request_validation_exception_handler(request, exc)
+
+    errors = exc.errors()
+    locations = [tuple(error.get("loc", ())) for error in errors]
+    if request.url.path == "/api/ai/chat":
+        if any("history" in location and error.get("type") == "string_too_long"
+               for location, error in zip(locations, errors)):
+            detail = "单条历史消息不能超过1200个字符，请缩短后重试。"
+        elif any("history" in location or "history" in str(error.get("msg", "")).casefold()
+                 for location, error in zip(locations, errors)):
+            detail = "对话历史格式不正确，请刷新页面后重试。"
+        else:
+            detail = "对话请求格式无效，请检查问题长度和内容后重试。"
+    elif any("context_turns" in location for location in locations):
+        detail = "随附对话最多支持10轮；每轮问题最多400个字符，问题和回答合计最多20000个字符。"
+    else:
+        detail = "反馈请求格式无效，请检查说明文字和邮箱后重试。"
+    return JSONResponse(status_code=422, content={"detail": detail})
 
 ALLOWED_COLORS = {"Red", "Blue", "Yellow", "Green", "Any"}
 TOPIC_TERMS = (
@@ -311,6 +337,40 @@ def _effect_catalog() -> dict:
         return json.load(source)
 
 
+@lru_cache(maxsize=1)
+def _verified_enemy_ids() -> frozenset[str]:
+    path = Path(__file__).resolve().parent.parent / "public" / "enemy-image-verified.json"
+    try:
+        with path.open(encoding="utf-8") as source:
+            manifest = json.load(source)
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return frozenset()
+    images = manifest.get("images", {}) if isinstance(manifest, dict) else {}
+    if not isinstance(images, dict):
+        return frozenset()
+    return frozenset(
+        str(enemy_id) for enemy_id, entry in images.items()
+        if isinstance(entry, dict) and entry.get("matchStatus") == "verified"
+    )
+
+
+def _verified_enemy_id_for_retrieval(retrieved: list[dict], proposed: object) -> str | None:
+    if not isinstance(proposed, str):
+        return None
+    candidates = {
+        str(entry["id"]).removeprefix("enemy:")
+        for entry in retrieved
+        if entry.get("category") == "enemy" and str(entry.get("id", "")).startswith("enemy:")
+    }
+    try:
+        verified_ids = _verified_enemy_ids()
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return None
+    if len(candidates) == 1 and proposed in candidates and proposed in verified_ids:
+        return proposed
+    return None
+
+
 def _character_effect_catalog_answer(question: str) -> str | None:
     """Answer full character-effect list questions from the four glossary groups."""
     if "专属" not in question or not any(word in question for word in ("词条", "效果")):
@@ -351,24 +411,36 @@ def _character_effect_catalog_answer(question: str) -> str | None:
 
 async def _rate_limit(request: Request) -> None:
     client = request.client.host if request.client else "unknown"
-    allowed = await run_in_threadpool(memory_store.record_ai_request, client, RATE_LIMIT)
-    if not allowed:
-        raise HTTPException(status_code=429, detail="你提问得有点频繁，请稍等片刻再继续咨询。")
+    retry_after = await run_in_threadpool(memory_store.record_ai_request, client, RATE_LIMIT)
+    if retry_after is not None:
+        raise HTTPException(
+            status_code=429,
+            detail="你提问得有点频繁，请稍等片刻再继续咨询。",
+            headers={"Retry-After": str(retry_after)},
+        )
 
 
 async def _memory_endpoint_rate_limit(request: Request) -> None:
     client = request.client.host if request.client else "unknown"
-    allowed = await run_in_threadpool(
+    retry_after = await run_in_threadpool(
         memory_store.record_ai_request, f"memory:{client}", MEMORY_ENDPOINT_RATE_LIMIT
     )
-    if not allowed:
-        raise HTTPException(status_code=429, detail="对话记忆操作过于频繁，请稍后再试。")
+    if retry_after is not None:
+        raise HTTPException(
+            status_code=429,
+            detail="对话记忆操作过于频繁，请稍后再试。",
+            headers={"Retry-After": str(retry_after)},
+        )
 
 
 async def _reserve_daily_ai_request() -> None:
-    allowed = await run_in_threadpool(memory_store.consume_daily_ai_request, DAILY_AI_LIMIT)
-    if not allowed:
-        raise HTTPException(status_code=429, detail="今天的咨询次数已用完，明天可以继续提问。")
+    retry_after = await run_in_threadpool(memory_store.consume_daily_ai_request, DAILY_AI_LIMIT)
+    if retry_after is not None:
+        raise HTTPException(
+            status_code=429,
+            detail="今天的咨询次数已用完，明天可以继续提问。",
+            headers={"Retry-After": str(retry_after)},
+        )
 
 
 def _validate_scope(body: AdviceRequest) -> None:
@@ -669,6 +741,11 @@ class MemoryAction(StrictModel):
     session_id: str = Field(pattern=r"^[0-9a-fA-F-]{36}$")
 
 
+class FeedbackTurn(StrictModel):
+    question: str = Field(min_length=1, max_length=400)
+    answer: str = Field(min_length=1, max_length=20000)
+
+
 class FeedbackSubmission(StrictModel):
     kind: Literal["answer", "suggestion"]
     message: str = Field(min_length=2, max_length=4000)
@@ -676,6 +753,7 @@ class FeedbackSubmission(StrictModel):
     include_context: bool = False
     question: str | None = Field(default=None, max_length=400)
     answer: str | None = Field(default=None, max_length=4000)
+    context_turns: list[FeedbackTurn] | None = Field(default=None, max_length=10)
 
 
 @app.post("/api/ai/history")
@@ -811,11 +889,14 @@ def _require_secure_ai_transport(request: Request) -> None:
 
 async def _feedback_rate_limit(request: Request) -> None:
     client = request.client.host if request.client else "unknown"
-    allowed = await run_in_threadpool(
+    retry_after = await run_in_threadpool(
         memory_store.record_ai_request, f"feedback:{client}", FEEDBACK_RATE_LIMIT
     )
-    if not allowed:
-        raise HTTPException(status_code=429, detail="反馈提交过于频繁，请稍后再试。")
+    if retry_after is not None:
+        raise HTTPException(
+            status_code=429, detail="反馈提交过于频繁，请稍后再试。",
+            headers={"Retry-After": str(retry_after)},
+        )
 
 
 @app.post("/api/feedback")
@@ -832,10 +913,20 @@ async def submit_feedback(body: FeedbackSubmission, request: Request) -> dict:
     if email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
         raise HTTPException(status_code=422, detail="邮箱格式无效。")
 
-    question = body.question.strip() if body.include_context and body.question else None
-    answer = body.answer.strip() if body.include_context and body.answer else None
-    if body.include_context and (not question or not answer):
-        raise HTTPException(status_code=422, detail="当前对话内容不可用，请取消勾选后重试。")
+    turns: list[dict[str, str]] = []
+    if body.include_context:
+        if body.context_turns is not None:
+            turns = [turn.model_dump() for turn in body.context_turns]
+        elif body.question and body.answer:
+            turns = [{"question": body.question, "answer": body.answer}]
+        if not turns:
+            raise HTTPException(status_code=422, detail="请提供至少一轮完整对话，或取消勾选对话内容。")
+        if sum(len(turn["question"]) + len(turn["answer"]) for turn in turns) > 20000:
+            raise HTTPException(status_code=422, detail="随附对话总长度不能超过20000个字符，请删减后重试。")
+
+    question = turns[0]["question"] if len(turns) == 1 else None
+    answer = turns[0]["answer"] if len(turns) == 1 else None
+    context_turns_json = json.dumps(turns, ensure_ascii=False) if turns else None
 
     saved = await run_in_threadpool(
         memory_store.save_feedback,
@@ -845,11 +936,13 @@ async def submit_feedback(body: FeedbackSubmission, request: Request) -> dict:
         question,
         answer,
         FEEDBACK_REQUESTS_PER_DAY,
+        context_turns_json,
     )
-    if not saved:
+    if saved is not None:
         raise HTTPException(
             status_code=429,
             detail="今日反馈提交量已达上限，请于 UTC 00:00 重置后再试。",
+            headers={"Retry-After": str(saved)},
         )
     return {"status": "received"}
 
@@ -866,6 +959,16 @@ async def feedback_inbox(
     _require_secure_feedback_admin_transport(request)
     _require_feedback_admin(authorization)
     items, total = await run_in_threadpool(memory_store.list_feedback, limit, offset)
+    for item in items:
+        raw_turns = item.pop("context_turns_json", None)
+        try:
+            turns = json.loads(raw_turns) if raw_turns else None
+        except (json.JSONDecodeError, TypeError):
+            turns = None
+        if not isinstance(turns, list):
+            turns = ([{"question": item["question"], "answer": item["answer"]}]
+                     if item.get("question") and item.get("answer") else [])
+        item["context_turns"] = turns
     return {"items": items, "total": total, "limit": limit, "offset": offset}
 
 
@@ -912,7 +1015,7 @@ async def chat(body: ChatRequest, request: Request) -> dict:
     if catalog_answer:
         if body.session_id:
             await run_in_threadpool(memory_store.append_exchange, body.session_id, body.question, catalog_answer)
-        return {"intent": "answer", "answer": catalog_answer,
+        return {"intent": "answer", "answer": catalog_answer, "answer_format": "markdown",
                 "character_key": None, "vessel_key": None, "build_scope": None}
     if not API_KEY:
         raise HTTPException(status_code=503, detail="后端尚未配置 DeepSeek API 密钥。请在服务端设置 DEEPSEEK_API_KEY。")
@@ -976,9 +1079,11 @@ async def chat(body: ChatRequest, request: Request) -> dict:
         "相关旧对话只用于记住用户亲自表达的偏好与当前对话上下文；旧回答不能当作游戏事实，游戏事实以本次检索的知识库记录为准。"
         "当前游戏资料已移除敌人图鉴中的出血承受率、冻伤承受率、催眠承受率、发狂承受率和韧性承受率；不得提供这些字段的数值或根据其他属性推算。用户询问这些字段时，明确说明当前图鉴不再提供该数据。该限制仅针对这五个敌人字段，不影响其他属性或日常语义中的“承受”。"
         "回答敌人弱点时，使用图鉴提供的伤害倍率，并将倍率最高的伤害类型作为最有效类型；倍率越高代表实际伤害越高。原始值是减伤百分比，实际伤害倍率=1-减伤百分比/100；原始值0对应×1.0，80对应×0.2。并列最高时全部列出。"
-        "使用简体中文。供具名称、颜色和词条名称用中文；不向用户显示内部英文键。局外、局内、深夜局外、深夜局内词条按资料标注严格区分；局内词条不能当作存档遗物的配装候选。不要声称已改动装配槽。回答涉及遗物词条图鉴时，可在正文末尾附站内链接 [词条图鉴](#effects)。"
+        "回答使用简体中文和安全 Markdown：允许标题、表格、列表、加粗和站内链接；禁止 HTML、图片语法、外链和任意 URL。供具名称、颜色和词条名称用中文；不向用户显示内部英文键。"
+        "敌人资料优先用表格，列名清楚写出弱点、伤害倍率、抗性；倍率最高者标为最有效类型。遗物资料表格用‘词条’作为首列，另列‘效果’和‘触发条件’；仅在来源明确确认没有触发条件时写‘无条件’，资料未说明时写‘未说明’或‘无法确认’。局外、局内、深夜局外、深夜局内严格区分；局内词条不能当作存档遗物配装候选。不要声称已改动装配槽。涉及遗物词条图鉴时，可附站内链接 [词条图鉴](#effects)。简单追问简短回答。"
+        "仅当本轮检索结果中恰有一个不同的敌人ID时，可在 JSON 的 enemy_id 字段填该记录的精确ID；否则填 null。不要根据图片或其他实体猜ID。"
         "只输出 JSON 对象：intent 为 answer/build/clarify；answer 为中文回答；build 时按可选列表原样返回 character_key 和 vessel_key，并将 build_scope 设为 combined 或 normal；其余意图的这三个字段设为 null。格式："
-        '{"intent":"answer|build|clarify","answer":"中文回答","character_key":null,"vessel_key":null,"build_scope":null}'
+        '{"intent":"answer|build|clarify","answer":"中文回答","enemy_id":null,"character_key":null,"vessel_key":null,"build_scope":null}'
     )
     messages = [{"role": "system", "content": system_prompt}]
     user_content = {
@@ -1063,10 +1168,17 @@ async def chat(body: ChatRequest, request: Request) -> dict:
     response = {
         "intent": intent,
         "answer": answer.strip()[:4000],
+        "answer_format": "markdown",
         "character_key": character_key if intent == "build" else None,
         "vessel_key": vessel_key if intent == "build" else None,
         "build_scope": build_scope if intent == "build" else None,
     }
+    proposed_enemy_id = parsed.get("enemy_id") if isinstance(parsed, dict) else None
+    verified_enemy_id = (
+        _verified_enemy_id_for_retrieval(retrieved, proposed_enemy_id) if intent == "answer" else None
+    )
+    if verified_enemy_id is not None:
+        response["verified_enemy_id"] = verified_enemy_id
     if body.session_id and intent != "build":
         await run_in_threadpool(memory_store.append_exchange, body.session_id, body.question, response["answer"])
     return response

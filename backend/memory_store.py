@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import os
 import sqlite3
 import stat
@@ -108,6 +109,15 @@ def _connect() -> Iterator[sqlite3.Connection]:
         created_at TEXT NOT NULL,
         expires_at TEXT NOT NULL
     )""")
+    feedback_columns = {
+        row[1] for row in connection.execute("PRAGMA table_info(feedback_submissions)")
+    }
+    if "context_turns_json" not in feedback_columns:
+        try:
+            connection.execute("ALTER TABLE feedback_submissions ADD COLUMN context_turns_json TEXT")
+        except sqlite3.OperationalError as exc:
+            if "duplicate column name" not in str(exc).casefold():
+                raise
     connection.execute(
         "CREATE INDEX IF NOT EXISTS feedback_submissions_by_expiry ON feedback_submissions(expires_at)"
     )
@@ -139,7 +149,8 @@ def save_feedback(
     question: str | None = None,
     answer: str | None = None,
     daily_limit: int = 250,
-) -> bool:
+    context_turns_json: str | None = None,
+) -> int | None:
     with _connect() as connection:
         connection.execute("BEGIN IMMEDIATE")
         created_at = datetime.now(timezone.utc)
@@ -149,7 +160,7 @@ def save_feedback(
             "SELECT request_count FROM feedback_daily_usage WHERE day = ?", (day,)
         ).fetchone()
         if row and row[0] >= daily_limit:
-            return False
+            return seconds_until_next_utc_midnight(created_at)
         connection.execute(
             "INSERT INTO feedback_daily_usage(day, request_count) VALUES (?, 1) "
             "ON CONFLICT(day) DO UPDATE SET request_count = request_count + 1",
@@ -162,8 +173,8 @@ def save_feedback(
         )
         connection.execute(
             """INSERT INTO feedback_submissions
-               (kind, message, email, question, answer, created_at, expires_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+               (kind, message, email, question, answer, created_at, expires_at, context_turns_json)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 kind,
                 message,
@@ -172,9 +183,16 @@ def save_feedback(
                 answer,
                 created_at.isoformat(),
                 expires_at.isoformat(),
+                context_turns_json,
             ),
         )
-    return True
+    return None
+
+
+def seconds_until_next_utc_midnight(now: datetime | None = None) -> int:
+    now = now or datetime.now(timezone.utc)
+    next_midnight = datetime.combine(now.date() + timedelta(days=1), datetime.min.time(), tzinfo=timezone.utc)
+    return max(1, math.ceil((next_midnight - now).total_seconds()))
 
 
 def purge_expired_feedback() -> int:
@@ -193,7 +211,8 @@ def list_feedback(limit: int = 50, offset: int = 0) -> tuple[list[dict], int]:
             "SELECT COUNT(*) FROM feedback_submissions"
         ).fetchone()[0]
         rows = connection.execute(
-            """SELECT id, kind, message, email, question, answer, created_at, expires_at
+            """SELECT id, kind, message, email, question, answer, created_at, expires_at,
+                      context_turns_json
                FROM feedback_submissions ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?""",
             (max(1, min(limit, 100)), max(0, offset)),
         ).fetchall()
@@ -220,8 +239,8 @@ def append_exchange(session_id: str, question: str, answer: str) -> None:
         pass
 
 
-def record_ai_request(client: str, per_minute: int) -> bool:
-    """Atomically enforce a shared per-client window across API endpoints/workers."""
+def record_ai_request(client: str, per_minute: int) -> int | None:
+    """Record an allowed event or return seconds until the oldest event expires."""
     with _connect() as connection:
         connection.execute("BEGIN IMMEDIATE")
         now = time.time()
@@ -231,14 +250,18 @@ def record_ai_request(client: str, per_minute: int) -> bool:
             (client, now - 60),
         ).fetchone()[0]
         if count >= per_minute:
-            return False
+            oldest = connection.execute(
+                "SELECT MIN(created_at) FROM ai_rate_events WHERE client = ? AND created_at > ?",
+                (client, now - 60),
+            ).fetchone()[0]
+            return max(1, math.ceil(oldest + 60 - now))
         connection.execute(
             "INSERT INTO ai_rate_events(client, created_at) VALUES (?, ?)", (client, now)
         )
-    return True
+    return None
 
 
-def consume_daily_ai_request(limit: int) -> bool:
+def consume_daily_ai_request(limit: int) -> int | None:
     """Reserve one outbound model request against a persistent UTC daily cap."""
     day = datetime.now(timezone.utc).date().isoformat()
     with _connect() as connection:
@@ -247,14 +270,14 @@ def consume_daily_ai_request(limit: int) -> bool:
             "SELECT request_count FROM ai_daily_usage WHERE day = ?", (day,)
         ).fetchone()
         if row and row[0] >= limit:
-            return False
+            return seconds_until_next_utc_midnight(datetime.now(timezone.utc))
         connection.execute(
             "INSERT INTO ai_daily_usage(day, request_count) VALUES (?, 1) "
             "ON CONFLICT(day) DO UPDATE SET request_count = request_count + 1",
             (day,),
         )
         connection.execute("DELETE FROM ai_daily_usage WHERE day < ?", (day,))
-    return True
+    return None
 
 
 def purge_expired_memory() -> int:
