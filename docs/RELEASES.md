@@ -143,10 +143,34 @@ PR [#29](https://github.com/chirt39/nightreign/pull/29) head `f5ea51c9b7f033c244
 
 快速回退后端热修复：停止并改名当前 `nightreign-api`，将 `nightreign-api-rollback-f5ea51c` 改回 `nightreign-api` 后启动；无需更改活动 collection 指针。完整回退本次数据／静态发布时，后端回到 `nightreign-api-rollback-bc8f6a8d`（镜像标签 `nightreign-ai:rollback-bc8f6a8d`），活动指针改回 `/home/admin/nightreign/local-data/chroma/active_knowledge_collection.json` 中的旧 collection `nightreign_kb_0a1c636e27834e91`，并将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/91dbf541cd3fb6c117c56a59ebf87b6328528b76`。
 
-### AI 对话限流与反馈可靠性（代码已实现，待总控审查与发布）
+### AI 对话限流与反馈可靠性（已部署，正式 AI/UI 验收待总控）
 
-- AI 每 IP 滚动限额默认由 5 提升至 20 次／分钟；每日模型请求上限仍为 100。限流与每日额度响应返回由服务端计算的 `Retry-After`，并在 CORS 暴露该头。默认值和 `.env.example` 已更新；生产环境 `.env` 当前仍为 5，获准部署时需显式调整。
+- AI 每 IP 滚动限额默认由 5 提升至 20 次／分钟；每日模型请求上限仍为 100。限流与每日额度响应返回由服务端计算的 `Retry-After`，并在 CORS 暴露该头。代码默认、`.env.example` 与生产 `.env` 均为 20/100。
 - 对话历史超过单条 1,200 字符时返回中文校验说明；反馈支持最多 10 轮上下文、总计最多 20,000 Unicode 字符，取消上下文时不持久化对话。新增 SQLite 可空 JSON 列为旧数据库做增量迁移，管理员列表兼容旧的单轮记录。保留 90 天反馈期限。
 - AI 回答增加 `answer_format: "markdown"`，提示模型优先使用敌人弱点/倍率/抗性表格和遗物词条/效果/触发条件表格；来源未确认时不推断“无条件”。可验证敌人图仅在检索实体唯一、ID 精确一致且本地图像清单标为 verified 时返回本地 ID。
-- 正常历史助手回答仍可用于连续追问；只过滤包含五个退役敌人字段的旧回答片段。无知识库重建、embedding 调用、线上数据迁移或部署。
-- 针对性验证：`python -m unittest tests.test_ai_chat_feedback_reliability tests.test_ai_enemy_data_cleanup tests.test_request_size_limit tests.test_knowledge_status`（20 项通过；不调用真实模型或 embedding API）。
+- 正常历史助手回答仍可用于连续追问；只过滤包含五个退役敌人字段的旧回答片段。实现与本次发布均未重建知识库或调用 embedding；发布仅执行 SQLite 可空列增量迁移。
+- 针对性验证：`python -m unittest tests.test_ai_chat_feedback_reliability tests.test_ai_enemy_data_cleanup tests.test_request_size_limit tests.test_knowledge_status`（20 项通过；部署前完成，不调用真实模型或 embedding API）。
+
+### 联合对话与反馈体验发布（2026-11-01）
+
+部署目标为合并提交 `99a91c8c64a70a521832d878becf64b9ecea5b8f`（包含后端 PR [#31](https://github.com/chirt39/nightreign/pull/31) 与前端 PR [#32](https://github.com/chirt39/nightreign/pull/32)）。后端镜像基于已运行且依赖版本不变的 `nightreign-ai:4e0ba282`，只覆盖合并版本源码与 JSON；新镜像为 `nightreign-ai:99a91c8`，镜像 ID `sha256:d853374f4c2b6f5eeecd570e1e373e78cc0ecdb59c3dc5cb450bae78957889a`，运行容器 ID `ee918033b65601a7dce31cf6dcd4070af40c5c9a825df3dd78df6d4c48a1efeb`。生产监听和代理保持 `127.0.0.1:8000`、`FORWARDED_ALLOW_IPS=172.17.0.1/32`。`.env` 仅将 `AI_REQUESTS_PER_MINUTE` 从 5 改为 20；每日上限保持 100，其它环境变量未改。旧后端容器保留为 `nightreign-api-rollback-4e0ba282`（原镜像 `nightreign-ai:4e0ba282`）。
+
+静态 release 为 `/var/www/nightreign/releases/99a91c8c64a70a521832d878becf64b9ecea5b8f`，`/var/www/nightreign/current` 已原子切换到该 release；此前目录 `/var/www/nightreign/releases/bc8f6a8d0851ae5afc55d0fd7822097af47df438` 保留。此次从合并 SHA 全新构建 Vite `dist`，308 个构建文件与部署目录逐一 SHA-256 一致；此外保留旧 bundle `assets/index-DZ_tnRlR.js`（SHA-256 `94364bac08e5902245a1ec52cb6b050451a92605c41031329c5912329ff8d60a`），供缓存旧 HTML 的浏览器继续加载。生产 HTTPS 返回的关键资源与构建产物哈希一致：
+
+| 资源 | SHA-256 |
+| --- | --- |
+| `index.html` | `c66a4c221104413acf5946d8f29cb5ac06f35cc64b32a7549d63331886577528` |
+| `assets/index-De7sY-sm.js` | `4338dafb5c860ae5e97551929b4e1c13c2d1843dd056cdadea3bc4ba3e43a5d6` |
+| `app.js` | `18b58c7f12ed0adc6ce640d8ff97cbf56c43d6e5caccc9d80c507219f39dfede` |
+| `style.css` | `5315ededeba0ff538a3d429a4c10df1ea28a564531780d89471744f6917e85f5` |
+| `game-ui.css` | `17312ddc369b27a2f1e8486b7ef8538ddeb246fa5340b2096e18e7c73ff21d32` |
+| `admin-feedback.html` | `82955bb2ba600fa7af48a6660b008b03ecd861280090cfbbbc3eee74f91ea6de` |
+| `enemy-data.json` | `be833d24b9746bac8c3d102009d39841d8b538a3a081da77a69f529e8388e3e5` |
+| `enemy-image-map.json` | `a435cdfaaacc1a5da07511bca87dd8b14f48a915739ac1e246388bcef0b8ddac` |
+| `enemy-image-verified.json` | `60a0abb6dfc977b924bb37ad7c1ee2aaa520df5a6b1d3b4ae7e021ef91386395` |
+
+后端 HTTPS `/api/health` 与 `/api/knowledge/status` 均返回 200；知识源与 Chroma 仍各 5,284 条，活动 collection 仍为 `nightreign_kb_a604700b2fd1b263`。候选启动触发了 SQLite 增量迁移；新增 `context_turns_json TEXT` 可空列。迁移前后 `messages` 为 16 条、反馈为 3 条，`PRAGMA quick_check` 为 `ok`。一致性备份（SQLite online backup）、旧 `.env` 与 active collection 指针均保存在 `/home/admin/nightreign-backups/pre-release-99a91c8-20261101/`，备份目录权限为 700，文件权限为 600；对话和反馈未替换或清空。
+
+已核验：镜像运行时的频率环境变量为 20/100；公网 health/knowledge 状态；迁移列可空且旧记录计数保留；`nightreign.cn` 与 `www.nightreign.cn` TLS/HTTP 可访问；上述 9 个资源公网响应哈希与新构建匹配，旧 bundle 仍可访问。本记录**不代表**正式浏览器 AI 表格回答与反馈交互的最后 UI 验收已通过；该项由总控另行完成后补记。本轮未重建语料或 Chroma，未调用 embedding API，也未发起 AI 验收请求。
+
+回退后端：停止当前 `nightreign-api`，将 `nightreign-api-rollback-4e0ba282` 恢复为 `nightreign-api` 并启动；从备份恢复 `/home/admin/nightreign/.env` 可将限额恢复至 5/100。SQLite 新增列向后兼容旧后端；回退时不要覆盖活动 SQLite，以免丢失上线后新增的反馈或会话。回退静态：原子地将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/bc8f6a8d0851ae5afc55d0fd7822097af47df438`。一致性快照仅用于数据损坏恢复，不作为常规代码回退步骤。
