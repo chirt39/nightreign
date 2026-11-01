@@ -143,7 +143,7 @@ PR [#29](https://github.com/chirt39/nightreign/pull/29) head `f5ea51c9b7f033c244
 
 快速回退后端热修复：停止并改名当前 `nightreign-api`，将 `nightreign-api-rollback-f5ea51c` 改回 `nightreign-api` 后启动；无需更改活动 collection 指针。完整回退本次数据／静态发布时，后端回到 `nightreign-api-rollback-bc8f6a8d`（镜像标签 `nightreign-ai:rollback-bc8f6a8d`），活动指针改回 `/home/admin/nightreign/local-data/chroma/active_knowledge_collection.json` 中的旧 collection `nightreign_kb_0a1c636e27834e91`，并将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/91dbf541cd3fb6c117c56a59ebf87b6328528b76`。
 
-### AI 对话限流与反馈可靠性（已部署，正式 AI/UI 验收待总控）
+### AI 对话限流与反馈可靠性（已部署；提示词补丁待部署）
 
 - AI 每 IP 滚动限额默认由 5 提升至 20 次／分钟；每日模型请求上限仍为 100。限流与每日额度响应返回由服务端计算的 `Retry-After`，并在 CORS 暴露该头。代码默认、`.env.example` 与生产 `.env` 均为 20/100。
 - 对话历史超过单条 1,200 字符时返回中文校验说明；反馈支持最多 10 轮上下文、总计最多 20,000 Unicode 字符，取消上下文时不持久化对话。新增 SQLite 可空 JSON 列为旧数据库做增量迁移，管理员列表兼容旧的单轮记录。保留 90 天反馈期限。
@@ -171,9 +171,9 @@ PR [#29](https://github.com/chirt39/nightreign/pull/29) head `f5ea51c9b7f033c244
 
 后端 HTTPS `/api/health` 与 `/api/knowledge/status` 均返回 200；知识源与 Chroma 仍各 5,284 条，活动 collection 仍为 `nightreign_kb_a604700b2fd1b263`。候选启动触发了 SQLite 增量迁移；新增 `context_turns_json TEXT` 可空列。迁移前后 `messages` 为 16 条、反馈为 3 条，`PRAGMA quick_check` 为 `ok`。一致性备份（SQLite online backup）、旧 `.env` 与 active collection 指针均保存在 `/home/admin/nightreign-backups/pre-release-99a91c8-20261101/`，备份目录权限为 700，文件权限为 600；对话和反馈未替换或清空。
 
-已核验：镜像运行时的频率环境变量为 20/100；公网 health/knowledge 状态；迁移列可空且旧记录计数保留；`nightreign.cn` 与 `www.nightreign.cn` TLS/HTTP 可访问；上述 9 个资源公网响应哈希与新构建匹配，旧 bundle 仍可访问。本轮未重建语料或 Chroma，也未调用 embedding API。
+已核验：镜像运行时的频率环境变量为 20/100；公网 health/knowledge 状态；迁移列可空且旧记录计数保留；`nightreign.cn` 与 `www.nightreign.cn` TLS/HTTP 可访问；上述 9 个资源公网响应哈希与新构建匹配，旧 bundle 仍可访问。本轮未重建语料或 Chroma，未执行批量 embedding 或向量迁移。总控的唯一真实问答按正常检索路径处理，可能触发查询或对话记忆 embedding；这不属于知识库重建。
 
-总控完成唯一一次正式站真实 AI 查询：“请用表格列出白金之子的伤害倍率和异常状态抗性，最后简短标出最有效的伤害类型。”新会话无旧历史；回答成功渲染为 2 张表（8 行与 9 行），突出圣属性 ×1.4、雷属性 ×1.2；聊天日志 `clientHeight` 与 `scrollHeight` 均为 904。正式站反馈弹窗能正常打开，当前会话显示 1 轮，默认 0 轮勾选，计数为 0/10 和 0/20000；关闭时没有提交生产反馈。其他多轮上下文、长回答、管理员兼容、取消提交和 429 倒计时场景由总控此前的本地 UI 证据与 20 项 mock 回归覆盖；未在生产提交多轮反馈，也未为验证限额发起 20 次请求。正式回答截图：`E:\海斗\tmp\chat-answer-live-20261101.png`。
+总控完成唯一一次正式站真实 AI 查询：“请用表格列出白金之子的伤害倍率和异常状态抗性，最后简短标出最有效的伤害类型。”新会话无旧历史；回答成功渲染为 2 张表（8 行与 9 行），突出圣属性 ×1.4、雷属性 ×1.2；聊天日志 `clientWidth` 与 `scrollWidth` 均为 904。正式站反馈弹窗能正常打开，当前会话显示 1 轮，默认 0 轮勾选，计数为 0/10 和 0/20000；关闭时没有提交生产反馈。其他多轮上下文、长回答、管理员兼容、取消提交和 429 倒计时场景由总控此前的本地 UI 证据与 20 项 mock 回归覆盖；未在生产提交多轮反馈，也未为验证限额发起 20 次请求。正式回答截图：`E:\海斗\tmp\chat-answer-live-20261101.png`。
 
 该真实回答同时发现提示词表述问题：普通敌人查询开头主动提到五个已退役字段，抗性标签使用了“物理普通／猩红腐败耐受”。本 PR 将作窄修正：只有用户明确询问时才说明五字段不可提供；普通查询不提退役/移除；展示名使用“普通／腐败”，抗性项保留图鉴提供的七项且标签不加“耐受／承受”。`python -m unittest tests.test_ai_enemy_data_cleanup.PromptCaptureTests` 的 1 项 mocked prompt 测试、`compileall` 与 `git diff --check` 通过；修正后的回答文案尚未部署，不会再发起真实 AI 请求。
 

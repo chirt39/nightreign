@@ -208,7 +208,7 @@ class PromptCaptureTests(unittest.IsolatedAsyncioTestCase):
         serialized = "\n".join(message["content"] for message in messages)
         system_prompt = messages[0]["content"]
         self.assertIn("仅在用户明确询问这五项时，简短说明当前图鉴不提供该数据", system_prompt)
-        self.assertIn("普通敌人资料问题不得主动提及这些字段、字段移除或数据缺失", system_prompt)
+        self.assertIn("普通查询不主动提及这五项的退役、移除或缺失说明", system_prompt)
         self.assertIn("‘物理普通’写作‘普通’，‘猩红腐败’写作‘腐败’", system_prompt)
         self.assertIn("标签直接使用图鉴名称，不添加‘耐受’或‘承受’前缀", system_prompt)
         self.assertIn("不得提供数值或依据其他属性推算", system_prompt)
