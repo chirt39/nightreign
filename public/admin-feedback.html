@@ -10,7 +10,7 @@
     *{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:15px/1.65 system-ui,"Noto Sans SC",sans-serif}
     main{max-width:980px;margin:0 auto;padding:36px 20px 70px}h1,h2,p{margin-top:0}.eyebrow{color:var(--gold);font:11px Georgia,serif;letter-spacing:.2em;margin-bottom:8px}h1{font:600 30px Georgia,"Noto Serif SC",serif;margin-bottom:8px}.intro{color:var(--muted);font-size:13px;margin-bottom:24px}
     form.login{display:flex;gap:10px;max-width:560px;align-items:end;flex-wrap:wrap;padding:18px;border:1px solid var(--line);background:var(--panel)}label{display:grid;gap:6px;flex:1;min-width:220px;color:var(--muted);font-size:12px}input{height:42px;padding:9px 11px;border:1px solid #52636b;background:#101b22;color:var(--text);font:inherit}button{min-height:42px;padding:9px 15px;border:1px solid var(--gold);background:var(--gold);color:#1b2427;font-weight:650;cursor:pointer}button:disabled{opacity:.6;cursor:wait}button:focus-visible,input:focus-visible{outline:2px solid #f5d18d;outline-offset:2px}
-    #admin-status{min-height:24px;margin:12px 0;color:var(--muted);font-size:13px}#admin-status.error{color:var(--error)}.inbox-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 12px}.inbox-toolbar h2{font-size:19px;margin:0}.inbox-list{display:grid;gap:12px}.feedback-card{padding:17px 18px;border:1px solid var(--line);background:linear-gradient(145deg,#192832,#131e25)}.feedback-card header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px}.kind{color:#ebd39d;font-size:12px}.created{color:#93a2a6;font-size:11px}.message{white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:12px}.email{color:var(--muted);font-size:12px;margin:0 0 12px}.context{border-top:1px solid #34434b;padding-top:9px}.context summary{color:#cdb27c;font-size:12px;cursor:pointer}.context p{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}.context strong{display:block;color:var(--muted);font-size:11px;margin-bottom:3px}#inbox-empty{padding:26px;text-align:center;color:var(--muted);border:1px dashed var(--line)}.inbox-pagination{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:18px;color:var(--muted);font-size:12px}.inbox-pagination button{min-height:36px;padding:6px 12px}[hidden]{display:none!important}
+    #admin-status{min-height:24px;margin:12px 0;color:var(--muted);font-size:13px}#admin-status.error{color:var(--error)}.inbox-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 12px}.inbox-toolbar h2{font-size:19px;margin:0}.inbox-list{display:grid;gap:12px}.feedback-card{padding:17px 18px;border:1px solid var(--line);background:linear-gradient(145deg,#192832,#131e25)}.feedback-card header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:10px}.kind{color:#ebd39d;font-size:12px}.created{color:#93a2a6;font-size:11px}.message{white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:12px}.email{color:var(--muted);font-size:12px;margin:0 0 12px}.context{border-top:1px solid #34434b;padding-top:9px}.context summary{color:#cdb27c;font-size:12px;cursor:pointer}.context p{margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px}.context strong{display:block;color:var(--muted);font-size:11px;margin-bottom:3px}.context-turn{padding:10px 0;border-bottom:1px solid #2d3e48}.context-turn:last-child{border-bottom:0}.context-turn-title{color:#e2ce9d!important;font-size:12px!important}#inbox-empty{padding:26px;text-align:center;color:var(--muted);border:1px dashed var(--line)}.inbox-pagination{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:18px;color:var(--muted);font-size:12px}.inbox-pagination button{min-height:36px;padding:6px 12px}[hidden]{display:none!important}
     .inbox-toolbar{flex-wrap:wrap}.inbox-actions{display:flex;gap:8px;flex-wrap:wrap}.inbox-actions .secondary{border-color:var(--line);background:var(--panel);color:var(--text)}
     .security-warning{padding:12px 15px;border:1px solid #8b5148;background:#351e20;color:#ffd2c9;font-size:13px}
   </style>
@@ -19,7 +19,7 @@
   <main>
     <p class="eyebrow">NIGHTREIGN GUIDE</p>
     <h1>用户反馈收件箱</h1>
-    <p class="intro">仅管理员可查看。反馈及可选的本轮对话内容最多保留 90 天。</p>
+    <p class="intro">仅管理员可查看。反馈及用户主动附上的对话轮次最多保留 90 天。</p>
     <p id="transport-warning" class="security-warning" role="alert" hidden>管理员收件箱登录要求页面和 API 均使用 HTTPS。当前环境不安全，已禁用口令输入；口令不会发送。请改用 HTTPS 管理地址，或在本机通过 localhost、127.0.0.1 或 [::1] 开发访问。</p>
     <form id="admin-login" class="login">
       <label for="admin-password">管理员口令
@@ -85,10 +85,17 @@
         const time=document.createElement('time');time.className='created';time.dateTime=item.created_at;time.textContent=new Date(item.created_at).toLocaleString('zh-CN');header.append(time);card.append(header);
         addText(card,'p','message',item.message);
         if(item.email)addText(card,'p','email',`联系邮箱：${item.email}`);
-        if(item.question||item.answer){
-          const details=document.createElement('details');details.className='context';addText(details,'summary','','已同意附上当前这一轮问答');
-          if(item.question){const question=document.createElement('p');addText(question,'strong','','问题');addText(question,'span','',item.question);details.append(question)}
-          if(item.answer){const answer=document.createElement('p');addText(answer,'strong','','回答');addText(answer,'span','',item.answer);details.append(answer)}
+        const legacyTurn=item.question||item.answer?[{question:item.question,answer:item.answer}]:[];
+        const turns=Array.isArray(item.context_turns)?item.context_turns.filter(turn=>turn&&typeof turn==='object'&&(typeof turn.question==='string'||typeof turn.answer==='string')):legacyTurn;
+        if(turns.length){
+          const details=document.createElement('details');details.className='context';addText(details,'summary','',`已同意附上 ${turns.length} 轮问答`);
+          turns.forEach((turn,index)=>{
+            const section=document.createElement('section');section.className='context-turn';
+            addText(section,'strong','context-turn-title',`第 ${index+1} 轮`);
+            if(typeof turn.question==='string'&&turn.question){const question=document.createElement('p');addText(question,'strong','','问题');addText(question,'span','',turn.question);section.append(question)}
+            if(typeof turn.answer==='string'&&turn.answer){const answer=document.createElement('p');addText(answer,'strong','','回答');addText(answer,'span','',turn.answer);section.append(answer)}
+            details.append(section);
+          });
           card.append(details);
         }
         inboxList.append(card);
