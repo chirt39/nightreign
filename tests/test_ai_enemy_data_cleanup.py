@@ -193,7 +193,7 @@ class PromptCaptureTests(unittest.IsolatedAsyncioTestCase):
             patch.object(main, "API_KEY", "mock-key"),
             patch.object(main, "run_in_threadpool", side_effect=inline_threadpool),
             patch.object(main, "_reserve_daily_ai_request", new=AsyncMock()),
-            patch.object(main.memory_store, "record_ai_request", return_value=True),
+            patch.object(main.memory_store, "record_ai_request", return_value=None),
             patch.object(main.memory_store, "recent", return_value=saved),
             patch.object(main.memory_store, "recall", return_value=recalled),
             patch.object(main.memory_store, "append_exchange"),
