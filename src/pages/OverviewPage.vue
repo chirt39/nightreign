@@ -34,7 +34,7 @@ defineProps({ active: Boolean });
             <form id="feedback-form" class="feedback-form">
               <div class="feedback-form-heading"><div><p class="eyebrow">ROUNDtable MESSAGE</p><h2 id="feedback-title">向窝反馈</h2></div><button id="feedback-cancel" class="button ghost" type="button">关闭</button></div>
               <p id="feedback-kind-label" class="feedback-kind-label"></p>
-              <p id="feedback-privacy-note" class="feedback-privacy-note">提交内容由站点维护者查看；邮箱为选填项。只有勾选后，本轮问答才会随反馈提交。反馈及随附问答最多保留 90 天。</p>
+              <p id="feedback-privacy-note" class="feedback-privacy-note">提交内容由站点维护者查看；邮箱为选填项。问答默认不附加，可手动选择最多 10 轮；所选问答总计不超过 20,000 字符。反馈及随附问答最多保留 90 天。</p>
               <label id="feedback-correction-type-wrap" class="feedback-label" for="feedback-correction-type" hidden>纠错类型</label>
               <select id="feedback-correction-type" name="correction_type" hidden>
                 <option value="image">图片</option><option value="location">地点</option><option value="category">分类</option><option value="multiplier">倍率</option><option value="resistance">抗性</option><option value="other">其他</option>
@@ -43,14 +43,12 @@ defineProps({ active: Boolean });
               <textarea id="feedback-message" name="message" minlength="2" maxlength="4000" required placeholder="告诉我们哪里不准确，或描述你的建议。"></textarea>
               <label class="feedback-label" for="feedback-email">邮箱（可选，便于后续联系）</label>
               <input id="feedback-email" name="email" type="email" maxlength="254" autocomplete="email" spellcheck="false" placeholder="name@example.com">
-              <label id="feedback-context-option" class="feedback-context-option" hidden>
-                <input id="feedback-include-context" type="checkbox">
-                <span>附上当前这一轮的问题与回答（默认不附）</span>
-              </label>
-              <div id="feedback-context-preview" class="feedback-context-preview" hidden>
-                <p><strong>本轮问题</strong><span id="feedback-question-preview"></span></p>
-                <p><strong>助手回答</strong><span id="feedback-answer-preview"></span></p>
-              </div>
+              <fieldset id="feedback-context-option" class="feedback-context-option" hidden>
+                <legend>选择要附上的对话轮次</legend>
+                <p id="feedback-context-summary" class="feedback-context-summary" aria-live="polite">默认不附加对话。</p>
+                <div id="feedback-context-list" class="feedback-context-list"></div>
+                <div id="feedback-context-preview" class="feedback-context-preview" hidden></div>
+              </fieldset>
               <p id="feedback-transport-warning" class="feedback-context-preview" role="alert" hidden>公网反馈需要使用 HTTPS 页面和 HTTPS API，当前连接不安全，已禁用提交。请改用 HTTPS；本机 localhost、127.0.0.1 或 [::1] 开发访问可使用 HTTP。HTTP 公网主站仍可浏览。</p>
               <div class="feedback-form-actions"><span id="feedback-status" role="status" aria-live="polite"></span><button id="feedback-submit" class="button primary" type="submit">提交反馈</button></div>
             </form>

@@ -48,6 +48,7 @@ async function loadCatalogs(){
       if(manifest?.schemaVersion!==1||!manifest.images||typeof manifest.images!=='object'||Array.isArray(manifest.images))return;
       state.enemyImageManifest=manifest;
       if(state.enemySelected)renderEnemyDetail(state.enemySelected);
+      refreshAgentEnemyPortraits();
     });
     buildEffectCategoryIndex();
     renderEffectEncyclopedia();
@@ -945,13 +946,17 @@ $('#rule-profile-delete').addEventListener('click',()=>{if(!state.activeRuleProf
 let pendingAgentPlan=null;
 const agentHistory=[];
 let agentClarificationContext=[];
-let agentCurrentFeedbackContext=null;
 let agentHistoryRestoreRevision=0;
+let agentHistoryRestorePending=false;
+let agentHistoryRestorePromise=null;
 let agentMemoryClearing=false;
 let agentRequestInFlight=false;
+let agentRateLimitUntil=0;
+let agentRateLimitTimer=null;
 let agentMemoryClearStage=1;
-let feedbackDialogContext=null;
 let feedbackDialogKind='suggestion';
+let feedbackDialogTurns=[];
+let feedbackDialogFocusTurn=null;
 const feedbackPageHost=window.location.hostname.replace(/^\[|\]$/g,'').toLowerCase();
 const feedbackLocalPage=['localhost','127.0.0.1','::1'].includes(feedbackPageHost);
 let feedbackApiSecure=false,feedbackLocalApi=false,feedbackApiProtocol='';
@@ -988,21 +993,53 @@ const agentSessionId=(()=>{
   return generated;
 })();
 function setAgentStatus(message,error=false){const status=$('#agent-status');status.textContent=message;status.classList.toggle('error',error)}
-function appendAgentMessage(role,text,feedbackContext=null){
-  const log=$('#agent-chat-log'),entry=document.createElement('div'),message=document.createElement('p');log.querySelector('.agent-empty')?.remove();entry.className=`agent-entry ${role}`;message.className=`agent-message ${role}`;
-  const pattern=/\[([^\]]+)\]\(#effects\)/g;let last=0,match;
-  while((match=pattern.exec(String(text)))){message.append(document.createTextNode(String(text).slice(last,match.index)));const link=document.createElement('a');link.href='#effects';link.dataset.view='effects';link.textContent=match[1];message.append(link);last=pattern.lastIndex}
-  message.append(document.createTextNode(String(text).slice(last)));entry.append(message);
-  if(role==='assistant'&&feedbackContext?.question&&feedbackContext?.answer){const button=document.createElement('button');button.className='agent-feedback-trigger';button.type='button';button.textContent='回答有错？向窝反馈';button.addEventListener('click',()=>openFeedbackDialog('answer',feedbackContext));entry.append(button)}
+function agentRateLimitRemaining(){return Math.max(0,Math.ceil((agentRateLimitUntil-Date.now())/1000))}
+function startAgentRateLimitCountdown(seconds,reason='请求已达到服务限额。'){
+  agentRateLimitUntil=Math.max(agentRateLimitUntil,Date.now()+Math.max(1,seconds||60)*1000);const update=()=>{const remaining=agentRateLimitRemaining(),button=$('#agent-send');button.disabled=remaining>0||agentRequestInFlight||!aiTransportSecure;if(remaining>0){const days=Math.floor(remaining/86400),hours=Math.floor((remaining%86400)/3600),minutes=Math.floor((remaining%3600)/60),secondsLeft=remaining%60,wait=[days?`${days} 天`:'',hours?`${hours} 小时`:'',minutes?`${minutes} 分`:'',`${String(secondsLeft).padStart(2,'0')} 秒`].filter(Boolean).join(' ');setAgentStatus(`${reason} 可在 ${wait} 后重试；你可以先编辑问题。`);return}clearInterval(agentRateLimitTimer);agentRateLimitTimer=null;if(!agentRequestInFlight)setAgentStatus(`${reason}等待时间已结束，可以重试。`)};clearInterval(agentRateLimitTimer);update();if(agentRateLimitRemaining()>0)agentRateLimitTimer=setInterval(update,250);
+}
+function appendInlineAgentMarkdown(parent,text){
+  const source=String(text),token=/\*\*([^*\n]+)\*\*|\*([^*\n]+)\*|\[([^\]\n]+)\]\(#effects\)/g;let cursor=0,match;
+  while((match=token.exec(source))){parent.append(document.createTextNode(source.slice(cursor,match.index)));if(match[1]){const strong=document.createElement('strong');strong.textContent=match[1];parent.append(strong)}else if(match[2]){const emphasis=document.createElement('em');emphasis.textContent=match[2];parent.append(emphasis)}else{const link=document.createElement('a');link.href='#effects';link.dataset.view='effects';link.textContent=match[3];parent.append(link)}cursor=token.lastIndex}
+  parent.append(document.createTextNode(source.slice(cursor)));
+}
+function appendAgentMarkdown(parent,text){
+  const lines=String(text).replace(/\r\n?/g,'\n').split('\n');let index=0,paragraph=[];
+  const flushParagraph=()=>{if(!paragraph.length)return;const block=document.createElement('p');appendInlineAgentMarkdown(block,paragraph.join('\n'));parent.append(block);paragraph=[]};
+  const cells=line=>line.trim().replace(/^\||\|$/g,'').split('|').map(cell=>cell.trim());
+  const isTableDivider=line=>/^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+  while(index<lines.length){const line=lines[index];if(!line.trim()){flushParagraph();index++;continue}
+    const heading=line.match(/^\s{0,3}(#{1,3})\s+(.+?)\s*#*\s*$/);if(heading){flushParagraph();const h=document.createElement(`h${heading[1].length}`);appendInlineAgentMarkdown(h,heading[2]);parent.append(h);index++;continue}
+    if(index+1<lines.length&&line.includes('|')&&isTableDivider(lines[index+1])){flushParagraph();const headers=cells(line),effectColumn=/^(?:遗物)?词条$|^效果$/.test(headers[0].replace(/[*_]/g,'')),tableWrap=document.createElement('div'),table=document.createElement('table'),thead=document.createElement('thead'),headRow=document.createElement('tr'),tbody=document.createElement('tbody');tableWrap.className='agent-table-wrap';table.className='agent-answer-table';headers.forEach(value=>{const th=document.createElement('th');th.scope='col';appendInlineAgentMarkdown(th,value);headRow.append(th)});thead.append(headRow);index+=2;while(index<lines.length&&lines[index].includes('|')&&lines[index].trim()){const row=document.createElement('tr');cells(lines[index]).slice(0,headers.length).forEach((value,cellIndex)=>{const td=document.createElement('td');if(effectColumn&&cellIndex===0){const icon=document.createElement('span');icon.className='agent-effect-glyph';icon.setAttribute('aria-hidden','true');icon.textContent='✧';td.append(icon)}appendInlineAgentMarkdown(td,value);row.append(td)});while(row.children.length<headers.length)row.append(document.createElement('td'));tbody.append(row);index++}table.append(thead,tbody);tableWrap.append(table);parent.append(tableWrap);continue}
+    const unordered=line.match(/^\s*[-*+]\s+(.+)$/),ordered=line.match(/^\s*\d+[.)]\s+(.+)$/);if(unordered||ordered){flushParagraph();const list=document.createElement(ordered?'ol':'ul');while(index<lines.length){const item=lines[index].match(ordered?/^\s*\d+[.)]\s+(.+)$/:/^\s*[-*+]\s+(.+)$/);if(!item)break;const li=document.createElement('li');appendInlineAgentMarkdown(li,item[1]);list.append(li);index++}parent.append(list);continue}
+    paragraph.push(line.trim());index++;
+  }
+  flushParagraph();
+}
+function verifiedAgentEnemyImage(id){
+  const value=String(id??''),entry=state.enemyImageManifest?.images?.[value];if(!/^\d{5,12}$/.test(value)||entry?.matchStatus!=='verified'||typeof entry.path!=='string'||!/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(entry.path))return null;return {id:value,path:entry.path};
+}
+function appendAgentEnemyPortrait(entry,id){
+  if(entry.querySelector('.agent-enemy-portrait'))return;const verified=verifiedAgentEnemyImage(id);if(!verified)return;const row=state.enemyData?.rows?.find(item=>String(item?.[1])===verified.id),entity=row&&state.enemyEntities.get(enemyEntityKey(row)),name=entity?.name||(row?enemyDisplayName(row):'核验怪物图片');if(!row)return;const figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');figure.className='agent-enemy-portrait';image.src=`./${verified.path}`;image.alt=`${name}核验图片`;image.loading='lazy';image.decoding='async';caption.textContent=name;figure.append(image,caption);entry.prepend(figure);
+}
+function refreshAgentEnemyPortraits(){document.querySelectorAll('.agent-entry[data-verified-enemy-id]').forEach(entry=>appendAgentEnemyPortrait(entry,entry.dataset.verifiedEnemyId))}
+function getAgentConversationTurns(){const turns=[];for(let index=0;index+1<agentHistory.length;index+=2){const question=agentHistory[index],answer=agentHistory[index+1];if(question?.role==='user'&&answer?.role==='assistant'&&typeof question.content==='string'&&typeof answer.content==='string')turns.push({id:String(index/2),question:question.content,answer:answer.content})}return turns}
+function clipAgentCodePoints(value,limit){const points=Array.from(String(value));return points.length>limit?points.slice(0,limit).join(''):String(value)}
+function fallbackAgentHistory(){const turns=getAgentConversationTurns().slice(-4);return turns.flatMap(turn=>[{role:'user',content:clipAgentCodePoints(turn.question,1200)},{role:'assistant',content:clipAgentCodePoints(turn.answer,1200)}])}
+function appendAgentMessage(role,text,feedbackContext=null,presentation=null){
+  const log=$('#agent-chat-log'),entry=document.createElement('div'),message=document.createElement('div');log.querySelector('.agent-empty')?.remove();entry.className=`agent-entry ${role}`;message.className=`agent-message ${role}`;
+  if(role==='assistant')appendAgentMarkdown(message,text);else message.textContent=String(text);entry.append(message);
+  if(role==='assistant'&&presentation?.verified_enemy_id){entry.dataset.verifiedEnemyId=String(presentation.verified_enemy_id);appendAgentEnemyPortrait(entry,presentation.verified_enemy_id)}
+  if(role==='assistant'&&feedbackContext?.question&&feedbackContext?.answer){const button=document.createElement('button');button.className='agent-feedback-trigger';button.type='button';button.textContent='回答有错？向窝反馈';button.addEventListener('click',()=>openFeedbackDialog('answer',getAgentConversationTurns(),feedbackContext.turnId));entry.append(button)}
   log.append(entry);log.scrollTop=log.scrollHeight;
 }
 async function restoreAgentHistory(){
   if(!aiTransportSecure)return;
   if(!agentSessionId){setAgentStatus('当前环境无法安全生成会话 ID；本页对话仍可继续，但不会读取或保存后端历史记忆。');return}
   const revision=agentHistoryRestoreRevision;
-  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(revision!==agentHistoryRestoreRevision||!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else{if(context)agentCurrentFeedbackContext=context;previousQuestion=''}}}setAgentStatus(`已恢复 ${Math.floor(agentHistory.length/2)} 轮对话记忆。`)}catch{if(revision===agentHistoryRestoreRevision)setAgentStatus('当前无法读取已保存的对话记忆。',true)}
+  agentHistoryRestorePending=true;
+  try{const data=await requestJson('/api/ai/history',{session_id:agentSessionId});if(revision!==agentHistoryRestoreRevision||!Array.isArray(data.messages)||!data.messages.length||agentHistory.length)return;const log=$('#agent-chat-log');let previousQuestion='';log.replaceChildren();for(const message of data.messages){if(message.role==='user'||message.role==='assistant'){const context=message.role==='assistant'&&previousQuestion?{question:previousQuestion,answer:message.content,turnId:String(agentHistory.length/2)}:null;appendAgentMessage(message.role,message.content,context);agentHistory.push(message);if(message.role==='user')previousQuestion=message.content;else previousQuestion=''}}}catch{if(revision===agentHistoryRestoreRevision)setAgentStatus('当前无法读取已保存的对话记忆。',true)}finally{agentHistoryRestorePending=false}
 }
-restoreAgentHistory();
+agentHistoryRestorePromise=restoreAgentHistory();
 const agentMemoryClearDialog=$('#agent-memory-clear-dialog');
 const agentMemoryClearOpen=$('#agent-memory-clear-open');
 function updateAgentMemoryClearAvailability(){agentMemoryClearOpen.disabled=!aiTransportSecure||!agentSessionId||agentRequestInFlight||agentMemoryClearing}
@@ -1025,7 +1062,7 @@ $('#agent-memory-clear-confirm').addEventListener('click',async()=>{
   const confirmButton=$('#agent-memory-clear-confirm'),cancelButton=$('#agent-memory-clear-cancel'),status=$('#agent-memory-clear-status');confirmButton.disabled=true;cancelButton.disabled=true;status.textContent='正在清除已保存对话记忆…';status.classList.remove('error');status.focus();
   try{
     await requestJson('/api/ai/memory/clear',{session_id:agentSessionId});
-    agentHistoryRestoreRevision++;agentHistory.length=0;agentClarificationContext=[];agentCurrentFeedbackContext=null;pendingAgentPlan=null;
+    agentHistoryRestoreRevision++;agentHistory.length=0;agentClarificationContext=[];pendingAgentPlan=null;
     $('#agent-chat-log').replaceChildren();const empty=document.createElement('p');empty.className='agent-empty';empty.textContent='你好，我会判断你的问题是查阅资料还是请求配装。配装时我会在对话中确认角色、供具、普通或深夜范围及配装目标；信息不清楚时会先询问。配装只使用已读取存档中的遗物。';$('#agent-chat-log').append(empty);
     $('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;setAgentStatus('已清除已保存对话记忆。');status.textContent='清除完成。';agentMemoryClearDialog.close();
   }catch(error){const message=error.message||'清除失败，请稍后重试。';status.textContent=message;status.classList.add('error');setAgentStatus(message,true)}
@@ -1033,7 +1070,20 @@ $('#agent-memory-clear-confirm').addEventListener('click',async()=>{
 });
 updateAgentMemoryClearAvailability();
 $('#agent-question').addEventListener('input',()=>{$('#agent-question-count').textContent=`${Array.from($('#agent-question').value).length} / 400 字`});
-function requestJson(url,body){if(url.startsWith('/api/ai/')&&!aiTransportSecure)return Promise.reject(new Error('当前连接不安全，已在发送前拦截 AI 请求。请使用 HTTPS 页面与 HTTPS API，或在本机使用 loopback 地址。'));return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();if(response.status===500||!raw.trim())throw new Error('本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。');if(response.status===404)throw new Error('找不到 AI 接口，请更新并重启本地 FastAPI 服务。');throw new Error(`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`)}const result=await response.json();if(!response.ok)throw new Error(result.detail||'AI 请求失败，请稍后重试。');return result})}
+function readableValidationDetail(detail){
+  if(!Array.isArray(detail))return typeof detail==='string'?detail:'请求内容未通过校验，请检查后重试。';
+  const labels={question:'问题',history:'对话历史',context_turns:'随附对话',answer:'回答',message:'反馈说明',session_id:'会话标识',has_inventory:'存档状态',content:'消息内容',role:'消息类型',kind:'反馈类型'};
+  const reasons={string_too_short:'内容太短',string_too_long:'内容太长',too_short:'缺少必要内容',too_long:'内容超出上限',missing:'缺少必要内容',literal_error:'格式不受支持',value_error:'格式不正确'};
+  const messages=detail.map(item=>{if(typeof item==='string')return item;const loc=Array.isArray(item?.loc)?item.loc:[],field=[...loc].reverse().find(part=>typeof part==='string'&&part!=='body')||'',label=labels[field]||'请求内容',reason=reasons[item?.type]||'',contextIndex=loc.indexOf('context_turns'),historyIndex=loc.indexOf('history'),turnIndex=contextIndex>=0?loc[contextIndex+1]:null,messageIndex=historyIndex>=0?loc[historyIndex+1]:null,prefix=Number.isInteger(turnIndex)?`第 ${turnIndex+1} 轮`:(Number.isInteger(messageIndex)?`历史第 ${messageIndex+1} 条`:'');return `${prefix?`${prefix} `:''}${label}${reason?`：${reason}`:'格式不正确'}`}).filter(Boolean);
+  return messages.length?`请求内容未通过校验：${[...new Set(messages)].join('；')}`:'请求内容未通过校验，请检查后重试。';
+}
+function requestJson(url,body){
+  if(url.startsWith('/api/ai/')&&!aiTransportSecure)return Promise.reject(new Error('当前连接不安全，已在发送前拦截 AI 请求。请使用 HTTPS 页面与 HTTPS API，或在本机使用 loopback 地址。'));
+  return fetch(`${window.NIGHTREIGN_AI_API_BASE||''}${url}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(async response=>{
+    const type=response.headers.get('content-type')||'';if(!type.includes('application/json')){const raw=await response.text();const error=new Error(response.status===500||!raw.trim()?'本地 FastAPI 服务未启动或无法连接（默认端口 8000）。请按 backend/README.md 启动后端。':response.status===404?'找不到 AI 接口，请更新并重启本地 FastAPI 服务。':`AI 服务返回非 JSON 响应（HTTP ${response.status}）。`);error.status=response.status;throw error}
+    const result=await response.json();if(!response.ok){const error=new Error(response.status===422?readableValidationDetail(result.detail):result.detail||'AI 请求失败，请稍后重试。');error.status=response.status;const retryAfter=Number(response.headers.get('Retry-After'));if(response.status===429&&Number.isFinite(retryAfter)&&retryAfter>0)error.retryAfterSeconds=Math.ceil(retryAfter);throw error}return result;
+  });
+}
 let feedbackDialogRevision=0;
 let feedbackSubmissionCount=0;
 let feedbackSubmissionSequence=0;
@@ -1051,30 +1101,36 @@ function feedbackErrorDetail(body){
   if(Array.isArray(detail))return detail.map(item=>typeof item==='string'?item:item?.msg).filter(Boolean).join('；');
   return '';
 }
-function openFeedbackDialog(kind,context=null,correctionTarget=null){
+function updateFeedbackContextSelection(){
+  const selected=Array.from($('#feedback-context-list').querySelectorAll('input[type="checkbox"]:checked')).map(input=>feedbackDialogTurns[Number(input.value)]).filter(Boolean),count=selected.length,total=selected.reduce((sum,turn)=>sum+Array.from(turn.question).length+Array.from(turn.answer).length,0),over=count>10||total>20000,summary=$('#feedback-context-summary'),preview=$('#feedback-context-preview'),submit=$('#feedback-submit');
+  summary.textContent=over?(count>10?'最多只能选择 10 轮。':`所选问答共 ${total.toLocaleString('zh-CN')} 字，超过 20,000 字上限。`):`已选择 ${count} / 10 轮 · ${total.toLocaleString('zh-CN')} / 20,000 字；默认不附加。`;
+  summary.classList.toggle('error',over);preview.replaceChildren();preview.hidden=count===0;
+  selected.forEach((turn,index)=>{const section=document.createElement('section'),heading=document.createElement('strong'),questionLabel=document.createElement('b'),question=document.createElement('p'),answerLabel=document.createElement('b'),answer=document.createElement('p');section.className='feedback-context-turn';heading.textContent=`第 ${index+1} 轮`;questionLabel.textContent='问题';question.textContent=turn.question;answerLabel.textContent='回答';answer.textContent=turn.answer;section.append(heading,questionLabel,question,answerLabel,answer);preview.append(section)});
+  submit.disabled=!feedbackTransportSecure||feedbackSubmissionCount>0||over;
+  return {selected,total,over};
+}
+function openFeedbackDialog(kind,turns=[],focusTurnId=null,correctionTarget=null){
   const dialog=$('#feedback-dialog'),form=$('#feedback-form');if(!dialog?.showModal){setAgentStatus('当前浏览器暂不支持打开反馈表单。',true);return}
   const typeWrap=$('#feedback-correction-type-wrap'),typeSelect=$('#feedback-correction-type');if(correctionTarget&&(!typeWrap||!typeSelect)){setAgentStatus('纠错表单需要更新后的页面结构，请刷新页面后重试。',true);return}
-  feedbackDialogRevision++;
-  feedbackDialogKind=kind;feedbackDialogContext=correctionTarget?null:context;feedbackDialogCorrectionTarget=correctionTarget;form.reset();const status=$('#feedback-status'),submit=$('#feedback-submit'),hasPendingSubmission=feedbackSubmissionCount>0;status.textContent=hasPendingSubmission?feedbackPendingMessage():'';if(hasPendingSubmission)status.dataset.pendingSubmission='true';else delete status.dataset.pendingSubmission;submit.hidden=false;submit.disabled=!feedbackTransportSecure||hasPendingSubmission;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=correctionTarget?'报告图鉴资料问题':kind==='answer'?'反馈这条助手回答':'向我们提出建议';
-  const option=$('#feedback-context-option'),preview=$('#feedback-context-preview'),messageField=$('#feedback-message');if(option)option.hidden=!feedbackDialogContext;if(preview)preview.hidden=true;if(typeWrap)typeWrap.hidden=!correctionTarget;if(typeSelect){typeSelect.hidden=!correctionTarget;typeSelect.required=Boolean(correctionTarget)}messageField.required=!correctionTarget;messageField.maxLength=correctionTarget?Math.max(0,4000-correctionPrefix(correctionTarget,typeSelect.value).length):4000;
-  const privacyNote=feedbackPrivacyNote();if(privacyNote)privacyNote.textContent=correctionTarget?'纠错仅包含本页敌人资料和你填写的说明，不会附带助手对话或本机存档。邮箱为选填项；反馈最多保留 90 天。':'提交内容由站点维护者查看；邮箱为选填项。只有勾选后，本轮问答才会随反馈提交。反馈及随附问答最多保留 90 天。';
-  if(context){$('#feedback-question-preview').textContent=context.question;$('#feedback-answer-preview').textContent=context.answer}
-  dialog.showModal();$('#feedback-message').focus();
+  feedbackDialogRevision++;feedbackDialogKind=kind;feedbackDialogTurns=correctionTarget?[]:(Array.isArray(turns)?turns:[]);feedbackDialogFocusTurn=focusTurnId;feedbackDialogCorrectionTarget=correctionTarget;form.reset();const status=$('#feedback-status'),submit=$('#feedback-submit'),hasPendingSubmission=feedbackSubmissionCount>0;status.textContent=hasPendingSubmission?feedbackPendingMessage():'';if(hasPendingSubmission)status.dataset.pendingSubmission='true';else delete status.dataset.pendingSubmission;submit.hidden=false;submit.disabled=!feedbackTransportSecure||hasPendingSubmission;$('#feedback-transport-warning').hidden=feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';$('#feedback-kind-label').textContent=correctionTarget?'报告图鉴资料问题':kind==='answer'?'反馈这条助手回答':'向我们提出建议';
+  const option=$('#feedback-context-option'),list=$('#feedback-context-list'),preview=$('#feedback-context-preview'),messageField=$('#feedback-message');option.hidden=!feedbackDialogTurns.length||Boolean(correctionTarget);list.replaceChildren();feedbackDialogTurns.forEach((turn,index)=>{const label=document.createElement('label'),checkbox=document.createElement('input'),copy=document.createElement('span'),question=document.createElement('small');label.className='feedback-turn-option';checkbox.type='checkbox';checkbox.value=String(index);copy.textContent=`第 ${index+1} 轮`;question.textContent=turn.question;label.append(checkbox,copy,question);list.append(label)});if(preview)preview.hidden=true;if(typeWrap)typeWrap.hidden=!correctionTarget;if(typeSelect){typeSelect.hidden=!correctionTarget;typeSelect.required=Boolean(correctionTarget)}messageField.required=!correctionTarget;messageField.maxLength=correctionTarget?Math.max(0,4000-correctionPrefix(correctionTarget,typeSelect.value).length):4000;
+  const privacyNote=feedbackPrivacyNote();if(privacyNote)privacyNote.textContent=correctionTarget?'纠错仅包含本页敌人资料和你填写的说明，不会附带助手对话或本机存档。邮箱为选填项；反馈最多保留 90 天。':'提交内容由站点维护者查看；邮箱为选填项。对话默认不附加，可手动选择最多 10 轮、合计不超过 20,000 字；反馈及随附问答最多保留 90 天。';
+  updateFeedbackContextSelection();dialog.showModal();if(feedbackDialogFocusTurn!==null){const index=feedbackDialogTurns.findIndex(turn=>turn.id===feedbackDialogFocusTurn);if(index>=0)list.querySelectorAll('input')[index]?.focus();else $('#feedback-message').focus()}else $('#feedback-message').focus();
 }
-$('#feedback-suggestion-open').addEventListener('click',()=>openFeedbackDialog('suggestion',agentCurrentFeedbackContext));
-$('#enemy-detail').addEventListener('click',event=>{const enemyStepButton=event.target.closest('[data-enemy-step]');if(enemyStepButton){navigateEnemyDetail(Number(enemyStepButton.dataset.enemyStep));return}const differenceButton=event.target.closest('[data-enemy-difference-open]');if(differenceButton){const differences=$('#enemy-location-differences');if(differences&&!differences.open)differences.open=true;differences?.scrollIntoView({behavior:'smooth',block:'start'});return}const button=event.target.closest('[data-enemy-report-open]');if(!button)return;const index=Number(button.dataset.enemyIndex),row=state.enemyData?.rows[index];if(!row||String(row[1])!==button.dataset.enemyId)return;const entity=state.enemyEntities.get(enemyEntityKey(row)),name=entity?.name||enemyDisplayName(row),url=new URL(`${location.origin}${location.pathname}`);url.searchParams.set('enemyId',String(row[1]));url.searchParams.set('enemyRecordIndex',String(index));url.hash='enemies';openFeedbackDialog('suggestion',null,{id:String(row[1]),name,url:url.href})});
+$('#feedback-suggestion-open').addEventListener('click',async()=>{if(agentHistoryRestorePending){setAgentStatus('正在恢复已保存的对话，稍后会打开反馈选择。');await agentHistoryRestorePromise}openFeedbackDialog('suggestion',getAgentConversationTurns())});
+$('#enemy-detail').addEventListener('click',event=>{const enemyStepButton=event.target.closest('[data-enemy-step]');if(enemyStepButton){navigateEnemyDetail(Number(enemyStepButton.dataset.enemyStep));return}const differenceButton=event.target.closest('[data-enemy-difference-open]');if(differenceButton){const differences=$('#enemy-location-differences');if(differences&&!differences.open)differences.open=true;differences?.scrollIntoView({behavior:'smooth',block:'start'});return}const button=event.target.closest('[data-enemy-report-open]');if(!button)return;const index=Number(button.dataset.enemyIndex),row=state.enemyData?.rows[index];if(!row||String(row[1])!==button.dataset.enemyId)return;const entity=state.enemyEntities.get(enemyEntityKey(row)),name=entity?.name||enemyDisplayName(row),url=new URL(`${location.origin}${location.pathname}`);url.searchParams.set('enemyId',String(row[1]));url.searchParams.set('enemyRecordIndex',String(index));url.hash='enemies';openFeedbackDialog('suggestion',[],null,{id:String(row[1]),name,url:url.href})});
 function correctionPrefix(target,type){const labels={image:'图片',location:'地点',category:'分类',multiplier:'倍率',resistance:'抗性',other:'其他'};return `【图鉴纠错】\n敌人：${target.name}\nID：${target.id}\n页面：${target.url}\n纠错类型：${labels[type]||labels.other}\n说明：`}
 $('#feedback-correction-type')?.addEventListener('change',event=>{if(feedbackDialogCorrectionTarget)$('#feedback-message').maxLength=Math.max(0,4000-correctionPrefix(feedbackDialogCorrectionTarget,event.target.value).length)});
-$('#feedback-include-context').addEventListener('change',event=>{$('#feedback-context-preview').hidden=!event.target.checked});
+$('#feedback-context-list').addEventListener('change',updateFeedbackContextSelection);
 $('#feedback-cancel').addEventListener('click',()=>$('#feedback-dialog').close());
-$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogRevision++;feedbackDialogContext=null;feedbackDialogCorrectionTarget=null;$('#feedback-form').reset();const typeWrap=$('#feedback-correction-type-wrap'),typeSelect=$('#feedback-correction-type'),messageField=$('#feedback-message'),privacyNote=feedbackPrivacyNote();if(typeWrap)typeWrap.hidden=true;if(typeSelect){typeSelect.hidden=true;typeSelect.required=false}messageField.required=true;messageField.maxLength=4000;if(privacyNote)privacyNote.textContent='提交内容由站点维护者查看；邮箱为选填项。只有勾选后，本轮问答才会随反馈提交。反馈及随附问答最多保留 90 天。';const status=$('#feedback-status');status.textContent='';delete status.dataset.pendingSubmission;$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';if(feedbackSubmissionCount)reportFeedbackOutcome(`仍有 ${feedbackSubmissionCount} 条反馈请求在处理中；关闭窗口不会撤销已发送的请求。`)});
+$('#feedback-dialog').addEventListener('close',()=>{feedbackDialogRevision++;feedbackDialogTurns=[];feedbackDialogFocusTurn=null;feedbackDialogCorrectionTarget=null;$('#feedback-form').reset();$('#feedback-context-list').replaceChildren();$('#feedback-context-summary').textContent='默认不附加对话。';$('#feedback-context-summary').classList.remove('error');const typeWrap=$('#feedback-correction-type-wrap'),typeSelect=$('#feedback-correction-type'),messageField=$('#feedback-message'),privacyNote=feedbackPrivacyNote();if(typeWrap)typeWrap.hidden=true;if(typeSelect){typeSelect.hidden=true;typeSelect.required=false}messageField.required=true;messageField.maxLength=4000;if(privacyNote)privacyNote.textContent='提交内容由站点维护者查看；邮箱为选填项。问答默认不附加，可手动选择最多 10 轮；所选问答总计不超过 20,000 字符。反馈及随附问答最多保留 90 天。';const status=$('#feedback-status');status.textContent='';delete status.dataset.pendingSubmission;$('#feedback-context-preview').hidden=true;$('#feedback-transport-warning').hidden=true;$('#feedback-submit').hidden=false;$('#feedback-submit').disabled=!feedbackTransportSecure;$('#feedback-cancel').textContent='关闭';if(feedbackSubmissionCount)reportFeedbackOutcome(`仍有 ${feedbackSubmissionCount} 条反馈请求在处理中；关闭窗口不会撤销已发送的请求。`)});
 $('#feedback-form').addEventListener('submit',async event=>{
   event.preventDefault();const submit=$('#feedback-submit'),status=$('#feedback-status');if(feedbackSubmissionCount>0){submit.disabled=true;status.dataset.pendingSubmission='true';status.textContent=feedbackPendingMessage();return}if(!feedbackTransportSecure){submit.disabled=true;$('#feedback-transport-warning').hidden=false;return}
   const correctionTarget=feedbackDialogCorrectionTarget,details=$('#feedback-message').value.trim();if(correctionTarget&&Array.from(details).length<2){status.textContent='请至少填写 2 个有效字符的纠错说明。';$('#feedback-message').focus();return}if(!event.currentTarget.reportValidity())return;
-  const includeContext=Boolean(!correctionTarget&&feedbackDialogContext&&$('#feedback-include-context').checked),message=correctionTarget?`${correctionPrefix(correctionTarget,$('#feedback-correction-type').value)}${details}`:details;
+  const selection=correctionTarget?{selected:[],over:false}:updateFeedbackContextSelection();if(selection.over){status.textContent='所选问答超出轮数或字符上限，请调整选择后再提交。';return}const includeContext=Boolean(!correctionTarget&&selection.selected.length),message=correctionTarget?`${correctionPrefix(correctionTarget,$('#feedback-correction-type').value)}${details}`:details;
   if(message.length>4000){status.textContent='反馈内容过长，请缩短说明后重试。';return}
   const payload={kind:feedbackDialogKind,message,email:$('#feedback-email').value.trim()||null,include_context:includeContext};
-  if(includeContext){payload.question=feedbackDialogContext.question;payload.answer=feedbackDialogContext.answer}
+  if(includeContext)payload.context_turns=selection.selected.map(({question,answer})=>({question,answer}));
   const dialog=$('#feedback-dialog'),revision=feedbackDialogRevision,submission=++feedbackSubmissionSequence;feedbackSubmissionCount++;submit.disabled=true;delete status.dataset.pendingSubmission;status.textContent='正在提交…';
   try{
     const response=await fetch(`${window.NIGHTREIGN_AI_API_BASE||''}/api/feedback`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
@@ -1107,18 +1163,19 @@ async function requestAgentBuild(question,context){
   const result=await requestJson('/api/ai/recommend',body);pendingAgentPlan={plan:result,inventory,character,key,mode};describeAgentPlan(result,inventory);setAgentStatus('配装建议已生成，请检查遗物和理由，再选择是否应用。');return result;
 }
 $('#agent-chat-form').addEventListener('submit',async event=>{
-  event.preventDefault();if(!aiTransportSecure){setAgentStatus('当前连接不安全，已禁用 AI 请求。请改用 HTTPS 页面与 HTTPS API，或在本机使用 loopback 地址。',true);return}if(agentMemoryClearing||agentRequestInFlight)return;const question=$('#agent-question').value.trim();if(!question)return;
-  const button=$('#agent-send');agentRequestInFlight=true;updateAgentMemoryClearAvailability();pendingAgentPlan=null;$('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;appendAgentMessage('user',question);$('#agent-question').value='';$('#agent-question-count').textContent='0 / 400 字';button.disabled=true;
+  event.preventDefault();if(!aiTransportSecure){setAgentStatus('当前连接不安全，已禁用 AI 请求。请改用 HTTPS 页面与 HTTPS API，或在本机使用 loopback 地址。',true);return}if(agentMemoryClearing||agentRequestInFlight||agentRateLimitRemaining()>0)return;const question=$('#agent-question').value.trim();if(!question)return;
+  const button=$('#agent-send'),clarificationBefore=[...agentClarificationContext];agentRequestInFlight=true;updateAgentMemoryClearAvailability();pendingAgentPlan=null;$('#agent-build-result').hidden=true;$('#agent-apply-build').hidden=true;appendAgentMessage('user',question);$('#agent-question').value='';$('#agent-question-count').textContent='0 / 400 字';button.disabled=true;
   try{
-    setAgentStatus('正在判断问题类型并查阅相关资料…');const chatBody={question,history:agentHistory.slice(-8),has_inventory:Boolean(state.save?.relics?.length)};if(agentSessionId)chatBody.session_id=agentSessionId;const reply=await requestJson('/api/ai/chat',chatBody);
+    setAgentStatus('正在判断问题类型并查阅相关资料…');const chatBody={question,has_inventory:Boolean(state.save?.relics?.length)};if(agentSessionId)chatBody.session_id=agentSessionId;else chatBody.history=fallbackAgentHistory();const reply=await requestJson('/api/ai/chat',chatBody);
     if(reply.intent==='build'){
-      const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);agentCurrentFeedbackContext={question,answer:plan.summary};appendAgentMessage('assistant',plan.summary,agentCurrentFeedbackContext);agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
+      const buildQuestion=[...agentClarificationContext,question].join('；').slice(-240);agentClarificationContext=[];const plan=await requestAgentBuild(buildQuestion,reply);const context={question,answer:plan.summary,turnId:String(agentHistory.length/2)};appendAgentMessage('assistant',plan.summary,context);
+      agentHistory.push({role:'user',content:question},{role:'assistant',content:plan.summary});
     }else{
-      const answer=reply.answer||'这个问题还不够明确，请补充一下你指的角色、敌人或配装目标。';agentCurrentFeedbackContext={question,answer};appendAgentMessage('assistant',answer,agentCurrentFeedbackContext);agentHistory.push({role:'user',content:question},{role:'assistant',content:answer});if(reply.intent==='clarify')agentClarificationContext.push(question);else agentClarificationContext=[];
+      const answer=reply.answer||'这个问题还不够明确，请补充一下你指的角色、敌人或配装目标。',context={question,answer,turnId:String(agentHistory.length/2)};appendAgentMessage('assistant',answer,context,reply);agentHistory.push({role:'user',content:question},{role:'assistant',content:answer});if(reply.intent==='clarify')agentClarificationContext.push(question);else agentClarificationContext=[];
       setAgentStatus(reply.intent==='clarify'?'需要你补充信息后，我再继续。':'回答已整理完成。');
     }
-  }catch(error){appendAgentMessage('assistant',`暂时无法完成：${error.message||'请检查 FastAPI 服务是否启动。'}`);setAgentStatus(error.message||'AI 请求失败，请稍后重试。',true)}
-  finally{button.disabled=false;agentRequestInFlight=false;updateAgentMemoryClearAvailability()}
+  }catch(error){agentClarificationContext=clarificationBefore;if(!$('#agent-question').value.trim()){$('#agent-question').value=question;$('#agent-question').dispatchEvent(new Event('input'))}appendAgentMessage('assistant',`暂时无法完成：${error.message||'请检查 FastAPI 服务是否启动。'}`);if(error.status===429&&error.retryAfterSeconds)startAgentRateLimitCountdown(error.retryAfterSeconds,error.message||'请求已达到服务限额。');else setAgentStatus(error.message||'AI 请求失败，请稍后重试。',true)}
+  finally{agentRequestInFlight=false;button.disabled=agentRateLimitRemaining()>0||!aiTransportSecure;updateAgentMemoryClearAvailability()}
 });
 $('#agent-apply-build').addEventListener('click',()=>{
   if(!pendingAgentPlan||!state.save)return;const {character,key,mode,plan}=pendingAgentPlan;
