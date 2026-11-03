@@ -188,3 +188,28 @@ PR [#29](https://github.com/chirt39/nightreign/pull/29) head `f5ea51c9b7f033c244
 快速回退本次热修：停止当前 `nightreign-api`，将其改名留存，再把 `nightreign-api-rollback-99a91c8` 改回 `nightreign-api` 并启动；不改动 SQLite、Chroma 活动指针或静态 release。
 
 如需将 99a91c8 联合发布整体回退到更早的稳定版本，可将 `nightreign-api-rollback-4e0ba282` 恢复为 `nightreign-api` 并启动；从备份恢复 `/home/admin/nightreign/.env` 可将限额恢复至 5/100。SQLite 新增列向后兼容旧后端；回退时不要覆盖活动 SQLite，以免丢失上线后新增的反馈或会话。回退静态时，原子地将 `/var/www/nightreign/current` 指回 `/var/www/nightreign/releases/bc8f6a8d0851ae5afc55d0fd7822097af47df438`。一致性快照仅用于数据损坏恢复，不作为常规代码回退步骤。
+
+### 反馈不再收集邮箱（2026-11-03）
+
+PR [#35](https://github.com/chirt39/nightreign/pull/35) merge commit：`908a4f6cce60e02eb696dedee44bfea4d305d2f5`。反馈表单已移除邮箱输入和相关提示；新前端不发送邮箱，后端兼容旧缓存页面时会丢弃该字段，不写入新记录。管理员 API 与页面均不返回邮箱。SQLite 旧 `email` 列保留以兼容已有数据库，历史值按原有 90 天清理期限保留；未迁移或清空数据库，未改 `.env`。
+
+静态站由合并提交干净构建，release 为 `/var/www/nightreign/releases/908a4f6cce60e02eb696dedee44bfea4d305d2f5/dist`；`/var/www/nightreign/current` 已原子切换到该版本，上一版 `/var/www/nightreign/releases/99a91c8c64a70a521832d878becf64b9ecea5b8f` 保留。公网 HTTPS 资源哈希与本地构建一致：
+
+| 静态文件 | SHA-256 |
+| --- | --- |
+| `index.html` | `399a5642ba50103cecf63864f0492922e714685ce81ab7cd2fd53aa148c0e7d2` |
+| `assets/index-BYW27pZG.js` | `eed4a2d463dc030b85413c7a4a7500f17abe5caa076e192720739e1f9a2c22f4` |
+| `app.js` | `c82ca706677dab1a3b2265fa7cc1cce9e0086b3157032db3f9c463c36dca1f58` |
+| `game-ui.css` | `46587d7c50c686cd0eede45aa9421e06ef3a12f5d3815718124de6addc4500c8` |
+| `style.css` | `5315ededeba0ff538a3d429a4c10df1ea28a564531780d89471744f6917e85f5` |
+| `admin-feedback.html` | `7ec6cff30c93f402c6381c947da85fbcdab953ec301782f1c0892932fe2cc1b9` |
+
+新 release 同时保留线上前两版 bundle `index-De7sY-sm.js`（SHA-256 `4338dafb5c860ae5e97551929b4e1c13c2d1843dd056cdadea3bc4ba3e43a5d6`）与 `index-DZ_tnRlR.js`（SHA-256 `94364bac08e5902245a1ec52cb6b050451a92605c41031329c5912329ff8d60a`），公网均返回 200。前端回滚目录仍完整。
+
+后端镜像 `nightreign-ai:908a4f6`（镜像 ID `sha256:eddce9566ea06b62482eeb7ede2ab03cfc999055aac5ac83f848c407414f9a5c`），运行容器 ID `2ddb03759bd4984be26ba317811fd0a5290c3e36def870c5cb8466a59109d29e`。旧后端容器保留为 `nightreign-api-rollback-908a4f6`（原镜像 `nightreign-ai:b2faa9d3`，容器 ID `b712d36df7152af41439f4b946a1b048a1efa97fce9e4bdd6ce8ebc3ee8fd135`）。SQLite 和 Chroma 沿用 `/home/admin/nightreign/local-data` 持久化卷；活动 collection 仍为 `nightreign_kb_a604700b2fd1b263`，知识源与 Chroma 各 5,284 条，未重建索引或执行 embedding。
+
+切换前停止后端后制作一致性备份：`/home/admin/nightreign-backups/pre-release-908a4f6-20261103/local-data.tar.gz`，权限 600，SHA-256 `9d89b321afd71895214a6b3b51b3b5feb5a06fddf2d6241cb2f14d8e1c5acda5`；归档 gzip 校验通过。备份仅用于数据损坏恢复，代码回滚不需覆盖活动数据库。
+
+验收：20 项后端相关单测通过；`npm ci`、`npm run build`、`node --check public/app.js` 与 `git diff --check` 通过。公网新首页、bundle、样式及管理员页返回正确内容和哈希；新 bundle 无邮箱控件文案；`/api/health` 与 `/api/knowledge/status` 返回 200、状态 `ok`。新容器启动后首次健康检查曾短暂返回未就绪；重试后 Chroma 恢复正常，知识源与 collection 计数一致。本次未向生产提交反馈、未发起 AI 模型查询。
+
+快速回退后端：停止当前 `nightreign-api`，将其改名留存，再将 `nightreign-api-rollback-908a4f6` 改回 `nightreign-api` 并启动。回退静态站：将 `/var/www/nightreign/current` 原子指回 `/var/www/nightreign/releases/99a91c8c64a70a521832d878becf64b9ecea5b8f`。无需恢复 SQLite 或 Chroma 备份。
