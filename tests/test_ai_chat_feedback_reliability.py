@@ -43,17 +43,25 @@ class AiChatFeedbackReliabilityTests(unittest.TestCase):
             id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, message TEXT NOT NULL,
             email TEXT, question TEXT, answer TEXT, created_at TEXT NOT NULL, expires_at TEXT NOT NULL
         )""")
-        connection.execute("INSERT INTO feedback_submissions VALUES (1, 'answer', 'old', NULL, 'q', 'a', '2026-01-01', '2099-01-01')")
+        connection.execute("INSERT INTO feedback_submissions VALUES (1, 'answer', 'old', 'legacy@example.test', 'q', 'a', '2026-01-01', '2099-01-01')")
         connection.commit()
         connection.close()
 
         turns_json = json.dumps([{"question": "新问题", "answer": "新回答"}], ensure_ascii=False)
-        self.assertIsNone(memory_store.save_feedback("answer", "new", None, "新问题", "新回答", 250, turns_json))
+        self.assertIsNone(memory_store.save_feedback("answer", "new", "新问题", "新回答", 250, turns_json))
         items, total = memory_store.list_feedback()
         self.assertEqual(total, 2)
         self.assertIn("context_turns_json", items[0])
         self.assertEqual(json.loads(items[0]["context_turns_json"]), [{"question": "新问题", "answer": "新回答"}])
         self.assertEqual(items[1]["question"], "q")
+        self.assertNotIn("email", items[0])
+        self.assertNotIn("email", items[1])
+        connection = sqlite3.connect(db)
+        try:
+            self.assertEqual(connection.execute("SELECT email FROM feedback_submissions WHERE id = 1").fetchone()[0], "legacy@example.test")
+            self.assertIsNone(connection.execute("SELECT email FROM feedback_submissions WHERE id = 2").fetchone()[0])
+        finally:
+            connection.close()
 
     def test_feedback_daily_limit_returns_wait_until_utc_midnight(self):
         self.assertEqual(memory_store.seconds_until_next_utc_midnight(
@@ -66,17 +74,21 @@ class AiChatFeedbackReliabilityTests(unittest.TestCase):
 
     def test_feedback_without_context_never_persists_attached_turns(self):
         client = TestClient(main.app, base_url="https://example.test")
+        feedback_schema = main.app.openapi()["components"]["schemas"]["FeedbackSubmission"]["properties"]
+        self.assertNotIn("email", feedback_schema)
         with patch.object(main, "FEEDBACK_ADMIN_PASSWORD", "x" * 40), \
              patch.object(main, "_feedback_rate_limit"), \
              patch.object(main.memory_store, "save_feedback", return_value=None) as save:
             response = client.post("/api/feedback", json={
                 "kind": "answer", "message": "反馈内容", "include_context": False,
+                "email": "legacy@example.test",
                 "context_turns": [{"question": "q", "answer": "a"}],
             })
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(save.call_args.args), 6)
+        self.assertIsNone(save.call_args.args[2])
         self.assertIsNone(save.call_args.args[3])
-        self.assertIsNone(save.call_args.args[4])
-        self.assertIsNone(save.call_args.args[6])
+        self.assertIsNone(save.call_args.args[5])
 
     def test_feedback_accepts_multiround_and_rejects_oversize_without_truncation(self):
         client = TestClient(main.app, base_url="https://example.test")
@@ -93,7 +105,7 @@ class AiChatFeedbackReliabilityTests(unittest.TestCase):
                 "context_turns": [{"question": "问题", "answer": "答" * 20000}],
             })
         self.assertEqual(accepted.status_code, 200)
-        self.assertEqual(json.loads(save.call_args_list[0].args[6]), turns)
+        self.assertEqual(json.loads(save.call_args_list[0].args[5]), turns)
         self.assertEqual(too_long.status_code, 422)
         self.assertIn("20000", too_long.json()["detail"])
 
@@ -124,7 +136,7 @@ class AiChatFeedbackReliabilityTests(unittest.TestCase):
     def test_admin_feedback_normalizes_legacy_and_multiround_context(self):
         client = TestClient(main.app, base_url="https://example.test")
         rows = [
-            {"id": 1, "question": "旧问题", "answer": "旧回答", "context_turns_json": None},
+            {"id": 1, "email": "legacy@example.test", "question": "旧问题", "answer": "旧回答", "context_turns_json": None},
             {"id": 2, "question": None, "answer": None, "context_turns_json": json.dumps([
                 {"question": "新问题1", "answer": "新回答1"},
                 {"question": "新问题2", "answer": "新回答2"},
@@ -138,6 +150,7 @@ class AiChatFeedbackReliabilityTests(unittest.TestCase):
         self.assertEqual(items[0]["context_turns"], [{"question": "旧问题", "answer": "旧回答"}])
         self.assertEqual(len(items[1]["context_turns"]), 2)
         self.assertNotIn("context_turns_json", items[1])
+        self.assertNotIn("email", items[0])
 
     def test_retry_after_is_exposed_by_cors(self):
         client = TestClient(main.app, base_url="https://example.test")

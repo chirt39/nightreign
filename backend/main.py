@@ -227,7 +227,7 @@ async def readable_request_validation_error(request: Request, exc: RequestValida
     elif any("context_turns" in location for location in locations):
         detail = "随附对话最多支持10轮；每轮问题最多400个字符，问题和回答合计最多20000个字符。"
     else:
-        detail = "反馈请求格式无效，请检查说明文字和邮箱后重试。"
+        detail = "反馈请求格式无效，请检查说明文字后重试。"
     return JSONResponse(status_code=422, content={"detail": detail})
 
 ALLOWED_COLORS = {"Red", "Blue", "Yellow", "Green", "Any"}
@@ -756,11 +756,18 @@ class FeedbackTurn(StrictModel):
 class FeedbackSubmission(StrictModel):
     kind: Literal["answer", "suggestion"]
     message: str = Field(min_length=2, max_length=4000)
-    email: str | None = Field(default=None, max_length=254)
     include_context: bool = False
     question: str | None = Field(default=None, max_length=400)
     answer: str | None = Field(default=None, max_length=4000)
     context_turns: list[FeedbackTurn] | None = Field(default=None, max_length=10)
+
+    @model_validator(mode="before")
+    @classmethod
+    def discard_legacy_email(cls, value):
+        # Old cached clients may still submit this removed field; never retain it.
+        if isinstance(value, dict) and "email" in value:
+            value = {key: item for key, item in value.items() if key != "email"}
+        return value
 
 
 @app.post("/api/ai/history")
@@ -916,10 +923,6 @@ async def submit_feedback(body: FeedbackSubmission, request: Request) -> dict:
     message = body.message.strip()
     if len(message) < 2:
         raise HTTPException(status_code=422, detail="反馈内容至少需要 2 个字符。")
-    email = (body.email or "").strip() or None
-    if email and not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
-        raise HTTPException(status_code=422, detail="邮箱格式无效。")
-
     turns: list[dict[str, str]] = []
     if body.include_context:
         if body.context_turns is not None:
@@ -939,7 +942,6 @@ async def submit_feedback(body: FeedbackSubmission, request: Request) -> dict:
         memory_store.save_feedback,
         body.kind,
         message,
-        email,
         question,
         answer,
         FEEDBACK_REQUESTS_PER_DAY,
@@ -967,6 +969,7 @@ async def feedback_inbox(
     _require_feedback_admin(authorization)
     items, total = await run_in_threadpool(memory_store.list_feedback, limit, offset)
     for item in items:
+        item.pop("email", None)
         raw_turns = item.pop("context_turns_json", None)
         try:
             turns = json.loads(raw_turns) if raw_turns else None

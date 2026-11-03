@@ -145,7 +145,6 @@ def history(session_id: str, limit: int = 80) -> list[dict[str, str]]:
 def save_feedback(
     kind: str,
     message: str,
-    email: str | None,
     question: str | None = None,
     answer: str | None = None,
     daily_limit: int = 250,
@@ -173,12 +172,11 @@ def save_feedback(
         )
         connection.execute(
             """INSERT INTO feedback_submissions
-               (kind, message, email, question, answer, created_at, expires_at, context_turns_json)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+               (kind, message, question, answer, created_at, expires_at, context_turns_json)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
                 kind,
                 message,
-                email,
                 question,
                 answer,
                 created_at.isoformat(),
@@ -211,7 +209,7 @@ def list_feedback(limit: int = 50, offset: int = 0) -> tuple[list[dict], int]:
             "SELECT COUNT(*) FROM feedback_submissions"
         ).fetchone()[0]
         rows = connection.execute(
-            """SELECT id, kind, message, email, question, answer, created_at, expires_at,
+            """SELECT id, kind, message, question, answer, created_at, expires_at,
                       context_turns_json
                FROM feedback_submissions ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?""",
             (max(1, min(limit, 100)), max(0, offset)),
