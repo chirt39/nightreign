@@ -74,6 +74,14 @@ await writeFile(join(generatedPublic, 'ai-config.js'), 'window.NIGHTREIGN_AI_API
 
 const siteApp = join(generatedPublic, 'app.js');
 const appCode = await readFile(siteApp, 'utf8');
+const apiFetchStart = 'fetch(`${window.NIGHTREIGN_AI_API_BASE';
+const transportGuard = "(window.location.protocol==='https:'&&feedbackApiSecure)";
+if (appCode.split(apiFetchStart).length !== 3 || appCode.split(transportGuard).length !== 2) {
+  throw new Error('网站 API 调用结构已更新，请核对小程序的网络适配。');
+}
+const miniappCode = appCode
+  .replaceAll(apiFetchStart, '(window.nightreignMiniappApiFetch || fetch)(`${window.NIGHTREIGN_AI_API_BASE')
+  .replace(transportGuard, "((window.location.protocol==='https:'||window.nightreignMiniappApiFetch)&&feedbackApiSecure)");
 const importHook = `
 window.nightreignLoadTransfer = function (payload) {
   if (!state.items || !state.effects) throw new Error('图鉴资料尚未载入，请稍后再试。');
@@ -89,6 +97,6 @@ window.nightreignLoadTransfer = function (payload) {
   setSaveStatus('已从当前设备导入 ' + parsed.relics.length + ' 件遗物及战绩。原始存档未上传。');
 };
 `;
-await writeFile(siteApp, appCode.replaceAll('存档在浏览器本地解析', '存档在当前设备本地解析') + importHook);
+await writeFile(siteApp, miniappCode.replaceAll('存档在浏览器本地解析', '存档在当前设备本地解析') + importHook);
 
 console.log('小程序已同步站点页面与静态资料。');
