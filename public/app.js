@@ -363,7 +363,8 @@ function enemyDetailPlaceholderMarkup(name){
 function enemyDetailImageMarkup(record,name){
   const images=state.enemyImageManifest?.images,id=String(record?.[1]??''),entry=images&&id&&Object.hasOwn(images,id)?images[id]:null,path=entry?.path;
   if(entry?.matchStatus!=='verified'||typeof path!=='string'||!/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(path))return enemyDetailPlaceholderMarkup(name);
-  return `<img class="enemy-detail-image" src="./${esc(path)}" alt="${esc(name)}" width="80" height="80" decoding="async">`;
+  const menuPortrait=entry.imageKind==='nightboss-menu-portrait',label=menuPortrait?`${name}：出击菜单头像`:name;
+  return `<img class="enemy-detail-image" src="./${esc(path)}" alt="${esc(label)}"${menuPortrait?' title="出击菜单头像"':''} width="80" height="80" decoding="async">`;
 }
 function renderEnemyDetail(r){
   if(!r){$('#enemy-detail').innerHTML=`<div class="enemy-detail-actions enemy-detail-actions-empty">${enemyDetailNavigationMarkup(-1)}</div><div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>`;$('#enemy-detail').scrollTop=0;return}
@@ -1016,10 +1017,10 @@ function appendAgentMarkdown(parent,text){
   flushParagraph();
 }
 function verifiedAgentEnemyImage(id){
-  const value=String(id??''),entry=state.enemyImageManifest?.images?.[value];if(!/^\d{5,12}$/.test(value)||entry?.matchStatus!=='verified'||typeof entry.path!=='string'||!/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(entry.path))return null;return {id:value,path:entry.path};
+  const value=String(id??''),entry=state.enemyImageManifest?.images?.[value];if(!/^\d{5,12}$/.test(value)||entry?.matchStatus!=='verified'||typeof entry.path!=='string'||!/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(entry.path))return null;return {id:value,path:entry.path,imageKind:entry.imageKind};
 }
 function appendAgentEnemyPortrait(entry,id){
-  if(entry.querySelector('.agent-enemy-portrait'))return;const verified=verifiedAgentEnemyImage(id);if(!verified)return;const row=state.enemyData?.rows?.find(item=>String(item?.[1])===verified.id),entity=row&&state.enemyEntities.get(enemyEntityKey(row)),name=entity?.name||(row?enemyDisplayName(row):'核验怪物图片');if(!row)return;const figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');figure.className='agent-enemy-portrait';image.src=`./${verified.path}`;image.alt=`${name}核验图片`;image.loading='lazy';image.decoding='async';caption.textContent=name;figure.append(image,caption);entry.prepend(figure);
+  if(entry.querySelector('.agent-enemy-portrait'))return;const verified=verifiedAgentEnemyImage(id);if(!verified)return;const row=state.enemyData?.rows?.find(item=>String(item?.[1])===verified.id),entity=row&&state.enemyEntities.get(enemyEntityKey(row)),name=entity?.name||(row?enemyDisplayName(row):'核验怪物图片');if(!row)return;const menuPortrait=verified.imageKind==='nightboss-menu-portrait',figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');figure.className='agent-enemy-portrait';image.src=`./${verified.path}`;image.alt=menuPortrait?`${name}：出击菜单头像`:`${name}核验图片`;image.loading='lazy';image.decoding='async';caption.textContent=menuPortrait?`${name} · 出击菜单头像`:name;figure.append(image,caption);entry.prepend(figure);
 }
 function refreshAgentEnemyPortraits(){document.querySelectorAll('.agent-entry[data-verified-enemy-id]').forEach(entry=>appendAgentEnemyPortrait(entry,entry.dataset.verifiedEnemyId))}
 function getAgentConversationTurns(){const turns=[];for(let index=0;index+1<agentHistory.length;index+=2){const question=agentHistory[index],answer=agentHistory[index+1];if(question?.role==='user'&&answer?.role==='assistant'&&typeof question.content==='string'&&typeof answer.content==='string')turns.push({id:String(index/2),question:question.content,answer:answer.content})}return turns}
