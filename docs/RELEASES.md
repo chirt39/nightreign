@@ -213,3 +213,26 @@ PR [#35](https://github.com/chirt39/nightreign/pull/35) merge commit：`908a4f6c
 验收：20 项后端相关单测通过；`npm ci`、`npm run build`、`node --check public/app.js` 与 `git diff --check` 通过。公网新首页、bundle、样式及管理员页返回正确内容和哈希；新 bundle 无邮箱控件文案；`/api/health` 与 `/api/knowledge/status` 返回 200、状态 `ok`。新容器启动后首次健康检查曾短暂返回未就绪；重试后 Chroma 恢复正常，知识源与 collection 计数一致。本次未向生产提交反馈、未发起 AI 模型查询。
 
 快速回退后端：停止当前 `nightreign-api`，将其改名留存，再将 `nightreign-api-rollback-908a4f6` 改回 `nightreign-api` 并启动。回退静态站：将 `/var/www/nightreign/current` 原子指回 `/var/www/nightreign/releases/99a91c8c64a70a521832d878becf64b9ecea5b8f`。无需恢复 SQLite 或 Chroma 备份。
+
+
+### 夜王出击菜单头像静态发布（2026-11-09）
+
+用户批准网站接入与上线。代码PR [#38](https://github.com/chirt39/nightreign/pull/38)已合并，发布提交为 `a5456624fcd25e7f52a6dcc7468cb63d3e920ae2`，于北京时间2026-11-09 16:27切换正式站静态目录。
+
+本轮为15个精确夜王详情锚点加入游戏1.3.3.0的出击菜单头像，普通色与紫色分别绑定，原有11项逐项保留；共26个可显示图片的锚点。详情和助手图片替代文本／说明均将新图称为“出击菜单头像”，不作为该NPC阶段的实景图。分身与其他阶段没有自动继承，DLC首领哈尔莫妮亚、史柴格斯仍待补。敌人JSON仍为1,662行、58列、254个展示组，原始数值、分类和归并规则未改；图片来源、参数引用、坐标和哈希见 [ENEMY_IMAGES.md](ENEMY_IMAGES.md) 及 `public/enemy-image-verified.json`。
+
+从合并提交干净工作树构建，321个构建文件与本地UI验收构建逐一SHA256一致；上传解包后再次逐文件核对。新目录为 `/var/www/nightreign/releases/a5456624fcd25e7f52a6dcc7468cb63d3e920ae2/dist`，Nginx继续使用 `/var/www/nightreign/current/dist`。`current`通过原子符号链接切换，未修改Nginx配置或重载服务。另按原文件哈希保留此前5个JS bundle（`index-DZ_tnRlR.js`、`index-De7sY-sm.js`、`index-BCvWp1Qv.js`、`index-BYW27pZG.js`、`index-BLST4HnX.js`）供缓存旧HTML的浏览器加载。
+
+| 正式站资源 | SHA256 |
+| --- | --- |
+| `index.html` | `71ab2077db1e890e47703b64395e1b0f17047c5f68e7f20c3ad0754b653b585e` |
+| `assets/index-DisJojSg.js` | `a398ce0723b3a92dc2942353c61bad4161a17757e2fc183d53d78627620164b1` |
+| `app.js` | `59ce3aa682f2b464d82969173bc89a59aaec0c69ff37de83df8422d8606b9bee` |
+| `enemy-data.json` | `be833d24b9746bac8c3d102009d39841d8b538a3a081da77a69f529e8388e3e5` |
+| `enemy-image-verified.json` | `c18c2da0695ee676884ffffb39a67b721102252ef8b5a3282472c89cb444f63b` |
+
+15张PNG及上述文件、两张CSS等共22个公网资源已逐项校验，响应为200且哈希匹配。本地Playwright核对15张新图、11张旧图、7个未配对分身／阶段、普通/永夜上一只／下一只切换、图片和清单失败回退、手机64px尺寸以及助手图片说明，页面脚本错误为0。正式站以全新浏览器会话复核格拉狄乌斯普通与永夜头像、白金之子旧图、格拉狄乌斯分身占位和艾德雷手机图，清单为26项、无页面脚本错误；UI验收拦截了API调用，未发起真实AI请求或提交反馈。截图与机器校验记录位于 `E:\海斗\outputs\nightboss-web-20261109`，包括 `live-nightboss-normal.png`、`live-nightboss-everdark.png`、`live-nightboss-mobile.png`、`local-qa.json`、`public-http-validation.json` 和 `live-ui-validation.json`。
+
+后端容器仍为 `2ddb03759bd4984be26ba317811fd0a5290c3e36def870c5cb8466a59109d29e`，镜像 `nightreign-ai:908a4f6`，启动时间 `2026-11-03T03:51:13.542622621Z`，切换前后完全一致；公网 `/api/health` 为200。此次只更新静态文件，没有改写数据库、环境变量、知识库或向量索引。
+
+上一版 `/var/www/nightreign/releases/908a4f6cce60e02eb696dedee44bfea4d305d2f5` 完整保留。回退时确认 `current` 仍指向本次release，在同目录建立指向 `releases/908a4f6cce60e02eb696dedee44bfea4d305d2f5` 的临时符号链接，再原子替换 `current`；无需重启后端或恢复数据库。服务器发布记录位于本次release根目录的 `deployment-record.json`，包含旧目录、321文件验证结果、5个兼容bundle哈希及前后后端身份。
