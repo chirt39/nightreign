@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-30",
+  "updatedAt": "2026-11-09",
   "images": {
     "34700000": {
       "path": "enemy-images/34700020.jpg",
@@ -100,6 +100,456 @@
       "matchStatus": "verified",
       "licenseStatus": "unverified",
       "checkedAt": "2026-10-30"
+    },
+    "49000010": {
+      "path": "enemy-images/nightboss-41826.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        1280,
+        464,
+        460,
+        460
+      ],
+      "sourceSha256": "8488468a02a326e6f44fe4e8938e156ded1a3dcd048f0da3b980cf8eb03d350a",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 6,
+        "field": "largeBossIconId",
+        "iconId": 41826,
+        "bossNameId": 131066
+      },
+      "sourceName": "卡莉果",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "49010010": {
+      "path": "enemy-images/nightboss-41846.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        520,
+        1532,
+        460,
+        460
+      ],
+      "sourceSha256": "d4befcabed821226360552e36925bd744eaa19fb208aa60343866df3e1faa803",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 16,
+        "field": "largeBossIconId",
+        "iconId": 41846,
+        "bossNameId": 131066
+      },
+      "sourceName": "卡莉果",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75000020": {
+      "path": "enemy-images/nightboss-41820.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        1280,
+        0,
+        460,
+        460
+      ],
+      "sourceSha256": "921c7dc920a4d6441e836a87dce8d6d25137e7d7af7fe813ee225f7e460d9f98",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 0,
+        "field": "largeBossIconId",
+        "iconId": 41820,
+        "bossNameId": 131060
+      },
+      "sourceName": "格拉狄乌斯",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75000210": {
+      "path": "enemy-images/nightboss-41840.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        1744,
+        464,
+        460,
+        460
+      ],
+      "sourceSha256": "3bebd90fb310750a52366ee93b1760a9074c01c200bdad6d2d511c3ba13b4eed",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 10,
+        "field": "largeBossIconId",
+        "iconId": 41840,
+        "bossNameId": 131060
+      },
+      "sourceName": "格拉狄乌斯",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75100020": {
+      "path": "enemy-images/nightboss-41821.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        1744,
+        0,
+        460,
+        460
+      ],
+      "sourceSha256": "e73e467df2e79103ed885b36e5bb1e149bd142dddaff505bbc68cdcc9d1145c7",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 1,
+        "field": "largeBossIconId",
+        "iconId": 41821,
+        "bossNameId": 131061
+      },
+      "sourceName": "艾德雷",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75110010": {
+      "path": "enemy-images/nightboss-41841.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        2208,
+        464,
+        460,
+        460
+      ],
+      "sourceSha256": "e987536b01fd58fb8ff4d03ea1a95fa6ec6ac59f02b57b8f4bab6815c143f7f4",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 11,
+        "field": "largeBossIconId",
+        "iconId": 41841,
+        "bossNameId": 131061
+      },
+      "sourceName": "艾德雷",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75200000": {
+      "path": "enemy-images/nightboss-41822.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        2208,
+        0,
+        460,
+        460
+      ],
+      "sourceSha256": "bd2a5a67077398266a0d9b3b1ed744a3f745d6e1a4c2e9223518535f4c13dae7",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 2,
+        "field": "largeBossIconId",
+        "iconId": 41822,
+        "bossNameId": 131062
+      },
+      "sourceName": "格诺斯塔",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75200120": {
+      "path": "enemy-images/nightboss-41842.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        2672,
+        464,
+        460,
+        460
+      ],
+      "sourceSha256": "d66f1992ed65226bcc9ef141f726937a90857f5710f42a94bba321915afaadab",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 12,
+        "field": "largeBossIconId",
+        "iconId": 41842,
+        "bossNameId": 131062
+      },
+      "sourceName": "格诺斯塔",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75400020": {
+      "path": "enemy-images/nightboss-41823.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        2672,
+        0,
+        460,
+        460
+      ],
+      "sourceSha256": "03e56ecc5be1b28cad6db8f9ed4f76e614bc6dcf0f18210fc83298f41d989f24",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 3,
+        "field": "largeBossIconId",
+        "iconId": 41823,
+        "bossNameId": 131063
+      },
+      "sourceName": "玛利斯",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75410000": {
+      "path": "enemy-images/nightboss-41843.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        3136,
+        464,
+        460,
+        460
+      ],
+      "sourceSha256": "330816241e72533d35ed68e8209d3bda430e7b83de8bc8515bac27bea3b3a4ef",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 13,
+        "field": "largeBossIconId",
+        "iconId": 41843,
+        "bossNameId": 131063
+      },
+      "sourceName": "玛利斯",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75600020": {
+      "path": "enemy-images/nightboss-41824.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        3136,
+        0,
+        460,
+        460
+      ],
+      "sourceSha256": "cb0c7992099a35486ee8a7cc319f14496680f16a6023815264a0fe47b94d0975",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 4,
+        "field": "largeBossIconId",
+        "iconId": 41824,
+        "bossNameId": 131064
+      },
+      "sourceName": "利普拉",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75610010": {
+      "path": "enemy-images/nightboss-41844.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        3600,
+        464,
+        460,
+        460
+      ],
+      "sourceSha256": "824f41b2c5ada6ec21660001a6c9c6c7fab171196a8243e2e8250ea339197be6",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 14,
+        "field": "largeBossIconId",
+        "iconId": 41844,
+        "bossNameId": 131064
+      },
+      "sourceName": "利普拉",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "75802010": {
+      "path": "enemy-images/nightboss-41827.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        760,
+        520,
+        460,
+        460
+      ],
+      "sourceSha256": "61e21c4783e058c7a601ccd4375e11db82e173a254d78ccb1f112a5ab7b24e6c",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 7,
+        "field": "largeBossIconId",
+        "iconId": 41827,
+        "bossNameId": 131067
+      },
+      "sourceName": "布德奇冥",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "76000010": {
+      "path": "enemy-images/nightboss-41825.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        3600,
+        0,
+        460,
+        460
+      ],
+      "sourceSha256": "3a879fd4c3e879ebbbc80cff60e7fe2066370af94aa623ae3ffe79cc6aff12c4",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 5,
+        "field": "largeBossIconId",
+        "iconId": 41825,
+        "bossNameId": 131065
+      },
+      "sourceName": "弗格尔",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "76001010": {
+      "path": "enemy-images/nightboss-41845.png",
+      "assetOrigin": "local-game-menu",
+      "matchStatus": "verified",
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "checkedAt": "2026-11-09",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        520,
+        1068,
+        460,
+        460
+      ],
+      "sourceSha256": "3db4c7a5a7aaaf552723a3812a0eb9c1abb140ac5ee3a842debb256d4dfc0e17",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 15,
+        "field": "largeBossIconId",
+        "iconId": 41845,
+        "bossNameId": 131065
+      },
+      "sourceName": "弗格尔",
+      "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
     }
   }
 }
