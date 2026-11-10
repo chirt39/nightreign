@@ -11,6 +11,7 @@ let controller = null;
 const attackLabels = { physical: '物理', magic: '魔力', fire: '火', lightning: '雷', holy: '圣' };
 const abilityLabels = { strength: '力气', dexterity: '灵巧', intelligence: '智力', faith: '信仰', arcane: '感应' };
 const displayValue = value => value === null || value === undefined || value === '' ? '待核对' : String(value);
+const displayScalingGrade = value => value === '-' ? '—' : (typeof value === 'string' && /^[SABCDE]$/.test(value) ? value : '待核对');
 const weapons = computed(() => catalog.value?.weapons || []);
 const categories = computed(() => catalog.value?.categories || []);
 const filtered = computed(() => {
@@ -27,9 +28,6 @@ const variant = computed(() => {
   return weapon.variants?.find(item => item.id === variantId.value) || weapon.variants?.find(item => item.id === weapon.representativeVariantId) || weapon.variants?.[0] || null;
 });
 const unknownVariant = computed(() => Boolean(variantId.value && selected.value && !selected.value.variants?.some(item => item.id === variantId.value)));
-const notes = computed(() => [...new Set([...(selected.value?.notes || []), ...(variant.value?.notes || [])].filter(Boolean))]);
-const hasRequirements = computed(() => Object.keys(abilityLabels).some(key => variant.value?.requirements?.[key] !== null && variant.value?.requirements?.[key] !== undefined && variant.value?.requirements?.[key] !== ''));
-const hasScaling = computed(() => Object.keys(abilityLabels).some(key => variant.value?.scaling?.[key] !== null && variant.value?.scaling?.[key] !== undefined && variant.value?.scaling?.[key] !== ''));
 function imageFor(weapon, currentVariant = null) {
   for (const icon of [currentVariant?.iconId, weapon?.iconId]) {
     const entry = images.value[String(icon)];
@@ -99,7 +97,7 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
 
 <template>
   <section id="view-weapons" class="view" :class="{ active }">
-    <div class="page-intro"><p class="eyebrow">ARMORY / WEAPON ARCHIVE</p><h1>武器图鉴</h1><p>查找武器与参数变体，查看基础攻击、使用条件、能力补正和战技。</p></div>
+    <div class="page-intro"><p class="eyebrow">ARMORY / WEAPON ARCHIVE</p><h1>武器图鉴</h1><p>查找武器与参数变体，查看基础攻击、能力补正和战技。</p></div>
     <p v-if="loading" class="weapon-notice" role="status">正在载入武器资料…</p>
     <div v-else-if="error" class="weapon-notice" role="alert"><p>{{ error }}</p><button class="button" type="button" @click="loadCatalog">重新载入</button></div>
     <template v-else-if="catalog">
@@ -127,18 +125,15 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
             <label v-if="selected.variants?.length" class="weapon-variant">参数变体<select :value="variant?.id" @change="variantId = $event.target.value; selectVariant()"><option v-for="item in selected.variants" :key="item.id" :value="item.id">{{ item.label || item.name || '待核对变体' }}</option></select></label>
             <p v-if="unknownVariant" class="weapon-note" role="status">链接中的参数变体不存在，当前展示默认变体。请重新选择。</p>
             <template v-if="variant">
-              <section class="weapon-section"><h3>基础攻击</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in attackLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayValue(variant.attack?.[key]) }}</dd></div></dl><p class="weapon-note">所选变体的基础攻击分量，不代表当前角色的实战伤害。</p><p v-if="variant.attackTypes?.length" class="weapon-note">攻击类型：{{ variant.attackTypes.join('、') }}</p></section>
-              <section class="weapon-section"><h3>能力补正</h3><dl v-if="hasScaling" class="weapon-stat-grid"><div v-for="(label, key) in abilityLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayValue(variant.scaling?.[key]) }}</dd></div></dl><p class="weapon-note">{{ variant.scalingNote || '能力补正待核对；此处不换算等级。' }}</p></section>
-              <section class="weapon-section"><h3>使用条件</h3><dl v-if="hasRequirements" class="weapon-stat-grid"><div v-for="(label, key) in abilityLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayValue(variant.requirements?.[key]) }}</dd></div></dl><p class="weapon-note">{{ variant.requirementNote || (hasRequirements ? '' : '使用条件待核对，暂不判定装备要求。') }}</p></section>
+              <section class="weapon-section"><h3>基础攻击</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in attackLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayValue(variant.attack?.[key]) }}</dd></div></dl><p v-if="variant.attackTypes?.length" class="weapon-note">攻击类型：{{ variant.attackTypes.join('、') }}</p></section>
+              <section class="weapon-section"><h3>能力补正</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in abilityLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayScalingGrade(variant.scalingGrades?.[key]) }}</dd></div></dl></section>
               <section class="weapon-section"><h3>{{ variant.skill?.kind === 'fixed' ? '固定战技' : variant.skill?.kind === 'pool' ? '战技候选池' : '战技' }}</h3><ul v-if="variant.skill?.names?.length" class="weapon-skill-list"><li v-for="name in variant.skill.names" :key="name">{{ name }}</li></ul><p v-else>待核对</p><p v-if="variant.skill?.kind === 'pool'" class="weapon-note">以下为可能出现的战技，不代表这件武器固定拥有全部战技。</p><p v-if="variant.skill?.note" class="weapon-note">{{ variant.skill.note }}</p></section>
-              <section v-if="notes.length" class="weapon-section"><h3>资料说明</h3><ul class="weapon-notes"><li v-for="note in notes" :key="note">{{ note }}</li></ul></section>
             </template>
             <p v-else class="weapon-note">该武器的参数变体待核对。</p>
           </template>
           <div v-else class="weapon-notice">选择武器后，在这里查看属性与战技。</div>
         </article>
       </div>
-      <footer class="weapon-source-note"><p v-if="catalog.gameVersion">游戏资料版本：{{ catalog.gameVersion }}</p><p>按游戏参数、文本及图片清单整理；未确认的信息标为“待核对”。基础补正系数直接按资料展示，不换算为 S–E 等级。</p></footer>
     </template>
   </section>
 </template>

@@ -5,16 +5,20 @@ Usage: python scripts/build_weapon_catalog.py [--source-root PATH] [--audit-dir 
 from __future__ import annotations
 
 import argparse
+import csv
 from collections import Counter, defaultdict
 import hashlib
 import json
+import math
 from pathlib import Path
+import unicodedata
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SOURCE = Path(r"E:\海斗\outputs\nightreign-data-20261109")
 DEFAULT_AUDIT = Path(r"E:\海斗\outputs\weapon-encyclopedia-20261110\data")
 DEFAULT_PARAMDEX = Path(r"E:\海斗\tools\WitchyBND-3.0.1.0\Assets\Paramdex\NR")
+DEFAULT_GRADES = Path(r"E:\海斗\outputs\weapon-encyclopedia-20261110\grades")
 
 # Human-reviewed labels for NR Meta's WEP_TYPE, not the coarse WEAPON_CATEGORY.
 CATEGORIES = {
@@ -67,8 +71,72 @@ def number(row, field):
     return int(value) if value.is_integer() else value
 
 
-def build(source, paramdex, audit_dir):
+def scaling_grade(value, thresholds):
+    """Menu's descending lower bounds, then fallback; never coerce unknown data to zero."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+        return None
+    for lower_bound, grade in thresholds:
+        if value >= lower_bound:
+            return grade
+    return "-"
+
+
+def load_grade_rule(extraction, paramdex):
+    rows = extraction.param("MenuValueTableParam")
+    selected = [row for row in rows if 100 <= int(row["id"]) <= 106]
+    selected.sort(key=lambda row: int(row["id"]))
+    menu_text = extraction.texts("CL_MenuText")
+    thresholds = []
+    for row in selected:
+        names = {unicodedata.normalize("NFKC", x["text"]) for x in menu_text.get(row["textId"], [])}
+        if len(names) != 1:
+            raise ValueError("Scaling grade text missing or ambiguous")
+        grade = next(iter(names))
+        if row["compareType"] == "1" and grade in "SABCDE":
+            thresholds.append((int(row["value"]), grade))
+        elif not (row["id"] == "106" and row["value"] == "0" and row["compareType"] == "2" and grade == "-"):
+            raise ValueError("Scaling menu rule changed; review before conversion")
+    if thresholds != [(73, "S"), (60, "A"), (45, "B"), (30, "C"), (15, "D"), (1, "E")]:
+        raise ValueError("NR menu thresholds changed; review required")
+    tdf = paramdex.parent / "AC6/Tdfs/MenuValueTableCmpType.tdf"
+    tdf_lines = tdf.read_text(encoding="utf-8-sig").splitlines()
+    if tdf_lines[0].strip('"') != "MENU_VALUE_TABLE_CMP_TYPE":
+        raise ValueError("Unexpected comparison enum type")
+    definitions = {row[1]: row[0] for row in csv.reader(tdf_lines) if len(row) == 2}
+    if {key: definitions.get(key) for key in ("0", "1", "2")} != {
+        "0": "Equal to table value", "1": "Greater than or equal to table value", "2": "Always match"
+    }:
+        raise ValueError("Shared tool comparison enum changed; review required")
+    properties = [r for r in extraction.param("MenuPropertySpecParam") if r["id"] in {str(i) for i in range(3070, 3075)}]
+    if len(properties) != 5 or any(r["FormatType"] != "100" for r in properties):
+        raise ValueError("NR weapon scaling menu format changed")
+    if [r["CaptionTextID"] for r in properties] != ["11310", "11311", "11312", "11313", "11319"]:
+        raise ValueError("NR scaling attribute captions changed")
+    layouts = [r for r in extraction.param("MenuPropertyLayoutParam") if r["id"] in {str(i) for i in range(2145, 2150)}]
+    if [r["PropertyID"] for r in layouts] != [str(i) for i in range(3070, 3075)]:
+        raise ValueError("NR weapon scaling menu layout changed")
+    extraction.param("MenuCommonParam")  # Preserve the checked menu snapshot in provenance.
+    reinforcement = extraction.param("ReinforceParamWeapon")
+    rates = {"correct" + suffix + "Rate": sorted({r["correct" + suffix + "Rate"] for r in reinforcement}) for suffix in STAT_FIELDS.values()}
+    if any(values != ["1"] for values in rates.values()):
+        raise ValueError("Stat reinforcement rates changed; base-only grade scope needs review")
+    rule = {"status": "data-backed-inference", "runtimeVerified": False,
+            "scope": "当前基础参数变体；不包含角色、运行时效果、等级同步或强化模拟。",
+            "unit": "raw-correct-coefficient", "inputDivisor": 1,
+            "comparison": ">=", "fallback": "-", "invalid": None,
+            "thresholds": [{"minimum": value, "grade": grade, "rowId": str(100 + index)} for index, (value, grade) in enumerate(thresholds)],
+            "evidenceNote": "阈值、文字与格式号来自NR本作；比较码语义借用同工具AC6 TDF，是跨作枚举推断，不是NR运行时比较代码证据。",
+            "comparisonEnum": {"path": "AC6/Tdfs/MenuValueTableCmpType.tdf", "sha256": hashlib.sha256(tdf.read_bytes()).hexdigest(), "definitions": definitions}}
+    evidence = {"rule": rule, "menuValueRows": selected,
+                "textEvidence": {r["textId"]: menu_text[r["textId"]] for r in selected},
+                "weaponProperties": properties, "weaponLayouts": layouts,
+                "reinforcementRows": len(reinforcement), "reinforcementStatRates": rates}
+    return thresholds, rule, evidence
+
+
+def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES):
     extraction = Extraction(source)
+    thresholds, grade_rule, grade_evidence = load_grade_rule(extraction, paramdex)
     weapons = extraction.param("EquipParamWeapon")
     custom = extraction.param("EquipParamCustomWeapon")
     arts = {r["id"]: r for r in extraction.param("SwordArtsParam")}
@@ -173,7 +241,8 @@ def build(source, paramdex, audit_dir):
                 "attackTypes": [label for field, label in [("isNormalAttackType", "普通"), ("isBlowAttackType", "打击"), ("isSlashAttackType", "斩击"), ("isThrustAttackType", "突刺")] if row[field] == "1"],
                 "requirements": None, "requirementNote": "使用条件待核对。",
                 "scaling": {k: number(row, "correct" + v) for k, v in STAT_FIELDS.items()},
-                "scalingNote": "基础补正系数，非游戏等级标记；不包含强化、等级同步和角色属性修正。",
+                "scalingGrades": {k: scaling_grade(number(row, "correct" + v), thresholds) for k, v in STAT_FIELDS.items()},
+                "scalingNote": "基础变体补正等级；保留原始系数，不包含运行时效果或强化模拟。",
                 "skill": skill(row), "notes": notes, "sourceIds": [row["id"]]})
         dlc = True if any(x["dlcText"] for x in weapon_names[root_id]) else None
         result.append({"id": root_id, "name": name, "categoryId": root["wepType"], "categoryLabel": CATEGORIES[root["wepType"]],
@@ -198,6 +267,7 @@ def build(source, paramdex, audit_dir):
                   "files": [{"path": path.relative_to(source).as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in sorted(extraction.inputs)],
                   "classificationMetaSha256": hashlib.sha256(meta_path.read_bytes()).hexdigest(),
                   "grouping": "沿 originEquipWep0..25 的一致显式引用追溯；缺失、循环或冲突不取整。",
+                  "scalingGrades": grade_rule,
                   "licenseStatus": "原游戏数据及文本的再分发许可待项目发布前核对；当前仅本地预览。"}
     summary = {"rawWeaponRows": len(weapons), "namedWeaponRows": sum(name_for(weapon_names, r["id"]) is not None for r in weapons),
                "weaponCount": len(result), "variantCount": len(included), "excludedRows": len(exclusions),
@@ -219,6 +289,14 @@ def build(source, paramdex, audit_dir):
     write_json(audit_dir / "skill-name-evidence.json", art_names)
     write_json(audit_dir / "resolved-skill-pools.json", skill_pools)
     write_json(audit_dir / "summary.json", summary)
+    grade_evidence["samples"] = [{"id": vid, "raw": {key: number(by_id[vid], "correct" + suffix) for key, suffix in STAT_FIELDS.items()},
+                                  "grades": {key: scaling_grade(number(by_id[vid], "correct" + suffix), thresholds) for key, suffix in STAT_FIELDS.items()},
+                                  "reinforceTypeId": by_id[vid]["reinforceTypeId"]} for vid in ["1000000", "1140000", "1140500"]]
+    grade_evidence["externalCrossCheck"] = {"source": "Mobalytics Nightreign Bloodstained Dagger",
+        "url": "https://mobalytics.gg/elden-ring-nightreign/wiki/weapons/bloodstained-dagger", "checkedDate": "2026-11-10",
+        "observed": {"strength": "E", "dexterity": "S"},
+        "scope": "第三方本作资料交叉核对，仅支持染血短刀样例，不证明所有边界或运行时效果。"}
+    write_json(grades_dir / "mapping-evidence.json", grade_evidence)
     return catalogue
 
 
@@ -228,8 +306,9 @@ def main():
     parser.add_argument("--paramdex", type=Path, default=DEFAULT_PARAMDEX)
     parser.add_argument("--output", type=Path, default=ROOT / "public/weapon-catalog.json")
     parser.add_argument("--audit-dir", type=Path, default=DEFAULT_AUDIT)
+    parser.add_argument("--grades-dir", type=Path, default=DEFAULT_GRADES)
     args = parser.parse_args()
-    catalogue = build(args.source_root, args.paramdex, args.audit_dir)
+    catalogue = build(args.source_root, args.paramdex, args.audit_dir, args.grades_dir)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(catalogue, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     print(json.dumps(catalogue["summary"], ensure_ascii=False))

@@ -2,22 +2,32 @@
 from __future__ import annotations
 
 import argparse
-from collections import defaultdict
+from bisect import bisect_right
+from collections import Counter, defaultdict
+import copy
+import csv
 import hashlib
 import json
 import math
 from pathlib import Path
 import sys
+import unicodedata
 
-from build_weapon_catalog import DEFAULT_AUDIT, DEFAULT_SOURCE, ROOT, Extraction, write_json
+from build_weapon_catalog import DEFAULT_AUDIT, DEFAULT_SOURCE, DEFAULT_GRADES, ROOT, Extraction, scaling_grade, write_json
 
 
-def validate(catalogue_path, source, audit_dir):
+def validate(catalogue_path, source, audit_dir, baseline=None):
     data = json.loads(catalogue_path.read_text(encoding="utf-8"))
     extraction = Extraction(source)
     raw = extraction.param("EquipParamWeapon")
     by_id = {r["id"]: r for r in raw}
     weapon_names = extraction.texts("WeaponName")
+    menu_rows = {r["id"]: r for r in extraction.param("MenuValueTableParam")}
+    menu_text = extraction.texts("CL_MenuText")
+    csv_weapons = {r["row_id"]: r for r in csv.DictReader((source / "csv/EquipParamWeapon.csv").open(encoding="utf-8-sig"))}
+    bounds = [int(menu_rows[str(i)]["value"]) for i in range(105, 99, -1)]
+    grades_ascending = ["-", "E", "D", "C", "B", "A", "S"]
+    source_thresholds = [(int(menu_rows[str(i)]["value"]), grades_ascending[106-i]) for i in range(100, 106)]
     arts = {r["id"]: r for r in extraction.param("SwordArtsParam")}
     art_names = extraction.texts("ArtsName")
     tables = defaultdict(list)
@@ -33,6 +43,17 @@ def validate(catalogue_path, source, audit_dir):
             raise ValueError(message)
 
     check(data["schemaVersion"] == 1, "Unsupported schema")
+    check(bounds == [1, 15, 30, 45, 60, 73], "Source grade boundary changed")
+    check([menu_rows[str(i)]["textId"] for i in range(100, 107)] == [str(i) for i in [11321, 11322, 11323, 11324, 11325, 11326, 11320]], "Grade text references changed")
+    for index, char in enumerate("SABCDE-"):
+        check({unicodedata.normalize("NFKC", x["text"]) for x in menu_text[menu_rows[str(100+index)]["textId"]]} == {char}, "Grade menu text mismatch")
+    for lower, below, equal in [(1, "-", "E"), (15, "E", "D"), (30, "D", "C"), (45, "C", "B"), (60, "B", "A"), (73, "A", "S")]:
+        check(scaling_grade(math.nextafter(lower, -math.inf), source_thresholds) == below, "Immediately before boundary misgraded")
+        check(scaling_grade(lower, source_thresholds) == equal, "Equal boundary misgraded")
+        check(scaling_grade(math.nextafter(lower, math.inf), source_thresholds) == equal, "Immediately after boundary misgraded")
+    check(scaling_grade(0, source_thresholds) == "-", "Zero scaling must display hyphen")
+    for invalid in [None, "73", True, False, [], {}, -1, -0.001, math.nan, math.inf, -math.inf]:
+        check(scaling_grade(invalid, source_thresholds) is None, "Unknown/invalid value coerced into a grade")
     check(catalogue_path.stat().st_size <= 3_000_000, "Public catalogue exceeds the reviewed payload budget")
     check("skillPools" not in data, "Detailed pools belong in external audit data")
     manifest = json.loads((source / "source-manifest.json").read_text(encoding="utf-8"))
@@ -61,12 +82,16 @@ def validate(catalogue_path, source, audit_dir):
             check(variant["sourceIds"] == [vid], "Variant source ID mismatch")
             check(variant["iconId"] == int(row["iconId"]), "Image ID replaced with weapon ID")
             check(variant["requirements"] is None and variant["rarity"] is None, "Unverified semantics must remain null")
-            check("基础补正系数" in variant["scalingNote"] and "非游戏等级标记" in variant["scalingNote"], "Scaling disclosure missing")
+            check("不包含运行时效果或强化模拟" in variant["scalingNote"], "Grade scope disclosure missing")
             for key, suffix in [("physical", "Physics"), ("magic", "Magic"), ("fire", "Fire"), ("lightning", "Thunder"), ("holy", "Dark")]:
                 value = variant["attack"][key]
                 check(isinstance(value, (int, float)) and math.isfinite(value) and value == float(row["attackBase" + suffix]), "Attack component differs from source")
             for key, suffix in [("strength", "Strength"), ("dexterity", "Agility"), ("intelligence", "Magic"), ("faith", "Faith"), ("arcane", "Luck")]:
                 check(variant["scaling"][key] == float(row["correct" + suffix]), "Scaling raw coefficient differs from source")
+                value = float(csv_weapons[vid]["correct" + suffix])
+                check(variant["scaling"][key] == value, "Independent CSV raw coefficient differs")
+                expected_grade = grades_ascending[bisect_right(bounds, value)] if math.isfinite(value) and value >= 0 else None
+                check(variant["scalingGrades"][key] == expected_grade, "Grade differs from independent CSV/menu lookup")
             skill = variant["skill"]
             check(skill["kind"] in {"fixed", "pool", "unknown"}, "Invalid skill kind")
             check("candidates" not in skill, "Repeated detailed candidates leaked into public payload")
@@ -101,6 +126,8 @@ def validate(catalogue_path, source, audit_dir):
     check("33990100" not in variants and by_id["33990100"]["originEquipWep"] not in by_id, "Unresolved source rounded into a family")
     check(families["5750000"]["dlc"] is True and families["11750000"]["dlc"] is True, "Dedicated DLC text sample missing")
     check(dagger["dlc"] is None, "Container dlc01 name incorrectly marked base dagger DLC")
+    for vid in ["1000000", "1140000", "1140500"]:
+        check(variants[vid]["scalingGrades"] == {"strength": "E", "dexterity": "S", "intelligence": "-", "faith": "-", "arcane": "-"}, "13/73 weapon example misgraded")
     check(variants["1000000"]["skill"]["kind"] == "pool" and len(skill_pools["10000010"]) > 1, "Dagger skill pool collapsed to fixed")
     exclusions = json.loads((audit_dir / "excluded-weapon-rows.json").read_text(encoding="utf-8"))
     check(set(variants).isdisjoint(x["id"] for x in exclusions), "Included/excluded overlap")
@@ -114,7 +141,26 @@ def validate(catalogue_path, source, audit_dir):
     check(data["summary"]["weaponCount"] == len(families) and data["summary"]["variantCount"] == len(variants), "Summary mismatch")
     for item in data["provenance"]["files"]:
         check(hashlib.sha256((source / item["path"]).read_bytes()).hexdigest() == item["sha256"], "Source hash mismatch: " + item["path"])
+    check(data["provenance"]["scalingGrades"]["runtimeVerified"] is False, "Static inference incorrectly called runtime verified")
+    preserved = None
+    if baseline:
+        before = json.loads(baseline.read_text(encoding="utf-8"))
+        after = copy.deepcopy(data)
+        for catalogue in [before, after]:
+            for weapon in catalogue["weapons"]:
+                for variant in weapon["variants"]:
+                    variant.pop("scalingGrades", None)
+                    variant.pop("scalingNote", None)
+        old_files = before["provenance"].pop("files")
+        new_files = after["provenance"].pop("files")
+        after["provenance"].pop("scalingGrades")
+        check(all(item in new_files for item in old_files), "Existing provenance changed")
+        check(before == after, "Unrelated catalogue fields changed")
+        preserved = True
     return {"status": "passed", "checks": count, "weaponCount": len(families), "variantCount": len(variants), "skillPools": len(skill_pools),
+            "scalingValuesChecked": len(variants) * 5, "boundaryCases": 18, "invalidCases": 11, "unrelatedFieldsPreserved": preserved,
+            "gradeCounts": dict(Counter(grade for variant in variants.values() for grade in variant["scalingGrades"].values())),
+            "zeroCoefficients": sum(value == 0 for variant in variants.values() for value in variant["scaling"].values()),
             "catalogueSha256": hashlib.sha256(catalogue_path.read_bytes()).hexdigest(),
             "samples": ["匕首普通/火焰/雷电", "33750000/33770000同图标不合并", "33990100来源缺失", "5750000/11750000 DLC专属文本", "10000010多行战技池"]}
 
@@ -125,9 +171,12 @@ def main():
     parser.add_argument("--catalogue", type=Path, default=ROOT / "public/weapon-catalog.json")
     parser.add_argument("--source-root", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--audit-dir", type=Path, default=DEFAULT_AUDIT)
+    parser.add_argument("--grades-dir", type=Path, default=DEFAULT_GRADES)
+    parser.add_argument("--baseline", type=Path, help="Pre-conversion catalogue for exact unrelated-field comparison")
     args = parser.parse_args()
-    result = validate(args.catalogue, args.source_root, args.audit_dir)
+    result = validate(args.catalogue, args.source_root, args.audit_dir, args.baseline)
     write_json(args.audit_dir / "validation.json", result)
+    write_json(args.grades_dir / "validation.json", result)
     print(json.dumps(result, ensure_ascii=False))
 
 

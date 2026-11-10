@@ -11,6 +11,14 @@ python scripts/build_weapon_catalog.py
 python scripts/validate_weapon_catalog.py
 ```
 
+2026-11-10 经用户批准，目录新增 `scalingGrades`，仍保留 `scaling` 的五项原始数值。转换证据与校验报告在 `E:\海斗\outputs\weapon-encyclopedia-20261110\grades`。如需核对本次变更没有影响其他字段：
+
+```powershell
+python scripts/validate_weapon_catalog.py --baseline E:\海斗\outputs\weapon-encyclopedia-20261110\grades\catalogue-before.json
+```
+
+基线文件是实施前保存的目录副本，生成器不会覆盖它。`--baseline` 可选；提供时必须完整比对除新增等级、更新的补正说明及新增出处以外的全部字段。生成器与校验器支持 `--grades-dir` 指定独立证据目录。
+
 生成器支持 `--source-root`、`--paramdex`、`--output`、`--audit-dir`；校验器支持 `--source-root`、`--catalogue`、`--audit-dir`。默认源为 `E:\海斗\outputs\nightreign-data-20261109`，审计目录为 `E:\海斗\outputs\weapon-encyclopedia-20261110\data`。Python 标准库即可运行。校验器会返回非零退出码拒绝失败结果，成功报告写入外部 `validation.json`。
 
 正式读取 `strict/regulation-bin/*.param.xml`，先展开每表 `<fields>` 的 `defaultValue` 再读取行属性，避免把 XML 省略字段误当零。`csv/EquipParamWeapon.csv` 可对照这些已展开参数；战技表与效果表必须读取全部 XML 行，不能以 ID 字典覆盖重复记录。公开 JSON 采用紧凑 UTF-8 编码，顺序固定，不嵌入运行时间；重复生成可比较 SHA-256。
@@ -63,7 +71,37 @@ python scripts/validate_weapon_catalog.py
 
 公开 `attack` 来自本变体的 `attackBasePhysics/Magic/Fire/Thunder/Dark`，其中 Dark 是旧字段名，对应圣属性分量。`attackTypes` 由四个 `isNormalAttackType/isBlowAttackType/isSlashAttackType/isThrustAttackType` 显示标记生成，零值不生成额外标签。
 
-`requirements` 全部为 null，并写“使用条件待核对”；`proper*`、`throwAtkRate` 的夜渡实际生效含义尚未确认，不生成“无要求”或角色等级限制。`rarity` 也暂为 null，原值在审计源行中。`scaling` 保存 `correctStrength/Agility/Magic/Faith/Luck` 数字，说明为“基础补正系数，非游戏等级标记”；不自动推算 S–E。强化、等级同步、角色属性、特殊效果、异常累积和动作倍率未计算，数据不能用作最终面板、实战伤害或抽取概率。
+`requirements` 全部为 null，并写“使用条件待核对”；`proper*`、`throwAtkRate` 的夜渡实际生效含义尚未确认，不生成“无要求”或角色等级限制。`rarity` 也暂为 null，原值在审计源行中。`scaling` 继续保存 `correctStrength/Agility/Magic/Faith/Luck` 原始数字；同名字段的 `scalingGrades` 保存推导字母。强化、等级同步、角色属性、特殊效果、异常累积和动作倍率未计算，数据不能用作最终面板、实战伤害或抽取概率。
+
+### 基础变体字母补正：静态推导与证据层级
+
+本次使用本作菜单参数推导字母，不采用《艾尔登法环》阈值。目录全局 `provenance.scalingGrades` 标为 `data-backed-inference`、`runtimeVerified: false`：有本作静态参数和外部样例支持，未启动游戏逐件实测，也未通过反编译证明 NR 的比较执行代码。
+
+本作的直接观察：
+
+- `MenuValueTableParam` 行 100…106 的 value/textId/compareType 如下；中文 `CL_MenuText.fmg.xml` 直接给出对应全角字母和“-”。生成时 NFKC 归一为 ASCII 字母，不改变含义。
+- `MenuPropertySpecParam` 行 3070…3074 的标题为力气/灵巧/智力/信仰/感应，`FormatType=100`；`MenuPropertyLayoutParam` 行 2145…2149 把它们放入 `Item_10…14`，帮助文本 31310…31313、31319 明确为对应能力影响武器攻击力的程度。这是格式号与字母表行号一致的挂接证据，但字段没有显式 MenuValueTable 外键。
+- `MenuCommonParam` 本次检查未发现已解释的补正等级阈值或除数开关；未知字段不推断用途。
+
+| MenuValue 行 | 原值下限 | textId | 显示 | compareType | 本实现范围 |
+| --- | ---: | ---: | --- | ---: | --- |
+| 100 | 73 | 11321 | S | 1 | ≥73 |
+| 101 | 60 | 11322 | A | 1 | ≥60 且 <73 |
+| 102 | 45 | 11323 | B | 1 | ≥45 且 <60 |
+| 103 | 30 | 11324 | C | 1 | ≥30 且 <45 |
+| 104 | 15 | 11325 | D | 1 | ≥15 且 <30 |
+| 105 | 1 | 11326 | E | 1 | ≥1 且 <15 |
+| 106 | 0 | 11320 | - | 2 | 非负输入未命中以上等级时兜底 |
+
+比较语义的证据层级：NR Meta 只写 Type 0/1/2；同工具 `Assets/Paramdex/AC6/Tdfs/MenuValueTableCmpType.tdf` 使用同名 `MENU_VALUE_TABLE_CMP_TYPE`，明确 0=Equal to table value、1=Greater than or equal to table value、2=Always match。本实现将此共享工具枚举解释用于 NR：按 100→105 的降序下限逐项 `>=` 比较，再使用 106 兜底。**这是跨作枚举语义推断，不是 NR 运行时直接证明。** 特别地，2 不是“等于0”或“小于等于0”；行106的 value 为0不改变其 Always match 兜底含义。
+
+输入按本作原始 `correct*` 数值尺度直接比较，`inputDivisor=1`。不先除100；若仅把原值73改成0.73而仍对照73，会错误落入兜底。原字段是 f32，但当前目录8960项全是有限非负整数，最小正数7。0共4385项，均显示“-”；真正缺失、非数字、布尔值、负数、NaN及无穷值返回 null，不当成零。理论非负小于1的值按表兜底为“-”，当前目录没有此类正值。
+
+真实样例：匕首 `1000000`、染血短刀 `1140000`、火焰染血短刀 `1140500` 的原始补正均为 13/73/0/0/0，静态推导为 E/S/-/-/-。[Mobalytics 的 Nightreign 染血短刀资料](https://mobalytics.gg/elden-ring-nightreign/wiki/weapons/bloodstained-dagger)于2026-11-10直接核对到 Strength E、Dexterity S，与原值13/73吻合。该第三方样例支持73边界及本作尺度，但不能证明其他所有边界已游戏内实测，不能据此将火焰变体也称为外部页面已核对。
+
+本快照255行 `ReinforceParamWeapon` 的五个 `correctStrength/Agility/Magic/Faith/LuckRate` 全部是1；指定样例的强化类型0、200也如此。其他字段如法术补正倍率可能变化，不能因此声称强化整体无影响。本功能不新增强化模拟，也不把运行时效果算进字母。
+
+生成器在阈值、文本、布局、枚举或五项强化倍率发生变化时中止并要求重新审核。校验器独立读取 CSV 原始系数及菜单表，覆盖1792×5项；六个阈值用 `math.nextafter` 检查紧邻前值、等值、后值共18例，另查0及11种未知/非法输入。前值1以下的兜底只为比较语义校验，不捏造一条真实武器样本。两次生成目录字节一致，实际 SHA-256 及全部报告保存在 `grades/validation.json`、`mapping-evidence.json`；原名称、攻击、战技、图标、归组和其他字段通过基线深比较。
 
 战技名称按 `SwordArtsParam.textId → ArtsName` 关联，不假设战技参数 ID 必然就是文本 ID。XML 省略的 `chanceWeight` 用表内默认值 100 恢复。引用 `swordArtsTableId` 时，保留其全部同行 ID 记录为候选池；`names` 仅汇总权重大于零且引用有效的去重中文名，池只有一个名字也不冒称固定战技。无表引用时使用 `swordArtsParamId` 的参数默认战技，定制配置仍可能覆盖。
 
