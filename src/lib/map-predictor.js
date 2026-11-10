@@ -23,6 +23,12 @@ export function phaseBossOptions(patterns, definitions, day) {
 export function validPosition(position) {
   return Boolean(position && Number.isFinite(position.x) && Number.isFinite(position.y) && position.x >= 0 && position.x <= 1 && position.y >= 0 && position.y <= 1);
 }
+export function referenceMapGroups(points = [], terrainId, visibility) {
+  return points.filter(point => point.filterable === false && point.terrainId === terrainId && ['fieldElite', 'baseBoss'].includes(point.displayCategory) && visibility[point.displayCategory] && validPosition(point.normalized)).map(point => ({
+    key: `reference:${point.key}`, terrainId: point.terrainId, normalized: point.normalized, reference: point,
+    entries: [{ name: point.nameZh, displayCategory: point.displayCategory }],
+  }));
+}
 export function safeMapAsset(entry) {
   return Boolean(entry?.status === 'verified' && Number.isFinite(entry.width) && entry.width > 0 && Number.isFinite(entry.height) && entry.height > 0 && typeof entry.src === 'string' && /^\/map-assets\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+\.(?:png|webp|jpe?g)$/i.test(entry.src));
 }
@@ -123,9 +129,10 @@ export function layoutMapMarkers(groups, width, height) {
   return groups.map(group => {
     const origin = { x: group.normalized.x * width, y: group.normalized.y * height };
     let position = origin;
-    for (let attempt = 0; placed.some(other => Math.hypot(other.x - position.x, other.y - position.y) < 48) && attempt < 80; attempt++) {
-      const angle = attempt * 2.4, radius = 48 * Math.sqrt(1 + attempt / 5);
-      position = { x: Math.max(24, Math.min(width - 24, origin.x + Math.cos(angle) * radius)), y: Math.max(24, Math.min(height - 24, origin.y + Math.sin(angle) * radius)) };
+    // Labels are at most 100px wide below a 44px hit target; include both and a gap.
+    for (let attempt = 0; placed.some(other => Math.abs(other.x - position.x) < 112 && Math.abs(other.y - position.y) < 64) && attempt < 200; attempt++) {
+      const angle = attempt * 2.4, radius = 64 * Math.sqrt(1 + attempt / 4);
+      position = { x: Math.max(56, Math.min(width - 56, origin.x + Math.cos(angle) * radius)), y: Math.max(24, Math.min(height - 40, origin.y + Math.sin(angle) * radius)) };
     }
     placed.push(position);
     return { ...group, markerX: position.x, markerY: position.y, offset: position !== origin };

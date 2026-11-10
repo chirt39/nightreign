@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { PRIMARY_BOSS_ROLE, displayCategory, layoutMapMarkers, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
+import { PRIMARY_BOSS_ROLE, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
 
 // Synthetic state fixtures exercise the filter contract, not game distribution claims.
 const known = value => ({ state: 'known', value });
@@ -215,4 +215,21 @@ test('elite coverage does not exclude other monster roles or unresolved elite id
   base.points[0].features = [];
   base.points[0].coverage.fieldElite = 'known_absent';
   assert.equal(evaluatePattern(base, clue, defs).matches, false);
+});
+
+
+test('reference markers follow terrain and layer visibility without entering candidate filtering', () => {
+  const reference = { key: 'fixed', terrainId: '2', nameZh: '参考首领', normalized: { x: .4, y: .6 }, displayCategory: 'fieldElite', filterable: false };
+  const visibility = { fieldElite: true, baseBoss: true };
+  const groups = referenceMapGroups([reference], '2', visibility);
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].reference, reference);
+  assert.equal(groups[0].attachId, undefined);
+  assert.equal(groups[0].entries[0].sourceId, undefined);
+  assert.equal(referenceMapGroups([reference], '1', visibility).length, 0);
+  assert.equal(referenceMapGroups([reference], '2', { fieldElite: false }).length, 0);
+  assert.equal(referenceMapGroups([{ ...reference, filterable: true }], '2', visibility).length, 0);
+  assert.equal(referenceMapGroups([{ ...reference, normalized: null }], '2', visibility).length, 0);
+  const candidates = [pattern(0)];
+  assert.deepEqual(findCandidates(candidates, { referencePoints: [reference] }), candidates);
 });

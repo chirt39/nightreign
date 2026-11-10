@@ -20,6 +20,7 @@ SOURCE = Path(r"E:\海斗\outputs\nightreign-data-20261109")
 OVERRIDES = REPO / "scripts/data/map_identity_overrides.json"
 OUTPUT = REPO / "public/map-catalog.json"
 ASSET_MANIFEST = REPO / "public/map-asset-manifest.json"
+CASTLE_BOSS_ATTACH_IDS = {"756", "757", "2756", "2757"}
 
 
 def sha256(path: Path) -> str:
@@ -193,6 +194,7 @@ def main() -> None:
             "referenceName": elite["referenceName"],
             "npcNameTextId": text_id,
             "nameMethod": elite.get("nameMethod", "native_fmg_exact"),
+            "worldMapPointIconId": elite["worldMapPointIconId"],
             "role": "fieldElite", "displayCategory": "fieldElite",
             "identityStatus": "native_icon_and_pattern_slot_crosschecked",
             "evidence": elite["evidence"],
@@ -294,9 +296,9 @@ def main() -> None:
                     "role": "primarySmallBaseBoss", "displayCategory": "baseBoss",
                     "identityStatus": "native_map_id_520_presence_set_crosschecked",
                 })
-            if map_id in overrides["verifiedFieldEliteMapIds"]:
-                if "16" not in point_icons[map_id]:
-                    raise ValueError(f"Field elite map {map_id} has no native boss icon")
+            if map_id in overrides["verifiedFieldEliteMapIds"] and attach_id not in CASTLE_BOSS_ATTACH_IDS:
+                if str(overrides["verifiedFieldEliteMapIds"][map_id]["worldMapPointIconId"]) not in point_icons[map_id]:
+                    raise ValueError(f"Field elite map {map_id} has no matching native boss icon")
                 features.append({
                     "kind": "monster", "state": "known", "sourceId": f"fieldElite:{map_id}",
                     "role": "fieldElite", "displayCategory": "fieldElite",
@@ -315,7 +317,7 @@ def main() -> None:
                     "building": "known" if category_complete else "unknown",
                     "monster": "unknown", "event": "unknown",
                     "primarySmallBaseBoss": "known" if map_id in overrides["verifiedFieldBossMapIds"] else "unknown",
-                    "fieldElite": "known" if map_id in overrides["verifiedFieldEliteMapIds"] else "unknown",
+                    "fieldElite": "known" if map_id in overrides["verifiedFieldEliteMapIds"] and attach_id not in CASTLE_BOSS_ATTACH_IDS else "unknown",
                 },
                 "sourceRows": {"lotResultSmallBaseAndSpot": row["id"]},
             })
@@ -374,7 +376,12 @@ def main() -> None:
         },
         "definitions": definitions,
         "patterns": patterns,
+        "referencePoints": overrides["referencePoints"],
     }
+    for point in catalog["referencePoints"]:
+        xy = point["normalized"]
+        if point["filterable"] is not False or point["positionAccuracy"] != "reference" or point["displayCategory"] not in {"fieldElite", "baseBoss"} or not (0 <= xy["x"] <= 1 and 0 <= xy["y"] <= 1):
+            raise ValueError(f"Invalid display-only reference point {point['key']}")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(catalog, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     print(f"{args.output}: {len(patterns)} patterns, {sum(len(p['points']) for p in patterns)} raw points")

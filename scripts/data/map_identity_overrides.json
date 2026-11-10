@@ -581,59 +581,760 @@
     "4551": {
       "referenceName": "Black Knife Assassin",
       "npcNameTextId": 902100600,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 902100600"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 902100600",
+      "worldMapPointIconId": 16
     },
     "4651": {
       "referenceName": "Red Wolf",
       "npcNameTextId": null,
       "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference Red Wolf slot assignments agree wherever available. 红狼 is a display translation of the reference label, not a native FMG title.",
       "displayNameZh": "红狼",
-      "nameMethod": "reference_label_translation"
+      "nameMethod": "reference_label_translation",
+      "worldMapPointIconId": 16
     },
     "4655": {
       "referenceName": "Leonine Misbegotten",
       "npcNameTextId": 903460500,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 903460500"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 903460500",
+      "worldMapPointIconId": 16
     },
     "4657": {
       "referenceName": "Elder Lion",
       "npcNameTextId": 904270600,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904270600"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904270600",
+      "worldMapPointIconId": 16
     },
     "4659": {
       "referenceName": "Royal Revenant",
       "npcNameTextId": 904020540,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904020540"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904020540",
+      "worldMapPointIconId": 16
     },
     "4662": {
       "referenceName": "Night's Cavalry",
       "npcNameTextId": 903150600,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 903150600"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 903150600",
+      "worldMapPointIconId": 16
     },
     "4665": {
       "referenceName": "Grafted Scion",
       "npcNameTextId": 904690000,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904690000"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904690000",
+      "worldMapPointIconId": 16
     },
     "4669": {
       "referenceName": "Ancient Hero of Zamor",
       "npcNameTextId": 907100300,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 907100300"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 907100300",
+      "worldMapPointIconId": 16
     },
     "4671": {
       "referenceName": "Miranda Blossom",
       "npcNameTextId": 904480311,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904480311"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904480311",
+      "worldMapPointIconId": 16
     },
     "4672": {
       "referenceName": "Golden Hippopotamus",
       "npcNameTextId": 905011000,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 905011000"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 905011000",
+      "worldMapPointIconId": 16
     },
     "4677": {
       "referenceName": "Demi-Human Queen",
       "npcNameTextId": 904130700,
-      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904130700"
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904130700",
+      "worldMapPointIconId": 16
+    },
+    "4652": {
+      "referenceName": "Draconic Tree Sentinel",
+      "npcNameTextId": 903250600,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4653": {
+      "referenceName": "Tree Sentinel",
+      "npcNameTextId": 903251600,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4654": {
+      "referenceName": "Royal Carian Knight",
+      "npcNameTextId": 903253500,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4656": {
+      "referenceName": "Bell Bearing Hunter",
+      "npcNameTextId": 903100600,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4658": {
+      "referenceName": "Flying Dragon",
+      "npcNameTextId": 904505000,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4663": {
+      "referenceName": "Ulcerated Tree Spirit",
+      "npcNameTextId": 904640000,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4664": {
+      "referenceName": "Ancestor Spirit",
+      "npcNameTextId": 904670000,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4666": {
+      "referenceName": "Black Blade Kindred",
+      "npcNameTextId": 904770001,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4667": {
+      "referenceName": "Erdtree Avatar",
+      "npcNameTextId": 904810600,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4668": {
+      "referenceName": "Magma Wyrm",
+      "npcNameTextId": 904910320,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
+    },
+    "4674": {
+      "referenceName": "Death Rite Bird",
+      "npcNameTextId": 904980600,
+      "worldMapPointIconId": 28,
+      "evidence": "SmallBaseAndSpotDefine 104/105/106/1201/1207/2104/2105/2106 boss icon 28; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and named outdoor reference slots agree wherever available; native NpcName exact English title."
     }
+  },
+  "referencePoints": [
+    {
+      "key": "1:1",
+      "terrainId": "1",
+      "nameZh": "山脚雪人",
+      "normalized": {
+        "x": 0.372227,
+        "y": 0.477258
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶西南侧山脚",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "1:2",
+      "terrainId": "1",
+      "nameZh": "营地骑士",
+      "normalized": {
+        "x": 0.29307,
+        "y": 0.45804
+      },
+      "displayCategory": "baseBoss",
+      "locationNote": "山顶西南侧营地；据点遭遇",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "1:3",
+      "terrainId": "1",
+      "nameZh": "废墟双白金之子",
+      "normalized": {
+        "x": 0.212998,
+        "y": 0.448432
+      },
+      "displayCategory": "baseBoss",
+      "locationNote": "西南废墟；据点遭遇",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "1:4",
+      "terrainId": "1",
+      "nameZh": "飞龙",
+      "normalized": {
+        "x": 0.305424,
+        "y": 0.343652
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶西侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "1:5",
+      "terrainId": "1",
+      "nameZh": "西剑圣",
+      "normalized": {
+        "x": 0.25006,
+        "y": 0.210047
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶西北侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "1:7",
+      "terrainId": "1",
+      "nameZh": "三寒鸦",
+      "normalized": {
+        "x": 0.354382,
+        "y": 0.176646
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶北侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "1:8",
+      "terrainId": "1",
+      "nameZh": "东剑圣",
+      "normalized": {
+        "x": 0.450926,
+        "y": 0.176188
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶东北侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "1:9",
+      "terrainId": "1",
+      "nameZh": "双雪人",
+      "normalized": {
+        "x": 0.411118,
+        "y": 0.38529
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶东南侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "1:6-1",
+      "terrainId": "1",
+      "nameZh": "冰龙",
+      "normalized": {
+        "x": 0.191951,
+        "y": 0.252142
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶冰龙候选刷新点",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false,
+      "spawnNote": "四处候选位置，不表示同局全部出现"
+    },
+    {
+      "key": "1:6-2",
+      "terrainId": "1",
+      "nameZh": "冰龙",
+      "normalized": {
+        "x": 0.239536,
+        "y": 0.344567
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶冰龙候选刷新点",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false,
+      "spawnNote": "四处候选位置，不表示同局全部出现"
+    },
+    {
+      "key": "1:6-3",
+      "terrainId": "1",
+      "nameZh": "冰龙",
+      "normalized": {
+        "x": 0.359873,
+        "y": 0.267699
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶冰龙候选刷新点",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false,
+      "spawnNote": "四处候选位置，不表示同局全部出现"
+    },
+    {
+      "key": "1:6-4",
+      "terrainId": "1",
+      "nameZh": "冰龙",
+      "normalized": {
+        "x": 0.397392,
+        "y": 0.194948
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "山顶冰龙候选刷新点",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false,
+      "spawnNote": "四处候选位置，不表示同局全部出现"
+    },
+    {
+      "key": "2:1",
+      "terrainId": "2",
+      "nameZh": "洞穴亚人女王",
+      "normalized": {
+        "x": 0.607688,
+        "y": 0.355682
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口东侧洞穴；下层",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:2",
+      "terrainId": "2",
+      "nameZh": "飞龙",
+      "normalized": {
+        "x": 0.65105,
+        "y": 0.239391
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口东北侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:3",
+      "terrainId": "2",
+      "nameZh": "石像鬼",
+      "normalized": {
+        "x": 0.409797,
+        "y": 0.422303
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口西南侧；高处",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:4",
+      "terrainId": "2",
+      "nameZh": "红狼",
+      "normalized": {
+        "x": 0.369588,
+        "y": 0.31705
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口西侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:5",
+      "terrainId": "2",
+      "nameZh": "胖主教",
+      "normalized": {
+        "x": 0.43542,
+        "y": 0.385247
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口西南侧；下层",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:6",
+      "terrainId": "2",
+      "nameZh": "胖主教",
+      "normalized": {
+        "x": 0.446458,
+        "y": 0.311531
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口西侧；下层",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:7",
+      "terrainId": "2",
+      "nameZh": "胖主教",
+      "normalized": {
+        "x": 0.538308,
+        "y": 0.287879
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口北侧；下层",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:8",
+      "terrainId": "2",
+      "nameZh": "土龙",
+      "normalized": {
+        "x": 0.540279,
+        "y": 0.416784
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口南侧；下层",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:9",
+      "terrainId": "2",
+      "nameZh": "坠星异兽",
+      "normalized": {
+        "x": 0.478783,
+        "y": 0.439648
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口南侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "2:10",
+      "terrainId": "2",
+      "nameZh": "西亚人女王",
+      "normalized": {
+        "x": 0.426353,
+        "y": 0.2524
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "火山口西北侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:1",
+      "terrainId": "5",
+      "nameZh": "西骑士",
+      "normalized": {
+        "x": 0.325191,
+        "y": 0.609922
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内西北侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:2",
+      "terrainId": "5",
+      "nameZh": "西黑刀",
+      "normalized": {
+        "x": 0.201132,
+        "y": 0.669884
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内西侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:4",
+      "terrainId": "5",
+      "nameZh": "楼骑士",
+      "normalized": {
+        "x": 0.217673,
+        "y": 0.66309
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内西侧高处",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:5",
+      "terrainId": "5",
+      "nameZh": "王室幽魂",
+      "normalized": {
+        "x": 0.244848,
+        "y": 0.69824
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内西侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:6",
+      "terrainId": "5",
+      "nameZh": "中骑士",
+      "normalized": {
+        "x": 0.270841,
+        "y": 0.710351
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内中部",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:7",
+      "terrainId": "5",
+      "nameZh": "艾斯提",
+      "normalized": {
+        "x": 0.213538,
+        "y": 0.794238
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内西南侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:8",
+      "terrainId": "5",
+      "nameZh": "龙人士兵",
+      "normalized": {
+        "x": 0.301265,
+        "y": 0.698831
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内中部",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:9",
+      "terrainId": "5",
+      "nameZh": "无头山妖",
+      "normalized": {
+        "x": 0.329917,
+        "y": 0.749341
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内南侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:10",
+      "terrainId": "5",
+      "nameZh": "东黑刀",
+      "normalized": {
+        "x": 0.330212,
+        "y": 0.780946
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内东南侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:11",
+      "terrainId": "5",
+      "nameZh": "东骑士",
+      "normalized": {
+        "x": 0.417939,
+        "y": 0.718031
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城内东侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:12",
+      "terrainId": "5",
+      "nameZh": "亚基尔",
+      "normalized": {
+        "x": 0.479673,
+        "y": 0.730436
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城外东南侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:13",
+      "terrainId": "5",
+      "nameZh": "罗蕾塔",
+      "normalized": {
+        "x": 0.342913,
+        "y": 0.52958
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城外北侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    },
+    {
+      "key": "5:14",
+      "terrainId": "5",
+      "nameZh": "河谷河马",
+      "normalized": {
+        "x": 0.48883,
+        "y": 0.566502
+      },
+      "displayCategory": "fieldElite",
+      "locationNote": "隐城城外东北侧",
+      "source": {
+        "author": "无名-Eisregen",
+        "label": "用户提供的特异地形标注图（Bilibili）；与本地底图特征配准"
+      },
+      "positionAccuracy": "reference",
+      "filterable": false
+    }
+  ],
+  "referencePointCalibration": {
+    "method": "SIFT local-feature homography against the verified 1536x1536 shipped map artwork; simplified affine coefficients used for the marked screenshot points",
+    "sourceImageAuthor": "无名-Eisregen",
+    "imagePixelToAssetPixel": {
+      "1": {
+        "scale": 0.7028,
+        "offsetX": 79.78,
+        "offsetY": 53.46
+      },
+      "2": {
+        "scale": 0.6055,
+        "offsetX": 396.33,
+        "offsetY": 180.0
+      },
+      "5": {
+        "scale": 0.4537,
+        "offsetX": 240.43,
+        "offsetY": 717.25
+      }
+    },
+    "assetSize": 1536,
+    "excluded": "Rotted buff stars, Noklateo treasure building 3, normal-map castle markers 8 and 9"
   }
 }

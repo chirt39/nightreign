@@ -9,7 +9,7 @@ import math
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from build_map_catalog import ASSET_MANIFEST, OVERRIDES, OUTPUT, SOURCE, param, sha256
+from build_map_catalog import ASSET_MANIFEST, CASTLE_BOSS_ATTACH_IDS, OVERRIDES, OUTPUT, SOURCE, param, sha256
 
 
 def main() -> None:
@@ -85,7 +85,9 @@ def main() -> None:
             assert point["coverage"]["monster"] == point["coverage"]["event"] == "unknown"
             raw = native_by_attach[point["attachId"]]["smallBaseMapId"]
             assert point["coverage"]["primarySmallBaseBoss"] == ("known" if raw in overrides["verifiedFieldBossMapIds"] else "unknown")
-            assert point["coverage"]["fieldElite"] == ("known" if raw in overrides["verifiedFieldEliteMapIds"] else "unknown")
+            assert point["coverage"]["fieldElite"] == ("known" if raw in overrides["verifiedFieldEliteMapIds"] and point["attachId"] not in CASTLE_BOSS_ATTACH_IDS else "unknown")
+            if point["attachId"] in CASTLE_BOSS_ATTACH_IDS:
+                assert not any(f.get("role") == "fieldElite" for f in point["features"])
             assert any(f.get("sourceId") == f"smallBaseMap:{raw}" for f in point["features"])
             for feature in point["features"]:
                 if feature.get("sourceId", "").startswith("buildingCategory:"):
@@ -108,7 +110,22 @@ def main() -> None:
 
     assert point_count == 23830
     assert field_boss_count == 348
-    assert field_elite_count == 2850
+    assert field_elite_count == 5060
+    castle_basement_raw = sum(
+        point["attachId"] in {"756", "2756"} and any(
+            f.get("sourceId", "").startswith("smallBaseMap:") and f["sourceId"].split(":", 1)[1] in overrides["verifiedFieldEliteMapIds"]
+            for f in point["features"]
+        )
+        for pattern in patterns for point in pattern["points"]
+    )
+    assert castle_basement_raw == 390
+    reference_points = catalog["referencePoints"]
+    assert len(reference_points) == 35 and len({p["key"] for p in reference_points}) == 35
+    assert Counter(p["terrainId"] for p in reference_points) == {"1": 12, "2": 10, "5": 13}
+    assert all(p["filterable"] is False and p["positionAccuracy"] == "reference" for p in reference_points)
+    assert Counter(p["displayCategory"] for p in reference_points) == {"fieldElite": 33, "baseBoss": 2}
+    assert {p["key"] for p in reference_points if p["displayCategory"] == "baseBoss"} == {"1:2", "1:3"}
+    assert all(0 <= p["normalized"][axis] <= 1 for p in reference_points for axis in ("x", "y"))
     assert event_count == 251
     assert len(catalog["definitions"]["nightlords"]) == 10
     assert len(catalog["definitions"]["bosses"]) == 35
@@ -128,6 +145,8 @@ def main() -> None:
         "classifiedBuildingPoints": category_count,
         "verifiedFieldBossPoints": field_boss_count,
         "verifiedFieldElitePoints": field_elite_count,
+        "excludedCastleBasementRawPoints": castle_basement_raw,
+        "displayOnlyReferencePoints": len(reference_points),
         "eventPatterns": event_count,
         "terrainCounts": dict(sorted(Counter(p["terrain"]["value"] for p in patterns).items())),
         "calibratedTerrains": sorted(calibrated_terrains),
@@ -216,7 +235,7 @@ def main() -> None:
             assignments = slot_assignments.get(pid, {})
             for point in pattern["points"]:
                 elite = next((f for f in point["features"] if f.get("role") == "fieldElite"), None)
-                if elite is None or point["normalized"] is None:
+                if elite is None or point["normalized"] is None or point["attachId"] in {"756", "2756"}:
                     continue
                 x, y = point["normalized"]["x"] * 1000, point["normalized"]["y"] * 1000
                 nearest = min(positions, key=lambda p: math.hypot(x - p["x"], y - p["y"]))
@@ -229,7 +248,7 @@ def main() -> None:
                 expected = overrides["verifiedFieldEliteMapIds"][map_id]["referenceName"]
                 assert assigned.lower().replace("-", "") == expected.lower().replace("-", "") or (map_id == "4672" and assigned == "Golden Hippo")
                 field_elite_slot_matches += 1
-        assert field_elite_slot_matches > 2000
+        assert field_elite_slot_matches > 3500
         report["fieldEliteNamedSlotCrosscheck"] = field_elite_slot_matches
         _, define_rows = param(args.source, "SmallBaseAndSpotDefine")
         map_icons: dict[str, set[str]] = defaultdict(set)
