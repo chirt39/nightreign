@@ -113,8 +113,8 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
 </script>
 
 <template>
-  <section id="view-weapons" class="view" :class="{ active }">
-    <div class="page-intro"><p class="eyebrow">ARMORY / WEAPON ARCHIVE</p><h1>武器图鉴</h1><p>查找武器与参数变体，查看基础攻击、能力补正和战技。</p></div>
+  <section id="view-weapons" class="view reference-page" :class="{ active }">
+    <div class="page-intro reference-heading"><p class="eyebrow">ARMORY / WEAPON ARCHIVE</p><h1>武器图鉴</h1><p>查找武器与参数变体，查看基础攻击、能力补正和战技。</p></div>
     <p v-if="loading" class="weapon-notice" role="status">正在载入武器资料…</p>
     <div v-else-if="error" class="weapon-notice" role="alert"><p>{{ error }}</p><button class="button" type="button" @click="loadCatalog">重新载入</button></div>
     <template v-else-if="catalog">

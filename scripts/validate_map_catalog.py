@@ -125,6 +125,13 @@ def main() -> None:
     assert all(p["filterable"] is False and p["positionAccuracy"] == "reference" for p in reference_points)
     assert Counter(p["displayCategory"] for p in reference_points) == {"fieldElite": 33, "baseBoss": 2}
     assert {p["key"] for p in reference_points if p["displayCategory"] == "baseBoss"} == {"1:2", "1:3"}
+    assert all(p["worldMapPointIconId"] is None for p in reference_points)
+    native_elite_icons = Counter()
+    for map_id, elite in overrides["verifiedFieldEliteMapIds"].items():
+        icon_id = catalog["definitions"]["features"][f"fieldElite:{map_id}"]["worldMapPointIconId"]
+        assert icon_id == elite["worldMapPointIconId"]
+        native_elite_icons[icon_id] += 1
+    assert native_elite_icons == {16: 11, 28: 11}
     assert all(0 <= p["normalized"][axis] <= 1 for p in reference_points for axis in ("x", "y"))
     assert event_count == 251
     assert len(catalog["definitions"]["nightlords"]) == 10
@@ -147,6 +154,8 @@ def main() -> None:
         "verifiedFieldElitePoints": field_elite_count,
         "excludedCastleBasementRawPoints": castle_basement_raw,
         "displayOnlyReferencePoints": len(reference_points),
+        "nativeFieldEliteIconTemplates": dict(native_elite_icons),
+        "unresolvedReferenceFieldEliteIcons": 33,
         "eventPatterns": event_count,
         "terrainCounts": dict(sorted(Counter(p["terrain"]["value"] for p in patterns).items())),
         "calibratedTerrains": sorted(calibrated_terrains),

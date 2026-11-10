@@ -6,7 +6,13 @@ export function buildingIconPath(manifest, sourceId) {
   const entry = manifest?.icons?.[sourceId], path = entry?.src;
   return entry?.status === 'verified' && typeof path === 'string' && /^\/?map-icons\/[A-Za-z0-9_-]+\.(?:png|webp)$/i.test(path) ? `/${path.replace(/^\//, '')}` : null;
 }
-export function nightlordPortrait(definition, manifest) {
+export function pointIconPath(manifest, worldMapPointIconId) {
+  const entry = manifest?.pointIcons?.[worldMapPointIconId], path = entry?.src;
+  return entry?.status === 'verified' && typeof path === 'string' && /^\/?map-icons\/[A-Za-z0-9_-]+\.(?:png|webp)$/i.test(path) ? `/${path.replace(/^\//, '')}` : null;
+}
+export function nightlordPortrait(definition, manifest, iconManifest) {
+  const native = iconManifest?.nightlords?.[definition?.menuRowId];
+  if (native?.status === 'verified' && native.iconId === definition?.menuIconId && typeof native.src === 'string' && /^\/?map-icons\/[A-Za-z0-9_-]+\.(?:png|webp)$/i.test(native.src)) return `/${native.src.replace(/^\//, '')}`;
   const entry = Object.values(manifest?.images || {}).find(image => image.matchStatus === 'verified' && image.imageKind === 'nightboss-menu-portrait' && image.sourceParam?.iconId === definition?.menuIconId && String(image.sourceParam?.rowId) === String(definition?.menuRowId));
   return typeof entry?.path === 'string' && /^enemy-images\/[A-Za-z0-9_-]+\.(?:png|jpe?g|webp)$/i.test(entry.path) ? `/${entry.path}` : null;
 }
@@ -120,7 +126,7 @@ export function collectLayers(patterns, definitions = {}) {
       if (feature.state !== 'known' || !FEATURE_KINDS.includes(feature.kind) || definition?.kind !== feature.kind || !namedDefinition(definition)) continue;
       if ((feature.role || null) !== (definition.role || null)) continue;
       const key = JSON.stringify([terrainId, id(point.attachId), feature.kind, id(feature.sourceId), feature.role || null]);
-      if (!entries.has(key)) entries.set(key, { key, terrainId, attachId: id(point.attachId), kind: feature.kind, role: feature.role || null, displayCategory: displayCategory(feature, definition), sourceId: id(feature.sourceId), name: definition.nameZh, normalized: validPosition(point.normalized) ? { ...point.normalized } : null, members: new Set(), positionConsistent: true });
+      if (!entries.has(key)) entries.set(key, { key, terrainId, attachId: id(point.attachId), kind: feature.kind, role: feature.role || null, displayCategory: displayCategory(feature, definition), worldMapPointIconId: definition.worldMapPointIconId ?? null, sourceId: id(feature.sourceId), name: definition.nameZh, normalized: validPosition(point.normalized) ? { ...point.normalized } : null, members: new Set(), positionConsistent: true });
       const entry = entries.get(key);
       entry.members.add(patternIndex);
       if (!validPosition(point.normalized) || !entry.normalized || Math.abs(point.normalized.x - entry.normalized.x) > 0.000001 || Math.abs(point.normalized.y - entry.normalized.y) > 0.000001) entry.positionConsistent = false;

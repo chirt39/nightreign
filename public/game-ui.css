@@ -932,3 +932,41 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 
 .side-license-link{display:block;margin:9px 0 0 16px;color:#b7c3cd;font-size:10px;line-height:1.5;text-decoration:underline;text-underline-offset:2px}
 .side-license-link:hover{color:#f0d494}
+
+/* 图鉴与地图共享页面尺寸，保留各页功能布局。 */
+.reference-pages{--reference-gap:12px;--reference-line:#3e566e;--reference-panel:#132131}
+:is(#view-enemies,#view-weapons,#view-map) .reference-heading{display:flex;border:0;background:none;align-items:baseline;gap:8px 16px;margin:0 0 12px;padding:0;flex-wrap:wrap}
+:is(#view-enemies,#view-weapons,#view-map) .reference-heading .eyebrow{display:none}
+:is(#view-enemies,#view-weapons,#view-map) .reference-heading h1{margin:0;color:#ecd7a7;font:600 28px/1.35 'Noto Serif SC',serif;letter-spacing:0}
+:is(#view-enemies,#view-weapons,#view-map) .reference-heading>p:last-child{margin:0;color:#b6c7d2;font-size:14px;line-height:1.6}
+#view-map .reference-heading{align-items:flex-start;flex-direction:column}
+:is(#view-enemies,#view-weapons,#view-map) :is(input[type=search],select){min-height:40px;height:40px;padding:7px 10px;border:1px solid #4c657b;border-radius:4px;background:#101d2a;color:#e0e7e9;font-size:14px}
+:is(#view-enemies,#view-weapons,#view-map) :is(.toolbar,.weapon-toolbar){gap:10px;margin-bottom:12px;padding:12px;border:1px solid var(--reference-line);border-radius:5px;background:var(--reference-panel)}
+:is(#view-enemies,#view-weapons,#view-map) :is(.toolbar,.weapon-toolbar,.map-toolbar) label{font-size:14px;color:#c7d3da}
+:is(#view-enemies,#view-weapons,#view-map) :is(.enemy-list-column,.enemy-detail,.weapon-list-panel,.weapon-detail,.map-conditions,.map-canvas-panel){border-color:var(--reference-line);border-radius:5px;background-color:var(--reference-panel)}
+:is(#view-enemies,#view-weapons,#view-map) :is(.pagination,.weapon-pagination,.map-candidate-switch,.map-canvas-tools,.map-toolbar,.map-more-actions,.map-name-pagination,.weapon-toolbar,.toolbar) button{min-height:38px;padding:6px 12px;border:1px solid #536c82;border-radius:4px;background:#1b2d40;color:#e7d5ac;font-size:14px}
+#view-map .map-more>summary{min-height:38px;font-size:14px}
+@media(min-width:851px){
+.app-shell.reference-pages>.main>.content{width:100%;max-width:none;margin:0;padding:12px 24px}
+.app-shell.reference-pages .topbar{height:54px;flex:0 0 54px}
+}
+@media(min-width:1151px){
+.app-shell.map-fullscreen>.main{display:block;height:auto;min-height:100dvh;overflow:visible}
+.app-shell.map-fullscreen>.main>.content{display:block;overflow:visible}
+}
+@media(max-width:850px){
+.app-shell.reference-pages>.main>.content{padding:16px}
+:is(#view-enemies,#view-weapons,#view-map) .reference-heading{align-items:flex-start;flex-direction:column;gap:5px}
+:is(#view-enemies,#view-weapons,#view-map) .reference-heading h1{font-size:24px}
+:is(#view-enemies,#view-weapons,#view-map) .reference-heading>p:last-child{font-size:13px}
+}
+
+:is(#view-enemies,#view-weapons,#view-map) .reference-heading:before{display:none}
+#view-enemies .enemy-pagination{flex-wrap:nowrap;gap:4px}
+#view-enemies .enemy-pagination button{padding:6px 7px;flex-shrink:0}
+#view-enemies .enemy-pagination select{width:48px;padding:5px 4px}
+#view-enemies .enemy-pagination label{white-space:nowrap;font-size:12px}
+
+#view-enemies .toolbar .search-field{height:40px;min-height:40px;padding:0 10px;border:1px solid #4c657b;border-radius:4px;background:#101d2a}
+#view-enemies .toolbar .search-field input{height:38px;min-height:38px;padding:7px 0;border:0;border-radius:0;background:transparent}
+#view-enemies.reference-page.active{margin:0}

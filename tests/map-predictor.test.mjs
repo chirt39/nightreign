@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
+import { PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
 
 // Synthetic state fixtures exercise the filter contract, not game distribution claims.
 const known = value => ({ state: 'known', value });
@@ -253,4 +253,28 @@ test('nightlord portraits use verified menu identity and DLC has an honest fallb
   assert.equal(nightlordPortrait(catalog.definitions.nightlords['0'], manifest), '/enemy-images/nightboss-41820.png');
   assert.equal(nightlordPortrait(catalog.definitions.nightlords['8'], manifest), null);
   assert.equal(nightlordPortrait(catalog.definitions.nightlords['9'], manifest), null);
+});
+
+
+test('native blue and red elite icons follow explicit definition metadata; references remain neutral', () => {
+  const catalog = JSON.parse(readFileSync(new URL('../public/map-catalog.json', import.meta.url), 'utf8'));
+  const manifest = JSON.parse(readFileSync(new URL('../public/map-icon-manifest.json', import.meta.url), 'utf8'));
+  assert.match(pointIconPath(manifest, 16), /elite-normal-/);
+  assert.match(pointIconPath(manifest, 28), /elite-strong-/);
+  assert.equal(pointIconPath(manifest, null), null);
+  const nativeLayers = collectLayers(catalog.patterns.slice(0, 1), catalog.definitions).filter(entry => entry.role === 'fieldElite');
+  assert.ok(nativeLayers.length > 0);
+  for (const entry of nativeLayers) {
+    assert.equal(entry.worldMapPointIconId, catalog.definitions.features[entry.sourceId].worldMapPointIconId);
+    assert.ok(pointIconPath(manifest, entry.worldMapPointIconId));
+  }
+  const references = referenceMapGroups(catalog.referencePoints, '1', { fieldElite: true });
+  assert.ok(references.length > 0);
+  for (const group of references) assert.equal(pointIconPath(manifest, group.entries[0].worldMapPointIconId), null);
+});
+
+test('both DLC nightlord portraits use verified native menu assets', () => {
+  const catalog = JSON.parse(readFileSync(new URL('../public/map-catalog.json', import.meta.url), 'utf8'));
+  const manifest = JSON.parse(readFileSync(new URL('../public/map-icon-manifest.json', import.meta.url), 'utf8'));
+  for (const id of ['8', '9']) assert.equal(nightlordPortrait(catalog.definitions.nightlords[id], {}, manifest), manifest.nightlords[id].src);
 });
