@@ -7,10 +7,12 @@ import RecordsPage from './pages/RecordsPage.vue';
 import BuildsPage from './pages/BuildsPage.vue';
 import SourcesPage from './pages/SourcesPage.vue';
 import EffectsPage from './pages/EffectsPage.vue';
+import WeaponsPage from './pages/WeaponsPage.vue';
 
 const labels = {
   overview: '圆桌厅堂',
-  enemies: '图鉴',
+  enemies: '怪物图鉴',
+  weapons: '武器图鉴',
   relics: '遗物仪式',
   records: '日志',
   builds: '遗物装配',
@@ -158,7 +160,7 @@ onUnmounted(() => {
     <h1>页面未能完整加载</h1>
     <p>必要功能暂时无法启动，请刷新页面重试。</p>
   </main>
-  <div v-else class="app-shell" :class="{ 'enemies-fullscreen': currentView === 'enemies' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
+  <div v-else class="app-shell" :class="{ 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
     <a class="skip-link" href="#main-content">跳转到主要内容</a>
     <aside id="mobile-navigation" class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
@@ -169,7 +171,8 @@ onUnmounted(() => {
       <p class="side-label">探索</p>
       <nav class="nav-list">
         <button class="nav-link" :class="{ active: currentView === 'overview' }" :aria-current="currentView === 'overview' ? 'page' : null" data-view="overview"><img class="nav-icon" src="/nav-icons/roundtable.webp" alt="" />圆桌厅堂</button>
-        <button class="nav-link" :class="{ active: currentView === 'enemies' }" :aria-current="currentView === 'enemies' ? 'page' : null" data-view="enemies"><img class="nav-icon" src="/nav-icons/bestiary.webp" alt="" />图鉴 <b id="nav-enemy-count">—</b></button>
+        <button class="nav-link" :class="{ active: currentView === 'enemies' }" :aria-current="currentView === 'enemies' ? 'page' : null" data-view="enemies"><img class="nav-icon" src="/nav-icons/bestiary.webp" alt="" />怪物图鉴 <b id="nav-enemy-count">—</b></button>
+        <button class="nav-link" :class="{ active: currentView === 'weapons' }" :aria-current="currentView === 'weapons' ? 'page' : null" data-view="weapons"><span class="nav-icon weapon-nav-icon" aria-hidden="true">⚔</span>武器图鉴</button>
         <button class="nav-link" :class="{ active: currentView === 'relics' }" :aria-current="currentView === 'relics' ? 'page' : null" data-view="relics"><img class="nav-icon" src="/nav-icons/relic-rite.png" alt="" />遗物仪式</button>
         <button class="nav-link" :class="{ active: currentView === 'records' }" :aria-current="currentView === 'records' ? 'page' : null" data-view="records"><img class="nav-icon" src="/nav-icons/journal.png" alt="" />日志</button>
         <button class="nav-link" :class="{ active: currentView === 'builds' }" :aria-current="currentView === 'builds' ? 'page' : null" data-view="builds"><img class="nav-icon" src="/nav-icons/relic-equip.png" alt="" />遗物装配</button>
@@ -190,6 +193,7 @@ onUnmounted(() => {
       <div class="content">
         <OverviewPage :active="currentView === 'overview'" />
         <EnemiesPage :active="currentView === 'enemies'" />
+        <WeaponsPage :active="currentView === 'weapons'" :catalog-versions="catalogJsonVersions" />
         <RelicsPage :active="currentView === 'relics'" />
         <RecordsPage :active="currentView === 'records'" />
         <BuildsPage :active="currentView === 'builds'" />

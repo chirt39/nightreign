@@ -23,6 +23,8 @@ const catalogJsonFiles = [
   'relic_rule_effects.json',
   'effect_encyclopedia.json',
   'enemy-image-verified.json',
+  'weapon-catalog.json',
+  'weapon-image-manifest.json',
 ];
 const stylesheetFiles = ['style.css', 'game-ui.css'];
 const classicScriptVersions = Object.fromEntries(classicScriptFiles.map((file) => {
@@ -40,6 +42,7 @@ const classicScriptVersions = Object.fromEntries(classicScriptFiles.map((file) =
 const catalogJsonVersions = Object.fromEntries(catalogJsonFiles.map((file) => {
   const path = fileURLToPath(new URL(`./public/${file}`, import.meta.url));
   if (!existsSync(path)) {
+    if (file === 'weapon-image-manifest.json') return [file, null];
     throw new Error(`[catalog JSON] Required public/${file} is missing; cannot generate its SHA-256 cache key.`);
   }
   const content = readFileSync(path);
