@@ -142,12 +142,27 @@ export function nearbyPoints(points, click, width, height, tolerance = 24) {
 export function coincidentMarkers(points, target, width, height) {
   return nearbyPoints(points, target.normalized, width, height, 3);
 }
-export function buildingChoicesAtPosition(groups, target) {
+export function buildingChoicesAtPosition(groups, target, deduplicate = true) {
   if (!validPosition(target?.normalized)) return [];
   const matches = [target, ...groups.filter(group => group.key !== target.key && group.terrainId === target.terrainId && validPosition(group.normalized) && Math.abs(group.normalized.x - target.normalized.x) < 0.000001 && Math.abs(group.normalized.y - target.normalized.y) < 0.000001)];
+  if (!deduplicate) return matches.flatMap(group => group.entries.filter(entry => entry.kind === 'building'));
   const choices = new Map();
   for (const group of matches) for (const entry of group.entries) if (entry.kind === 'building' && !choices.has(entry.sourceId)) choices.set(entry.sourceId, entry);
   return [...choices.values()];
+}
+export function pointChoiceContext(clues, target, groups) {
+  const kind = target.entries[0].kind, role = target.entries[0].role || null;
+  return { ...clues, observations: (clues.observations || []).filter(observation => {
+    if (id(observation.terrainId) !== id(target.terrainId) || observation.kind !== kind || (observation.role || null) !== role) return true;
+    if (id(observation.attachId) === id(target.attachId)) return false;
+    if (kind !== 'building') return true;
+    const other = groups.find(group => id(group.terrainId) === id(observation.terrainId) && id(group.attachId) === id(observation.attachId));
+    return !validPosition(other?.normalized) || !validPosition(target.normalized) || Math.abs(other.normalized.x - target.normalized.x) >= 0.000001 || Math.abs(other.normalized.y - target.normalized.y) >= 0.000001;
+  }) };
+}
+export function possiblePointChoices(patterns, clues, choices, definitions) {
+  const remaining = findCandidates(patterns, clues, definitions);
+  return choices.filter(choice => remaining.some(pattern => evaluatePattern(pattern, { observations: [choice] }, definitions).matches));
 }
 export function withoutPointObservations(observations, point) {
   return observations.filter(item => id(item.terrainId) !== id(point.terrainId) || id(item.attachId) !== id(point.attachId));

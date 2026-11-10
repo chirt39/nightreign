@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { buildingChoicesAtPosition, confirmedBuildingKeys, coincidentMarkers, withoutPointObservations, PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
+import { pointChoiceContext, possiblePointChoices, buildingChoicesAtPosition, confirmedBuildingKeys, coincidentMarkers, withoutPointObservations, PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
 
 // Synthetic state fixtures exercise the filter contract, not game distribution claims.
 const known = value => ({ state: 'known', value });
@@ -336,4 +336,50 @@ test('ordinary physical building position exposes DLC choices bound to their rea
   for(const category of ['marsh','forge']){const e=choices.find(e=>e.sourceId==='buildingCategory:'+category);assert.ok(e);assert.equal(e.attachId,'2101');}
   assert.equal(new Set(choices.map(e=>e.sourceId)).size,choices.length);
   assert.ok(normal.entries.every(e=>!['buildingCategory:marsh','buildingCategory:forge'].includes(e.sourceId)));
+});
+
+
+test('actual viewport measurement is invariant when scrollbar content dimensions alternate', () => {
+  const source=readFileSync(new URL('../src/pages/MapPredictorPage.vue',import.meta.url),'utf8');
+  const measure=source.slice(source.indexOf('function measureViewport()'),source.indexOf('function scheduleViewportMeasure()'));
+  const viewport={clientWidth:1030,clientHeight:619,getBoundingClientRect:()=>({width:1046.6667,height:636})};
+  const size={width:0,height:0};
+  const run=Function('mapViewport','getComputedStyle','viewportSize',`let viewportFrame,viewportContentBox;${measure};return box=>{viewportContentBox=box;measureViewport();return {...viewportSize};}`)({value:viewport},()=>({borderLeftWidth:'.666667px',borderRightWidth:'.666667px',borderTopWidth:'.666667px',borderBottomWidth:'.666667px'}),size);
+  assert.deepEqual(run({width:1030,height:619}),{width:1045,height:634});
+  viewport.clientHeight=635;
+  assert.deepEqual(run({width:1030,height:634.666}),{width:1045,height:634});
+});
+
+test('choice editing removes only the same class at its real or shared building slot', () => {
+  const defs={features:{a:{kind:'building',nameZh:'建筑甲'},c:{kind:'building',nameZh:'建筑乙'},b:{kind:'event',nameZh:'事件'}}};
+  const choices=[{kind:'building',terrainId:'0',attachId:'1',sourceId:'a'},{kind:'building',terrainId:'0',attachId:'1',sourceId:'c'}];
+  const target={key:'one',terrainId:'0',attachId:'1',normalized:{x:.5,y:.5},entries:choices};
+  const shared={...target,key:'dlc',attachId:'2001'};
+  const clues={filters:{terrain:'0'},observations:[choices[0],{...choices[0],attachId:'2001'},{terrainId:'0',attachId:'2',kind:'event',sourceId:'b'}]};
+  const ctx=pointChoiceContext(clues,target,[target,shared]);
+  assert.deepEqual(ctx.observations,[clues.observations[2]]);assert.equal(ctx.filters,clues.filters);
+  const first=pattern(0),second=pattern(1);second.points[0].features[0].sourceId='c';
+  assert.deepEqual(possiblePointChoices([first,second],pointChoiceContext({observations:[choices[0]]},target,[target]),choices,defs).map(e=>e.sourceId),['a','c']);
+  first.points.push({attachId:'2',features:[{kind:'event',state:'known',sourceId:'b'}],coverage:{event:'known'}});
+  second.points.push({attachId:'2',features:[],coverage:{event:'known_absent'}});
+  assert.deepEqual(possiblePointChoices([first,second],ctx,choices,defs).map(e=>e.sourceId),['a']);
+  const unknown=pattern(2);unknown.points[0].coverage.building='unknown';
+  assert.equal(possiblePointChoices([unknown],{},[choices[1]],defs).length,1);
+  unknown.points=[];assert.equal(possiblePointChoices([unknown],{},[choices[1]],defs).length,1);
+});
+
+test('real marked clues narrow building and elite choices while keeping DLC sources', () => {
+  const c=JSON.parse(readFileSync(new URL('../public/map-catalog.json',import.meta.url),'utf8'));
+  const bySlot=new Map();
+  for(const e of collectLayers(c.patterns,c.definitions).filter(e=>e.terrainId==='1'&&e.normalized&&MAP_DISPLAY_CATEGORIES.includes(e.displayCategory))){if(!bySlot.has(e.attachId))bySlot.set(e.attachId,{key:e.attachId,terrainId:e.terrainId,attachId:e.attachId,normalized:e.normalized,entries:[]});bySlot.get(e.attachId).entries.push(e);}
+  const groups=[...bySlot.values()];
+  const clues={filters:{terrain:'1',nightlord:'0'},observations:[{terrainId:'1',attachId:'104',kind:'building',sourceId:'buildingCategory:fort'}]};
+  const target=bySlot.get('108'),raw=buildingChoicesAtPosition(groups,target,false);
+  const building=possiblePointChoices(c.patterns,pointChoiceContext(clues,target,groups),raw,c.definitions);
+  const names=[...new Set(building.map(e=>e.name))];
+  assert.ok(names.includes('大型营地'));assert.ok(names.includes('沼泽'));assert.ok(names.includes('锻造设施'));
+  assert.equal(names.includes('大教堂'),false);assert.equal(names.includes('要塞'),false);
+  const elite=bySlot.get('750');
+  assert.equal(possiblePointChoices(c.patterns,{filters:clues.filters},elite.entries,c.definitions).length,4);
+  assert.deepEqual(possiblePointChoices(c.patterns,pointChoiceContext(clues,elite,groups),elite.entries,c.definitions).map(e=>e.name),['老狮子','米兰达之花']);
 });
