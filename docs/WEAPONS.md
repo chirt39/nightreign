@@ -6,7 +6,7 @@
 
 - 总控：本文件、REQUIREMENTS.md、DECISIONS.md、集成审核、最终交付。
 - 遗物与配装：`public/weapon-catalog.json`、`scripts/build_weapon_catalog.py`、`scripts/validate_weapon_catalog.py`、`docs/WEAPON_DATA.md`。
-- 存档与逆向：`public/weapon-images/`、`public/weapon-image-manifest.json`、`scripts/extract_weapon_images.py`、`docs/WEAPON_IMAGES.md`。
+- 存档与逆向：`public/weapon-images/`、`public/weapon-image-manifest.json`、`scripts/extract_weapon_images.py`、`docs/WEAPON_IMAGES.md`；本轮新增 `public/skill-images/`、`public/skill-image-manifest.json`、`public/nav-icons/weapons.webp`、`scripts/extract_weapon_ui_icons.py`。
 - 前端与美术：`src/pages/WeaponsPage.vue`、`src/App.vue`、`public/game-ui.css`、`vite.config.js`。
 - 工程与发布：本地构建与浏览器验收；验证脚本及证据放在仓库外的 `E:\海斗\outputs\weapon-encyclopedia-20261110`，不启动线上发布。
 
@@ -22,6 +22,16 @@
 
 ## 数据与页面接口 v1
 
+### 已批准的图标接入（2026-11-10，基线 b334de2）
+
+- 左侧武器图鉴入口使用原生 `MENU_MenuIcon_40051.png` 直剑轮廓，保存为 `/nav-icons/weapons.webp`。这是按图形内容选用的入口标志，不宣称它就是游戏内武器图鉴菜单的绑定图标。
+- 基础攻击五项按字段明确复用 `/enemy-attribute-icons/damage-{physical,magic,fire,lightning,holy}.png`，图标作为名称的补充，保留数值。既有 Wiki 来源说明保留，不登记为本轮原生提取。
+- 战技按当前变体的引用匹配原生图。保留 `skill.names` 的集合、顺序及 fixed/pool 语义，新增等长 `skill.itemIds`（战技参数 ID 字符串或 null）；顶层新增 `skillDefinitions`，键为战技 ID，每项 `{id,textId,name,iconId}`。共享定义避免在 35,106 个显示上下文重复完整对象，公开目录继续控制在 3 MB 内。
+- 每个 `itemIds[index]` 来自当前变体实际固定引用或有效候选池，且对应定义名称必须等于 `names[index]`；不能全局按同名取首张图。出现同一上下文歧义时该 ID 留 null，原名称继续显示。现有快照 176 个名称对应 182 个实际展示战技 ID，当前上下文不存在歧义。
+- 新增独立可选清单 `skill-image-manifest.json`：`{schemaVersion:1, images:{"8300":{src:"/skill-images/8300-<hash>.webp",alt:"狮子斩",status:"verified",source:{...}}}, summary:{...}, provenance:{...}}`。键为 iconId，前端只接受已核验的本地图片路径。读取清单失败、旧数据无新增字段或图片失败时保留名称与稳定图标空间，不猜图、不阻断武器页。
+- 数据专项负责目录、生成/校验脚本及 WEAPON_DATA.md；逆向专项负责新图片、清单、提取脚本及 WEAPON_IMAGES.md；前端专项负责 App.vue、WeaponsPage.vue、game-ui.css 和可选清单缓存版本；工程负责仓库外构建与针对性浏览器验收，总控审核、更新需求并统一提交。
+- 验收包括 182 个图标的源引用与裁切、六组同名不同图的上下文、变体切换、五种攻击图标、导航一致性、手机长名称、缺图/旧数据回退及原始数值和战技集合不变。证据放在 `E:\海斗\outputs\weapon-encyclopedia-20261110\icons`。继续仅更新本地 4187 预览，不推送或上线。
+
 `public/weapon-catalog.json`：
 
 ```json
@@ -30,6 +40,7 @@
   "gameVersion": "1.3.3.0",
   "regulationVersion": "10350000",
   "categories": [{"id": "1", "label": "短剑"}],
+  "skillDefinitions": {},
   "weapons": [{
     "id": "1000000",
     "name": "匕首",
@@ -51,7 +62,7 @@
       "requirementNote": "使用条件待核对",
       "scaling": {"strength": 13, "dexterity": 73, "intelligence": 0, "faith": 0, "arcane": 0},
       "scalingGrades": {"strength": "E", "dexterity": "S", "intelligence": "-", "faith": "-", "arcane": "-"},
-      "skill": {"kind": "unknown", "names": [], "note": "战技待核对"},
+      "skill": {"kind": "unknown", "names": [], "itemIds": [], "note": "战技待核对"},
       "notes": [],
       "sourceIds": ["1000000"]
     }],
@@ -67,7 +78,7 @@
 
 - ID 全部为字符串；分类 ID 为 `wepType` 字符串。分类标签由数据专项人工核对。`null` 为未确认，不能转换为 0 或“无要求”。`dlc: true` 只给有明确 DLC 文本/资源证据的条目；来源不能判定用 null。
 - `requirements` 保留原始接口的未知状态，不再显示使用条件区。`scaling` 保留五项原始数值；`scalingGrades` 按本作菜单表推导字母等级，完整证据与转换范围见 [WEAPON_DATA.md](WEAPON_DATA.md)。前端只读取等级字段，`-` 显示为“—”，缺失或非法值显示“待核对”，不把未知值当作无补正，不回退显示原始系数。
-- `skill.kind` 为 `fixed`、`pool` 或 `unknown`；`names` 为去重中文名称数组。固定战技与候选池分别标示，不把池中的第一个值当作固定战技。
+- `skill.kind` 为 `fixed`、`pool` 或 `unknown`；`names` 为去重中文名称数组。固定战技与候选池分别标示，不把池中的第一个值当作固定战技。`itemIds` 与 `names` 等长同序，引用顶层 `skillDefinitions`，不能用全局同名匹配替代当前变体的引用；旧数据缺少这两个新增字段时保留名称与图标占位。
 - 按游戏中的显式来源引用归组；关联冲突留在审计中，不用同名或 ID 取整强行归组。未知名称、内部占位及无法确认属于玩家武器的记录不强行放入公开目录，并在数据说明记载排除理由。
 - 基础攻击为所选参数变体的基础分量，不是当前角色实战伤害。首版不计算角色、等级或强化后的最终攻击。
 - 图片独立清单 `public/weapon-image-manifest.json`：`{schemaVersion:1, images:{"10000":{src:"/weapon-images/10000-<hash>.webp",alt:"匕首",status:"verified",source:{...}}}, summary:{...}}`。映射键为 iconId 字符串，缺失或失败统一使用前端占位；只有映射与图像证据支持时 status 才为 verified。
@@ -102,3 +113,14 @@
 - 前端只读取字母等级，不回落展示原始数字；指定说明、使用条件、资料说明和版本区块已删除。总控已审查源码差异并刷新本地页面确认。
 - 本轮 8 项针对性浏览器验收全部通过，覆盖真实变体切换、未知和非法等级、指定内容移除、深链与历史、1280×720 / 390×844 布局和键盘操作。构建前后六个源文件哈希一致，tracked dist 未改变。
 - 本地预览继续为 [http://localhost:4187/#weapons](http://localhost:4187/#weapons)，未推送或上线。当前证据在 `E:\海斗\outputs\weapon-encyclopedia-20261110\grades`，含 `root-review.json`、`validation.json`、`mapping-evidence.json` 及 `qa/checks.json`；首版证据归档在 `grades/qa/baseline`。
+
+## 武器、战技与攻击图标集成（2026-11-10）
+
+- 已为入口接入原生直剑轮廓、为基础攻击接入五种既有属性图标，并为当前目录的 182 个战技参数 ID 提取 160×160 无损 WebP 图；这些战技对应 176 个不同名称。导航图按图形选用，不声称已验证游戏内菜单绑定。
+- 全部 35,106 个逐变体名称上下文均能唯一匹配，缺失与歧义为 0。六组同名不同 iconId 保留各自引用；其中“欧赫剑舞”的两个原生 iconId 像素相同，不强行替换为不同图。
+- 目录新增共享 `skillDefinitions` 和等长同序的 `skill.itemIds`，约 2.18 MB。对照 `b334de2`，除这两个新增字段外，原目录内容完全一致；生成结果可重复，上一轮补正证据哈希未变。当前目录 SHA-256：`d87da9d6246042eccf1a9aea36997fd027e519f09a7a7bf5959f24adafe74fe7`。
+- 图片清单 SHA-256：`cb386af1499b26d1c8c4f30c36e3f7657fd55f67576809e47707a675e148b422`。清单的 `catalogueSha256AtExtraction` 记录提取时的 `b334de2` 目录快照；本轮最终目录的完整覆盖由 `icons/root-review.json` 独立核对。所有图片的文件哈希、解码像素及原生参数引用均通过校验，418 个受保护的既有文件保持不变。
+- 总控已审查数据、提取脚本与前端差异，并在本地预览确认武器导航、黑刀“死亡刀刃”图片与五项攻击图标正常显示。图标仅补充文字；旧数据、缺清单、缺图或名称映射不一致时保留名称和固定占位，不阻断页面。
+- 工程 22 项专项检查全部通过，包含 182 张图片可读与浏览器解码、六组同名战技的 12 个实际显示上下文、固定/候选战技与变体切换、五种攻击图标（含零值）、旧目录/清单失败/缺图/未核验/名称不符/404 回退，以及 1280×720 和 390×844 布局、键盘导航及备案链接可达。总控已查看桌面与手机截图。构建前后八个关键文件哈希一致，tracked dist 未改变。
+- 预览地址仍为 [http://localhost:4187/#weapons](http://localhost:4187/#weapons)，后台进程已恢复；本轮未推送或部署线上站点。静态预览的 API 保持隔离，浏览器验收未调用真实模型或提交反馈。
+- 本轮证据集中在 `E:\海斗\outputs\weapon-encyclopedia-20261110\icons`：`root-review.json`、`validation.json`、`data/validation.json`、`data/integrity.json`、原生图像对照和 `qa/`。当前仍仅为本地预览，原游戏文件未修改，也未以本次静态提取代替游戏内实测。

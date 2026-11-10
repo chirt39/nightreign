@@ -675,7 +675,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 @media(max-width:600px){#view-overview .home-agent{padding:14px}.home-agent-heading{flex-direction:column;align-items:flex-start;gap:12px}.topbar-tools{gap:0}.topbar-feedback{padding:7px 9px;font-size:10px}.agent-entry{max-width:100%}.feedback-form{padding:16px}.agent-memory-tools{align-items:flex-start;flex-direction:column;gap:3px}.agent-memory-dialog-content{padding:16px}.agent-answer-table{min-width:320px}.feedback-turn-option{grid-template-columns:auto auto minmax(0,1fr)}.feedback-turn-option small{white-space:normal;max-height:2.7em}}
 
 /* Searchable relic effect glossary. */
-.weapon-nav-icon{display:inline-grid;place-items:center;font-size:21px;color:#d2b77c}
+.weapon-nav-placeholder{background:#152332}
 #view-weapons{font-size:14px;line-height:1.6}
 #view-weapons .weapon-toolbar{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:14px;border:1px solid #3c5065;background:#152332;border-radius:4px}
 #view-weapons label{display:grid;gap:5px;min-width:0;color:#c8d1d7;font-size:14px}
@@ -714,7 +714,12 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-weapons .weapon-stat-grid dd{margin:3px 0 0;color:#f0e2c4;font-size:16px;font-weight:650;font-variant-numeric:tabular-nums}
 #view-weapons .weapon-note{margin:9px 0 0;color:#aebfcb;font-size:14px;line-height:1.65}
 #view-weapons .weapon-skill-list{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:0}
-#view-weapons .weapon-skill-list li{padding:5px 10px;border:1px solid #625b46;background:#252e36;border-radius:3px;font-size:14px}
+#view-weapons .weapon-skill-list li{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:center;gap:8px;min-width:0;max-width:100%;padding:5px 10px;border:1px solid #625b46;background:#252e36;border-radius:3px;font-size:14px}
+#view-weapons .weapon-skill-name{min-width:0;overflow-wrap:anywhere}
+#view-weapons .weapon-skill-icon,#view-weapons .weapon-skill-icon img,#view-weapons .weapon-skill-icon>.weapon-icon-placeholder{display:block;width:30px;height:30px;object-fit:contain}
+#view-weapons .weapon-icon-placeholder{background:#162331;border:1px solid #46576b;border-radius:2px}
+#view-weapons .weapon-attack-label{display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap}
+#view-weapons .weapon-attack-icon{display:block;flex:0 0 18px;width:18px;height:18px;object-fit:contain}
 #view-weapons .weapon-notes{padding-left:20px;margin:0;color:#bfccd3}
 #view-weapons .weapon-notice{padding:22px;color:#bfccd3;font-size:14px}
 #view-weapons .weapon-notice h2{font-size:20px}

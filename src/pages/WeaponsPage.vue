@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({ active: Boolean, catalogVersions: Object });
 const catalog = ref(null), images = ref({}), loading = ref(false), error = ref('');
+const skillImages = ref({});
 const query = ref(''), category = ref('all'), weaponId = ref(''), variantId = ref(''), page = ref(1);
 const failedImages = ref(new Set());
 const detailHeading = ref(null);
@@ -36,6 +37,20 @@ function imageFor(weapon, currentVariant = null) {
   return '';
 }
 function imageFailed(event) { failedImages.value = new Set([...failedImages.value, event.target.getAttribute('src')]); }
+function attackIcon(key) {
+  const src = `/enemy-attribute-icons/damage-${key}.png`;
+  return Object.hasOwn(attackLabels, key) && !failedImages.value.has(src) ? src : '';
+}
+function skillImageFor(index, name) {
+  const skill = variant.value?.skill;
+  if (!Array.isArray(skill?.itemIds) || skill.itemIds.length !== skill.names?.length) return '';
+  const id = skill.itemIds[index];
+  if (typeof id !== 'string') return '';
+  const definition = catalog.value?.skillDefinitions?.[id];
+  if (!definition || definition.id !== id || definition.name !== name || definition.iconId == null) return '';
+  const entry = skillImages.value[String(definition.iconId)];
+  return entry?.status === 'verified' && typeof entry.src === 'string' && /^\/skill-images\/[A-Za-z0-9_-]+\.(?:webp|png|jpe?g)$/i.test(entry.src) && !failedImages.value.has(entry.src) ? entry.src : '';
+}
 function readUrl() {
   const params = new URL(location.href).searchParams;
   query.value = params.get('weaponQ') || '';
@@ -78,6 +93,8 @@ async function loadCatalog() {
   const signal = controller.signal;
   const imageVersion = props.catalogVersions?.['weapon-image-manifest.json'];
   if (imageVersion) fetch(`/weapon-image-manifest.json?v=${imageVersion}`, { signal }).then(response => response.ok ? response.json() : null).then(data => { if (data?.schemaVersion === 1 && data.images && !Array.isArray(data.images)) images.value = data.images; }).catch(() => {});
+  const skillImageVersion = props.catalogVersions?.['skill-image-manifest.json'];
+  if (skillImageVersion) fetch(`/skill-image-manifest.json?v=${skillImageVersion}`, { signal }).then(response => response.ok ? response.json() : null).then(data => { if (data?.schemaVersion === 1 && data.images && typeof data.images === 'object' && !Array.isArray(data.images)) skillImages.value = data.images; }).catch(() => {});
   try {
     const version = props.catalogVersions?.['weapon-catalog.json'];
     if (!/^[a-f0-9]{12}$/i.test(version || '')) throw new Error('武器资料版本尚未就绪，请刷新页面后重试。');
@@ -125,9 +142,9 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
             <label v-if="selected.variants?.length" class="weapon-variant">参数变体<select :value="variant?.id" @change="variantId = $event.target.value; selectVariant()"><option v-for="item in selected.variants" :key="item.id" :value="item.id">{{ item.label || item.name || '待核对变体' }}</option></select></label>
             <p v-if="unknownVariant" class="weapon-note" role="status">链接中的参数变体不存在，当前展示默认变体。请重新选择。</p>
             <template v-if="variant">
-              <section class="weapon-section"><h3>基础攻击</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in attackLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayValue(variant.attack?.[key]) }}</dd></div></dl><p v-if="variant.attackTypes?.length" class="weapon-note">攻击类型：{{ variant.attackTypes.join('、') }}</p></section>
+              <section class="weapon-section"><h3>基础攻击</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in attackLabels" :key="key"><dt class="weapon-attack-label"><img v-if="attackIcon(key)" :src="attackIcon(key)" class="weapon-attack-icon" width="18" height="18" alt="" @error="imageFailed"><span v-else class="weapon-attack-icon weapon-icon-placeholder" aria-hidden="true"></span><span>{{ label }}</span></dt><dd>{{ displayValue(variant.attack?.[key]) }}</dd></div></dl><p v-if="variant.attackTypes?.length" class="weapon-note">攻击类型：{{ variant.attackTypes.join('、') }}</p></section>
               <section class="weapon-section"><h3>能力补正</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in abilityLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayScalingGrade(variant.scalingGrades?.[key]) }}</dd></div></dl></section>
-              <section class="weapon-section"><h3>{{ variant.skill?.kind === 'fixed' ? '固定战技' : variant.skill?.kind === 'pool' ? '战技候选池' : '战技' }}</h3><ul v-if="variant.skill?.names?.length" class="weapon-skill-list"><li v-for="name in variant.skill.names" :key="name">{{ name }}</li></ul><p v-else>待核对</p><p v-if="variant.skill?.kind === 'pool'" class="weapon-note">以下为可能出现的战技，不代表这件武器固定拥有全部战技。</p><p v-if="variant.skill?.note" class="weapon-note">{{ variant.skill.note }}</p></section>
+              <section class="weapon-section"><h3>{{ variant.skill?.kind === 'fixed' ? '固定战技' : variant.skill?.kind === 'pool' ? '战技候选池' : '战技' }}</h3><ul v-if="variant.skill?.names?.length" class="weapon-skill-list"><li v-for="(name, index) in variant.skill.names" :key="`${index}-${name}`"><span class="weapon-skill-icon"><img v-if="skillImageFor(index, name)" :src="skillImageFor(index, name)" width="30" height="30" alt="" loading="lazy" @error="imageFailed"><span v-else class="weapon-icon-placeholder" aria-hidden="true"></span></span><span class="weapon-skill-name">{{ name }}</span></li></ul><p v-else>待核对</p><p v-if="variant.skill?.kind === 'pool'" class="weapon-note">以下为可能出现的战技，不代表这件武器固定拥有全部战技。</p><p v-if="variant.skill?.note" class="weapon-note">{{ variant.skill.note }}</p></section>
             </template>
             <p v-else class="weapon-note">该武器的参数变体待核对。</p>
           </template>

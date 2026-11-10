@@ -34,3 +34,21 @@
 图片按全表 iconId 提前提取。本轮对接当前 catalog 的 391 种武器、391 个不同变体 iconId，图片覆盖 391/391，缺图为 0；仅 10330、10331 两张资产未被当前 catalog 使用，保留并交总控决定是否裁剪。validation.json 同时记录当时的 catalog、manifest、脚本 SHA，catalog 后续变化时需重新计算覆盖率。
 
 没有为缺失图标生成替代图，没有修改武器数值、目录归组、其他图片或页面 UI。
+
+## 已批准的武器入口与战技图标（2026-11-10）
+
+本轮新增 `public/skill-images/`、`public/skill-image-manifest.json`、`public/nav-icons/weapons.webp` 和 `scripts/extract_weapon_ui_icons.py`，只供已批准的本地预览。基础攻击五项继续使用既有 Wiki 来源的 damage PNG，本轮没有修改、复制或登记为游戏解包素材。
+
+导航采用原生 `MENU_MenuIcon_40051.png` 直剑轮廓，来自 `01_common_h.tpf.dcx` 的 `SB_MenuIcon_0`，layout 矩形 `[1364,2036,172,172]`。按原生 172×172 整幅矩形无损导出，浏览器路径为 `/nav-icons/weapons.webp`；`navigation.weapons` 登记裁切和文件 SHA。这是按图形内容选用的入口标志，尚未证明它在游戏中绑定哪一条菜单命令。
+
+战技固定引用链为 `EquipParamWeapon.swordArtsParamId → SwordArtsParam.id → iconId`；池引用链为 `swordArtsTableId → SwordArtsTableParam` 同 ID 的全部正权重行 → `swordArtsId → SwordArtsParam.id → iconId`。名称另由 `SwordArtsParam.textId → ArtsName` 获取，不能把战技参数 ID 当作图标 ID，也不能全局按同名选首图。
+
+从当前 catalog 的实际 names 及每变体源引用独立推导出 35,106 个显示上下文、182 个战技 ID、182 个图标 ID，均精确命中基础包 `SB_ItemIcon_0` 或 `SB_ItemIcon_1` 的 `MENU_ItemIcon_<iconId>.png`。隐藏 default 125（icon8496）和 1056（icon8589）未提取，未知/占位图未提取，缺图为 0。数据专项新增的 skillDefinitions 与 skill.itemIds 保留 ID，由前端据当前上下文取图；图片清单只按 iconId 建键。
+
+182 张图片均保留原生 160×160、完整透明画布，无缩放、重绘或生成图。全部以无损 RGBA WebP 导出，重新解码后尺寸和 RGBA 字节与原图集矩形裁切严格相等；战技文件共 5,601,430 字节，导航 2,414 字节。六组同名不同 iconId 均保留：回旋斩、罗蕾塔的斩击、欧赫剑舞、流体化、星云、不可挡之刃。其中欧赫剑舞的 8512/8555 图标编号不同但原生裁切像素相同；其余五组的像素也不同。不会根据名称或像素相同反向合并战技参数 ID。
+
+源文件复用已核验的 `monster-images/game-source/01_common_h.tpf.dcx` 和 layout，DCX 哈希与既有武器清单的基础菜单源一致。在内存进行 KRAK/PC TPF/DDS 解码，仅选中所需的三个图集，不重新全量解包。清单 source 登记归档资源位置、DCX/TPF/DDS/layout 哈希、sprite、矩形、参数 ID/textId/iconId、原生 RGBA 与 WebP SHA；provenance 登记参数表、中文文本、catalog 快照和提取脚本哈希。
+
+复现：`python scripts/extract_weapon_ui_icons.py`；可选 `--repo`、`--source-root`、`--evidence`。脚本只写本轮分配的图标文件、清单及证据目录，不自动删除旧资产。182 个公开战技范围若变化会中止，需先审核新范围。依赖沿用本机既有 Pillow、cryptography 与 Oodle 解码链，不执行旧提取脚本 main。
+
+证据目录为 `E:\海斗\outputs\weapon-encyclopedia-20261110\icons`：`skills-contact-01.png` 至 `skills-contact-04.png` 覆盖全部 182 图；`same-name-different-icons.png` 为六组对照；`navigation-native.png` 为导航原尺寸预览；`validation.json` 为源、像素、覆盖和保护哈希检查。已查看完整联系表和六组对照。游戏 EXE/regulation 哈希与初始清单相同，游戏资源大小/mtime 及旧武器图片、其他导航资产哈希保持不变。此核验不表示已逐条游戏内实测或已取得公开再分发许可。

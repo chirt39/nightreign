@@ -13,10 +13,10 @@ from pathlib import Path
 import sys
 import unicodedata
 
-from build_weapon_catalog import DEFAULT_AUDIT, DEFAULT_SOURCE, DEFAULT_GRADES, ROOT, Extraction, scaling_grade, write_json
+from build_weapon_catalog import DEFAULT_AUDIT, DEFAULT_SOURCE, DEFAULT_GRADES, DEFAULT_ICONS, ROOT, Extraction, scaling_grade, skill_item_ids, write_json
 
 
-def validate(catalogue_path, source, audit_dir, baseline=None):
+def validate(catalogue_path, source, audit_dir, baseline=None, baseline_mode="icons"):
     data = json.loads(catalogue_path.read_text(encoding="utf-8"))
     extraction = Extraction(source)
     raw = extraction.param("EquipParamWeapon")
@@ -63,6 +63,9 @@ def validate(catalogue_path, source, audit_dir, baseline=None):
     families = {w["id"]: w for w in data["weapons"]}
     check(len(families) == len(data["weapons"]), "Duplicate family IDs")
     variants = {}
+    definitions = data["skillDefinitions"]
+    used_art_ids, unresolved_contexts = set(), []
+    context_count = 0
     for item in data["weapons"]:
         check(isinstance(item["id"], str) and item["id"] in by_id, "Family ID not a source row")
         check(item["categoryLabel"] == categories[item["categoryId"]], "Category label mismatch")
@@ -106,6 +109,29 @@ def validate(catalogue_path, source, audit_dir, baseline=None):
                 check(skill["names"] == names, "Pool names differ from active candidates")
             else:
                 check(skill["default"]["id"] == row["swordArtsParamId"], "Default skill reference changed")
+            # Reconstruct the context from source XML, not the generator's icon audit.
+            referenced = [r["swordArtsId"] for _, r in tables[row["swordArtsTableId"]]
+                          if float(r["chanceWeight"]) > 0 and int(r["swordArtsId"]) >= 0] if skill["kind"] == "pool" else [row["swordArtsParamId"]] if skill["kind"] == "fixed" else []
+            name_ids = defaultdict(set)
+            for art_id in referenced:
+                art_row = arts.get(art_id)
+                texts = {x["text"] for x in art_names.get(art_row["textId"] if art_row else None, [])}
+                if len(texts) == 1:
+                    name_ids[next(iter(texts))].add(art_id)
+            check(len(skill["itemIds"]) == len(skill["names"]), "Icon references changed public name count")
+            for name, art_id in zip(skill["names"], skill["itemIds"]):
+                context_count += 1
+                ids = name_ids[name]
+                expected_id = next(iter(ids)) if len(ids) == 1 else None
+                if expected_id is not None and int(arts[expected_id]["iconId"]) <= 0:
+                    expected_id = None
+                check(art_id == expected_id, "Icon chosen outside current fixed/pool context")
+                if art_id is None:
+                    unresolved_contexts.append({"variantId": vid, "name": name, "ids": sorted(ids, key=int)})
+                else:
+                    check(isinstance(art_id, str), "Art parameter ID must stay a string")
+                    used_art_ids.add(art_id)
+                    check(definitions[art_id] == {"id": art_id, "textId": arts[art_id]["textId"], "name": name, "iconId": int(arts[art_id]["iconId"])}, "Definition differs from SwordArtsParam text/icon fields")
     for table_id, options in skill_pools.items():
         check(len(options) == len(tables[table_id]), "Repeated table rows were lost")
         for option, (index, row) in zip(options, tables[table_id]):
@@ -142,25 +168,54 @@ def validate(catalogue_path, source, audit_dir, baseline=None):
     for item in data["provenance"]["files"]:
         check(hashlib.sha256((source / item["path"]).read_bytes()).hexdigest() == item["sha256"], "Source hash mismatch: " + item["path"])
     check(data["provenance"]["scalingGrades"]["runtimeVerified"] is False, "Static inference incorrectly called runtime verified")
+    check(set(definitions) == used_art_ids, "Missing or unused skill definitions")
+    check(not {"125", "1056"} & used_art_ids, "Hidden pool defaults leaked into public names")
+    # Same global name must retain the distinct source IDs/icons at its real contexts.
+    for first, second, name in [("103", "1166", "回旋斩"), ("118", "1165", "罗蕾塔的斩击"),
+                               ("1012", "1055", "欧赫剑舞"), ("1018", "1035", "流体化"),
+                               ("1047", "1173", "星云"), ("1054", "1191", "不可挡之刃")]:
+        check(definitions[first]["name"] == definitions[second]["name"] == name and definitions[first]["iconId"] != definitions[second]["iconId"], "Same-name different-icon sample collapsed")
+    menu_files = {x["name"] for x in json.loads((source / "monster-images/menu-inventory.json").read_text(encoding="utf-8"))["menu_files"]}
+    check(all(f"MENU_Knowledge_{x['iconId']:05}.tpf.dcx" in menu_files for x in definitions.values()), "Source menu resource not found")
+    # Future ambiguity keeps the existing single name and returns null, including when icons coincide.
+    fixture = {"kind": "pool", "names": ["同名", "缺失"], "tableId": "sample", "default": {"id": "3", "name": "同名"}}
+    opts = {"sample": [{"id": "1", "name": "同名", "weight": 1}, {"id": "2", "name": "同名", "weight": 1}, {"id": "3", "name": "缺失", "weight": 0}]}
+    item_ids, issues = skill_item_ids(fixture, opts, {str(i): {"iconId": "10", "textId": "1"} for i in (1, 2, 3)}, {})
+    check(item_ids == [None, None] and len(issues) == 2 and fixture["names"] == ["同名", "缺失"], "Ambiguity/zero-weight fallback changed names or picked first")
+    fixed_fixture = {"kind": "fixed", "names": ["固定"], "default": {"id": "3", "name": "固定"}}
+    item_ids, issues = skill_item_ids(fixed_fixture, opts, {"3": {"iconId": "30", "textId": "3"}}, {})
+    check(item_ids == ["3"] and not issues, "Fixed skill incorrectly resolved from a pool")
+    duplicate_fixture = {"kind": "pool", "names": ["重复行"], "tableId": "repeated"}
+    same_id_rows = {"repeated": [{"id": "1", "name": "重复行", "weight": 1}] * 2}
+    item_ids, issues = skill_item_ids(duplicate_fixture, same_id_rows, {"1": {"iconId": "10", "textId": "1"}}, {})
+    check(item_ids == ["1"] and not issues, "Repeated identical parameter reference inflated the name list")
+    item_ids, issues = skill_item_ids(fixed_fixture, {}, {"3": {"iconId": "0", "textId": "3"}}, {})
+    check(item_ids == [None] and len(issues) == 1, "Missing icon reference should retain text without guessing")
     preserved = None
     if baseline:
         before = json.loads(baseline.read_text(encoding="utf-8"))
         after = copy.deepcopy(data)
         for catalogue in [before, after]:
+            catalogue.pop("skillDefinitions", None)
             for weapon in catalogue["weapons"]:
                 for variant in weapon["variants"]:
-                    variant.pop("scalingGrades", None)
-                    variant.pop("scalingNote", None)
-        old_files = before["provenance"].pop("files")
-        new_files = after["provenance"].pop("files")
-        after["provenance"].pop("scalingGrades")
-        check(all(item in new_files for item in old_files), "Existing provenance changed")
+                    variant["skill"].pop("itemIds", None)
+                    if baseline_mode == "grades":
+                        variant.pop("scalingGrades", None)
+                        variant.pop("scalingNote", None)
+        if baseline_mode == "grades":
+            old_files = before["provenance"].pop("files")
+            new_files = after["provenance"].pop("files")
+            after["provenance"].pop("scalingGrades")
+            check(all(item in new_files for item in old_files), "Existing provenance changed")
         check(before == after, "Unrelated catalogue fields changed")
         preserved = True
     return {"status": "passed", "checks": count, "weaponCount": len(families), "variantCount": len(variants), "skillPools": len(skill_pools),
             "scalingValuesChecked": len(variants) * 5, "boundaryCases": 18, "invalidCases": 11, "unrelatedFieldsPreserved": preserved,
             "gradeCounts": dict(Counter(grade for variant in variants.values() for grade in variant["scalingGrades"].values())),
             "zeroCoefficients": sum(value == 0 for variant in variants.values() for value in variant["scaling"].values()),
+            "skillNameContexts": context_count, "skillDefinitions": len(definitions), "uniqueSkillNames": len({x["name"] for x in definitions.values()}),
+            "unresolvedSkillContexts": unresolved_contexts, "baselineMode": baseline_mode if baseline else None,
             "catalogueSha256": hashlib.sha256(catalogue_path.read_bytes()).hexdigest(),
             "samples": ["匕首普通/火焰/雷电", "33750000/33770000同图标不合并", "33990100来源缺失", "5750000/11750000 DLC专属文本", "10000010多行战技池"]}
 
@@ -172,11 +227,14 @@ def main():
     parser.add_argument("--source-root", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--audit-dir", type=Path, default=DEFAULT_AUDIT)
     parser.add_argument("--grades-dir", type=Path, default=DEFAULT_GRADES)
+    parser.add_argument("--icons-dir", type=Path, default=DEFAULT_ICONS)
     parser.add_argument("--baseline", type=Path, help="Pre-conversion catalogue for exact unrelated-field comparison")
+    parser.add_argument("--baseline-mode", choices=["icons", "grades"], default="icons")
     args = parser.parse_args()
-    result = validate(args.catalogue, args.source_root, args.audit_dir, args.baseline)
+    result = validate(args.catalogue, args.source_root, args.audit_dir, args.baseline, args.baseline_mode)
     write_json(args.audit_dir / "validation.json", result)
     write_json(args.grades_dir / "validation.json", result)
+    write_json(args.icons_dir / "validation.json", result)
     print(json.dumps(result, ensure_ascii=False))
 
 

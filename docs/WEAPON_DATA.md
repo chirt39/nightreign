@@ -14,7 +14,7 @@ python scripts/validate_weapon_catalog.py
 2026-11-10 经用户批准，目录新增 `scalingGrades`，仍保留 `scaling` 的五项原始数值。转换证据与校验报告在 `E:\海斗\outputs\weapon-encyclopedia-20261110\grades`。如需核对本次变更没有影响其他字段：
 
 ```powershell
-python scripts/validate_weapon_catalog.py --baseline E:\海斗\outputs\weapon-encyclopedia-20261110\grades\catalogue-before.json
+python scripts/validate_weapon_catalog.py --baseline-mode grades --baseline E:\海斗\outputs\weapon-encyclopedia-20261110\grades\catalogue-before.json
 ```
 
 基线文件是实施前保存的目录副本，生成器不会覆盖它。`--baseline` 可选；提供时必须完整比对除新增等级、更新的补正说明及新增出处以外的全部字段。生成器与校验器支持 `--grades-dir` 指定独立证据目录。
@@ -105,7 +105,39 @@ python scripts/validate_weapon_catalog.py --baseline E:\海斗\outputs\weapon-en
 
 战技名称按 `SwordArtsParam.textId → ArtsName` 关联，不假设战技参数 ID 必然就是文本 ID。XML 省略的 `chanceWeight` 用表内默认值 100 恢复。引用 `swordArtsTableId` 时，保留其全部同行 ID 记录为候选池；`names` 仅汇总权重大于零且引用有效的去重中文名，池只有一个名字也不冒称固定战技。无表引用时使用 `swordArtsParamId` 的参数默认战技，定制配置仍可能覆盖。
 
-公开 `skill` 只含接口 v1 的 kind/names/note 和简短 tableId/default；完整候选、权重、原始行索引和中文文本依据放在外部审计。`10000010` 匕首池含多条不同战技，验证器逐条比对源表，不能取首项“贯穿”当固定战技。没有对权重进行概率归一化，也没有声称该池就是全部实际掉落结果。
+公开 `skill` 保留接口 v1 的 kind/names/note 和简短 tableId/default，并新增与 names 等长同序的 `itemIds`；完整候选、权重、原始行索引和中文文本依据仍放在外部审计。`10000010` 匕首池含多条不同战技，验证器逐条比对源表，不能取首项“贯穿”当固定战技。没有对权重进行概率归一化，也没有声称该池就是全部实际掉落结果。
+
+### 战技图标的数据关联（基线 b334de2）
+
+顶层新增 `skillDefinitions`，以战技参数 ID 字符串为键，定义为 `{id,textId,name,iconId}`。每个变体 `skill.itemIds[index]` 指向当前 `skill.names[index]` 的定义；原名称、顺序、条目数和 fixed/pool 语义保持。名称仍由 `SwordArtsParam.textId → ArtsName` 解析，图标只读本作 `SwordArtsParam.iconId`（u16，默认0），NR Meta 明确该字段为战技图标、`IconConfig="Item"`。没有查用 EquipParamGem，没有以战技 ID、文本 ID、名称或相邻 ID 猜图。
+
+固定战技只使用实际 `default` 引用；候选池只使用该变体所指池中正权重、有效参数 ID 的候选。相同 ID 的重复候选不增加名称条目。对每个既有名称，只有上下文中唯一参数 ID 且正向图标引用有效才填 ID；若同名出现多个不同 ID，即便它们共用一个图标，也返回 null 并将歧义写入外部审计，不任选第一项、不展开原名称列表。未知、缺失或零图标引用也保留文字并留 null。
+
+当前1792个变体有35106个公开名称上下文，缺失/歧义均为0；176个名称对应182个参数 ID、180个文本 ID、182个不同图标 ID。93个参数来自候选池，102个来自固定战技，两类重叠13个。133个参数默认引用中，125“回旋锁链”和1056“魔力之短剑”未进入实际展示集合；它们不能因为参数默认字段存在就被混入候选显示。
+
+六组全局同名不同图均在不同上下文，当前同一变体的名称均可唯一匹配：
+
+| 名称 | 上下文一：参数→图标 | 上下文二：参数→图标 |
+| --- | --- | --- |
+| 回旋斩 | 匕首1000000候选：103→8303 | 龙戟18140000固定：1166→8557 |
+| 罗蕾塔的斩击 | 双头剑10000000候选：118→8316 | 罗蕾塔的战镰18100000固定：1165→8556 |
+| 欧赫剑舞 | 欧赫宝剑2220000固定：1055→8555 | 玛雷家行刑剑3150000固定：1012→8512 |
+| 流体化 | 诺克斯流体剑2080000固定：1018→8518 | 诺克斯流体锤11120000固定：1035→8535 |
+| 星云 | 艾丝缇薄翼7070000固定：1173→8564 | 弃子的繁星13030000固定：1047→8547 |
+| 不可挡之刃 | 秘文剑2110000固定：1054→8554 | 秘文帕塔剑21130000固定：1191→8580 |
+
+182个图标均可沿 `MENU_Knowledge_{iconId:05}.tpf.dcx` 命中既有 `monster-images/menu-inventory.json` 资源清单。此数据校验只确认原字段与菜单资源对应；实际像素、裁切及公开图片清单由图片专项另行核验，不能用清单存在替代图像内容验收。
+
+本轮命令使用独立输出位置，避免覆盖上一轮 `grades/validation.json` 与 `grades/mapping-evidence.json`：
+
+```powershell
+python scripts/build_weapon_catalog.py --audit-dir E:\海斗\outputs\weapon-encyclopedia-20261110\icons\data\catalogue-audit --grades-dir E:\海斗\outputs\weapon-encyclopedia-20261110\icons\data\grade-recheck --icons-dir E:\海斗\outputs\weapon-encyclopedia-20261110\icons\data
+python scripts/validate_weapon_catalog.py --audit-dir E:\海斗\outputs\weapon-encyclopedia-20261110\icons\data\catalogue-audit --grades-dir E:\海斗\outputs\weapon-encyclopedia-20261110\icons\data\grade-recheck --icons-dir E:\海斗\outputs\weapon-encyclopedia-20261110\icons\data --baseline E:\海斗\outputs\weapon-encyclopedia-20261110\icons\data\catalogue-before.json
+```
+
+`icons/data/catalogue-before.json` 保存 git b334de2 的原目录；默认 `--baseline-mode icons` 只允许新增 skillDefinitions 和 itemIds，其余字段必须完全一致，包括原始补正与字母、说明、战技默认/池引用、名称顺序、攻击、图标和出处。原补正升级前基线比较另用 `--baseline-mode grades`。校验器独立从源 XML 重新构造固定/有效池引用，核对全部上下文、六组不同图、同 ID 重复候选、未来同名多引用/缺图的 null 回退及公开载荷不超过3MB。
+
+本轮证据 `icons/data` 包含 `skill-icon-contexts.json`、`skill-icon-definitions.json`、`skill-icon-ambiguities.json`、`skill-icon-summary.json`、`validation.json`，以及基线、重跑和旧补正报告保护记录。生成器的默认审计目录保留向后兼容；需要保存某次历史交付时，后续运行也应像以上命令显式提供新目录。
 
 ## 外部审计与许可
 

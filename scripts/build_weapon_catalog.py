@@ -19,6 +19,7 @@ DEFAULT_SOURCE = Path(r"E:\海斗\outputs\nightreign-data-20261109")
 DEFAULT_AUDIT = Path(r"E:\海斗\outputs\weapon-encyclopedia-20261110\data")
 DEFAULT_PARAMDEX = Path(r"E:\海斗\tools\WitchyBND-3.0.1.0\Assets\Paramdex\NR")
 DEFAULT_GRADES = Path(r"E:\海斗\outputs\weapon-encyclopedia-20261110\grades")
+DEFAULT_ICONS = Path(r"E:\海斗\outputs\weapon-encyclopedia-20261110\icons\data")
 
 # Human-reviewed labels for NR Meta's WEP_TYPE, not the coarse WEAPON_CATEGORY.
 CATEGORIES = {
@@ -134,12 +135,42 @@ def load_grade_rule(extraction, paramdex):
     return thresholds, rule, evidence
 
 
-def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES):
+def skill_item_ids(skill, pools, arts, definitions):
+    """Resolve within the actual variant context, preserving each public name position."""
+    options = pools.get(skill.get("tableId"), []) if skill["kind"] == "pool" else [skill["default"]] if skill["kind"] == "fixed" else []
+    by_name = defaultdict(set)
+    for option in options:
+        if "weight" in option and (option["weight"] <= 0 or int(option["id"]) < 0):
+            continue
+        if option.get("name"):
+            by_name[option["name"]].add(option["id"])
+    item_ids, issues = [], []
+    for name in skill["names"]:
+        ids = by_name[name]
+        if len(ids) != 1:
+            item_ids.append(None)
+            issues.append({"name": name, "ids": sorted(ids, key=int), "reason": "missing-reference" if not ids else "ambiguous-reference"})
+            continue
+        art_id = next(iter(ids))
+        row = arts.get(art_id)
+        if row is None or int(row["iconId"]) <= 0:
+            item_ids.append(None)
+            issues.append({"name": name, "ids": [art_id], "reason": "missing-icon-reference"})
+            continue
+        definitions[art_id] = {"id": art_id, "textId": row["textId"], "name": name, "iconId": int(row["iconId"])}
+        item_ids.append(art_id)
+    return item_ids, issues
+
+
+def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES, icons_dir=DEFAULT_ICONS):
     extraction = Extraction(source)
     thresholds, grade_rule, grade_evidence = load_grade_rule(extraction, paramdex)
     weapons = extraction.param("EquipParamWeapon")
     custom = extraction.param("EquipParamCustomWeapon")
-    arts = {r["id"]: r for r in extraction.param("SwordArtsParam")}
+    art_rows = extraction.param("SwordArtsParam")
+    arts = {r["id"]: r for r in art_rows}
+    if len(arts) != len(art_rows):
+        raise ValueError("Duplicate SwordArtsParam IDs require review; do not pick an icon arbitrarily")
     tables = extraction.param("SwordArtsTableParam")
     attached = extraction.param("AttachEffectTableParam")
     effect_definitions = extraction.param("AttachEffectParam")
@@ -250,6 +281,15 @@ def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES):
                        "variants": variants, "sourceIds": [r["id"] for r in rows],
                        "notes": ["获取途径待核对。"]})
 
+    skill_definitions, icon_contexts, icon_issues = {}, [], []
+    for item in result:
+        for variant in item["variants"]:
+            selected_skill = variant["skill"]
+            item_ids, issues = skill_item_ids(selected_skill, skill_pools, arts, skill_definitions)
+            selected_skill["itemIds"] = item_ids
+            icon_contexts.append({"variantId": variant["id"], "kind": selected_skill["kind"],
+                                  "tableId": selected_skill.get("tableId"), "names": selected_skill["names"], "itemIds": item_ids})
+            icon_issues.extend({"variantId": variant["id"], **issue} for issue in issues)
     included = {v["id"] for item in result for v in item["variants"]}
     custom_audit = [{"id": r["id"], "targetWeaponId": r["targetWeaponId"],
                      "status": "included-variant" if r["targetWeaponId"] in included else "excluded-target" if r["targetWeaponId"] in by_id else "unresolved-target",
@@ -278,7 +318,7 @@ def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES):
                "attachEffectTableIds": len({r["id"] for r in attached})}
     catalogue = {"schemaVersion": 1, "gameVersion": manifest["executable_version"], "regulationVersion": manifest["regulation_version"],
                  "categories": [{"id": k, "label": CATEGORIES[k]} for k in sorted({x["categoryId"] for x in result}, key=int)],
-                 "weapons": result, "summary": summary, "provenance": provenance}
+                 "weapons": result, "skillDefinitions": skill_definitions, "summary": summary, "provenance": provenance}
     write_json(audit_dir / "excluded-weapon-rows.json", exclusions)
     write_json(audit_dir / "reference-conflicts.json", conflicts)
     write_json(audit_dir / "custom-configurations.json", custom_audit)
@@ -297,6 +337,11 @@ def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES):
         "observed": {"strength": "E", "dexterity": "S"},
         "scope": "第三方本作资料交叉核对，仅支持染血短刀样例，不证明所有边界或运行时效果。"}
     write_json(grades_dir / "mapping-evidence.json", grade_evidence)
+    write_json(icons_dir / "skill-icon-contexts.json", icon_contexts)
+    write_json(icons_dir / "skill-icon-ambiguities.json", icon_issues)
+    write_json(icons_dir / "skill-icon-definitions.json", skill_definitions)
+    write_json(icons_dir / "skill-icon-summary.json", {"variants": len(icon_contexts), "nameContexts": sum(len(x["names"]) for x in icon_contexts),
+               "definitions": len(skill_definitions), "names": len({x["name"] for x in skill_definitions.values()}), "issues": len(icon_issues)})
     return catalogue
 
 
@@ -307,8 +352,9 @@ def main():
     parser.add_argument("--output", type=Path, default=ROOT / "public/weapon-catalog.json")
     parser.add_argument("--audit-dir", type=Path, default=DEFAULT_AUDIT)
     parser.add_argument("--grades-dir", type=Path, default=DEFAULT_GRADES)
+    parser.add_argument("--icons-dir", type=Path, default=DEFAULT_ICONS)
     args = parser.parse_args()
-    catalogue = build(args.source_root, args.paramdex, args.audit_dir, args.grades_dir)
+    catalogue = build(args.source_root, args.paramdex, args.audit_dir, args.grades_dir, args.icons_dir)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(catalogue, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     print(json.dumps(catalogue["summary"], ensure_ascii=False))
