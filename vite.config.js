@@ -26,6 +26,8 @@ const catalogJsonFiles = [
   'weapon-catalog.json',
   'weapon-image-manifest.json',
   'skill-image-manifest.json',
+  'map-catalog.json',
+  'map-asset-manifest.json',
 ];
 const stylesheetFiles = ['style.css', 'game-ui.css'];
 const classicScriptVersions = Object.fromEntries(classicScriptFiles.map((file) => {
@@ -43,7 +45,7 @@ const classicScriptVersions = Object.fromEntries(classicScriptFiles.map((file) =
 const catalogJsonVersions = Object.fromEntries(catalogJsonFiles.map((file) => {
   const path = fileURLToPath(new URL(`./public/${file}`, import.meta.url));
   if (!existsSync(path)) {
-    if (file === 'weapon-image-manifest.json' || file === 'skill-image-manifest.json') return [file, null];
+    if (['weapon-image-manifest.json', 'skill-image-manifest.json', 'map-catalog.json', 'map-asset-manifest.json'].includes(file)) return [file, null];
     throw new Error(`[catalog JSON] Required public/${file} is missing; cannot generate its SHA-256 cache key.`);
   }
   const content = readFileSync(path);

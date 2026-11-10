@@ -676,6 +676,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 
 /* Searchable relic effect glossary. */
 .weapon-nav-placeholder{background:#152332}
+.nav-link .map-nav-icon{display:grid;place-items:center;background:#172638;color:#d9c28d;font-size:25px}
 #view-weapons{font-size:14px;line-height:1.6}
 #view-weapons .weapon-toolbar{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:14px;border:1px solid #3c5065;background:#152332;border-radius:4px}
 #view-weapons label{display:grid;gap:5px;min-width:0;color:#c8d1d7;font-size:14px}
@@ -685,8 +686,10 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-weapons .weapon-count{flex:0 0 auto;padding:8px 0;color:#abbcc9;font-size:14px}
 #view-weapons .weapon-layout{display:grid;grid-template-columns:minmax(270px,32%) minmax(0,1fr);gap:16px;align-items:start}
 #view-weapons .weapon-list-panel,#view-weapons .weapon-detail{min-width:0;border:1px solid #3c5065;border-radius:4px;background:#142231}
-#view-weapons .weapon-list{list-style:none;margin:0;padding:6px;max-height:650px;overflow:auto;scrollbar-gutter:stable}
-#view-weapons .weapon-list li{margin:0}
+#view-weapons .weapon-list-panel{container:weapon-list / inline-size}
+#view-weapons .weapon-list{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:6px;list-style:none;margin:0;padding:6px;max-height:650px;overflow:auto;scrollbar-gutter:stable}
+#view-weapons .weapon-list li{min-width:0;margin:0}
+@container weapon-list (min-width:600px){#view-weapons .weapon-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #view-weapons .weapon-row{display:grid;grid-template-columns:48px minmax(0,1fr) 36px;align-items:center;gap:10px;width:100%;min-height:72px;padding:9px;border:1px solid transparent;border-bottom-color:#2d4052;border-radius:3px;background:transparent;color:#e2e7e7;text-align:left;cursor:pointer;font:inherit}
 #view-weapons .weapon-row:hover{background:#203247}
 #view-weapons .weapon-row.selected{border-color:#b59a62;background:#29333b;box-shadow:inset 3px 0 #d2b77c}
@@ -757,8 +760,15 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
   #view-weapons .weapon-source-note p+p{margin:0}
 }
 .app-shell>.sidebar{min-height:0;overflow-y:auto;overscroll-behavior:contain}
-.app-shell>.sidebar>.nav-list{flex:1 1 auto;min-height:44px;overflow-y:auto;align-content:start;overscroll-behavior:contain;scrollbar-width:thin}
+.app-shell>.sidebar>.nav-list{flex:1 1 auto;min-height:44px;min-width:0;grid-template-columns:minmax(0,1fr);overflow-y:auto;overflow-x:hidden;align-content:start;overscroll-behavior:contain;scrollbar-width:thin}
+.app-shell>.sidebar>.nav-list>.nav-link{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+.app-shell>.sidebar>.nav-list>.nav-link:focus-visible{outline-offset:-2px}
 .app-shell>.sidebar>.brand,.app-shell>.sidebar>.side-divider,.app-shell>.sidebar>.side-label,.app-shell>.sidebar>.side-bottom{flex-shrink:0}
+@media(min-width:1151px){
+  .app-shell.map-fullscreen>.main{display:flex;height:100dvh;flex-direction:column;overflow:hidden}
+  .app-shell.map-fullscreen .topbar{height:54px;flex:0 0 54px}
+  .app-shell.map-fullscreen>.main>.content{display:flex;flex:1;flex-direction:column;min-height:0;width:100%;padding:12px 24px;overflow:hidden}
+}
 @media(max-width:850px){#view-weapons .page-intro{grid-template-columns:minmax(0,1fr);row-gap:5px}}
 .effect-encyclopedia{padding:18px;border:1px solid #35495d;background:linear-gradient(150deg,#172638,#142231)}
 .effect-encyclopedia+.hint,.page-intro>p a{color:#d0b37b;text-underline-offset:3px}
