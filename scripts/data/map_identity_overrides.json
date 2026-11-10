@@ -1371,5 +1371,23 @@
     },
     "assetSize": 1536,
     "excluded": "Rotted buff stars, Noklateo treasure building 3, normal-map castle markers 8 and 9"
+  },
+  "fieldEliteDisplayPositionOverrides": {
+    "0:755": {
+      "normalized": {
+        "x": 0.432,
+        "y": 0.716
+      },
+      "positionAccuracy": "reference",
+      "evidence": "Base-terrain Lake field-boss reference slot (432,716 on 1000x1000 map), corroborated by user screenshot showing the native marker overlaps the building at attach 305. Display marker only; original attach/world position unchanged."
+    },
+    "0:2755": {
+      "normalized": {
+        "x": 0.432,
+        "y": 0.716
+      },
+      "positionAccuracy": "reference",
+      "evidence": "DLC base-terrain counterpart of attach 755; same native location as building attach 2305 and same Lake reference slot. Display marker only; original attach/world position unchanged."
+    }
   }
 }

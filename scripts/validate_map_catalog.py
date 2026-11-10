@@ -50,6 +50,7 @@ def main() -> None:
     category_count = 0
     field_boss_count = 0
     field_elite_count = 0
+    display_position_count = Counter()
     event_count = 0
     for pid, pattern in by_id.items():
         flag = native_flags[pid]
@@ -101,6 +102,14 @@ def main() -> None:
                     field_elite_count += 1
                     assert feature["sourceId"] == f"fieldElite:{raw}"
                     assert feature["displayCategory"] == catalog["definitions"]["features"][feature["sourceId"]]["displayCategory"] == "fieldElite"
+                    display_key = f"{pattern['terrain']['value']}:{point['attachId']}"
+                    display_override = overrides.get("fieldEliteDisplayPositionOverrides", {}).get(display_key)
+                    if display_override:
+                        assert feature["displayNormalized"] == display_override["normalized"]
+                        assert feature["displayPositionAccuracy"] == "reference"
+                        display_position_count[display_key] += 1
+                    else:
+                        assert "displayNormalized" not in feature
         if pattern["events"]["state"] == "known":
             event_count += 1
             assert len(pattern["events"]["values"]) == 1
@@ -111,6 +120,13 @@ def main() -> None:
     assert point_count == 23830
     assert field_boss_count == 348
     assert field_elite_count == 5060
+    assert display_position_count == {"0:755": 160, "0:2755": 80}
+    for pid, elite_attach, building_attach in (("0", "755", "305"), ("1000", "2755", "2305")):
+        points = {point["attachId"]: point for point in by_id[pid]["points"]}
+        elite = points[elite_attach]
+        assert elite["normalized"] == points[building_attach]["normalized"]
+        assert elite["world"]["source"] == f"SmallBaseAndSpotAttachPoint:{elite_attach}"
+        assert any(f.get("kind") == "building" and f.get("sourceId", "").startswith("smallBaseMap:") for f in elite["features"])
     castle_basement_raw = sum(
         point["attachId"] in {"756", "2756"} and any(
             f.get("sourceId", "").startswith("smallBaseMap:") and f["sourceId"].split(":", 1)[1] in overrides["verifiedFieldEliteMapIds"]
@@ -152,6 +168,7 @@ def main() -> None:
         "classifiedBuildingPoints": category_count,
         "verifiedFieldBossPoints": field_boss_count,
         "verifiedFieldElitePoints": field_elite_count,
+        "fieldEliteDisplayPositionOverrides": dict(display_position_count),
         "excludedCastleBasementRawPoints": castle_basement_raw,
         "displayOnlyReferencePoints": len(reference_points),
         "nativeFieldEliteIconTemplates": dict(native_elite_icons),

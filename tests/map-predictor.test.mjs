@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
+import { buildingChoicesAtPosition, confirmedBuildingKeys, coincidentMarkers, withoutPointObservations, PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
 
 // Synthetic state fixtures exercise the filter contract, not game distribution claims.
 const known = value => ({ state: 'known', value });
@@ -277,4 +277,63 @@ test('both DLC nightlord portraits use verified native menu assets', () => {
   const catalog = JSON.parse(readFileSync(new URL('../public/map-catalog.json', import.meta.url), 'utf8'));
   const manifest = JSON.parse(readFileSync(new URL('../public/map-icon-manifest.json', import.meta.url), 'utf8'));
   for (const id of ['8', '9']) assert.equal(nightlordPortrait(catalog.definitions.nightlords[id], {}, manifest), manifest.nightlords[id].src);
+});
+
+
+test('only actual coincident points share a position picker and point cancellation removes all its clues', () => {
+  const a = { key: 'a', terrainId: '0', attachId: '1', normalized: { x: .5, y: .5 } };
+  const b = { ...a, key: 'b', attachId: '2' };
+  const near = { ...a, key: 'near', normalized: { x: .54, y: .5 } };
+  assert.deepEqual(coincidentMarkers([a,b,near], a, 500,500).map(p=>p.key), ['a','b']);
+  const clues = [{ terrainId:'0', attachId:'1', kind:'building' }, { terrainId:'0', attachId:'1', kind:'monster' }, { terrainId:'1', attachId:'1', kind:'building' }];
+  assert.deepEqual(withoutPointObservations(clues,a), [clues[2]]);
+});
+
+test('red building certainty ignores raw IDs but requires every candidate coverage and consistent position', () => {
+  const defs = { features: { ...definitions.features, raw: { kind:'building', nameZh:null, identityStatus:'raw_id_only' } } };
+  const a = pattern(0), b = pattern(1);
+  for (const p of [a,b]) p.points[0].features.unshift({ kind:'building', state:'known', sourceId:'raw' });
+  const key = '["0","1","a"]';
+  assert.ok(confirmedBuildingKeys([a,b],'0',defs).has(key));
+  for (const change of [p=>p.points[0].coverage.building='unknown', p=>p.points=[], p=>p.points[0].normalized={x:.6,y:.5}, p=>p.points[0].features[1].state='unknown', p=>p.terrain={state:'unknown'}]) {
+    const uncertain=structuredClone(b);change(uncertain);
+    assert.equal(confirmedBuildingKeys([a,uncertain],'0',defs).has(key),false);
+  }
+  assert.equal(confirmedBuildingKeys([],'0',defs).size,0);
+});
+
+test('real marked mountain scenario exposes other confirmed buildings and all DLC choices exist', () => {
+  const c=JSON.parse(readFileSync(new URL('../public/map-catalog.json',import.meta.url),'utf8'));
+  const filters={terrain:'1',nightlord:'0',firstNight:'4924',secondNight:'4860'};
+  const observation={terrainId:'1',attachId:'100',kind:'building',sourceId:'buildingCategory:greatchurch'};
+  const remaining=findCandidates(c.patterns,{filters,observations:[observation]},c.definitions);
+  const certain=confirmedBuildingKeys(remaining,'1',c.definitions);
+  assert.ok(remaining.length>0);
+  assert.ok(certain.has('["1","101","buildingCategory:ruins"]'));
+  const choices=collectLayers(c.patterns,c.definitions).filter(e=>e.kind==='building');
+  assert.ok(choices.some(e=>e.sourceId==='buildingCategory:marsh'));
+  assert.ok(choices.some(e=>e.sourceId==='buildingCategory:forge'));
+});
+
+test('south lake elite display correction preserves native point and filter identity', () => {
+  const c=JSON.parse(readFileSync(new URL('../public/map-catalog.json',import.meta.url),'utf8'));
+  const p=c.patterns.find(p=>String(p.terrain.value)==='0'&&p.points.some(pt=>pt.features.some(f=>f.displayNormalized)));
+  const pt=p.points.find(pt=>pt.features.some(f=>f.displayNormalized)),f=pt.features.find(f=>f.displayNormalized);
+  const entry=collectLayers([p],c.definitions).find(e=>e.attachId===String(pt.attachId)&&e.sourceId===f.sourceId);
+  assert.deepEqual(entry.normalized,f.displayNormalized);
+  assert.notDeepEqual(entry.normalized,pt.normalized);
+  assert.equal(evaluatePattern(p,{observations:[{terrainId:'0',attachId:pt.attachId,kind:f.kind,role:f.role,sourceId:f.sourceId}]},c.definitions).matches,true);
+});
+
+
+test('ordinary physical building position exposes DLC choices bound to their real slots', () => {
+  const c=JSON.parse(readFileSync(new URL('../public/map-catalog.json',import.meta.url),'utf8'));
+  const layers=collectLayers(c.patterns,c.definitions).filter(e=>e.kind==='building'&&e.terrainId==='0'&&e.normalized);
+  const bySlot=new Map();
+  for(const e of layers){const key=JSON.stringify([e.terrainId,e.attachId]);if(!bySlot.has(key))bySlot.set(key,{key,terrainId:e.terrainId,attachId:e.attachId,normalized:e.normalized,entries:[]});bySlot.get(key).entries.push(e);}
+  const groups=[...bySlot.values()],normal=groups.find(g=>g.attachId==='101');
+  const choices=buildingChoicesAtPosition(groups,normal);
+  for(const category of ['marsh','forge']){const e=choices.find(e=>e.sourceId==='buildingCategory:'+category);assert.ok(e);assert.equal(e.attachId,'2101');}
+  assert.equal(new Set(choices.map(e=>e.sourceId)).size,choices.length);
+  assert.ok(normal.entries.every(e=>!['buildingCategory:marsh','buildingCategory:forge'].includes(e.sourceId)));
 });

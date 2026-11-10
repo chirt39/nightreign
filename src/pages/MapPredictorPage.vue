@@ -1,14 +1,14 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue';
-import { MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, calibratedPointDirectory, collectLayers, definitionOptions, eventOptions, evaluatePattern, findCandidates, layoutMapMarkers, namedDefinition, nearbyPoints, phaseBossOptions, referenceMapGroups, safeMapAsset, validPosition } from '../lib/map-predictor.js';
+import { buildingChoicesAtPosition, coincidentMarkers, confirmedBuildingKeys, withoutPointObservations, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, calibratedPointDirectory, collectLayers, definitionOptions, eventOptions, findCandidates, layoutMapMarkers, nearbyPoints, phaseBossOptions, referenceMapGroups, safeMapAsset, validPosition } from '../lib/map-predictor.js';
 
 const props = defineProps({ active: Boolean, catalogVersions: Object });
 const catalog = shallowRef(null), manifest = shallowRef(null), iconManifest = shallowRef(null), enemyImages = shallowRef(null), loading = ref(false), error = ref('');
 const emptyFilters = () => ({ nightlord: '', firstNight: '', secondNight: '', depth: '', terrain: '', event: '', eventDay: '' });
 const filters = reactive(emptyFilters()), observations = ref([]), undoStack = ref([]);
 const candidatePage = ref(1), search = ref(''), namePage = ref(1), zoom = ref(1.65), failedAssets = ref(new Set());
-const selectedReference = ref(null), overlapChoices = ref([]), nightlordPicker = ref(null);
-const selectedGroupKey = ref(''), pointStatus = ref(''), pointDialog = ref(null), moreDetails = ref(null);
+const selectedReference = ref(null), overlapChoices = ref([]), controlDialog = ref(null), controlPanel = ref('more');
+const selectedGroupKey = ref(''), pointDialog = ref(null);
 const layerVisibility = reactive({ building: true, fieldElite: true });
 const layerLabels = { building: '建筑', fieldElite: '野外精英怪' };
 const dragging = ref(false); let dragStart = null, suppressMapClick = false;
@@ -37,7 +37,7 @@ function groupLayers(entries) {
   for (const entry of entries) {
     if (!MAP_DISPLAY_CATEGORIES.includes(entry.displayCategory)) continue;
     const key = JSON.stringify([entry.terrainId, entry.attachId]);
-    if (!groups.has(key)) groups.set(key, { key, terrainId: entry.terrainId, attachId: entry.attachId, normalized: pointDirectory.value.get(key)?.normalized || entry.normalized, entries: [] });
+    if (!groups.has(key)) groups.set(key, { key, terrainId: entry.terrainId, attachId: entry.attachId, normalized: entry.normalized, entries: [] });
     groups.get(key).entries.push(entry);
   }
   return [...groups.values()];
@@ -47,21 +47,39 @@ const availableGroups = computed(() => allGroups.value.filter(group => group.ter
 const candidateGroups = computed(() => {
   const groups = groupLayers(collectLayers(currentCandidate.value ? [currentCandidate.value] : [], definitions.value));
   for (const observation of observations.value) {
-    const group = allGroups.value.find(item => item.terrainId === observation.terrainId && item.attachId === observation.attachId);
-    if (group && !groups.some(item => item.key === group.key)) groups.push(group);
+    const source = allGroups.value.find(item => item.terrainId === observation.terrainId && item.attachId === observation.attachId);
+    if (!source) continue;
+    const entry = source.entries.find(item => item.sourceId === observation.sourceId && (item.role || null) === (observation.role || null));
+    if (!entry) continue;
+    let group = groups.find(item => item.key === source.key);
+    if (!group) { group = { ...source, entries: [] }; groups.push(group); }
+    group.entries = group.entries.filter(item => item.kind !== entry.kind || (item.role || null) !== (entry.role || null));
+    group.entries.unshift(entry);
   }
   return groups.filter(group => group.terrainId === terrainView.value && validPosition(group.normalized));
 });
-const mapGroups = computed(() => candidateGroups.value.map(group => ({ ...group, entries: group.entries.filter(entry => layerVisibility[entry.displayCategory]) })).filter(group => group.entries.length));
+const mapGroups = computed(() => {
+  const visible = candidateGroups.value.map(group => ({ ...group, entries: group.entries.filter(entry => layerVisibility[entry.displayCategory] || isObserved(group)) })).filter(group => group.entries.length);
+  const result = [];
+  for (const group of visible.sort((a,b) => Number(isObserved(b)) - Number(isObserved(a)))) {
+    if (group.entries[0].kind === 'building' && result.some(item => item.entries[0].kind === 'building' && sameBuildingPosition(item, group))) continue;
+    result.push(group);
+  }
+  return result;
+});
+function sameBuildingPosition(a,b) { return a.terrainId === b.terrainId && a.normalized && b.normalized && Math.abs(a.normalized.x-b.normalized.x)<.000001 && Math.abs(a.normalized.y-b.normalized.y)<.000001; }
+const certainBuildings = computed(() => observations.value.length ? confirmedBuildingKeys(candidates.value, terrainView.value, definitions.value) : new Set());
+function isCertain(group) { return !isObserved(group) && group.entries.some(entry => entry.kind === 'building' && certainBuildings.value.has(JSON.stringify([group.terrainId, group.attachId, entry.sourceId]))); }
 const referenceGroups = computed(() => referenceMapGroups(catalog.value?.referencePoints, terrainView.value, layerVisibility));
 const displayedMarkers = computed(() => layoutMapMarkers([...mapGroups.value, ...referenceGroups.value], stageSize.value.width, stageSize.value.height));
 const matchingNameGroups = computed(() => {
   const needle = search.value.trim().toLocaleLowerCase();
-  return availableGroups.value.filter(group => !needle || `${groupName(group)} ${pointLabel(group)}`.toLocaleLowerCase().includes(needle));
+  return availableGroups.value.filter(group => !needle || `${group.entries.map(entry => entry.name).join(' ')} ${pointLabel(group)}`.toLocaleLowerCase().includes(needle));
 });
 const nameResultPages = computed(() => Math.max(1, Math.ceil(matchingNameGroups.value.length / 24)));
 const nameGroups = computed(() => matchingNameGroups.value.slice((namePage.value - 1) * 24, namePage.value * 24));
 const selectedGroup = computed(() => allGroups.value.find(group => group.key === selectedGroupKey.value));
+const selectedChoices = computed(() => !selectedGroup.value ? [] : selectedGroup.value.entries.some(entry => entry.kind === 'building') ? buildingChoicesAtPosition(allGroups.value, selectedGroup.value) : selectedGroup.value.entries);
 const candidateNightlords = computed(() => {
   const ids = new Set(candidates.value.filter(pattern => pattern.nightlord?.state === 'known').map(pattern => String(pattern.nightlord.menuRowId)));
   return options.value.nightlord.filter(option => ids.has(option.value));
@@ -70,9 +88,9 @@ const selectedNightlord = computed(() => options.value.nightlord.find(option => 
 function portrait(value) { const path = nightlordPortrait(definitions.value.nightlords?.[value], enemyImages.value, iconManifest.value); return path && !failedAssets.value.has(path) ? path : null; }
 function buildingIcon(entry) { const path = entry?.displayCategory === 'building' ? buildingIconPath(iconManifest.value, entry.sourceId) : null; return path && !failedAssets.value.has(path) ? path : null; }
 function markerIcon(entry) { const path = entry?.displayCategory === 'fieldElite' ? pointIconPath(iconManifest.value, entry.worldMapPointIconId) : buildingIcon(entry); return path && !failedAssets.value.has(path) ? path : null; }
-function setNightlord(value) { setFilter('nightlord', value); if (nightlordPicker.value) nightlordPicker.value.open = false; }
+function setNightlord(value) { setFilter('nightlord', value); controlDialog.value?.close(); }
+async function openControls(panel) { closeDialog(); controlPanel.value = panel; await nextTick(); if (!controlDialog.value?.open) controlDialog.value?.showModal(); }
 const filterTags = computed(() => moreFields.filter(field => filters[field.key]).map(field => ({ key: field.key, text: `${field.label}：${options.value[field.key].find(option => option.value === filters[field.key])?.label || '待核对'}${field.key === 'event' && filters.eventDay ? ` · 第${filters.eventDay === '1' ? '一' : '二'}日` : ''}` })));
-const conflictLabels = computed(() => candidates.value.length ? [] : [...new Set(patterns.value.flatMap(pattern => evaluatePattern(pattern, clues.value, definitions.value).conflicts))]);
 const asset = computed(() => { const entry = manifest.value?.terrains?.[terrainView.value]; return safeMapAsset(entry) && !failedAssets.value.has(entry.src) ? entry : null; });
 const stageSize = computed(() => {
   if (!asset.value || !viewportSize.width || !viewportSize.height) return { width: 0, height: 0 };
@@ -97,33 +115,40 @@ function moveDrag(event) { if (!dragStart || dragStart.id !== event.pointerId) r
 function stopDrag() { dragStart = null; dragging.value = false; }
 function pointNumber(point) { return pointDirectory.value.get(JSON.stringify([point.terrainId, String(point.attachId)]))?.number || '?'; }
 function pointLabel(point) { return `位置 ${pointNumber(point)}`; }
-function groupName(group) { return [...new Set(group.entries.map(entry => entry.name))].join(' / '); }
+function groupName(group) { return group.reference?.nameZh || (group.entries.length === 1 ? group.entries[0].name : `${pointLabel(group)} · ${group.entries.length} 项已知对象`); }
+function groupCategory(group) { return group.reference ? '参考位置' : group.entries[0]?.kind === 'building' ? '建筑位置' : '野外精英位置'; }
 function terrainName(value) { return definitions.value.terrains?.[String(value)]?.nameZh || '地形待核对'; }
 function isObserved(group) { return observations.value.some(entry => entry.attachId === group.attachId && entry.terrainId === group.terrainId); }
-function isSelected(entry) { return selectedGroup.value && observations.value.some(item => item.attachId === selectedGroup.value.attachId && item.terrainId === selectedGroup.value.terrainId && item.sourceId === entry.sourceId && (item.role || null) === (entry.role || null)); }
+function isSelected(entry) { return observations.value.some(item => item.attachId === entry.attachId && item.terrainId === entry.terrainId && item.sourceId === entry.sourceId && (item.role || null) === (entry.role || null)); }
 function remember() { undoStack.value.push(JSON.stringify({ filters: { ...filters }, observations: observations.value })); if (undoStack.value.length > 50) undoStack.value.shift(); }
 function setFilter(key, value) { if (filters[key] === value) return; remember(); filters[key] = value; if (key === 'event' && !value) filters.eventDay = ''; }
 function clearClues() { remember(); Object.assign(filters, emptyFilters()); observations.value = []; closeDialog(); resetMap(); }
 function undo() { const previous = undoStack.value.pop(); if (!previous) return; const state = JSON.parse(previous); Object.assign(filters, state.filters); observations.value = state.observations; closeDialog(); }
-function removeObservation(index) { remember(); observations.value.splice(index, 1); }
+function removePoint(group) { remember(); observations.value = withoutPointObservations(observations.value, group).filter(item => !(item.kind === 'building' && group.entries[0].kind === 'building' && sameBuildingPosition(allGroups.value.find(p => p.terrainId === item.terrainId && p.attachId === item.attachId) || {}, group))); }
+function clearObservations() { remember(); observations.value = []; }
 async function showPointDialog() { await nextTick(); if (pointDialog.value && !pointDialog.value.open) pointDialog.value.showModal(); }
-function chooseGroup(group) { if (!group) return; overlapChoices.value = []; selectedReference.value = null; selectedGroupKey.value = group.key; pointStatus.value = ''; if (moreDetails.value) moreDetails.value.open = false; showPointDialog(); }
-function openMarker(group) { if (group.reference) { overlapChoices.value = []; selectedGroupKey.value = ''; selectedReference.value = group.reference; showPointDialog(); } else chooseGroup(allGroups.value.find(item => item.key === group.key)); }
+function chooseGroup(group) { if (!group) return; overlapChoices.value = []; selectedReference.value = null; selectedGroupKey.value = group.key; controlDialog.value?.close(); showPointDialog(); }
+function openMarker(group) { controlDialog.value?.close(); if (group.reference) { overlapChoices.value = []; selectedGroupKey.value = ''; selectedReference.value = group.reference; showPointDialog(); } else chooseGroup(allGroups.value.find(item => item.key === group.key)); }
 function openMapMatches(found) { if (!found.length) return; if (found.length === 1) openMarker(found[0]); else { selectedGroupKey.value = ''; selectedReference.value = null; overlapChoices.value = found; showPointDialog(); } }
 function mapClicked(event) { if (suppressMapClick) { suppressMapClick = false; return; } const rect = event.currentTarget.getBoundingClientRect(); openMapMatches(nearbyPoints(displayedMarkers.value, { x: (event.clientX - rect.left) / rect.width, y: (event.clientY - rect.top) / rect.height }, rect.width, rect.height, 16)); }
-function markerClicked(group, event) { if (event.detail > 0 && suppressMapClick) { suppressMapClick = false; return; } openMapMatches(nearbyPoints(displayedMarkers.value, group.normalized, stageSize.value.width, stageSize.value.height, 32)); }
+function markerClicked(group, event) { if (event.detail > 0 && suppressMapClick) { suppressMapClick = false; return; } openMapMatches(coincidentMarkers(displayedMarkers.value, group, stageSize.value.width, stageSize.value.height)); }
 function selectFeature(feature) {
   const group = selectedGroup.value;
   if (!group) return;
-  const observation = { attachId: group.attachId, terrainId: group.terrainId, kind: feature.kind, sourceId: feature.sourceId, name: feature.name, ...(feature.role ? { role: feature.role } : {}) };
-  const index = observations.value.findIndex(item => item.attachId === group.attachId && item.terrainId === group.terrainId && item.kind === feature.kind && (item.role || null) === (feature.role || null));
+  const selected = isSelected(feature);
+  const observation = { attachId: feature.attachId, terrainId: feature.terrainId, kind: feature.kind, sourceId: feature.sourceId, name: feature.name, ...(feature.role ? { role: feature.role } : {}) };
   remember();
-  if (index < 0) observations.value.push(observation);
-  else if (observations.value[index].sourceId === feature.sourceId) observations.value.splice(index, 1);
-  else observations.value.splice(index, 1, observation);
+  observations.value = observations.value.filter(item => {
+    if (feature.kind === 'building' && item.kind === 'building') {
+      const previous = allGroups.value.find(point => point.terrainId === item.terrainId && point.attachId === item.attachId);
+      return !previous || !sameBuildingPosition(previous, group);
+    }
+    return !(item.attachId === observation.attachId && item.terrainId === observation.terrainId && item.kind === feature.kind && (item.role || null) === (feature.role || null));
+  });
+  if (!selected) observations.value.push(observation);
   closeDialog(); nextTick(() => mapViewport.value?.focus({ preventScroll: true }));
 }
-function closeDialog() { pointDialog.value?.close(); selectedReference.value = null; overlapChoices.value = []; selectedGroupKey.value = ''; pointStatus.value = ''; }
+function closeDialog() { pointDialog.value?.close(); selectedReference.value = null; overlapChoices.value = []; selectedGroupKey.value = ''; }
 function turnCandidate(step) { candidatePage.value = Math.min(candidates.value.length, Math.max(1, candidatePage.value + step)); closeDialog(); }
 function imageFailed(event) { const src = event.target.getAttribute('src'); if (src) failedAssets.value = new Set([...failedAssets.value, src]); }
 const referenceSourceUrl = computed(() => /^https?:\/\//i.test(selectedReference.value?.source?.url || '') ? selectedReference.value.source.url : null);
@@ -161,50 +186,61 @@ onBeforeUnmount(() => { controller?.abort(); viewportObserver?.disconnect(); if 
 <template>
   <section id="view-map" class="view reference-page" :class="{ active }">
     <p v-if="loading" role="status">正在载入地图…</p>
-    <div v-else-if="error" role="alert"><p>{{ error }}</p><button class="button" type="button" @click="loadCatalog">重新载入</button></div>
+    <div v-else-if="error" role="alert"><p>{{ error }}</p><button type="button" @click="loadCatalog">重新载入</button></div>
     <template v-else-if="catalog">
       <div class="map-workspace">
-      <aside class="map-conditions" aria-label="地图推算条件">
-    <header class="map-heading reference-heading"><h1>地图与夜王推算</h1><p>选择已知夜王，或标记地图上的建筑与野外精英，推算本局地图。</p></header>
-      <div class="map-toolbar">
-        <label>地形<select :value="filters.terrain" @change="setFilter('terrain', $event.target.value)"><option value="">全部地形</option><option v-for="option in options.terrain" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
-        <div class="map-nightlord-field"><span>已知夜王</span><details ref="nightlordPicker" class="map-nightlord-picker"><summary aria-label="选择已知夜王"><img v-if="selectedNightlord && portrait(selectedNightlord.value)" :src="portrait(selectedNightlord.value)" alt="" @error="imageFailed"><span v-else class="map-portrait-fallback" aria-hidden="true">◇</span><span>{{ selectedNightlord?.label || '不选' }}</span><span class="map-picker-arrow" aria-hidden="true">⌄</span></summary><div class="map-nightlord-options" role="radiogroup" aria-label="已知夜王"><button type="button" role="radio" :aria-checked="!filters.nightlord" @click="setNightlord('')">不选</button><button v-for="option in options.nightlord" :key="option.value" type="button" role="radio" :aria-checked="filters.nightlord === option.value" @click="setNightlord(option.value)"><img v-if="portrait(option.value)" :src="portrait(option.value)" alt="" @error="imageFailed"><span v-else class="map-portrait-fallback">图片待补</span><span>{{ option.label }}</span></button></div></details></div>
-        <button type="button" @click="clearClues">重置</button>
-      </div>
-      <div v-if="observations.length || filterTags.length" class="map-clue-tags" aria-label="已选线索">
-        <span v-for="(observation, index) in observations" :key="`${observation.terrainId}-${observation.attachId}-${observation.kind}-${observation.role}`" class="map-clue-tag"><button class="map-tag-name" type="button" @click="chooseGroup(allGroups.find(group => group.attachId === observation.attachId && group.terrainId === observation.terrainId))">{{ observation.terrainId !== terrainView ? `${terrainName(observation.terrainId)} · ` : '' }}{{ observation.name }} · {{ pointLabel(observation) }}</button><button type="button" class="map-tag-remove" :aria-label="`删除 ${observation.name}，${pointLabel(observation)}`" @click="removeObservation(index)">×</button></span>
-        <span v-for="tag in filterTags" :key="tag.key" class="map-clue-tag"><span>{{ tag.text }}</span><button type="button" class="map-tag-remove" :aria-label="`删除${tag.text}`" @click="setFilter(tag.key, '')">×</button></span>
-      </div>
-      <div class="map-result-bar">
-        <strong role="status">剩余 {{ candidates.length }} 张地图</strong>
-        <div class="map-candidate-switch" aria-label="候选地图切换"><button type="button" :disabled="candidatePage <= 1" @click="turnCandidate(-1)">上一张</button><span>{{ candidates.length ? candidatePage : 0 }} / {{ candidates.length }}</span><button type="button" :disabled="candidatePage >= candidates.length" @click="turnCandidate(1)">下一张</button></div>
-        <span class="map-current-terrain">当前地图：{{ terrainName(terrainView) }}</span>
-        <details ref="moreDetails" class="map-more"><summary>更多线索<span v-if="filterTags.length"> · {{ filterTags.length }}</span></summary><div class="map-more-content">
-          <div class="map-more-fields"><label v-for="field in moreFields" :key="field.key">{{ field.label }}<select :value="filters[field.key]" :disabled="!options[field.key].length" @change="setFilter(field.key, $event.target.value)"><option value="">不选</option><option v-for="option in options[field.key]" :key="option.value" :value="option.value">{{ option.label }}</option></select></label><label>事件发生日<select :value="filters.eventDay" :disabled="!filters.event" @change="setFilter('eventDay', $event.target.value)"><option value="">不选</option><option value="1">第一日</option><option value="2">第二日</option></select></label></div>
-          <div class="map-more-actions"><button type="button" :disabled="!undoStack.length" @click="undo">撤销上一步</button></div>
-          <details class="map-name-picker"><summary>按名称标记位置</summary><label>地点或首领<input v-model="search" type="search" placeholder="搜索名称或位置编号"></label><ul><li v-for="group in nameGroups" :key="group.key"><button type="button" @click="chooseGroup(group)">{{ pointLabel(group) }} · {{ groupName(group) }}</button></li></ul><p v-if="!nameGroups.length">没有匹配位置。</p><nav v-if="nameResultPages > 1" class="map-name-pagination" aria-label="位置名称分页"><button type="button" :disabled="namePage === 1" @click="namePage--">上一页</button><span>{{ namePage }} / {{ nameResultPages }}</span><button type="button" :disabled="namePage === nameResultPages" @click="namePage++">下一页</button></nav></details>
-        </div></details>
-      </div>
-      <section class="map-nightlords" aria-label="候选夜王"><h2>可能夜王</h2><ul><li v-for="option in candidateNightlords" :key="option.value"><img v-if="portrait(option.value)" :src="portrait(option.value)" alt="" @error="imageFailed"><span v-else class="map-portrait-fallback">图片待补</span><span>{{ option.label }}</span></li></ul><p v-if="!candidateNightlords.length">待核对</p></section>
-      <p v-if="!candidates.length" class="map-conflict" role="alert">线索有冲突或超出当前资料范围，请移除或修改线索。{{ conflictLabels.length ? `可检查：${conflictLabels.join('、')}。` : '' }}</p>
-      </aside>
-      <div class="map-canvas-panel">
-        <div class="map-canvas-tools"><div class="map-layer-switches" aria-label="地图图层"><label v-for="(label, category) in layerLabels" :key="category"><input v-model="layerVisibility[category]" type="checkbox">{{ label }}</label></div><div><button type="button" :disabled="!asset || zoom <= 1" aria-label="缩小地图" @click="zoom = Math.max(1, zoom - .25)">−</button><button type="button" :disabled="!asset || zoom >= 3" aria-label="放大地图" @click="zoom = Math.min(3, zoom + .25)">＋</button><button type="button" :disabled="!asset" @click="resetMap(true)">全图适配</button></div></div>
-        <div v-if="asset" ref="mapViewport" class="map-viewport" :class="{ dragging }" @pointerdown="startDrag" @pointermove="moveDrag" @pointerup="stopDrag" @pointercancel="stopDrag" :style="{ '--map-aspect': `${asset.width} / ${asset.height}` }" tabindex="0" aria-label="地图，点击图标标记，拖动平移">
-          <div class="map-surface" :style="{ width: `${Math.max(viewportSize.width, stageSize.width)}px`, height: `${Math.max(viewportSize.height, stageSize.height)}px` }"><div v-if="stageSize.width > 0" class="map-stage" :style="{ width: `${stageSize.width}px`, height: `${stageSize.height}px` }" @click="mapClicked">
-            <img :src="asset.src" :alt="`${terrainName(terrainView)}底图`" draggable="false" @error="imageFailed">
-            <button v-for="group in displayedMarkers" :key="group.key" class="map-marker" :class="{ observed: isObserved(group), reference: group.reference, dense: group.dense, 'game-icon': markerIcon(group.entries[0]), building: group.entries[0].displayCategory === 'building' }" :style="{ left: `${group.markerX}px`, top: `${group.markerY}px` }" type="button" :aria-label="group.reference ? `${groupName(group)}，参考位置` : `${pointLabel(group)}，${groupName(group)}，${isObserved(group) ? '已标记' : '推算点位'}`" @click.stop="markerClicked(group, $event)" :title="groupName(group)"><span aria-hidden="true"><img v-if="markerIcon(group.entries[0])" :src="markerIcon(group.entries[0])" alt="" draggable="false" @error="imageFailed"><svg v-else viewBox="0 0 24 24"><path :d="iconPath(group.entries[0].displayCategory)" /></svg></span><small>{{ groupName(group) }}<em v-if="group.reference">参考</em></small></button>
-          </div></div>
+        <aside class="map-conditions" aria-label="地图推算条件">
+          <header class="map-heading reference-heading"><h1>地图与夜王推算</h1></header>
+          <div class="map-mobile-summary"><strong role="status">剩余 {{ candidates.length }} 张地图</strong><button type="button" @click="openControls('conditions')">条件与结果</button></div>
+          <div class="map-desktop-conditions">
+            <div class="map-toolbar">
+              <label>地形<select :value="filters.terrain" @change="setFilter('terrain', $event.target.value)"><option value="">全部地形</option><option v-for="option in options.terrain" :key="option.value" :value="option.value">{{ option.label }}</option></select></label>
+              <button class="map-nightlord-choice" type="button" aria-label="选择已知夜王" @click="openControls('nightlords')"><img v-if="selectedNightlord && portrait(selectedNightlord.value)" :src="portrait(selectedNightlord.value)" alt="" @error="imageFailed"><span>已知夜王：{{ selectedNightlord?.label || '不选' }}</span></button>
+              <div class="map-condition-actions"><button type="button" @click="clearClues">重置</button><button type="button" :disabled="!undoStack.length" @click="undo">撤销</button><button type="button" @click="openControls('more')">更多线索{{ filterTags.length ? ` · ${filterTags.length}` : '' }}</button></div>
+            </div>
+            <div class="map-result-bar">
+              <strong role="status">剩余 {{ candidates.length }} 张地图</strong>
+              <div class="map-candidate-switch" aria-label="候选地图切换"><button type="button" :disabled="candidatePage <= 1" @click="turnCandidate(-1)">上一张</button><span>{{ candidates.length ? candidatePage : 0 }} / {{ candidates.length }}</span><button type="button" :disabled="candidatePage >= candidates.length" @click="turnCandidate(1)">下一张</button></div>
+              <span>当前地图：{{ terrainName(terrainView) }}</span>
+            </div>
+            <button class="map-results-open" type="button" @click="openControls('results')">可能夜王 · {{ candidateNightlords.length }} 位 <span aria-hidden="true">›</span></button>
+            <p class="map-marking-help"><i class="manual"></i>手动标注 <i class="certain"></i>剩余候选一致</p>
+          </div>
+        </aside>
+        <div class="map-canvas-panel">
+          <div class="map-canvas-tools">
+            <div v-if="!candidates.length" class="map-conflict" role="alert">线索冲突或超出资料范围，请取消标注或修改条件。<button v-if="observations.length" type="button" @click="clearObservations">清除全部标注</button></div>
+            <div class="map-layer-switches" aria-label="地图图层"><label v-for="(label, category) in layerLabels" :key="category"><input v-model="layerVisibility[category]" type="checkbox">{{ label }}</label></div>
+            <div class="map-zoom"><button type="button" :disabled="!asset || zoom <= 1" aria-label="缩小地图" @click="zoom = Math.max(1, zoom - .25)">−</button><button type="button" :disabled="!asset || zoom >= 3" aria-label="放大地图" @click="zoom = Math.min(3, zoom + .25)">＋</button><button type="button" :disabled="!asset" @click="resetMap(true)">全图适配</button></div>
+          </div>
+          <div v-if="asset" ref="mapViewport" class="map-viewport" :class="{ dragging }" @pointerdown="startDrag" @pointermove="moveDrag" @pointerup="stopDrag" @pointercancel="stopDrag" tabindex="0" aria-label="地图，点击图标标记，拖动平移">
+            <div class="map-surface" :style="{ width: `${Math.max(viewportSize.width, stageSize.width)}px`, height: `${Math.max(viewportSize.height, stageSize.height)}px` }"><div v-if="stageSize.width > 0" class="map-stage" :style="{ width: `${stageSize.width}px`, height: `${stageSize.height}px` }" @click="mapClicked">
+              <img :src="asset.src" :alt="`${terrainName(terrainView)}底图`" draggable="false" @error="imageFailed">
+              <div v-for="group in displayedMarkers" :key="group.key" class="map-marker-anchor" :style="{ left: `${group.markerX}px`, top: `${group.markerY}px` }">
+                <button class="map-marker" :class="{ observed: isObserved(group), certain: isCertain(group), reference: group.reference, dense: group.dense, 'game-icon': markerIcon(group.entries[0]), building: group.entries[0].displayCategory === 'building' }" type="button" :aria-label="group.reference ? `${groupName(group)}，参考位置` : `${pointLabel(group)}，${groupName(group)}，${isObserved(group) ? '已标注' : '推算点位'}`" @click.stop="markerClicked(group, $event)" :title="groupName(group)"><span aria-hidden="true"><img v-if="markerIcon(group.entries[0])" :src="markerIcon(group.entries[0])" alt="" draggable="false" @error="imageFailed"><svg v-else viewBox="0 0 24 24"><path :d="iconPath(group.entries[0].displayCategory)" /></svg></span><small>{{ groupName(group) }}<em v-if="group.reference">参考</em></small></button>
+                <button v-if="isObserved(group)" type="button" class="map-marker-remove" :aria-label="`取消${pointLabel(group)}的全部标注`" title="取消该点全部标注" @pointerdown.stop @click.stop="removePoint(group)">×</button>
+              </div>
+            </div></div>
+          </div>
+          <div v-else class="map-empty">底图暂不可用，请在更多线索中按名称标记。</div>
         </div>
-        <div v-else class="map-empty">底图暂不可用，可在“更多线索”中按名称标记。</div>
-        <p v-if="pointStatus" class="map-point-status" role="status">{{ pointStatus }}</p>
       </div>
-      </div>
+      <dialog ref="controlDialog" class="map-point-dialog map-control-dialog" aria-labelledby="map-control-title">
+        <header><h2 id="map-control-title">{{ { nightlords: '选择已知夜王', more: '更多线索', results: '可能夜王', conditions: '条件与结果' }[controlPanel] }}</h2><button type="button" aria-label="关闭条件" @click="controlDialog.close()">×</button></header>
+        <div v-if="controlPanel === 'nightlords'" class="map-nightlord-options" role="radiogroup" aria-label="已知夜王"><button type="button" role="radio" :aria-checked="!filters.nightlord" @click="setNightlord('')">不选</button><button v-for="option in options.nightlord" :key="option.value" type="button" role="radio" :aria-checked="filters.nightlord === option.value" @click="setNightlord(option.value)"><img v-if="portrait(option.value)" :src="portrait(option.value)" alt="" @error="imageFailed"><span v-else class="map-portrait-fallback">图片待补</span>{{ option.label }}</button></div>
+        <section v-else-if="controlPanel === 'results'" class="map-nightlords" aria-label="候选夜王"><ul><li v-for="option in candidateNightlords" :key="option.value"><img v-if="portrait(option.value)" :src="portrait(option.value)" alt="" @error="imageFailed"><span v-else class="map-portrait-fallback">图片待补</span><span>{{ option.label }}</span></li></ul><p v-if="!candidateNightlords.length">暂无候选</p></section>
+        <template v-else>
+          <template v-if="controlPanel === 'conditions'"><label>地形<select :value="filters.terrain" @change="setFilter('terrain', $event.target.value)"><option value="">全部地形</option><option v-for="option in options.terrain" :key="option.value" :value="option.value">{{ option.label }}</option></select></label><button class="map-nightlord-choice" type="button" @click="openControls('nightlords')">已知夜王：{{ selectedNightlord?.label || '不选' }}</button><p>剩余 {{ candidates.length }} 张地图 · {{ terrainName(terrainView) }}</p><div class="map-candidate-switch"><button type="button" :disabled="candidatePage <= 1" @click="turnCandidate(-1)">上一张</button><span>{{ candidates.length ? candidatePage : 0 }} / {{ candidates.length }}</span><button type="button" :disabled="candidatePage >= candidates.length" @click="turnCandidate(1)">下一张</button></div><button type="button" @click="openControls('results')">可能夜王 · {{ candidateNightlords.length }} 位</button></template>
+          <div class="map-more-fields"><label v-for="field in moreFields" :key="field.key">{{ field.label }}<select :value="filters[field.key]" @change="setFilter(field.key, $event.target.value)"><option value="">不选</option><option v-for="option in options[field.key]" :key="option.value" :value="option.value">{{ option.label }}</option></select></label><label>事件发生日<select :value="filters.eventDay" :disabled="!filters.event" @change="setFilter('eventDay', $event.target.value)"><option value="">不选</option><option value="1">第一日</option><option value="2">第二日</option></select></label></div>
+          <div class="map-condition-actions"><button type="button" :disabled="!undoStack.length" @click="undo">撤销上一步</button><button type="button" @click="clearClues">重置条件</button></div>
+          <details class="map-name-picker"><summary>按名称标记位置</summary><label>地点或首领<input v-model="search" type="search" placeholder="搜索名称或位置编号"></label><ul><li v-for="group in nameGroups" :key="group.key"><button type="button" @click="chooseGroup(group)">{{ pointLabel(group) }} · {{ groupCategory(group) }}</button></li></ul><p v-if="!nameGroups.length">没有匹配位置。</p><nav v-if="nameResultPages > 1" class="map-name-pagination" aria-label="位置名称分页"><button type="button" :disabled="namePage === 1" @click="namePage--">上一页</button><span>{{ namePage }} / {{ nameResultPages }}</span><button type="button" :disabled="namePage === nameResultPages" @click="namePage++">下一页</button></nav></details>
+        </template>
+      </dialog>
       <dialog ref="pointDialog" class="map-point-dialog" aria-labelledby="map-point-title" @close="selectedGroupKey = ''; selectedReference = null; overlapChoices = []">
-        <header><h2 id="map-point-title">{{ overlapChoices.length ? '选择重合点位' : selectedReference ? `${selectedReference.nameZh} · 参考位置` : selectedGroup ? `${groupName(candidateGroups.find(group => group.key === selectedGroup.key) || selectedGroup)} · 选择已见对象` : '选择已见对象' }}</h2><button type="button" aria-label="关闭选择" @click="closeDialog">×</button></header>
-        <div v-if="overlapChoices.length" class="map-feature-choices map-overlap-choices"><button v-for="group in overlapChoices" :key="group.key" type="button" @click="openMarker(group)"><img v-if="markerIcon(group.entries[0])" :src="markerIcon(group.entries[0])" alt="" @error="imageFailed"><svg v-else viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(group.entries[0].displayCategory)" /></svg><span>{{ groupName(group) }}<small v-if="group.reference">参考位置</small></span></button></div>
-        <div v-else-if="selectedReference" class="map-reference-info"><p>{{ selectedReference.locationNote }}</p><p class="map-reference-note">参考位置，仅供查看，不参与地图筛选。</p><p class="map-reference-source">来源：{{ selectedReference.source?.author }}<span v-if="selectedReference.source?.author && selectedReference.source?.label"> · </span><a v-if="referenceSourceUrl" :href="referenceSourceUrl" target="_blank" rel="noopener noreferrer">{{ selectedReference.source?.label || '查看来源' }}</a><span v-else>{{ selectedReference.source?.label }}</span></p></div>
-        <template v-else-if="selectedGroup"><template v-for="(label, category) in layerLabels" :key="category"><h3 v-if="selectedGroup.entries.some(entry => entry.displayCategory === category)">{{ label }}</h3><div class="map-feature-choices"><button v-for="entry in selectedGroup.entries.filter(item => item.displayCategory === category)" :key="entry.key" type="button" :aria-pressed="isSelected(entry)" :class="{ selected: isSelected(entry) }" @click="selectFeature(entry)"><img v-if="markerIcon(entry)" :src="markerIcon(entry)" alt="" @error="imageFailed"><svg v-else viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(entry.displayCategory)" /></svg><span>{{ entry.name }}</span><span v-if="isSelected(entry)" class="map-selected-check" aria-hidden="true">✓</span></button></div></template></template>
+        <header><h2 id="map-point-title">{{ overlapChoices.length ? '选择重合位置' : selectedReference ? `${selectedReference.nameZh} · 参考位置` : selectedGroup ? `${selectedGroup.entries[0].kind === 'building' ? '建筑位置' : pointLabel(selectedGroup)} · 选择已见对象` : '选择已见对象' }}</h2><button type="button" aria-label="关闭选择" @click="closeDialog">×</button></header>
+        <div v-if="overlapChoices.length" class="map-feature-choices map-overlap-choices"><button v-for="group in overlapChoices" :key="group.key" type="button" @click="openMarker(group)"><img v-if="markerIcon(group.entries[0])" :src="markerIcon(group.entries[0])" alt="" @error="imageFailed"><svg v-else viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(group.entries[0].displayCategory)" /></svg><span>{{ group.reference ? groupName(group) : pointLabel(group) }}<small>{{ groupCategory(group) }}</small></span></button></div>
+        <div v-else-if="selectedReference" class="map-reference-info"><p>{{ selectedReference.locationNote }}</p><p class="map-reference-note">参考位置，仅供查看，不参与地图筛选。</p><p class="map-reference-source">来源：{{ selectedReference.source?.author }} · <a v-if="referenceSourceUrl" :href="referenceSourceUrl" target="_blank" rel="noopener noreferrer">{{ selectedReference.source?.label }}</a><span v-else>{{ selectedReference.source?.label }}</span></p></div>
+        <template v-else-if="selectedGroup"><p class="map-selection-help">点击已标注对象可取消单项；地图上的 × 取消该点全部标注。</p><template v-for="(label, category) in layerLabels" :key="category"><h3 v-if="selectedChoices.some(entry => entry.displayCategory === category)">{{ label }}</h3><div class="map-feature-choices"><button v-for="entry in selectedChoices.filter(item => item.displayCategory === category)" :key="entry.key" type="button" :aria-pressed="isSelected(entry)" :class="{ selected: isSelected(entry) }" @click="selectFeature(entry)"><img v-if="markerIcon(entry)" :src="markerIcon(entry)" alt="" @error="imageFailed"><svg v-else viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(entry.displayCategory)" /></svg><span>{{ entry.name }}</span><span v-if="isSelected(entry)" class="map-selected-check" aria-hidden="true">✓</span></button></div></template></template>
       </dialog>
     </template>
   </section>
@@ -236,4 +272,21 @@ label{display:grid;gap:4px;min-width:0;color:#c7d3da}select,input{width:100%;min
 }
 @media(max-width:850px){.map-heading{align-items:flex-start;flex-direction:column;gap:5px}.map-heading h1{font-size:23px}.map-toolbar{gap:8px}.map-toolbar label,.map-nightlord-field{flex:1;width:auto;min-width:0}.map-result-bar{gap:8px}.map-result-bar>strong{font-size:16px}.map-more{margin-left:0}.map-candidate-switch>span{min-width:45px}.map-more-content{width:100%;padding:12px}.map-canvas-panel{padding:7px}.map-clue-tags{max-height:none}.map-nightlords{line-height:1.6}.map-canvas-tools{flex-wrap:wrap}.map-point-dialog{padding:14px}.map-feature-choices{gap:6px}.map-feature-choices button{gap:7px;padding:8px}.map-feature-choices svg{width:25px;height:25px}.map-viewport{height:68dvh;min-height:420px}.map-layer-switches{gap:8px}.map-canvas-tools>div{flex-wrap:wrap}}
 @media(max-width:380px){.map-toolbar{flex-wrap:wrap}.map-toolbar label,.map-nightlord-field{flex-basis:40%}.map-toolbar>button{width:100%}.map-feature-choices,.map-overlap-choices{grid-template-columns:minmax(0,1fr)}}
+
+#view-map.active{display:flex;flex:1;flex-direction:column;min-height:0;width:100%;margin:0}
+.map-workspace{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;flex:1;min-height:0;align-items:stretch}
+.map-conditions{min-height:0;margin:0;padding:14px;overflow:visible;border:1px solid #3e566e;border-radius:5px;background:#132131}
+.map-mobile-summary{display:none}.map-heading{margin-bottom:12px}.map-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:0 0 12px}.map-toolbar label{width:auto}.map-condition-actions{display:flex;flex-wrap:wrap;gap:6px}.map-condition-actions button{padding:6px 9px}
+.map-nightlord-choice{display:flex;align-items:center;gap:8px;width:100%;text-align:left;min-height:44px}.map-nightlord-choice img{width:34px;height:34px;object-fit:contain;flex-shrink:0}
+.map-result-bar{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding-top:12px;margin-bottom:12px;border-top:1px solid #3a5065}.map-candidate-switch{width:100%;justify-content:space-between;gap:6px}.map-results-open{width:100%;display:flex;justify-content:space-between}.map-marking-help{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:#b5c5cf}.map-marking-help i{width:12px;height:12px;border:2px solid #8de0ae}.map-marking-help .certain{border-color:#ed807b}
+.map-canvas-panel{position:static;height:auto;min-height:0;display:flex;flex-direction:column}.map-viewport{flex:1;min-height:0;height:auto}.map-canvas-tools{display:flex;flex-shrink:0;flex-wrap:wrap}.map-canvas-tools .map-conflict{display:flex;align-items:center;flex-wrap:wrap;gap:8px;flex:1 0 100%;margin:0;padding:6px 8px;font-size:13px}.map-zoom{margin-left:auto}
+.map-marker-anchor{position:absolute;width:0;height:0;z-index:1}.map-marker-anchor:has(.observed){z-index:3}.map-marker-anchor:hover,.map-marker-anchor:focus-within{z-index:5}
+.map-stage .map-marker{--marker-size:40px;--marker-hit:44px;left:0;top:0}.map-marker.building{--marker-size:48px;--marker-hit:52px}.map-marker.dense{--marker-size:32px;--marker-hit:36px}.map-marker.building.dense{--marker-size:40px;--marker-hit:44px}
+.map-marker.certain:not(.observed)>span{outline:3px solid #ec7771;outline-offset:2px}.map-marker.observed>span{outline:3px solid #8de0ae;outline-offset:2px}
+.map-marker-remove{position:absolute;left:17px;top:-32px;width:22px;height:22px;min-height:22px;padding:0;border:1px solid #bde8cd;border-radius:50%;background:#24573d;color:#fff;font-size:18px;line-height:1;z-index:6}
+.map-control-dialog{width:min(640px,calc(100% - 24px));overflow:auto;max-height:calc(100dvh - 24px)}.map-point-dialog{overflow:auto;max-height:calc(100dvh - 24px)}.map-point-dialog>header{position:sticky;top:-18px;z-index:2;padding:6px 0;background:#142637}.map-control-dialog>label,.map-control-dialog>.map-nightlord-choice,.map-control-dialog>.map-candidate-switch{margin-top:12px}.map-more-fields{margin-top:16px}.map-control-dialog .map-condition-actions{margin-top:14px}.map-nightlord-options{grid-template-columns:repeat(2,minmax(0,1fr));max-height:none;overflow:visible;margin-top:12px}.map-nightlords{margin-top:18px}.map-nightlords ul{gap:12px}.map-selection-help{color:#b8cbd6;font-size:13px;margin:12px 0}
+@media(max-width:1150px),(max-height:650px){
+.map-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:8px}.map-conditions{padding:8px 10px}.map-heading{margin:0 0 7px}.map-desktop-conditions{display:none}.map-mobile-summary{display:flex;align-items:center;justify-content:space-between;gap:8px}.map-mobile-summary strong{font-size:15px;color:#ecd7a7}.map-mobile-summary button{min-height:34px;padding:5px 10px}.map-canvas-panel{padding:7px}.map-viewport{height:auto;min-height:0}.map-layer-switches{gap:8px}.map-canvas-tools{gap:5px}.map-zoom{gap:4px}.map-zoom button{min-height:32px;padding:4px 8px;font-size:12px}
+}
+@media(max-width:480px){.map-heading h1{font-size:22px}.map-point-dialog{padding:12px}.map-point-dialog>header{top:-12px}.map-more-fields{grid-template-columns:minmax(0,1fr)}.map-nightlord-options{gap:6px}.map-nightlord-options button{padding:6px;font-size:13px}.map-nightlord-options img{width:32px;height:32px}.map-canvas-tools .map-conflict{font-size:12px}.map-conflict button{font-size:12px;min-height:30px}}
 </style>

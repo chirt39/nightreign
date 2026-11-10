@@ -299,11 +299,21 @@ def main() -> None:
             if map_id in overrides["verifiedFieldEliteMapIds"] and attach_id not in CASTLE_BOSS_ATTACH_IDS:
                 if str(overrides["verifiedFieldEliteMapIds"][map_id]["worldMapPointIconId"]) not in point_icons[map_id]:
                     raise ValueError(f"Field elite map {map_id} has no matching native boss icon")
-                features.append({
+                elite_feature = {
                     "kind": "monster", "state": "known", "sourceId": f"fieldElite:{map_id}",
                     "role": "fieldElite", "displayCategory": "fieldElite",
                     "identityStatus": "native_icon_and_pattern_slot_crosschecked",
-                })
+                }
+                display_override = overrides.get("fieldEliteDisplayPositionOverrides", {}).get(f"{terrain}:{attach_id}")
+                if display_override:
+                    if normalized is None:
+                        raise ValueError(f"No calibrated native point for display override {terrain}:{attach_id}")
+                    display_xy = display_override["normalized"]
+                    if not (0 <= display_xy["x"] <= 1 and 0 <= display_xy["y"] <= 1):
+                        raise ValueError(f"Display override outside terrain {terrain}:{attach_id}")
+                    elite_feature["displayNormalized"] = display_xy
+                    elite_feature["displayPositionAccuracy"] = display_override["positionAccuracy"]
+                features.append(elite_feature)
             features.extend((
                 {"kind": "monster", "state": "unknown"},
                 {"kind": "event", "state": "unknown"},

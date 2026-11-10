@@ -125,11 +125,12 @@ export function collectLayers(patterns, definitions = {}) {
       const definition = definitions.features?.[id(feature.sourceId)];
       if (feature.state !== 'known' || !FEATURE_KINDS.includes(feature.kind) || definition?.kind !== feature.kind || !namedDefinition(definition)) continue;
       if ((feature.role || null) !== (definition.role || null)) continue;
+      const position = validPosition(feature.displayNormalized) ? feature.displayNormalized : point.normalized;
       const key = JSON.stringify([terrainId, id(point.attachId), feature.kind, id(feature.sourceId), feature.role || null]);
-      if (!entries.has(key)) entries.set(key, { key, terrainId, attachId: id(point.attachId), kind: feature.kind, role: feature.role || null, displayCategory: displayCategory(feature, definition), worldMapPointIconId: definition.worldMapPointIconId ?? null, sourceId: id(feature.sourceId), name: definition.nameZh, normalized: validPosition(point.normalized) ? { ...point.normalized } : null, members: new Set(), positionConsistent: true });
+      if (!entries.has(key)) entries.set(key, { key, terrainId, attachId: id(point.attachId), kind: feature.kind, role: feature.role || null, displayCategory: displayCategory(feature, definition), worldMapPointIconId: definition.worldMapPointIconId ?? null, sourceId: id(feature.sourceId), name: definition.nameZh, normalized: validPosition(position) ? { ...position } : null, members: new Set(), positionConsistent: true });
       const entry = entries.get(key);
       entry.members.add(patternIndex);
-      if (!validPosition(point.normalized) || !entry.normalized || Math.abs(point.normalized.x - entry.normalized.x) > 0.000001 || Math.abs(point.normalized.y - entry.normalized.y) > 0.000001) entry.positionConsistent = false;
+      if (!validPosition(position) || !entry.normalized || Math.abs(position.x - entry.normalized.x) > 0.000001 || Math.abs(position.y - entry.normalized.y) > 0.000001) entry.positionConsistent = false;
     }
   });
   return [...entries.values()].map(({ members, positionConsistent, ...entry }) => ({ ...entry, normalized: positionConsistent ? entry.normalized : null, common: entry.terrainId !== null && members.size === patterns.length, candidateCount: members.size }));
@@ -137,6 +138,29 @@ export function collectLayers(patterns, definitions = {}) {
 export function nearbyPoints(points, click, width, height, tolerance = 24) {
   if (!validPosition(click) || !(width > 0) || !(height > 0)) return [];
   return points.filter(point => validPosition(point.normalized)).map(point => ({ ...point, distance: Math.hypot((point.normalized.x - click.x) * width, (point.normalized.y - click.y) * height) })).filter(point => point.distance <= tolerance).sort((a, b) => a.distance - b.distance);
+}
+export function coincidentMarkers(points, target, width, height) {
+  return nearbyPoints(points, target.normalized, width, height, 3);
+}
+export function buildingChoicesAtPosition(groups, target) {
+  if (!validPosition(target?.normalized)) return [];
+  const matches = [target, ...groups.filter(group => group.key !== target.key && group.terrainId === target.terrainId && validPosition(group.normalized) && Math.abs(group.normalized.x - target.normalized.x) < 0.000001 && Math.abs(group.normalized.y - target.normalized.y) < 0.000001)];
+  const choices = new Map();
+  for (const group of matches) for (const entry of group.entries) if (entry.kind === 'building' && !choices.has(entry.sourceId)) choices.set(entry.sourceId, entry);
+  return [...choices.values()];
+}
+export function withoutPointObservations(observations, point) {
+  return observations.filter(item => id(item.terrainId) !== id(point.terrainId) || id(item.attachId) !== id(point.attachId));
+}
+export function confirmedBuildingKeys(patterns, terrainId, definitions) {
+  const relevant = patterns.filter(pattern => pattern.terrain?.state !== 'known' || id(pattern.terrain.value) === id(terrainId));
+  if (!relevant.length) return new Set();
+  const entries = collectLayers(relevant, definitions).filter(entry => entry.kind === 'building' && entry.common && validPosition(entry.normalized) && entry.terrainId === id(terrainId));
+  return new Set(entries.filter(entry => relevant.every(pattern => {
+    const point = pattern.points?.find(item => id(item.attachId) === entry.attachId);
+    const buildings = point?.features?.filter(feature => feature.kind === 'building' && (feature.state !== 'known' || namedDefinition(definitions.features?.[id(feature.sourceId)]))) || [];
+    return pattern.terrain?.state === 'known' && point?.coverage?.building === 'known' && buildings.length > 0 && buildings.every(feature => feature.state === 'known' && id(feature.sourceId) === entry.sourceId);
+  })).map(entry => JSON.stringify([entry.terrainId, entry.attachId, entry.sourceId])));
 }
 // Keep native positions; dense markers shrink and expose their names on interaction.
 export function layoutMapMarkers(groups, width, height) {

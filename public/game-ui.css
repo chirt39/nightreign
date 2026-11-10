@@ -970,3 +970,11 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-enemies .toolbar .search-field{height:40px;min-height:40px;padding:0 10px;border:1px solid #4c657b;border-radius:4px;background:#101d2a}
 #view-enemies .toolbar .search-field input{height:38px;min-height:38px;padding:7px 0;border:0;border-radius:0;background:transparent}
 #view-enemies.reference-page.active{margin:0}
+
+/* 地图固定在可用窗口内，条件改用可滚动弹层。 */
+.app-shell.map-fullscreen{height:100dvh;min-height:0;overflow:hidden}
+.app-shell.map-fullscreen>.main{display:flex;height:100dvh;min-height:0;flex-direction:column;overflow:hidden}
+.app-shell.map-fullscreen .topbar{height:54px;min-height:54px;flex:0 0 54px}
+.app-shell.map-fullscreen>.main>.content{display:flex;flex:1;flex-direction:column;min-height:0;width:100%;padding:12px 24px;overflow:hidden}
+#view-map .map-heading{margin:0 0 12px}
+@media(max-width:1150px),(max-height:650px){.app-shell.map-fullscreen>.main>.content{padding:8px 12px}#view-map .map-heading{margin:0 0 7px}#view-map .map-heading h1{font-size:22px}#view-map .map-zoom button{min-height:32px;padding:4px 8px;font-size:12px}}
