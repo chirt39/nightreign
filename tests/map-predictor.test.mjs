@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { PRIMARY_BOSS_ROLE, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
+import { PRIMARY_BOSS_ROLE, displayCategory, layoutMapMarkers, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
 
 // Synthetic state fixtures exercise the filter contract, not game distribution claims.
 const known = value => ({ state: 'known', value });
@@ -23,10 +23,10 @@ test('unknown boss identities do not become hard exclusion', () => {
   base.dayBosses.day1.identityStatus = 'verified';
   assert.equal(evaluatePattern(base, { filters: { firstNight: '8' } }).matches, false);
 });
-test('verified depth restrictions and DLC requirement differ from unknown', () => {
+test('depth restrictions remain active and removed DLC filters are ignored', () => {
   const base = pattern(0, { eligibility: { depths: { state: 'known', values: [1, 2] }, allPlayersHaveDlc: { state: 'known', required: true } } });
   assert.equal(evaluatePattern(base, { filters: { depth: '3' } }).matches, false);
-  assert.equal(evaluatePattern(base, { filters: { dlc: 'not-all' } }).matches, false);
+  assert.equal(evaluatePattern(base, { filters: { dlc: 'not-all' } }).matches, true);
   base.eligibility.allPlayersHaveDlc.required = false;
   assert.equal(evaluatePattern(base, { filters: { dlc: 'all' } }).matches, true);
 });
@@ -166,4 +166,53 @@ test('primary role layers require both feature and definition agreement', () => 
   assert.equal(collectLayers([base], roleDefinitions)[0].role, PRIMARY_BOSS_ROLE);
   delete base.points[0].features[0].role;
   assert.equal(collectLayers([base], roleDefinitions).length, 0);
+});
+
+
+test('display layers distinguish primary bosses and explicitly classified elites', () => {
+  assert.equal(displayCategory({ kind: 'building' }), 'building');
+  assert.equal(displayCategory({ kind: 'monster', role: PRIMARY_BOSS_ROLE }), 'baseBoss');
+  assert.equal(displayCategory({ kind: 'monster' }), null);
+  assert.equal(displayCategory({ kind: 'monster' }, { displayCategory: 'fieldElite' }), 'fieldElite');
+});
+
+test('overlapping markers spread without altering their actual coordinates', () => {
+  const groups = ['a', 'b', 'c'].map(key => ({ key, normalized: { x: .5, y: .5 } }));
+  const markers = layoutMapMarkers(groups, 600, 600);
+  assert.equal(markers[0].offset, false);
+  for (const marker of markers) assert.deepEqual(marker.normalized, { x: .5, y: .5 });
+  for (let i = 0; i < markers.length; i++) for (let j = i + 1; j < markers.length; j++)
+    assert.ok(Math.hypot(markers[i].markerX - markers[j].markerX, markers[i].markerY - markers[j].markerY) >= 48);
+});
+
+test('native field elite at terrain 0 attach 750 filters by its own role coverage', () => {
+  const catalog = JSON.parse(readFileSync(new URL('../public/map-catalog.json', import.meta.url), 'utf8'));
+  const filters = { terrain: '0' };
+  const observation = { terrainId: '0', attachId: '750', kind: 'monster', role: 'fieldElite', sourceId: 'fieldElite:4655' };
+  assert.equal(catalog.definitions.features[observation.sourceId].nameZh, '狮子混种');
+  const before = findCandidates(catalog.patterns, { filters }, catalog.definitions);
+  const after = findCandidates(catalog.patterns, { filters, observations: [observation] }, catalog.definitions);
+  assert.ok(after.length > 0 && after.length < before.length);
+  assert.ok(after.some(item => item.patternId === '0'));
+  const conflicting = before.find(item => !after.includes(item));
+  assert.ok(conflicting);
+  const unknown = structuredClone(conflicting);
+  unknown.points.find(item => String(item.attachId) === '750').coverage.fieldElite = 'unknown';
+  assert.equal(evaluatePattern(unknown, { observations: [observation] }, catalog.definitions).matches, true);
+  unknown.points = unknown.points.filter(item => String(item.attachId) !== '750');
+  assert.equal(evaluatePattern(unknown, { observations: [observation] }, catalog.definitions).matches, true);
+});
+
+test('elite coverage does not exclude other monster roles or unresolved elite identities', () => {
+  const defs = { features: { elite: { nameZh: '精英甲', kind: 'monster', role: 'fieldElite' }, other: { nameZh: '精英乙', kind: 'monster', role: 'fieldElite' }, ...roleDefinitions.features } };
+  const base = pattern(0, { points: [{ ...point(), features: [{ kind: 'monster', state: 'known', role: 'fieldElite', sourceId: 'other' }], coverage: { fieldElite: 'known', monster: 'unknown', [PRIMARY_BOSS_ROLE]: 'unknown' } }] });
+  const clue = { observations: [{ attachId: 1, kind: 'monster', role: 'fieldElite', sourceId: 'elite' }] };
+  assert.equal(evaluatePattern(base, clue, defs).matches, false);
+  assert.equal(evaluatePattern(base, bossClue, defs).matches, true);
+  assert.equal(evaluatePattern(base, { observations: [{ attachId: 1, kind: 'monster', sourceId: 'elite' }] }, defs).matches, true);
+  base.points[0].features[0].state = 'unknown';
+  assert.equal(evaluatePattern(base, clue, defs).matches, true);
+  base.points[0].features = [];
+  base.points[0].coverage.fieldElite = 'known_absent';
+  assert.equal(evaluatePattern(base, clue, defs).matches, false);
 });

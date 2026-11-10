@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -48,6 +49,7 @@ def main() -> None:
     point_count = 0
     category_count = 0
     field_boss_count = 0
+    field_elite_count = 0
     event_count = 0
     for pid, pattern in by_id.items():
         flag = native_flags[pid]
@@ -83,6 +85,7 @@ def main() -> None:
             assert point["coverage"]["monster"] == point["coverage"]["event"] == "unknown"
             raw = native_by_attach[point["attachId"]]["smallBaseMapId"]
             assert point["coverage"]["primarySmallBaseBoss"] == ("known" if raw in overrides["verifiedFieldBossMapIds"] else "unknown")
+            assert point["coverage"]["fieldElite"] == ("known" if raw in overrides["verifiedFieldEliteMapIds"] else "unknown")
             assert any(f.get("sourceId") == f"smallBaseMap:{raw}" for f in point["features"])
             for feature in point["features"]:
                 if feature.get("sourceId", "").startswith("buildingCategory:"):
@@ -90,7 +93,12 @@ def main() -> None:
                     assert feature["sourceId"] in catalog["definitions"]["features"]
                 if feature.get("sourceId", "").startswith("fieldBoss:"):
                     field_boss_count += 1
+                    assert feature["displayCategory"] == catalog["definitions"]["features"][feature["sourceId"]]["displayCategory"] == "baseBoss"
                     assert feature["sourceId"] in catalog["definitions"]["features"]
+                if feature.get("sourceId", "").startswith("fieldElite:"):
+                    field_elite_count += 1
+                    assert feature["sourceId"] == f"fieldElite:{raw}"
+                    assert feature["displayCategory"] == catalog["definitions"]["features"][feature["sourceId"]]["displayCategory"] == "fieldElite"
         if pattern["events"]["state"] == "known":
             event_count += 1
             assert len(pattern["events"]["values"]) == 1
@@ -100,9 +108,14 @@ def main() -> None:
 
     assert point_count == 23830
     assert field_boss_count == 348
+    assert field_elite_count == 2850
     assert event_count == 251
     assert len(catalog["definitions"]["nightlords"]) == 10
     assert len(catalog["definitions"]["bosses"]) == 35
+    red_wolf = catalog["definitions"]["features"]["fieldElite:4651"]
+    assert red_wolf["nameZh"] == "红狼" and red_wolf["referenceName"] == "Red Wolf"
+    assert red_wolf["npcNameTextId"] is None and red_wolf["nameMethod"] == "reference_label_translation"
+    assert sum(any(f.get("sourceId") == "fieldElite:4651" for point in p["points"] for f in point["features"]) for p in patterns) == 243
     assert set(catalog["definitions"]["terrains"]) == set("012345")
     for terrain_id, terrain in overrides["terrainCodes"].items():
         assert catalog["definitions"]["terrains"][terrain_id]["nameZh"] == terrain["nameZh"]
@@ -114,6 +127,7 @@ def main() -> None:
         "patterns": len(patterns), "nativePoints": point_count,
         "classifiedBuildingPoints": category_count,
         "verifiedFieldBossPoints": field_boss_count,
+        "verifiedFieldElitePoints": field_elite_count,
         "eventPatterns": event_count,
         "terrainCounts": dict(sorted(Counter(p["terrain"]["value"] for p in patterns).items())),
         "calibratedTerrains": sorted(calibrated_terrains),
@@ -193,6 +207,30 @@ def main() -> None:
                 if field_boss["referenceSlug"] in record.get("fieldBosses", [])
             }
             assert native_set == reference_set
+        terrain_reference_names = {"0": "Normal", "1": "Mountaintop", "2": "Crater", "3": "Rotted", "4": "Great Hollow", "5": "Noklateo"}
+        named_slots = reference["remote"]["bossPositions"]["positions"]
+        slot_assignments = reference["remote"]["bossAssignments"]["seeds"]
+        field_elite_slot_matches = 0
+        for pid, pattern in by_id.items():
+            positions = named_slots[terrain_reference_names[pattern["terrain"]["value"]]]
+            assignments = slot_assignments.get(pid, {})
+            for point in pattern["points"]:
+                elite = next((f for f in point["features"] if f.get("role") == "fieldElite"), None)
+                if elite is None or point["normalized"] is None:
+                    continue
+                x, y = point["normalized"]["x"] * 1000, point["normalized"]["y"] * 1000
+                nearest = min(positions, key=lambda p: math.hypot(x - p["x"], y - p["y"]))
+                if math.hypot(x - nearest["x"], y - nearest["y"]) > 45 or not nearest.get("slot"):
+                    continue
+                assigned = assignments.get(nearest["slot"])
+                if not assigned:
+                    continue
+                map_id = elite["sourceId"].split(":", 1)[1]
+                expected = overrides["verifiedFieldEliteMapIds"][map_id]["referenceName"]
+                assert assigned.lower().replace("-", "") == expected.lower().replace("-", "") or (map_id == "4672" and assigned == "Golden Hippo")
+                field_elite_slot_matches += 1
+        assert field_elite_slot_matches > 2000
+        report["fieldEliteNamedSlotCrosscheck"] = field_elite_slot_matches
         _, define_rows = param(args.source, "SmallBaseAndSpotDefine")
         map_icons: dict[str, set[str]] = defaultdict(set)
         for row in define_rows:

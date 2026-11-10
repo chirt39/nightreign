@@ -576,5 +576,64 @@
       "evidence": "Exact presence-set equality across 520 explicit pattern IDs; native LotResultSmallBaseAndSpot.smallBaseMapId -> SmallBaseAndSpotAttachPoint location; static crosscheck, no runtime proof"
     }
   },
-  "fieldBossEvidenceSha256": "a59b062c56ab79e1cbaa971ec9df3d7e3d669b6bd1842018f89088673abae6e3"
+  "fieldBossEvidenceSha256": "a59b062c56ab79e1cbaa971ec9df3d7e3d669b6bd1842018f89088673abae6e3",
+  "verifiedFieldEliteMapIds": {
+    "4551": {
+      "referenceName": "Black Knife Assassin",
+      "npcNameTextId": 902100600,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 902100600"
+    },
+    "4651": {
+      "referenceName": "Red Wolf",
+      "npcNameTextId": null,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference Red Wolf slot assignments agree wherever available. 红狼 is a display translation of the reference label, not a native FMG title.",
+      "displayNameZh": "红狼",
+      "nameMethod": "reference_label_translation"
+    },
+    "4655": {
+      "referenceName": "Leonine Misbegotten",
+      "npcNameTextId": 903460500,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 903460500"
+    },
+    "4657": {
+      "referenceName": "Elder Lion",
+      "npcNameTextId": 904270600,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904270600"
+    },
+    "4659": {
+      "referenceName": "Royal Revenant",
+      "npcNameTextId": 904020540,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904020540"
+    },
+    "4662": {
+      "referenceName": "Night's Cavalry",
+      "npcNameTextId": 903150600,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 903150600"
+    },
+    "4665": {
+      "referenceName": "Grafted Scion",
+      "npcNameTextId": 904690000,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904690000"
+    },
+    "4669": {
+      "referenceName": "Ancient Hero of Zamor",
+      "npcNameTextId": 907100300,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 907100300"
+    },
+    "4671": {
+      "referenceName": "Miranda Blossom",
+      "npcNameTextId": 904480311,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904480311"
+    },
+    "4672": {
+      "referenceName": "Golden Hippopotamus",
+      "npcNameTextId": 905011000,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 905011000"
+    },
+    "4677": {
+      "referenceName": "Demi-Human Queen",
+      "npcNameTextId": 904130700,
+      "evidence": "SmallBaseAndSpotDefine 114/1200/2114 boss icon 16; LotResultSmallBaseAndSpot map ID and native attach point; explicit patternId and reference slot assignments agree wherever available. Local NpcName exact English title at 904130700"
+    }
+  }
 }

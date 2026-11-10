@@ -1,5 +1,12 @@
 export const FEATURE_KINDS = ['building', 'monster', 'event'];
 export const PRIMARY_BOSS_ROLE = 'primarySmallBaseBoss';
+export const FIELD_ELITE_ROLE = 'fieldElite';
+export function displayCategory(feature, definition = {}) {
+  if (feature.kind === 'building') return 'building';
+  const category = feature.displayCategory || definition.displayCategory;
+  if (['baseBoss', 'fieldElite'].includes(category)) return category;
+  return feature.role === PRIMARY_BOSS_ROLE ? 'baseBoss' : null;
+}
 const id = value => value == null ? null : String(value);
 const hasValue = value => value !== '' && value !== null && value !== undefined;
 export function namedDefinition(definition) {
@@ -44,9 +51,6 @@ export function evaluatePattern(pattern, clues = {}, definitions = {}) {
   }
   const depths = pattern.eligibility?.depths;
   if (hasValue(filters.depth) && depths?.state === 'known' && Array.isArray(depths.values) && !depths.values.some(value => id(value) === id(filters.depth))) conflicts.push('深夜等级');
-  const dlc = pattern.eligibility?.allPlayersHaveDlc;
-  // required=false imposes no DLC requirement; unknown never excludes a party.
-  if (filters.dlc === 'not-all' && dlc?.state === 'known' && dlc.required === true) conflicts.push('队伍 DLC 情况');
   const selectedEvent = eventOptions(definitions.events).find(option => option.value === filters.event);
   if (selectedEvent) {
     const events = pattern.events;
@@ -62,15 +66,15 @@ export function evaluatePattern(pattern, clues = {}, definitions = {}) {
     if (!FEATURE_KINDS.includes(observation.kind) || !hasValue(observation.sourceId) || !hasValue(observation.attachId)) continue;
     if (observation.role) {
       const definition = definitions.features?.[id(observation.sourceId)];
-      if (observation.role !== PRIMARY_BOSS_ROLE || observation.kind !== 'monster' || definition?.kind !== 'monster' || definition.role !== observation.role || !namedDefinition(definition)) continue;
+      if (![PRIMARY_BOSS_ROLE, FIELD_ELITE_ROLE].includes(observation.role) || observation.kind !== 'monster' || definition?.kind !== 'monster' || definition.role !== observation.role || !namedDefinition(definition)) continue;
     }
     if (valueConflict(pattern.terrain, observation.terrainId, pattern.terrain?.value)) { conflicts.push(`位置线索 ${index + 1} 的地形`); continue; }
     const point = pattern.points?.find(item => id(item.attachId) === id(observation.attachId));
     if (!point) continue;
     const matching = point.features?.some(feature => feature.kind === observation.kind && feature.state === 'known' && (feature.role || null) === (observation.role || null) && id(feature.sourceId) === id(observation.sourceId));
     if (observation.role) {
-      const uncertain = point.features?.some(feature => feature.role === observation.role && (feature.state !== 'known' || !namedDefinition(definitions.features?.[id(feature.sourceId)]) || definitions.features?.[id(feature.sourceId)]?.role !== observation.role));
-      if (!matching && !uncertain && point.coverage?.[observation.role] === 'known') conflicts.push(`位置线索 ${index + 1} 的主遭遇首领`);
+      const uncertain = point.features?.some(feature => feature.role === observation.role && (feature.state !== 'known' || feature.kind !== observation.kind || !namedDefinition(definitions.features?.[id(feature.sourceId)]) || definitions.features?.[id(feature.sourceId)]?.role !== observation.role));
+      if (!matching && !uncertain && ['known', 'known_absent'].includes(point.coverage?.[observation.role])) conflicts.push(`位置线索 ${index + 1} 的${observation.role === FIELD_ELITE_ROLE ? '野外精英怪' : '主遭遇首领'}`);
     } else if (!matching && ['known', 'known_absent'].includes(point.coverage?.[observation.kind])) conflicts.push(`位置线索 ${index + 1}`);
   }
   return { matches: conflicts.length === 0, conflicts };
@@ -101,7 +105,7 @@ export function collectLayers(patterns, definitions = {}) {
       if (feature.state !== 'known' || !FEATURE_KINDS.includes(feature.kind) || definition?.kind !== feature.kind || !namedDefinition(definition)) continue;
       if ((feature.role || null) !== (definition.role || null)) continue;
       const key = JSON.stringify([terrainId, id(point.attachId), feature.kind, id(feature.sourceId), feature.role || null]);
-      if (!entries.has(key)) entries.set(key, { key, terrainId, attachId: id(point.attachId), kind: feature.kind, role: feature.role || null, sourceId: id(feature.sourceId), name: definition.nameZh, normalized: validPosition(point.normalized) ? { ...point.normalized } : null, members: new Set(), positionConsistent: true });
+      if (!entries.has(key)) entries.set(key, { key, terrainId, attachId: id(point.attachId), kind: feature.kind, role: feature.role || null, displayCategory: displayCategory(feature, definition), sourceId: id(feature.sourceId), name: definition.nameZh, normalized: validPosition(point.normalized) ? { ...point.normalized } : null, members: new Set(), positionConsistent: true });
       const entry = entries.get(key);
       entry.members.add(patternIndex);
       if (!validPosition(point.normalized) || !entry.normalized || Math.abs(point.normalized.x - entry.normalized.x) > 0.000001 || Math.abs(point.normalized.y - entry.normalized.y) > 0.000001) entry.positionConsistent = false;
@@ -112,6 +116,20 @@ export function collectLayers(patterns, definitions = {}) {
 export function nearbyPoints(points, click, width, height, tolerance = 24) {
   if (!validPosition(click) || !(width > 0) || !(height > 0)) return [];
   return points.filter(point => validPosition(point.normalized)).map(point => ({ ...point, distance: Math.hypot((point.normalized.x - click.x) * width, (point.normalized.y - click.y) * height) })).filter(point => point.distance <= tolerance).sort((a, b) => a.distance - b.distance);
+}
+// Spread overlapping hit targets on the map while retaining their true coordinates.
+export function layoutMapMarkers(groups, width, height) {
+  const placed = [];
+  return groups.map(group => {
+    const origin = { x: group.normalized.x * width, y: group.normalized.y * height };
+    let position = origin;
+    for (let attempt = 0; placed.some(other => Math.hypot(other.x - position.x, other.y - position.y) < 48) && attempt < 80; attempt++) {
+      const angle = attempt * 2.4, radius = 48 * Math.sqrt(1 + attempt / 5);
+      position = { x: Math.max(24, Math.min(width - 24, origin.x + Math.cos(angle) * radius)), y: Math.max(24, Math.min(height - 24, origin.y + Math.sin(angle) * radius)) };
+    }
+    placed.push(position);
+    return { ...group, markerX: position.x, markerY: position.y, offset: position !== origin };
+  });
 }
 export function calibratedPointDirectory(patterns) {
   const points = new Map();

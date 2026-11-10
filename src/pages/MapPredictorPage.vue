@@ -1,15 +1,18 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue';
-import { PRIMARY_BOSS_ROLE, calibratedPointDirectory, collectLayers, definitionOptions, eventOptions, evaluatePattern, findCandidates, namedDefinition, nearbyPoints, phaseBossOptions, safeMapAsset, validPosition } from '../lib/map-predictor.js';
+import { calibratedPointDirectory, collectLayers, definitionOptions, eventOptions, evaluatePattern, findCandidates, layoutMapMarkers, namedDefinition, nearbyPoints, phaseBossOptions, safeMapAsset, validPosition } from '../lib/map-predictor.js';
 
 const props = defineProps({ active: Boolean, catalogVersions: Object });
 const catalog = shallowRef(null), manifest = shallowRef(null), loading = ref(false), error = ref('');
-const emptyFilters = () => ({ nightlord: '', firstNight: '', secondNight: '', depth: '', dlc: '', terrain: '', event: '', eventDay: '' });
+const emptyFilters = () => ({ nightlord: '', firstNight: '', secondNight: '', depth: '', terrain: '', event: '', eventDay: '' });
 const filters = reactive(emptyFilters()), observations = ref([]), undoStack = ref([]);
-const candidatePage = ref(1), search = ref(''), namePage = ref(1), zoom = ref(1), failedAssets = ref(new Set());
-const selectedGroupKey = ref(''), nearby = ref([]), pointStatus = ref(''), pointDialog = ref(null), moreDetails = ref(null);
+const candidatePage = ref(1), search = ref(''), namePage = ref(1), zoom = ref(1.65), failedAssets = ref(new Set());
+const selectedGroupKey = ref(''), pointStatus = ref(''), pointDialog = ref(null), moreDetails = ref(null);
+const layerVisibility = reactive({ building: true, baseBoss: true, fieldElite: true });
+const layerLabels = { building: '建筑', baseBoss: '据点首领', fieldElite: '野外精英怪' };
+const dragging = ref(false); let dragStart = null, suppressMapClick = false;
 const mapViewport = ref(null), viewportSize = reactive({ width: 0, height: 0 });
-let controller, viewportObserver = null, viewportFrame = null;
+let controller, viewportObserver = null, viewportFrame = null, viewportContentBox = null;
 const patterns = computed(() => catalog.value?.patterns || []);
 const definitions = computed(() => catalog.value?.definitions || {});
 const clues = computed(() => ({ filters: { ...filters }, observations: observations.value }));
@@ -25,14 +28,13 @@ const options = computed(() => ({
   firstNight: phaseBossOptions(patterns.value, definitions.value.bosses, 'day1'),
   secondNight: phaseBossOptions(patterns.value, definitions.value.bosses, 'day2'),
   event: eventOptions(definitions.value.events),
-  dlc: [{ value: 'all', label: '全员拥有 DLC' }, { value: 'not-all', label: '并非全员拥有 DLC' }],
 }));
-const moreFields = [{ key: 'firstNight', label: '第一夜首领' }, { key: 'secondNight', label: '第二夜首领' }, { key: 'event', label: '已见事件' }, { key: 'dlc', label: '队伍 DLC 情况' }];
+const moreFields = [{ key: 'firstNight', label: '第一夜首领' }, { key: 'secondNight', label: '第二夜首领' }, { key: 'event', label: '已见事件' }];
 const pointDirectory = computed(() => calibratedPointDirectory(patterns.value));
 function groupLayers(entries) {
   const groups = new Map();
   for (const entry of entries) {
-    if (entry.kind !== 'building' && entry.role !== PRIMARY_BOSS_ROLE) continue;
+    if (!entry.displayCategory) continue;
     const key = JSON.stringify([entry.terrainId, entry.attachId]);
     if (!groups.has(key)) groups.set(key, { key, terrainId: entry.terrainId, attachId: entry.attachId, normalized: pointDirectory.value.get(key)?.normalized || entry.normalized, entries: [] });
     groups.get(key).entries.push(entry);
@@ -41,7 +43,7 @@ function groupLayers(entries) {
 }
 const allGroups = computed(() => groupLayers(collectLayers(patterns.value, definitions.value)).filter(group => group.terrainId !== null && validPosition(group.normalized)));
 const availableGroups = computed(() => allGroups.value.filter(group => group.terrainId === terrainView.value));
-const mapGroups = computed(() => {
+const candidateGroups = computed(() => {
   const groups = groupLayers(collectLayers(currentCandidate.value ? [currentCandidate.value] : [], definitions.value));
   for (const observation of observations.value) {
     const group = allGroups.value.find(item => item.terrainId === observation.terrainId && item.attachId === observation.attachId);
@@ -49,6 +51,8 @@ const mapGroups = computed(() => {
   }
   return groups.filter(group => group.terrainId === terrainView.value && validPosition(group.normalized));
 });
+const mapGroups = computed(() => candidateGroups.value.map(group => ({ ...group, entries: group.entries.filter(entry => layerVisibility[entry.displayCategory]) })).filter(group => group.entries.length));
+const displayedMarkers = computed(() => layoutMapMarkers(mapGroups.value, stageSize.value.width, stageSize.value.height));
 const matchingNameGroups = computed(() => {
   const needle = search.value.trim().toLocaleLowerCase();
   return availableGroups.value.filter(group => !needle || `${groupName(group)} ${pointLabel(group)}`.toLocaleLowerCase().includes(needle));
@@ -72,13 +76,25 @@ const stageSize = computed(() => {
   const scale = Math.min(viewportSize.width / asset.value.width, viewportSize.height / asset.value.height) * zoom.value;
   return { width: asset.value.width * scale, height: asset.value.height * scale };
 });
-function measureViewport() { viewportFrame = null; if (mapViewport.value) { viewportSize.width = mapViewport.value.clientWidth; viewportSize.height = mapViewport.value.clientHeight; } }
+function measureViewport() {
+  viewportFrame = null;
+  const viewport = mapViewport.value;
+  if (!viewport) return;
+  const rect = viewport.getBoundingClientRect(), style = getComputedStyle(viewport);
+  // clientHeight/clientWidth round fractional CSS pixels up and can create scrollbars.
+  const width = viewportContentBox?.width ?? Math.min(viewport.clientWidth, rect.width - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth));
+  const height = viewportContentBox?.height ?? Math.min(viewport.clientHeight, rect.height - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth));
+  viewportSize.width = Math.max(0, Math.floor(width)); viewportSize.height = Math.max(0, Math.floor(height));
+}
 function scheduleViewportMeasure() { if (viewportFrame !== null) cancelAnimationFrame(viewportFrame); viewportFrame = requestAnimationFrame(measureViewport); }
-function resetMap() { zoom.value = 1; nextTick(() => { measureViewport(); mapViewport.value?.scrollTo({ top: 0, left: 0, behavior: 'auto' }); }); }
+function resetMap(full = false) { zoom.value = full ? 1 : 1.65; nextTick(() => { measureViewport(); centerMap(); }); }
+function centerMap() { const viewport = mapViewport.value; if (viewport) viewport.scrollTo({ top: Math.max(0, (viewport.scrollHeight - viewport.clientHeight) / 2), left: Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2), behavior: 'auto' }); }
+function startDrag(event) { if (event.button !== 0 || !mapViewport.value) return; dragStart = { id: event.pointerId, x: event.clientX, y: event.clientY, left: mapViewport.value.scrollLeft, top: mapViewport.value.scrollTop }; suppressMapClick = false; }
+function moveDrag(event) { if (!dragStart || dragStart.id !== event.pointerId) return; const dx = event.clientX - dragStart.x, dy = event.clientY - dragStart.y; if (!dragging.value && Math.hypot(dx, dy) < 6) return; dragging.value = true; suppressMapClick = true; mapViewport.value.setPointerCapture(event.pointerId); mapViewport.value.scrollLeft = dragStart.left - dx; mapViewport.value.scrollTop = dragStart.top - dy; }
+function stopDrag() { dragStart = null; dragging.value = false; }
 function pointNumber(point) { return pointDirectory.value.get(JSON.stringify([point.terrainId, String(point.attachId)]))?.number || '?'; }
 function pointLabel(point) { return `位置 ${pointNumber(point)}`; }
 function groupName(group) { return [...new Set(group.entries.map(entry => entry.name))].join(' / '); }
-function pointChoiceSummary(group) { const buildings = group.entries.filter(entry => entry.kind === 'building').length, bosses = group.entries.filter(entry => entry.role === PRIMARY_BOSS_ROLE).length; return [buildings ? `建筑 ${buildings} 项` : '', bosses ? `首领 ${bosses} 项` : ''].filter(Boolean).join(' · '); }
 function terrainName(value) { return definitions.value.terrains?.[String(value)]?.nameZh || '地形待核对'; }
 function isObserved(group) { return observations.value.some(entry => entry.attachId === group.attachId && entry.terrainId === group.terrainId); }
 function isSelected(entry) { return selectedGroup.value && observations.value.some(item => item.attachId === selectedGroup.value.attachId && item.terrainId === selectedGroup.value.terrainId && item.sourceId === entry.sourceId && (item.role || null) === (entry.role || null)); }
@@ -88,10 +104,9 @@ function clearClues() { remember(); Object.assign(filters, emptyFilters()); obse
 function undo() { const previous = undoStack.value.pop(); if (!previous) return; const state = JSON.parse(previous); Object.assign(filters, state.filters); observations.value = state.observations; closeDialog(); }
 function removeObservation(index) { remember(); observations.value.splice(index, 1); }
 async function showPointDialog() { await nextTick(); if (pointDialog.value && !pointDialog.value.open) pointDialog.value.showModal(); }
-function chooseGroup(group) { selectedGroupKey.value = group.key; nearby.value = []; pointStatus.value = ''; if (moreDetails.value) moreDetails.value.open = false; showPointDialog(); }
-function openNearby(found) { if (found.length === 1) chooseGroup(found[0]); else if (found.length) { selectedGroupKey.value = ''; nearby.value = found; showPointDialog(); } else pointStatus.value = '附近没有可选点位，请放大地图或按名称选择。'; }
-function mapClicked(event) { const rect = event.currentTarget.getBoundingClientRect(); openNearby(nearbyPoints(availableGroups.value, { x: (event.clientX - rect.left) / rect.width, y: (event.clientY - rect.top) / rect.height }, rect.width, rect.height, 28)); }
-function markerClicked(group, event) { const rect = event.currentTarget.closest('.map-stage').getBoundingClientRect(); openNearby(nearbyPoints(availableGroups.value, group.normalized, rect.width, rect.height, 28)); }
+function chooseGroup(group) { if (!group) return; selectedGroupKey.value = group.key; pointStatus.value = ''; if (moreDetails.value) moreDetails.value.open = false; showPointDialog(); }
+function mapClicked(event) { if (suppressMapClick) { suppressMapClick = false; return; } const rect = event.currentTarget.getBoundingClientRect(); const found = nearbyPoints(mapGroups.value, { x: (event.clientX - rect.left) / rect.width, y: (event.clientY - rect.top) / rect.height }, rect.width, rect.height, 24); if (found.length) chooseGroup(allGroups.value.find(group => group.key === found[0].key)); }
+function markerClicked(group, event) { if (event.detail > 0 && suppressMapClick) { suppressMapClick = false; return; } chooseGroup(allGroups.value.find(item => item.key === group.key)); }
 function selectFeature(feature) {
   const group = selectedGroup.value;
   if (!group) return;
@@ -103,10 +118,10 @@ function selectFeature(feature) {
   else observations.value.splice(index, 1, observation);
   closeDialog(); nextTick(() => mapViewport.value?.focus({ preventScroll: true }));
 }
-function closeDialog() { pointDialog.value?.close(); selectedGroupKey.value = ''; nearby.value = []; pointStatus.value = ''; }
+function closeDialog() { pointDialog.value?.close(); selectedGroupKey.value = ''; pointStatus.value = ''; }
 function turnCandidate(step) { candidatePage.value = Math.min(candidates.value.length, Math.max(1, candidatePage.value + step)); closeDialog(); }
 function imageFailed(event) { const src = event.target.getAttribute('src'); if (src) failedAssets.value = new Set([...failedAssets.value, src]); }
-const iconPath = kind => kind === 'building' ? 'M3 10 12 3l9 7M5 9v12h14V9M9 21v-8h6v8' : 'm4 3 17 17-3 1L3 6V3h3M16 3l5 3-6 6M3 20l6-6M3 17l4 4';
+const iconPath = kind => kind === 'building' ? 'M3 10 12 3l9 7M5 9v12h14V9M9 21v-8h6v8' : kind === 'fieldElite' ? 'm12 3 8 5v8l-8 5-8-5V8l8-5M8 10h.01M16 10h.01M8 16l4-3 4 3' : 'm4 3 17 17-3 1L3 6V3h3M16 3l5 3-6 6M3 20l6-6M3 17l4 4';
 async function loadCatalog() {
   if (loading.value || catalog.value) return;
   controller?.abort(); controller = new AbortController(); const signal = controller.signal; loading.value = true; error.value = '';
@@ -127,8 +142,9 @@ watch(clues, () => { candidatePage.value = 1; }, { deep: true });
 watch(terrainView, () => { closeDialog(); resetMap(); });
 watch([search, terrainView], () => { namePage.value = 1; });
 watch(() => props.active, active => { if (active) { loadCatalog(); nextTick(scheduleViewportMeasure); } }, { immediate: true });
-watch(mapViewport, viewport => { viewportObserver?.disconnect(); if (!viewport) return; if (typeof ResizeObserver !== 'undefined') { viewportObserver = new ResizeObserver(scheduleViewportMeasure); viewportObserver.observe(viewport); } scheduleViewportMeasure(); });
+watch(mapViewport, viewport => { viewportObserver?.disconnect(); viewportContentBox = null; if (!viewport) return; if (typeof ResizeObserver !== 'undefined') { viewportObserver = new ResizeObserver(entries => { const box = entries[0].contentRect; viewportContentBox = { width: box.width, height: box.height }; scheduleViewportMeasure(); }); viewportObserver.observe(viewport); } scheduleViewportMeasure(); });
 watch(asset, () => nextTick(scheduleViewportMeasure));
+watch(stageSize, () => { if (!dragging.value) nextTick(centerMap); });
 onMounted(() => window.addEventListener('resize', scheduleViewportMeasure));
 onBeforeUnmount(() => { controller?.abort(); viewportObserver?.disconnect(); if (viewportFrame !== null) cancelAnimationFrame(viewportFrame); window.removeEventListener('resize', scheduleViewportMeasure); });
 </script>
@@ -161,27 +177,27 @@ onBeforeUnmount(() => { controller?.abort(); viewportObserver?.disconnect(); if 
       <p class="map-nightlords">可能夜王：{{ nightlordNames.length ? nightlordNames.join('、') : '待核对' }}</p>
       <p v-if="!candidates.length" class="map-conflict" role="alert">线索有冲突或超出当前资料范围，请移除或修改线索。{{ conflictLabels.length ? `可检查：${conflictLabels.join('、')}。` : '' }}</p>
       <div class="map-canvas-panel">
-        <div class="map-canvas-tools"><span class="map-legend"><i class="observed"></i>已标记 <i></i>推算点位</span><div><button type="button" :disabled="!asset || zoom <= 1" aria-label="缩小地图" @click="zoom = Math.max(1, zoom - .25)">−</button><button type="button" :disabled="!asset || zoom >= 3" aria-label="放大地图" @click="zoom = Math.min(3, zoom + .25)">＋</button><button type="button" :disabled="!asset" @click="resetMap">适配</button></div></div>
-        <div v-if="asset" ref="mapViewport" class="map-viewport" :style="{ '--map-aspect': `${asset.width} / ${asset.height}` }" tabindex="0" aria-label="地图，点击点位标记；放大后可滚动">
+        <div class="map-canvas-tools"><div class="map-layer-switches" aria-label="地图图层"><label v-for="(label, category) in layerLabels" :key="category"><input v-model="layerVisibility[category]" type="checkbox">{{ label }}</label></div><div><button type="button" :disabled="!asset || zoom <= 1" aria-label="缩小地图" @click="zoom = Math.max(1, zoom - .25)">−</button><button type="button" :disabled="!asset || zoom >= 3" aria-label="放大地图" @click="zoom = Math.min(3, zoom + .25)">＋</button><button type="button" :disabled="!asset" @click="resetMap(true)">全图适配</button></div></div>
+        <div v-if="asset" ref="mapViewport" class="map-viewport" :class="{ dragging }" @pointerdown="startDrag" @pointermove="moveDrag" @pointerup="stopDrag" @pointercancel="stopDrag" :style="{ '--map-aspect': `${asset.width} / ${asset.height}` }" tabindex="0" aria-label="地图，点击图标标记，拖动平移">
           <div class="map-surface" :style="{ width: `${Math.max(viewportSize.width, stageSize.width)}px`, height: `${Math.max(viewportSize.height, stageSize.height)}px` }"><div v-if="stageSize.width > 0" class="map-stage" :style="{ width: `${stageSize.width}px`, height: `${stageSize.height}px` }" @click="mapClicked">
             <img :src="asset.src" :alt="`${terrainName(terrainView)}底图`" draggable="false" @error="imageFailed">
-            <button v-for="group in mapGroups" :key="group.key" class="map-marker" :class="{ observed: isObserved(group) }" :style="{ left: `${group.normalized.x * 100}%`, top: `${group.normalized.y * 100}%` }" type="button" :aria-label="`${pointLabel(group)}，${groupName(group)}，${isObserved(group) ? '已标记' : '推算点位'}`" @click.stop="markerClicked(group, $event)"><span aria-hidden="true">{{ pointNumber(group) }}</span></button>
+            <svg class="map-marker-links" :viewBox="`0 0 ${stageSize.width} ${stageSize.height}`" aria-hidden="true"><line v-for="group in displayedMarkers.filter(item => item.offset)" :key="group.key" :x1="group.normalized.x * stageSize.width" :y1="group.normalized.y * stageSize.height" :x2="group.markerX" :y2="group.markerY" /></svg>
+            <button v-for="group in displayedMarkers" :key="group.key" class="map-marker" :class="{ observed: isObserved(group) }" :style="{ left: `${group.markerX}px`, top: `${group.markerY}px` }" type="button" :aria-label="`${pointLabel(group)}，${groupName(group)}，${isObserved(group) ? '已标记' : '推算点位'}`" @click.stop="markerClicked(group, $event)" :title="groupName(group)"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="iconPath(group.entries[0].displayCategory)" /></svg></span><small>{{ groupName(group) }}</small></button>
           </div></div>
         </div>
         <div v-else class="map-empty">底图暂不可用，可在“更多线索”中按名称标记。</div>
         <p v-if="pointStatus" class="map-point-status" role="status">{{ pointStatus }}</p>
       </div>
-      <dialog ref="pointDialog" class="map-point-dialog" aria-labelledby="map-point-title" @close="selectedGroupKey = ''; nearby = []">
-        <header><h2 id="map-point-title">{{ selectedGroup ? `${pointLabel(selectedGroup)} · 选择已见对象` : '选择位置' }}</h2><button type="button" aria-label="关闭选择" @click="closeDialog">×</button></header>
-        <div v-if="nearby.length" class="map-overlap-choices"><button v-for="group in nearby" :key="group.key" type="button" @click="chooseGroup(group)">{{ pointLabel(group) }}<small>{{ pointChoiceSummary(group) }}</small></button></div>
-        <template v-if="selectedGroup"><template v-for="kind in ['building', 'monster']" :key="kind"><h3 v-if="selectedGroup.entries.some(entry => entry.kind === kind)">{{ kind === 'building' ? '建筑' : '该点主遭遇首领（不含普通怪、召唤或突袭）' }}</h3><div class="map-feature-choices"><button v-for="entry in selectedGroup.entries.filter(item => item.kind === kind)" :key="entry.key" type="button" :aria-pressed="isSelected(entry)" :class="{ selected: isSelected(entry) }" @click="selectFeature(entry)"><svg viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(entry.kind)" /></svg><span>{{ entry.name }}</span><span v-if="isSelected(entry)" class="map-selected-check" aria-hidden="true">✓</span></button></div></template></template>
+      <dialog ref="pointDialog" class="map-point-dialog" aria-labelledby="map-point-title" @close="selectedGroupKey = ''">
+        <header><h2 id="map-point-title">{{ selectedGroup ? `${groupName(candidateGroups.find(group => group.key === selectedGroup.key) || selectedGroup)} · 选择已见对象` : '选择已见对象' }}</h2><button type="button" aria-label="关闭选择" @click="closeDialog">×</button></header>
+        <template v-if="selectedGroup"><template v-for="(label, category) in layerLabels" :key="category"><h3 v-if="selectedGroup.entries.some(entry => entry.displayCategory === category)">{{ label }}</h3><div class="map-feature-choices"><button v-for="entry in selectedGroup.entries.filter(item => item.displayCategory === category)" :key="entry.key" type="button" :aria-pressed="isSelected(entry)" :class="{ selected: isSelected(entry) }" @click="selectFeature(entry)"><svg viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(entry.displayCategory)" /></svg><span>{{ entry.name }}</span><span v-if="isSelected(entry)" class="map-selected-check" aria-hidden="true">✓</span></button></div></template></template>
       </dialog>
     </template>
   </section>
 </template>
 
 <style scoped>
-#view-map{font-size:14px;line-height:1.5;min-width:0}.map-heading{display:flex;align-items:center;gap:20px;margin-bottom:10px}.map-heading h1{margin:0;color:#ecd7a7;font:600 25px/1.35 'Noto Serif SC',serif;white-space:nowrap}.map-heading p{margin:0;color:#b6c7d2}
+#view-map{font-size:14px;line-height:1.5;min-width:0}.map-heading{display:flex;align-items:center;gap:20px;margin-bottom:10px}.map-heading h1{margin:0;color:#ecd7a7;font:600 25px/1.35 'Noto Serif SC',serif;white-space:nowrap}.map-heading p{margin:0;color:#b6c7d2;font-size:12px}
 button,select,input{font:inherit}button,summary{cursor:pointer}button{min-height:38px;padding:6px 12px;border:1px solid #536c82;border-radius:4px;background:#1b2d40;color:#e7d5ac}button:disabled{opacity:.4;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #ecd39a;outline-offset:2px}
 label{display:grid;gap:4px;min-width:0;color:#c7d3da}select,input{width:100%;min-width:0;min-height:40px;padding:7px 10px;border:1px solid #4c657b;border-radius:4px;background:#101d2a;color:#e0e7e9}
 .map-toolbar{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px}.map-toolbar label{width:220px}.map-toolbar>button{min-height:40px}
@@ -189,9 +205,9 @@ label{display:grid;gap:4px;min-width:0;color:#c7d3da}select,input{width:100%;min
 .map-clue-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;max-height:90px;overflow:auto}.map-clue-tag{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:2px 4px 2px 9px;border:1px solid #708a6f;border-radius:4px;background:#243d36;color:#ddeddd}.map-clue-tag>span{overflow-wrap:anywhere}.map-tag-name{min-height:32px;padding:2px 0;border:0;background:none;color:inherit;overflow-wrap:anywhere;text-align:left}.map-tag-remove{min-height:32px;width:32px;padding:0;border:0;background:none;color:inherit;font-size:21px;flex-shrink:0}
 .map-nightlords{margin:0 0 10px;color:#b8c9d4;font-size:14px}.map-conflict{margin:0 0 10px;padding:8px 12px;border-left:2px solid #d08b78;background:#392b2b;color:#f0c6b9}
 .map-canvas-panel{display:flex;flex-direction:column;min-width:0;min-height:0;padding:10px;border:1px solid #3e566e;border-radius:5px;background:#132131}.map-canvas-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.map-canvas-tools>div{display:flex;gap:6px}.map-legend{display:flex;align-items:center;gap:6px;color:#b4c5d1;font-size:13px}.map-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:#446e9c;border:1px solid #b4d2ed}.map-legend i.observed{background:#528e70;border-color:#a5e5bc;margin-right:0}.map-legend i:not(.observed){margin-left:8px}
-.map-viewport{max-width:100%;height:min(62vh,650px);min-height:230px;overflow:auto;overscroll-behavior:contain;background:#0d1926;border:1px solid #324b62;border-radius:3px}.map-surface{display:grid;place-items:center}.map-stage{position:relative;isolation:isolate}.map-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none}.map-stage .map-marker{position:absolute;display:grid;place-items:center;width:44px;height:44px;min-height:44px;padding:0;transform:translate(-50%,-50%);border:0;border-radius:50%;background:transparent;z-index:1}.map-marker>span{display:grid;place-items:center;width:27px;height:27px;border:1px solid #c3d7ed;border-radius:50%;background:#234d79;color:#fff;font-size:12px;font-weight:650}.map-marker.observed{z-index:2}.map-marker.observed>span{background:#326e4e;border-color:#b8edcc;outline:3px solid #8de0ae;outline-offset:1px}.map-stage .map-marker:focus-visible{outline:3px solid white;outline-offset:2px;z-index:3}.map-empty{display:grid;place-items:center;min-height:280px;color:#bacbd5}.map-point-status{margin:8px 0 0;color:#d7c69d}
+.map-viewport{max-width:100%;height:72dvh;min-height:420px;overflow:auto;overscroll-behavior:contain;touch-action:none;cursor:grab;background:#0d1926;border:1px solid #324b62;border-radius:3px}.map-surface{display:grid;place-items:center}.map-stage{position:relative;isolation:isolate}.map-viewport.dragging{cursor:grabbing}.map-layer-switches{display:flex;gap:12px;flex-wrap:wrap}.map-layer-switches label{display:flex;align-items:center;gap:5px;font-size:12px}.map-layer-switches input{width:16px;min-height:16px;accent-color:#c9b16e}.map-stage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none}.map-marker-links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.map-marker-links line{stroke:#c7bc94;stroke-width:1;stroke-dasharray:3 3}.map-stage .map-marker{position:absolute;display:grid;place-items:center;width:44px;height:44px;min-height:44px;padding:0;transform:translate(-50%,-50%);border:0;border-radius:50%;background:transparent;z-index:1}.map-marker svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.map-marker small{position:absolute;top:34px;max-width:100px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;padding:1px 4px;background:#0c1a29e8;color:#f0e0bc;font-size:11px;pointer-events:none}.map-marker:hover,.map-marker:focus-visible{z-index:4}.map-marker>span{display:grid;place-items:center;width:32px;height:32px;border:1px solid #c3d7ed;border-radius:50%;background:#234d79;color:#fff;font-size:12px;font-weight:650}.map-marker.observed{z-index:2}.map-marker.observed>span{background:#326e4e;border-color:#b8edcc;outline:3px solid #8de0ae;outline-offset:1px}.map-stage .map-marker:focus-visible{outline:3px solid white;outline-offset:2px;z-index:3}.map-empty{display:grid;place-items:center;min-height:280px;color:#bacbd5}.map-point-status{margin:8px 0 0;color:#d7c69d}
 .map-point-dialog{width:min(650px,calc(100% - 28px));max-height:80dvh;margin:auto;padding:18px;border:1px solid #9c8559;border-radius:6px;background:#142637;color:#e4e9e5;box-shadow:0 20px 65px #000b}.map-point-dialog::backdrop{background:#050f1bd1}.map-point-dialog header{display:flex;align-items:center;justify-content:space-between;gap:12px}.map-point-dialog h2{margin:0;color:#e6d0a2;font-size:19px}.map-point-dialog header button{width:38px;padding:0;font-size:23px;flex-shrink:0}.map-point-dialog h3{margin:16px 0 8px;color:#bdccd6;font-size:14px;font-weight:500}.map-feature-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.map-feature-choices button{display:flex;align-items:center;gap:10px;min-height:60px;text-align:left;padding:10px;overflow-wrap:anywhere}.map-feature-choices svg{width:30px;height:30px;flex-shrink:0;fill:none;stroke:#d8c18b;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}.map-feature-choices button.selected{border-color:#a9d7ab;background:#2b4939;color:#e1f4df}.map-selected-check{margin-left:auto;color:#bde8bd}.map-overlap-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px}.map-overlap-choices button{text-align:left}.map-overlap-choices small{display:block;margin-top:4px;color:#b1c4d1}
-@media(min-width:1151px){#view-map.active{display:flex;flex:1;min-height:0;flex-direction:column}.map-heading,.map-toolbar,.map-result-bar,.map-nightlords,.map-clue-tags,.map-conflict{flex-shrink:0}.map-canvas-panel{flex:1}.map-viewport{flex:1;height:auto;min-height:180px}}
-@media(max-width:850px){.map-heading{align-items:flex-start;flex-direction:column;gap:5px}.map-heading h1{font-size:23px}.map-toolbar{gap:8px}.map-toolbar label{flex:1;width:auto}.map-result-bar{gap:8px}.map-result-bar>strong{font-size:16px}.map-more{margin-left:0}.map-candidate-switch>span{min-width:45px}.map-more-content{width:100%;padding:12px}.map-canvas-panel{padding:7px}.map-clue-tags{max-height:110px}.map-nightlords{line-height:1.6}.map-canvas-tools{flex-wrap:wrap}.map-point-dialog{padding:14px}.map-feature-choices{gap:6px}.map-feature-choices button{gap:7px;padding:8px}.map-feature-choices svg{width:25px;height:25px}.map-viewport{height:55vh;min-height:270px}}
+@media(min-width:1151px){#view-map.active{display:flex;flex:1;min-height:0;flex-direction:column}.map-heading,.map-toolbar,.map-result-bar,.map-nightlords,.map-clue-tags,.map-conflict{flex-shrink:0}.map-canvas-panel{flex:1}.map-viewport{flex:1;height:auto;min-height:420px}}
+@media(max-width:850px){.map-heading{align-items:flex-start;flex-direction:column;gap:5px}.map-heading h1{font-size:23px}.map-toolbar{gap:8px}.map-toolbar label{flex:1;width:auto}.map-result-bar{gap:8px}.map-result-bar>strong{font-size:16px}.map-more{margin-left:0}.map-candidate-switch>span{min-width:45px}.map-more-content{width:100%;padding:12px}.map-canvas-panel{padding:7px}.map-clue-tags{max-height:110px}.map-nightlords{line-height:1.6}.map-canvas-tools{flex-wrap:wrap}.map-point-dialog{padding:14px}.map-feature-choices{gap:6px}.map-feature-choices button{gap:7px;padding:8px}.map-feature-choices svg{width:25px;height:25px}.map-viewport{height:68dvh;min-height:420px}.map-layer-switches{gap:8px}.map-canvas-tools>div{flex-wrap:wrap}}
 @media(max-width:380px){.map-toolbar{flex-wrap:wrap}.map-toolbar label{flex-basis:40%}.map-toolbar>button{width:100%}.map-feature-choices,.map-overlap-choices{grid-template-columns:minmax(0,1fr)}}
 </style>

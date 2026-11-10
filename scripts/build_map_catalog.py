@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build the local map-pattern catalog from the verified regulation XML snapshot.
 
-The outside site's 520-row snapshot is used only to audit the small identity
-override table. It is not an input to this published catalog.
+The outside site's 520-row snapshot and named boss slots audit the small
+identity override table. They are not build inputs to this published catalog.
 """
 
 from __future__ import annotations
@@ -178,8 +178,24 @@ def main() -> None:
             "kind": "monster", "nameZh": definitions["bosses"][boss_id]["nameZh"],
             "bossId": boss_id,
             "role": "primarySmallBaseBoss",
+            "displayCategory": "baseBoss",
             "identityStatus": "native_map_id_520_presence_set_crosschecked",
             "evidence": field_boss["evidence"],
+        }
+
+    for map_id, elite in overrides["verifiedFieldEliteMapIds"].items():
+        text_id = elite["npcNameTextId"]
+        name = npc_text.get(str(text_id)) if text_id is not None else elite.get("displayNameZh")
+        if text_id is not None and not name:
+            raise ValueError(f"Missing NpcName text for field elite {map_id}: {text_id}")
+        definitions["features"][f"fieldElite:{map_id}"] = {
+            "kind": "monster", "nameZh": name,
+            "referenceName": elite["referenceName"],
+            "npcNameTextId": text_id,
+            "nameMethod": elite.get("nameMethod", "native_fmg_exact"),
+            "role": "fieldElite", "displayCategory": "fieldElite",
+            "identityStatus": "native_icon_and_pattern_slot_crosschecked",
+            "evidence": elite["evidence"],
         }
 
     patterns = []
@@ -275,8 +291,16 @@ def main() -> None:
             if map_id in overrides["verifiedFieldBossMapIds"]:
                 features.append({
                     "kind": "monster", "state": "known", "sourceId": f"fieldBoss:{map_id}",
-                    "role": "primarySmallBaseBoss",
+                    "role": "primarySmallBaseBoss", "displayCategory": "baseBoss",
                     "identityStatus": "native_map_id_520_presence_set_crosschecked",
+                })
+            if map_id in overrides["verifiedFieldEliteMapIds"]:
+                if "16" not in point_icons[map_id]:
+                    raise ValueError(f"Field elite map {map_id} has no native boss icon")
+                features.append({
+                    "kind": "monster", "state": "known", "sourceId": f"fieldElite:{map_id}",
+                    "role": "fieldElite", "displayCategory": "fieldElite",
+                    "identityStatus": "native_icon_and_pattern_slot_crosschecked",
                 })
             features.extend((
                 {"kind": "monster", "state": "unknown"},
@@ -291,6 +315,7 @@ def main() -> None:
                     "building": "known" if category_complete else "unknown",
                     "monster": "unknown", "event": "unknown",
                     "primarySmallBaseBoss": "known" if map_id in overrides["verifiedFieldBossMapIds"] else "unknown",
+                    "fieldElite": "known" if map_id in overrides["verifiedFieldEliteMapIds"] else "unknown",
                 },
                 "sourceRows": {"lotResultSmallBaseAndSpot": row["id"]},
             })
@@ -345,7 +370,7 @@ def main() -> None:
             "identityOverridesSha256": sha256(OVERRIDES),
             "assetManifestSha256": sha256(ASSET_MANIFEST) if ASSET_MANIFEST.exists() else None,
             "referenceVersion": overrides["reference"]["datasetVersion"],
-            "referenceUse": "520-row ID cross-check only; no external slots, positions or event assignments copied",
+            "referenceUse": "520-row ID and named boss-slot identity cross-check only; no external slots, positions or event assignments copied",
         },
         "definitions": definitions,
         "patterns": patterns,

@@ -13,14 +13,15 @@
 | 建筑类别 | 来源地点图标 ID → 类别；按方案比较原生各图标出现次数与原作者公开的地点类别次数 | 9,102 个点位有已核对类别。教堂、废墟、聚落、魔法师塔、大型营地、沼泽、锻造设施为 520/520 次数一致；要塞 517/520、大教堂 516/520，只作正向标签，差异待核 |
 | 方案事件 | `LotResultMapPatternFlag.eventFlag` 或对应 `modifierSet=0` 的 modifier；有突袭日次时用原生 7705/7725 标志 | 251 个方案有一项事件、269 个方案已确认无这些事件，按显式方案 ID 与参考事件家族／日次 520/520 一致；事件位置未知，不绘制到任何点位 |
 | 地图点位首领 | 17 个 `smallBaseMapId` 与参考野外首领键在 520 个方案中的出现集合逐项完全一致，位置仍取原生 attachId | 348 个点位（主要是大空洞）有已核对首领 ID；其他野外怪物与召唤、强化、突袭形态仍未知 |
+| 野外精英怪 | `SmallBaseAndSpotDefine` 的 114/1200/2114 行将 11 个模板归于首领图标 16；按显式方案 ID 与参照资料的具名首领槽核对身份，位置取原生 attachId，经已验证地形系数转换 | 11 个模板、2,850 个方案点位标为 `displayCategory: fieldElite`；其中 2,085 个具名槽可直接交叉核对且无冲突，其余沿用同一原生模板 ID。其他野外怪物身份仍未知；通用 Red Wolf 缺少一一对应的本机中文词条，页面用“红狼”作参考标签译名，`nameMethod: reference_label_translation`，并非官方中文名 |
 
 外部参照仅用于静态核对数字身份与含义：Artimuz 的 [Nightreign Seed Finder](https://nightreign-seed-finder.com/) 数据版本 `1.03.2`，经公开 [nightreign-seed-observer](https://github.com/stockholm754-source/nightreign-seed-observer) 项目安全读取为 JSON。以显式 `seed_id = patternId` 连接，而非数组顺序。没有将外部 36 槽布局、坐标、图片或整表复制到公开目录。原作者资料未声明可再分发本项目所需的授权；公开目录的事实映射保留来源、版本和核对状态，地图图片另按资产专项处理。本地游戏版本更新后须重新比对；此处的 520 条吻合不代表游戏运行时已实测。
 
 ## 筛选语义
 
 - `patternId` 是方案主键。`nightlord.menuRowId` 与 `definitions.nightlords` 用于已知夜王正向筛图；`dayBosses.day1/day2.sourceId`、`terrain.value`、`events.values[].sourceId` 和点位 `features[].sourceId` 用同一组方案反向筛选。所有 ID 在前端按字符串比较。
-- `known` 是已确认值；`known_absent` 是已确认不存在；`unknown` 是资料未覆盖。点位 `coverage[kind]` 仅在相应类别完整核对时为 `known`，其余不能据缺席排除。`features` 可同时包含原始建筑 ID、通用建筑类别、野外首领，以及未知的其他怪物／事件；通用类别适用于“教堂”等用户选项。未出现的整个 attachId 目前仍按未知处理。
-- 17 类野外首领标为 `role: primarySmallBaseBoss`。每个 `(patternId, attachId)` 在原生 `LotResultSmallBaseAndSpot` 中至多一个 `smallBaseMapId`；只有已核验的 17 个主首领模板点位标 `coverage.primarySmallBaseBoss=known`，其余模板仍为 `unknown`。用户明确选择“该点主遭遇首领”时，两个已核验且不同的模板可以互斥；未知模板和缺少点位行不能排除。`coverage.monster` 始终为 `unknown`，不能据此排除同点其他普通怪、召唤物或事件刷怪。
+- `known` 是已确认值；`known_absent` 是已确认不存在；`unknown` 是资料未覆盖。点位 `coverage[kind]` 仅在相应类别完整核对时为 `known`，其余不能据缺席排除。`features` 可同时包含原始建筑 ID、通用建筑类别、野外精英怪、据点首领，以及未知的其他怪物／事件；通用类别适用于“教堂”等用户选项。未出现的整个 attachId 目前仍按未知处理。
+- 11 类野外精英怪标为 `role: fieldElite`、`displayCategory: fieldElite`，对应点位 `coverage.fieldElite=known`。原有 17 类据点主首领保留 `role: primarySmallBaseBoss`，新增 `displayCategory: baseBoss`；仅已核验的 17 个模板点位标 `coverage.primarySmallBaseBoss=known`。每个 `(patternId, attachId)` 在原生 `LotResultSmallBaseAndSpot` 中至多一个 `smallBaseMapId`。相同角色中两个已核验且不同的模板可以互斥；未知模板和缺少点位行不能据缺席排除。`coverage.monster` 始终为 `unknown`，不能据此排除同点普通怪、召唤物或事件刷怪。
 - `nightlord.form` 全部为 `unknown`；夜王菜单普通色头像不能证明深夜实战形态。`eligibility.depths` 全部为 `unknown`，没有将 `NightBossMenuParam` 的抽选权重当成地图方案适用深度。`allPlayersHaveDlc.required=true` 仅用于 DLC 夜王、稀有地形 4 与安定者突袭事件；依据[官方 1.03.1 更新说明](https://en.bandainamcoent.eu/elden-ring/news/elden-ring-nightreign-patch-notes-version-1031)和[热修说明](https://en.bandainamcoent.eu/elden-ring/news/elden-ring-nightreign-hotfix-notes-version-1031)。未提供任何概率。
 - `definitions.bosses` 的组合名称由多条本机 FMG 成员名拼接，不能当作 NPC 阶段 ID。首领、野外首领、召唤物、强化体、突袭事件分属不同来源 ID；只按中文同名不能归并。
 
@@ -28,7 +29,7 @@
 
 `scripts/validate_map_catalog.py` 重新读取原生表，逐方案核 `targetBoss`、地形、两夜首领与点位数；可选地读取仓库外参考 JSON 校验 520 个显式 ID、事件身份及日次，并输出 `E:\海斗\outputs\map-nightlord-20261110\data\validation.json`。验证样例：夜王格拉狄乌斯 → 50 方案；加第一夜 `4929` → 25；加第二夜 `4860` → 11；加第二夜黑夜群袭事件 `event:7724` → 2（方案 0、4）；再选附着点 113 的“废墟” → 仅方案 0。方案 4 的同一位置是“大型营地”，两者建筑类别覆盖均为 `known`，所以这是有效的反向排除。添加条件后候选集合只缩小，不会凭空增多。
 
-主遭遇首领的有限反向例子：选夜王格拉狄乌斯与大空洞地形得 5 个方案 `1005`–`1009`；在附着点 `1111` 标记已见“英雄石像鬼们”（`fieldBoss:4917`）后，`1005` 命中，`1006` 同点为已核验的 `fieldBoss:4910`，可据主遭遇角色排除。若候选还包括 `1015`，其同点原始模板为 `4990`、尚未列入已核验 17 类，必须保留为未知，不能因没有 `4917` 标签就排除。这不声称该点没有其他普通怪。
+主遭遇首领的有限反向例子：选夜王格拉狄乌斯与大空洞地形得 5 个方案 `1005`–`1009`；在附着点 `1111` 标记已见“英雄石像鬼们”（`fieldBoss:4917`）后，`1005` 命中，`1006` 同点为已核验的 `fieldBoss:4910`，可据主遭遇角色排除。若候选还包括 `1015`，其同点原始模板为 `4990`、尚未列入已核验 17 类，必须保留为未知，不能因没有 `4917` 标签就排除。这不声称该点没有其他普通怪。方案 `1005` 的附着点 `1156` 则来自原生 `smallBaseMapId=4657`，是单独标注的野外精英怪 `fieldElite:4657`，不可与据点首领合并筛选。
 
 坐标变换以 `public/map-asset-manifest.json` 六类数字地形的 `coordinateTransform` 为准；构建器实际读取并核对系数、底图尺寸、area 60、层号与坐标原点，只为支持的地表点计算 `normalized`。资产专项的至少三个参照点校准及底图来源详见 `docs/MAP_ASSETS.md`。这仍是静态校准，未进行游戏运行实测。
 
