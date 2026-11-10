@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { PRIMARY_BOSS_ROLE, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
+import { PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
 
 // Synthetic state fixtures exercise the filter contract, not game distribution claims.
 const known = value => ({ state: 'known', value });
@@ -176,13 +176,16 @@ test('display layers distinguish primary bosses and explicitly classified elites
   assert.equal(displayCategory({ kind: 'monster' }, { displayCategory: 'fieldElite' }), 'fieldElite');
 });
 
-test('overlapping markers spread without altering their actual coordinates', () => {
+test('dense markers retain exact native positions without leader lines', () => {
   const groups = ['a', 'b', 'c'].map(key => ({ key, normalized: { x: .5, y: .5 } }));
   const markers = layoutMapMarkers(groups, 600, 600);
-  assert.equal(markers[0].offset, false);
-  for (const marker of markers) assert.deepEqual(marker.normalized, { x: .5, y: .5 });
-  for (let i = 0; i < markers.length; i++) for (let j = i + 1; j < markers.length; j++)
-    assert.ok(Math.hypot(markers[i].markerX - markers[j].markerX, markers[i].markerY - markers[j].markerY) >= 48);
+  for (const marker of markers) {
+    assert.deepEqual(marker.normalized, { x: .5, y: .5 });
+    assert.equal(marker.markerX, 300); assert.equal(marker.markerY, 300);
+    assert.equal(marker.dense, true); assert.equal(marker.offset, undefined);
+  }
+  assert.equal(layoutMapMarkers([groups[0]], 600, 600)[0].dense, false);
+  assert.equal(nearbyPoints(markers, { x: .5, y: .5 }, 600, 600, 24).length, 3);
 });
 
 test('native field elite at terrain 0 attach 750 filters by its own role coverage', () => {
@@ -220,16 +223,34 @@ test('elite coverage does not exclude other monster roles or unresolved elite id
 
 test('reference markers follow terrain and layer visibility without entering candidate filtering', () => {
   const reference = { key: 'fixed', terrainId: '2', nameZh: '参考首领', normalized: { x: .4, y: .6 }, displayCategory: 'fieldElite', filterable: false };
-  const visibility = { fieldElite: true, baseBoss: true };
+  const visibility = { fieldElite: true };
   const groups = referenceMapGroups([reference], '2', visibility);
   assert.equal(groups.length, 1);
   assert.equal(groups[0].reference, reference);
   assert.equal(groups[0].attachId, undefined);
   assert.equal(groups[0].entries[0].sourceId, undefined);
   assert.equal(referenceMapGroups([reference], '1', visibility).length, 0);
+  assert.equal(referenceMapGroups([{ ...reference, displayCategory: 'baseBoss' }], '2', { baseBoss: true }).length, 0);
+  assert.deepEqual(MAP_DISPLAY_CATEGORIES, ['building', 'fieldElite']);
   assert.equal(referenceMapGroups([reference], '2', { fieldElite: false }).length, 0);
   assert.equal(referenceMapGroups([{ ...reference, filterable: true }], '2', visibility).length, 0);
   assert.equal(referenceMapGroups([{ ...reference, normalized: null }], '2', visibility).length, 0);
   const candidates = [pattern(0)];
   assert.deepEqual(findCandidates(candidates, { referencePoints: [reference] }), candidates);
+});
+
+
+test('building icons resolve explicit definition mappings to local assets', () => {
+  const manifest = { icons: { 'smallBaseMap:1': { src: 'map-icons/building-1.png', status: 'verified' } } };
+  assert.equal(buildingIconPath(manifest, 'smallBaseMap:1'), '/map-icons/building-1.png');
+  assert.equal(buildingIconPath(manifest, 'smallBaseMap:2'), null);
+  assert.equal(buildingIconPath({ icons: { a: { src: 'https://example.com/a.png', status: 'verified' } } }, 'a'), null);
+});
+
+test('nightlord portraits use verified menu identity and DLC has an honest fallback', () => {
+  const catalog = JSON.parse(readFileSync(new URL('../public/map-catalog.json', import.meta.url), 'utf8'));
+  const manifest = JSON.parse(readFileSync(new URL('../public/enemy-image-verified.json', import.meta.url), 'utf8'));
+  assert.equal(nightlordPortrait(catalog.definitions.nightlords['0'], manifest), '/enemy-images/nightboss-41820.png');
+  assert.equal(nightlordPortrait(catalog.definitions.nightlords['8'], manifest), null);
+  assert.equal(nightlordPortrait(catalog.definitions.nightlords['9'], manifest), null);
 });

@@ -1,6 +1,15 @@
 export const FEATURE_KINDS = ['building', 'monster', 'event'];
 export const PRIMARY_BOSS_ROLE = 'primarySmallBaseBoss';
 export const FIELD_ELITE_ROLE = 'fieldElite';
+export const MAP_DISPLAY_CATEGORIES = ['building', 'fieldElite'];
+export function buildingIconPath(manifest, sourceId) {
+  const entry = manifest?.icons?.[sourceId], path = entry?.src;
+  return entry?.status === 'verified' && typeof path === 'string' && /^\/?map-icons\/[A-Za-z0-9_-]+\.(?:png|webp)$/i.test(path) ? `/${path.replace(/^\//, '')}` : null;
+}
+export function nightlordPortrait(definition, manifest) {
+  const entry = Object.values(manifest?.images || {}).find(image => image.matchStatus === 'verified' && image.imageKind === 'nightboss-menu-portrait' && image.sourceParam?.iconId === definition?.menuIconId && String(image.sourceParam?.rowId) === String(definition?.menuRowId));
+  return typeof entry?.path === 'string' && /^enemy-images\/[A-Za-z0-9_-]+\.(?:png|jpe?g|webp)$/i.test(entry.path) ? `/${entry.path}` : null;
+}
 export function displayCategory(feature, definition = {}) {
   if (feature.kind === 'building') return 'building';
   const category = feature.displayCategory || definition.displayCategory;
@@ -24,7 +33,7 @@ export function validPosition(position) {
   return Boolean(position && Number.isFinite(position.x) && Number.isFinite(position.y) && position.x >= 0 && position.x <= 1 && position.y >= 0 && position.y <= 1);
 }
 export function referenceMapGroups(points = [], terrainId, visibility) {
-  return points.filter(point => point.filterable === false && point.terrainId === terrainId && ['fieldElite', 'baseBoss'].includes(point.displayCategory) && visibility[point.displayCategory] && validPosition(point.normalized)).map(point => ({
+  return points.filter(point => point.filterable === false && point.terrainId === terrainId && point.displayCategory === 'fieldElite' && visibility[point.displayCategory] && validPosition(point.normalized)).map(point => ({
     key: `reference:${point.key}`, terrainId: point.terrainId, normalized: point.normalized, reference: point,
     entries: [{ name: point.nameZh, displayCategory: point.displayCategory }],
   }));
@@ -123,20 +132,11 @@ export function nearbyPoints(points, click, width, height, tolerance = 24) {
   if (!validPosition(click) || !(width > 0) || !(height > 0)) return [];
   return points.filter(point => validPosition(point.normalized)).map(point => ({ ...point, distance: Math.hypot((point.normalized.x - click.x) * width, (point.normalized.y - click.y) * height) })).filter(point => point.distance <= tolerance).sort((a, b) => a.distance - b.distance);
 }
-// Spread overlapping hit targets on the map while retaining their true coordinates.
+// Keep native positions; dense markers shrink and expose their names on interaction.
 export function layoutMapMarkers(groups, width, height) {
-  const placed = [];
-  return groups.map(group => {
-    const origin = { x: group.normalized.x * width, y: group.normalized.y * height };
-    let position = origin;
-    // Labels are at most 100px wide below a 44px hit target; include both and a gap.
-    for (let attempt = 0; placed.some(other => Math.abs(other.x - position.x) < 112 && Math.abs(other.y - position.y) < 64) && attempt < 200; attempt++) {
-      const angle = attempt * 2.4, radius = 64 * Math.sqrt(1 + attempt / 4);
-      position = { x: Math.max(56, Math.min(width - 56, origin.x + Math.cos(angle) * radius)), y: Math.max(24, Math.min(height - 40, origin.y + Math.sin(angle) * radius)) };
-    }
-    placed.push(position);
-    return { ...group, markerX: position.x, markerY: position.y, offset: position !== origin };
-  });
+  return groups.map(group => ({ ...group, markerX: group.normalized.x * width, markerY: group.normalized.y * height,
+    dense: groups.some(other => other.key !== group.key && Math.hypot((other.normalized.x - group.normalized.x) * width, (other.normalized.y - group.normalized.y) * height) < 44),
+  }));
 }
 export function calibratedPointDirectory(patterns) {
   const points = new Map();

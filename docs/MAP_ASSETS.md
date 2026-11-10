@@ -83,3 +83,25 @@ python scripts/extract_map_assets.py --scenes
 最终资产校验见 `asset-validation.json`：六张文件存在且哈希吻合、1536×1536、数字地形键 0–5、清单无本机路径、生成脚本哈希吻合、七个参照点偏差小于 10 原图像素。该文件校验的公开清单 SHA256 为 `f8fee03675e3fdc6cac4ede045ac3a85d22e566a852e6a78c0121c81f1d1c373`。公开清单与图片已冻结供集成构建使用。
 
 底图为本机游戏资源的派生物，原图权利归原权利人；这里记录提取与核验来源，不将其描述为新创作资产。
+
+## 建筑原版图标（2026-11-10）
+
+本轮新增 `public/map-icons/` 与 `public/map-icon-manifest.json`，不改底图清单。接口为 `schemaVersion: 1`、`icons[definitionKey]`；每项包含 src、原尺寸 width/height、status、worldMapPointIconId、iconId、PNG SHA256 及 source。前端应按已核验的 `buildingCategory:*` key 取图。九类全部找到原版素材，无缺失项；167 个 `raw_id_only` 的 `smallBaseMap:*` 定义未擅自配图。
+
+| definition key 后缀 | 建筑 | WorldMapPointIconParam 行 | iconId | 原尺寸 |
+| --- | --- | --- | --- | --- |
+| church | 教堂 | 2 | 42001 | 188×188 |
+| ruins | 废墟 | 3 | 42002 | 234×234 |
+| township | 聚落 | 4 | 42003 | 228×228 |
+| sorcerers | 魔法师塔 | 6 | 42005 | 236×236 |
+| mainencampment | 大型营地 | 10 | 42009 | 224×224 |
+| fort | 要塞 | 7 | 42006 | 266×266 |
+| greatchurch | 大教堂 | 24 | 42023 | 248×248 |
+| marsh | 沼泽 | 77 | 42047 | 266×202 |
+| forge | 锻造设施 | 78 | 42048 | 220×130 |
+
+关联链为当前 `map-catalog.json` 建筑类别的 worldMapPointIconId → 原生 `WorldMapPointIconParam.iconId` → 布局文件中同编号 sprite。基础七类来自 `/menu/01_common_h.tpf.dcx` 的 `SB_MenuIcon_1`，精确布局来自 `/menu/01_common_h.sblytbnd.dcx` 内的 `SB_MenuIcon_1.layout`，sprite 名为 `MENU_MenuIcon_{iconId}.png`。沼泽与锻造设施来自 `/menu/21_common_dlc01_h.tpf.dcx` 的 `SB_MapIcon_DLC01_0`，布局为对应 `/menu/21_common_dlc01_h.sblytbnd.dcx` 内的 `SB_MapIcon_DLC01_0.layout`，精确 sprite 分别为 `MENU_MAP_42047_077.png` 与 `MENU_MAP_42048_078.png`。两组资源均由前轮本机 `data0.bdt` 提取，此次只读取仓库外缓存，不再打开或解包游戏安装资源。
+
+按原生布局矩形从 DDS 解码后的 RGBA 图集裁切，原尺寸输出透明 PNG，保留游戏自带色彩、发光与透明留白，没有重绘、缩放、裁掉透明边或加背景。逐张验证 PNG 重新解码的 RGBA 等于源图集对应矩形。九张共 419,930 字节；完整资源、DDS、layout、图片哈希与矩形均在图标清单。图标取到原版素材不扩大建筑身份覆盖范围：要塞、大教堂的既有类别次数差异仍沿用数据专项的限制。
+
+提取脚本与证据放在仓库外 `E:\海斗\outputs\map-nightlord-20261110\map-icons`：`build_map_icons.py` 可复现九类裁切，`contact-sheet.png` 为九图人工核对图，`extraction-validation.json` 记录来源路径、脚本哈希、清单哈希及像素核验。执行方式：`python E:\海斗\outputs\map-nightlord-20261110\map-icons\build_map_icons.py`。图标公共清单 SHA256 为 `efccdce1ce1493dc20f125960b3b28e7ca1c3b218395f8780b50e8947d570d5a`。未修改生成脚本、地图目录数据、前端或其他负责人的文件。
