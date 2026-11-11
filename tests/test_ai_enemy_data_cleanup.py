@@ -15,7 +15,7 @@ class EnemyCorpusCleanupTests(unittest.TestCase):
         records = build_knowledge_base.build()
         enemy_rows = [row for row in records if row["category"] == "enemy"]
         image_rows = [row for row in records if row["category"] == "enemy_image"]
-        self.assertEqual(len(enemy_rows), 1662)
+        self.assertEqual(len(enemy_rows), 1658)
         self.assertEqual(len(image_rows), 371)
         for row in enemy_rows:
             self.assertFalse(any(label in row["content"] for label in build_knowledge_base.REMOVED_ENEMY_FIELD_LABELS))

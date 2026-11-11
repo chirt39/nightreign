@@ -1011,3 +1011,9 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 :is(#view-effects,#view-relics) .atlas-list-panel>.pagination select{width:44px;min-height:36px;height:36px;padding:4px;font-size:12px}
 :is(#view-effects,#view-relics) .atlas-list-panel>.pagination label{font-size:11px;white-space:nowrap}
 :is(#view-effects,#view-relics,#view-builds,#view-overview) .search-field input{border:0;border-radius:0;background:transparent;min-width:0}
+
+/* 详情实图铺满原方框，占位图保留完整内容；搜索焦点覆盖整个框。 */
+#view-enemies .enemy-detail .enemy-detail-image:not(.enemy-detail-placeholder){object-fit:cover;object-position:center}
+#view-enemies .enemy-detail .enemy-detail-placeholder{object-fit:contain}
+#view-enemies .toolbar .search-field:focus-within{border-color:#91a5ba;box-shadow:inset 0 0 0 1px #91a5ba}
+#view-enemies .toolbar .search-field input:focus{outline:none!important;box-shadow:none}

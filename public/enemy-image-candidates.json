@@ -81,46 +81,67 @@
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
-    "71000110b": {
-      "path": "enemy-images/candidate-bwiki-c93635ef375567c2.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B771000012",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/1a/r89apc39fkj031lofmd4po7ywuep3r4.jpg/200px-NPC_Avatar_71000012.jpg",
-      "matchEvidence": "same Chinese base name; source NPC ID may differ",
-      "sourceEnemyName": "萨米尔的古英雄",
-      "sourceEnemyId": "71000012",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
     "75210000": {
-      "path": "enemy-images/candidate-eldenpedia-44cef6129c675aa3.png",
-      "assetOrigin": "eldenpedia",
-      "sourcePage": "https://eldenring.wiki.gg/wiki/Nightreign:Animus,_Ascendant_Light",
-      "sourceImage": "https://eldenring.wiki.gg/images/thumb/ERN_Animus_-_blurry.png/300px-ERN_Animus_-_blurry.png?cc58d4",
-      "matchEvidence": "same Nightlord; stage may differ",
-      "sourceEnemyName": "Animus, Ascendant Light",
+      "path": "enemy-images/nightboss-41822.png",
+      "assetOrigin": "local-game-menu",
       "matchStatus": "candidate",
-      "licenseStatus": "unverified"
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        2208,
+        0,
+        460,
+        460
+      ],
+      "sourceSha256": "bd2a5a67077398266a0d9b3b1ed744a3f745d6e1a4c2e9223518535f4c13dae7",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 2,
+        "field": "largeBossIconId",
+        "iconId": 41822,
+        "bossNameId": 131062
+      },
+      "sourceName": "格诺斯塔",
+      "matchNotes": "格诺斯塔的游戏出击菜单头像，作为亚尼姆斯对应战斗的候选图；不是亚尼姆斯本体实景图。",
+      "sourceEnemyId": "75200000",
+      "matchEvidence": "按出击战斗关联引用格诺斯塔菜单头像；亚尼姆斯本体与阶段形态未核对"
     },
     "75210010": {
-      "path": "enemy-images/candidate-eldenpedia-44cef6129c675aa3.png",
-      "assetOrigin": "eldenpedia",
-      "sourcePage": "https://eldenring.wiki.gg/wiki/Nightreign:Animus,_Ascendant_Light",
-      "sourceImage": "https://eldenring.wiki.gg/images/thumb/ERN_Animus_-_blurry.png/300px-ERN_Animus_-_blurry.png?cc58d4",
-      "matchEvidence": "same Nightlord; stage may differ",
-      "sourceEnemyName": "Animus, Ascendant Light",
+      "path": "enemy-images/nightboss-41842.png",
+      "assetOrigin": "local-game-menu",
       "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "75400100": {
-      "path": "enemy-images/candidate-nightreign-boss-shot-dfc0294f59859710.png",
-      "assetOrigin": "nightreign-boss-shot",
-      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Maris_Fathom_of_Night",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/a/ad/Maris-everdark-1-nightreign-300px.png",
-      "matchEvidence": "game screenshot of Maris-everdark-1-nightreign-300px.png; phase or subject within a duo may differ",
-      "sourceEnemyName": "Maris-everdark-1-nightreign-300px.png",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
+      "imageKind": "nightboss-menu-portrait",
+      "licenseStatus": "unverified",
+      "sourceGame": "ELDEN RING NIGHTREIGN",
+      "sourceGameVersion": "1.3.3.0",
+      "sourceRegulationVersion": "10350000",
+      "sourceResource": "/menu/01_common_h.tpf.dcx",
+      "sourceAtlas": "SB_MenuIcon_1",
+      "sourceLayout": "/menu/01_common_h.sblytbnd.dcx:SB_MenuIcon_1.layout",
+      "sourceRectangle": [
+        2672,
+        464,
+        460,
+        460
+      ],
+      "sourceSha256": "d66f1992ed65226bcc9ef141f726937a90857f5710f42a94bba321915afaadab",
+      "sourceParam": {
+        "table": "NightBossMenuParam",
+        "rowId": 12,
+        "field": "largeBossIconId",
+        "iconId": 41842,
+        "bossNameId": 131062
+      },
+      "sourceName": "格诺斯塔",
+      "matchNotes": "格诺斯塔的游戏出击菜单头像，作为亚尼姆斯对应战斗的候选图；不是亚尼姆斯本体实景图。",
+      "sourceEnemyId": "75200120",
+      "matchEvidence": "按出击战斗关联引用格诺斯塔菜单头像；亚尼姆斯本体与阶段形态未核对"
     },
     "39700000": {
       "path": "enemy-images/candidate-eldenring-api-0ce93e85d5d9b909.jpg",
@@ -185,28 +206,6 @@
       "licenseStatus": "unverified"
     },
     "30100270b": {
-      "path": "enemy-images/candidate-bwiki-8f1b50949e61934d.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100114",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/13/nfgchpbf0wormqblg1de33ycab9lho9.jpg/200px-NPC_Avatar_30100114.jpg",
-      "matchEvidence": "same Chinese base name; source NPC ID may differ",
-      "sourceEnemyName": "失乡骑士",
-      "sourceEnemyId": "30100114",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "30101260": {
-      "path": "enemy-images/candidate-bwiki-0c8d95fed758a41e.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100814",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/b1/jw40x2lpm9rc3j9urfrb6irz7vfc7ji.jpg/200px-NPC_Avatar_30100814.jpg",
-      "matchEvidence": "same Chinese base name; source NPC ID may differ",
-      "sourceEnemyName": "失乡骑士",
-      "sourceEnemyId": "30100814",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "30100280": {
       "path": "enemy-images/candidate-bwiki-8f1b50949e61934d.jpg",
       "assetOrigin": "bwiki",
       "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100114",
