@@ -790,7 +790,6 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 .effect-encyclopedia-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .effect-encyclopedia-tags span{padding:2px 6px;border:1px solid #526478;color:#c6b58c;font-size:10px}
 .effect-encyclopedia-card p{margin:8px 0 3px;color:#aebdca;font-size:12px;line-height:1.65;white-space:pre-line}
-.effect-encyclopedia-card>small{color:#8499aa;font-size:10px}
 @media(max-width:850px){.effect-encyclopedia-categories{grid-template-columns:repeat(3,minmax(0,1fr))}.effect-encyclopedia-toolbar{grid-template-columns:minmax(0,1fr) minmax(130px,180px)}.effect-encyclopedia-toolbar .result-count{justify-self:start}}
 @media(max-width:600px){.effect-encyclopedia{padding:12px}.effect-encyclopedia-categories{grid-template-columns:repeat(2,minmax(0,1fr))}.effect-encyclopedia-toolbar{grid-template-columns:1fr}.effect-encyclopedia-list{grid-template-columns:1fr}}
 
@@ -982,9 +981,13 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 /* 词条与遗物直接显示效果，卡片按可用宽度自动排列。 */
 #view-effects .effect-encyclopedia{padding:12px}
 #view-effects .effect-encyclopedia-list,#view-relics .relic-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px;align-items:start;min-width:0}
-#view-effects .effect-encyclopedia-card{overflow-wrap:anywhere}
+/* 每排共享标题、标签、正文三个轨道，内容决定高度，避免固定行数截断。 */
+#view-effects .effect-encyclopedia-list{align-items:stretch}
+#view-effects .effect-encyclopedia-card{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:8px;overflow-wrap:anywhere}
+#view-effects .effect-encyclopedia-card>header,#view-effects .effect-encyclopedia-tags,#view-effects .effect-encyclopedia-card>p{min-width:0;align-self:start;margin:0}
+#view-effects .effect-encyclopedia-tags{align-items:flex-start}
+#view-effects .effect-encyclopedia-tags span{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 #view-effects .effect-encyclopedia-card p{font-size:14px;line-height:1.8}
-#view-effects .effect-encyclopedia-card>small{font-size:12px}
 #view-relics .relic-card{min-width:0;grid-template-columns:minmax(0,1fr);row-gap:10px}
 #view-relics .relic-card>header{grid-column:1;grid-row:auto;flex-direction:row;align-items:flex-start}
 #view-relics .relic-identity,#view-relics .relic-identity>div{min-width:0}
