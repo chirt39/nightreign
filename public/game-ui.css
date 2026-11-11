@@ -988,11 +988,13 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-effects .effect-encyclopedia-tags{align-items:flex-start}
 #view-effects .effect-encyclopedia-tags span{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
 #view-effects .effect-encyclopedia-card p{font-size:14px;line-height:1.8}
-#view-relics .relic-card{min-width:0;grid-template-columns:minmax(0,1fr);row-gap:10px}
-#view-relics .relic-card>header{grid-column:1;grid-row:auto;flex-direction:row;align-items:flex-start}
+/* 每排遗物共享头部与效果区高度，负面效果仍留在所属词条内。 */
+#view-relics .relic-grid{align-items:stretch}
+#view-relics .relic-card{min-width:0;grid-row:span 2;grid-template-columns:minmax(0,1fr);grid-template-rows:subgrid;row-gap:10px}
+#view-relics .relic-card>header{grid-column:1;grid-row:auto;align-self:start;flex-direction:row;align-items:flex-start}
 #view-relics .relic-identity,#view-relics .relic-identity>div{min-width:0}
 #view-relics .relic-card h3{overflow-wrap:anywhere}
-#view-relics .relic-card .effect-list.game-effect-list{grid-column:1;grid-row:auto;grid-template-columns:minmax(0,1fr)}
+#view-relics .relic-card .effect-list.game-effect-list{grid-column:1;grid-row:auto;align-self:start;grid-template-columns:minmax(0,1fr)}
 #view-relics .relic-card .game-effect-row{font-size:14px}
 #view-effects .empty-state,#view-relics .relic-grid>.empty-state{grid-column:1/-1}
 #view-effects .effect-encyclopedia-pagination{margin:14px 0 0}
