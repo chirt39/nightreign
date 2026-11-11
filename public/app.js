@@ -55,6 +55,12 @@ async function loadCatalogs(){
     });
     buildEffectCategoryIndex();
     renderEffectEncyclopedia();
+    const effectUrl = new URL(location.href);
+    const effectCategory = effectUrl.searchParams.get('effectCategory');
+    const effectId = effectUrl.searchParams.get('effectId');
+    if (location.hash === '#effects' && effectCategory && effectId) {
+      requestAnimationFrame(() => restoreRelicEffectNavigation({ kind: 'effect', category: effectCategory, id: effectId }));
+    }
     $('#nav-enemy-count').textContent=enemy.rows.length.toLocaleString('zh-CN');
     buildEnemyMetadata();
     buildEnemyDisplayIndex();
@@ -260,7 +266,7 @@ function syncEnemyUrl(){
   const selectedIndex=state.enemySelected?state.enemyData.rows.indexOf(state.enemySelected):-1;
   if(selectedIndex>=0){params.set('enemyId',String(state.enemySelected[1]));params.set('enemyRecordIndex',String(selectedIndex))}
   else{params.delete('enemyId');params.delete('enemyRecordIndex')}
-  url.search=params.toString();history.replaceState(null,'',url);
+  url.search=params.toString();history.replaceState(history.state,'',url);
 }
 function resolveEnemyUrlMatch(filteredRows,allRows,recordIndex,enemyId){
   let selectedRecord=null;
@@ -428,6 +434,7 @@ function outOfGameEffectCatalog(){
   }
   return catalog;
 }
+const catalogEffectByKey = new Map();
 function renderEffectEncyclopedia(){
   const data=state.effectEncyclopediaData||{},labels=new Map((data.categories||[]).map(group=>[group.id,group.label]));
   const entries=(data.entries||[]).map(entry=>{
@@ -438,6 +445,12 @@ function renderEffectEncyclopedia(){
   const typeSelect=$('#effect-encyclopedia-type');if(!typeSelect)return;
   typeSelect.innerHTML='<option value="all">全部类型</option>'+types.map(type=>`<option value="${esc(type)}">${esc(type)}</option>`).join('');
   state.effectEncyclopedia=entries;
+  catalogEffectByKey.clear();
+  for (const entry of entries) {
+    const key = entry.category + ':' + entry.id;
+    // A duplicate within one category cannot be a link target.
+    catalogEffectByKey.set(key, catalogEffectByKey.has(key) ? null : entry);
+  }
   for(const button of $$('.effect-encyclopedia-categories [data-effect-category]')){
     const category=button.dataset.effectCategory,count=category==='all'?entries.length:entries.filter(item=>item.category===category).length;
     button.querySelector('span').textContent=count.toLocaleString('zh-CN');
@@ -558,10 +571,121 @@ function pairedEffects(relic){
   }
   return groups;
 }
-function renderEffectRows(relic,showId=false){
-  const groups=pairedEffects(relic);
-  return groups.length?groups.map(group=>`<div class="game-effect-row"><span class="game-effect-icon" aria-hidden="true">✧</span><div class="game-effect-copy"><span>${esc(effectName(group[0]))}${showId?`<em>#${esc(group[0].id)}</em>`:''}</span>${group.slice(1).map(e=>`<span class="game-effect-negative">${esc(effectName(e))}${showId?`<em>#${esc(e.id)}</em>`:''}</span>`).join('')}</div></div>`).join(''):'<div class="game-effect-row empty">此遗物无已识别词条</div>';
+function relicEffectTarget(relic, effect) {
+  const category = { Relic: 'normal-outside', UniqueRelic: 'normal-outside', DeepRelic: 'deep-outside' }[relic.itemType];
+  if (!category) return null;
+  const entry = catalogEffectByKey.get(category + ':' + effect.id);
+  return entry ? { kind: 'effect', category, id: String(entry.id) } : null;
 }
+function effectCardUrl(target) {
+  const url = new URL(location.href);
+  url.searchParams.set('effectCategory', target.category);
+  url.searchParams.set('effectId', target.id);
+  url.hash = 'effects';
+  return url.pathname + url.search + url.hash;
+}
+function relicEffectText(relic, effect, position, linkEffects) {
+  const name = esc(effectName(effect));
+  const target = linkEffects && relicEffectTarget(relic, effect);
+  if (!target) return name;
+  return `<a class="relic-effect-link" href="${esc(effectCardUrl(target))}"
+    data-effect-category="${esc(target.category)}" data-effect-id="${esc(target.id)}"
+    data-relic-id="${esc(relic.id)}" data-effect-position="${position}">${name}</a>`;
+}
+function renderEffectRows(relic, showId = false, linkEffects = false) {
+  const groups = pairedEffects(relic);
+  if (!groups.length) return '<div class="game-effect-row empty">此遗物无已识别词条</div>';
+  return groups.map((group, groupIndex) => {
+    const labels = group.map((effect, index) => {
+      const name = relicEffectText(relic, effect, `${groupIndex}:${index}`, linkEffects);
+      const id = showId ? `<em>#${esc(effect.id)}</em>` : '';
+      return `<span${index ? ' class="game-effect-negative"' : ''}>${name}${id}</span>`;
+    });
+    return `<div class="game-effect-row"><span class="game-effect-icon" aria-hidden="true">✧</span><div class="game-effect-copy">${labels.join('')}</div></div>`;
+  }).join('');
+}
+function captureRelicEffectNavigation(link) {
+  const filters = Object.fromEntries(
+    ['relic-search', 'relic-category', 'relic-type', 'relic-color'].map(id => [id, $('#' + id).value])
+  );
+  return {
+    kind: 'relics',
+    filters,
+    page: state.relicPage,
+    relicId: link.dataset.relicId,
+    position: link.dataset.effectPosition,
+    offset: link.getBoundingClientRect().top,
+    scrollY: window.scrollY,
+  };
+}
+function restoreRelicEffectNavigation(snapshot) {
+  if (snapshot.kind === 'relics') {
+    if (!state.save) return;
+    const findLink = () => $$('#relic-list .relic-effect-link').find(item =>
+      item.dataset.relicId === snapshot.relicId && item.dataset.effectPosition === snapshot.position
+    );
+    const sameFilters = Object.entries(snapshot.filters).every(([id, value]) => $('#' + id).value === value);
+    if (!sameFilters || state.relicPage !== snapshot.page || !findLink()) {
+      for (const [id, value] of Object.entries(snapshot.filters)) {
+        $('#' + id).value = value;
+      }
+      filterRelics();
+      state.relicPage = snapshot.page;
+      renderRelics();
+    }
+    requestAnimationFrame(() => {
+      const link = findLink();
+      link?.focus({ preventScroll: true });
+      const top = link
+        ? window.scrollY + link.getBoundingClientRect().top - snapshot.offset
+        : snapshot.scrollY;
+      window.scrollTo({ top, behavior: 'instant' });
+    });
+    return;
+  }
+  if (snapshot.kind !== 'effect') return;
+  const entry = catalogEffectByKey.get(snapshot.category + ':' + snapshot.id);
+  if (!entry) return;
+  state.effectEncyclopediaCategory = snapshot.category;
+  $('#effect-encyclopedia-search').value = '';
+  $('#effect-encyclopedia-type').value = 'all';
+  for (const button of $$('.effect-encyclopedia-categories [data-effect-category]')) {
+    button.setAttribute('aria-pressed', String(button.dataset.effectCategory === snapshot.category));
+  }
+  filterEffectEncyclopedia();
+  const entries = state.effectEncyclopedia.filter(item => item.category === snapshot.category);
+  state.effectEncyclopediaPage = Math.floor(entries.indexOf(entry) / state.effectEncyclopediaPageSize) + 1;
+  filterEffectEncyclopedia(false);
+  requestAnimationFrame(() => {
+    const card = document.getElementById(`effect-${snapshot.category}-${snapshot.id}`);
+    const heading = card?.querySelector('h2');
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+      card.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
+  });
+}
+window.NightreignRelicEffectNavigation = {
+  restore: restoreRelicEffectNavigation,
+  url: effectCardUrl,
+};
+$('#relic-list').addEventListener('click', event => {
+  const link = event.target.closest('.relic-effect-link');
+  if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  window.dispatchEvent(new CustomEvent('nightreign:navigate', {
+    detail: {
+      view: 'effects',
+      source: captureRelicEffectNavigation(link),
+      cardNavigation: {
+        kind: 'effect',
+        category: link.dataset.effectCategory,
+        id: link.dataset.effectId,
+      },
+    },
+  }));
+});
 function relicType(r){return r.itemType||'Relic'}
 function relicEntry(r){return state.relicCatalog?.items?.[r.itemKey]||null}
 function safeSourceUrl(value){
@@ -677,12 +801,22 @@ function renderRelics(){
   state.relicPage=Math.min(Math.max(state.relicPage,1),pages);
   const start=(state.relicPage-1)*RELIC_PAGE_SIZE,rows=state.relicFiltered.slice(start,start+RELIC_PAGE_SIZE);
   $('#relic-count').textContent=total?`第 ${start+1}–${start+rows.length} 件 / 共 ${total} 件`:'0 件';
-  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),sourcePage=safeSourceUrl(entry?.source_page),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${sourcePage?`<a href="${esc(sourcePage)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
+  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),sourcePage=safeSourceUrl(entry?.source_page),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${sourcePage?`<a href="${esc(sourcePage)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
   if(typeof decorateRelicEditorCards==='function')decorateRelicEditorCards(rows);
   renderPagination('relic-pagination',total,RELIC_PAGE_SIZE,state.relicPage);
 }
-$('#relic-search').addEventListener('input',filterRelics);
-for(const id of ['relic-category','relic-type','relic-color'])$('#'+id).addEventListener('change',filterRelics);
+function clearRelicEffectSnapshot() {
+  if (history.state?.cardNavigation?.kind !== 'relics') return;
+  history.replaceState({ ...history.state, cardNavigation: null }, '', location.href);
+}
+function handleRelicFilterChange() {
+  clearRelicEffectSnapshot();
+  filterRelics();
+}
+$('#relic-search').addEventListener('input', handleRelicFilterChange);
+for (const id of ['relic-category', 'relic-type', 'relic-color']) {
+  $('#' + id).addEventListener('change', handleRelicFilterChange);
+}
 function focusCardPage(selector) {
   const list = $(selector);
   const title = list.querySelector('article h2, article h3');
@@ -695,12 +829,14 @@ function focusCardPage(selector) {
 $('#relic-pagination').addEventListener('click', event => {
   const step = event.target.closest('[data-step]');
   if (!step) return;
+  clearRelicEffectSnapshot();
   state.relicPage += Number(step.dataset.step);
   renderRelics();
   focusCardPage('#relic-list');
 });
 $('#relic-pagination').addEventListener('change', event => {
   if (event.target.tagName !== 'SELECT') return;
+  clearRelicEffectSnapshot();
   state.relicPage = Number(event.target.value);
   renderRelics();
   focusCardPage('#relic-list');

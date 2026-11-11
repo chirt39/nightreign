@@ -29,19 +29,35 @@ const loadError = ref(false);
 const classicScriptVersions = typeof __CLASSIC_SCRIPT_VERSIONS__ === 'undefined' ? null : __CLASSIC_SCRIPT_VERSIONS__;
 const catalogJsonVersions = typeof __CATALOG_JSON_VERSIONS__ === 'undefined' ? null : __CATALOG_JSON_VERSIONS__;
 
-function setView(view, updateUrl = true, restoreScrollY = null) {
+function setView(view, updateUrl = true, restoreScrollY = null, cardNavigation = null, sourceSnapshot = null) {
   const nextView = view in labels ? view : 'overview';
   const changed = nextView !== currentView.value;
   if (updateUrl && changed) {
-    history.replaceState({ ...history.state, view: currentView.value, scrollY: window.scrollY }, '', location.href);
+    history.replaceState({
+      ...history.state,
+      view: currentView.value,
+      scrollY: window.scrollY,
+      cardNavigation: sourceSnapshot || (currentView.value === 'relics' ? null : history.state?.cardNavigation),
+    }, '', location.href);
   }
   currentView.value = nextView;
-  if (updateUrl && location.hash !== `#${nextView}`) {
-    if (changed) history.pushState({ ...history.state, view: nextView, scrollY: 0 }, '', `#${nextView}`);
-    else history.replaceState({ ...history.state, view: nextView, scrollY: window.scrollY }, '', `#${nextView}`);
+  const targetUrl = new URL(location.href);
+  const hasEffectTarget = targetUrl.searchParams.has('effectCategory') || targetUrl.searchParams.has('effectId');
+  if (updateUrl && (location.hash !== `#${nextView}` || cardNavigation || hasEffectTarget)) {
+    targetUrl.searchParams.delete('effectCategory');
+    targetUrl.searchParams.delete('effectId');
+    targetUrl.hash = nextView;
+    const url = cardNavigation?.kind === 'effect'
+      ? window.NightreignRelicEffectNavigation.url(cardNavigation)
+      : targetUrl.pathname + targetUrl.search + targetUrl.hash;
+    const entry = { ...history.state, view: nextView, scrollY: changed ? 0 : window.scrollY, cardNavigation };
+    if (changed || cardNavigation) history.pushState(entry, '', url);
+    else history.replaceState(entry, '', url);
   }
   closeMobileNavigation(true);
-  if (restoreScrollY !== null) {
+  if (cardNavigation) {
+    nextTick(() => window.NightreignRelicEffectNavigation?.restore(cardNavigation));
+  } else if (restoreScrollY !== null) {
     nextTick(() => window.scrollTo({ top: restoreScrollY, behavior: 'auto' }));
   } else if (changed || updateUrl) {
     const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
@@ -62,6 +78,7 @@ function handleGlobalKeydown(event) {
 }
 
 function handleShellClick(event) {
+  if (event.defaultPrevented) return;
   if (event.target.closest('#mobile-menu')) {
     sidebarOpen.value = !sidebarOpen.value;
     return;
@@ -83,21 +100,28 @@ function handleShellClick(event) {
 }
 
 function handleNavigation(event) {
-  setView(event.detail?.view);
+  setView(event.detail?.view, true, null, event.detail?.cardNavigation, event.detail?.source);
 }
 
+let restoredHistoryUrl = '';
 function handleHashChange() {
+  if (restoredHistoryUrl === location.href) {
+    restoredHistoryUrl = '';
+    return;
+  }
+  restoredHistoryUrl = '';
   if (location.hash === '#main-content') return;
   setView(location.hash.slice(1), false);
 }
 
 function handlePopState(event) {
+  restoredHistoryUrl = location.href;
   if (location.hash === '#main-content') {
     const view = event.state?.view in labels ? event.state.view : currentView.value;
     setView(view, false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0);
     return;
   }
-  setView(location.hash.slice(1), false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0);
+  setView(location.hash.slice(1), false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0, event.state?.cardNavigation);
 }
 
 function loadClassicScript(file) {

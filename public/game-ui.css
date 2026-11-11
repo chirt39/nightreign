@@ -1042,3 +1042,10 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-enemies .enemy-detail .enemy-detail-placeholder{object-fit:contain}
 #view-enemies .toolbar .search-field:focus-within{border-color:#91a5ba;box-shadow:inset 0 0 0 1px #91a5ba}
 #view-enemies .toolbar .search-field input:focus{outline:none!important;box-shadow:none}
+
+/* 仅遗物仪式的可定位词条可跳到图鉴，负面效果沿用原有分组与颜色。 */
+#view-relics .relic-effect-link{text-decoration:underline;text-decoration-color:#91a5ba;text-underline-offset:3px;overflow-wrap:anywhere}
+#view-relics .relic-effect-link:hover{color:#f0d69f}
+#view-effects .effect-encyclopedia-card{scroll-margin-top:16px}
+
+#view-effects .effect-encyclopedia-card:focus-within{border-color:#91a5ba}
