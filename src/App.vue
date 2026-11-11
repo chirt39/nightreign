@@ -163,7 +163,7 @@ onUnmounted(() => {
     <h1>页面未能完整加载</h1>
     <p>必要功能暂时无法启动，请刷新页面重试。</p>
   </main>
-  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'atlas-list-fullscreen': currentView === 'effects', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
+  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
     <a class="skip-link" href="#main-content">跳转到主要内容</a>
     <aside id="mobile-navigation" class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
@@ -183,7 +183,7 @@ onUnmounted(() => {
         <button class="nav-link" :class="{ active: currentView === 'effects' }" :aria-current="currentView === 'effects' ? 'page' : null" data-view="effects"><img class="nav-icon" src="/nav-icons/effects-battle-record.png" alt="" />词条图鉴</button>
         <button class="nav-link" :class="{ active: currentView === 'sources' }" :aria-current="currentView === 'sources' ? 'page' : null" data-view="sources"><img class="nav-icon" src="/nav-icons/sources.png" alt="" />资料说明</button>
       </nav>
-      <div class="side-bottom"><span class="pulse-dot"></span> 离线资料 · 本地解析<br /><small>存档始终留在你的浏览器中</small><a class="side-license-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a></div>
+      <div class="side-bottom"><a class="side-license-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a></div>
     </aside>
 
     <main id="main-content" class="main" tabindex="-1">

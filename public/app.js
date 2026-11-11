@@ -471,12 +471,12 @@ $('.effect-encyclopedia-categories').addEventListener('click',event=>{
 $('#effect-encyclopedia-pagination').addEventListener('click',event=>{
   const step=event.target.closest('[data-step]');if(!step)return;
   state.effectEncyclopediaPage+=Number(step.dataset.step);filterEffectEncyclopedia(false);
-  const pager=$('#effect-encyclopedia-pagination');pager.scrollIntoView({block:'nearest'});pager.querySelector(`[data-step="${step.dataset.step}"]:not(:disabled)`)?.focus();
+  focusCardPage('#effect-encyclopedia-list');
 });
 $('#effect-encyclopedia-pagination').addEventListener('change',event=>{
   if(event.target.tagName!=='SELECT')return;
   state.effectEncyclopediaPage=Number(event.target.value);filterEffectEncyclopedia(false);
-  const pager=$('#effect-encyclopedia-pagination');pager.scrollIntoView({block:'nearest'});pager.querySelector('select')?.focus();
+  focusCardPage('#effect-encyclopedia-list');
 });
 function effectGroups(relic){return (relic.effects||[]).flat().filter(Boolean)}
 function normalizedEffectName(name){return String(name||'').normalize('NFKC').replace(/\s+/g,'').replace(/\+\d+$/,'')}
@@ -664,8 +664,28 @@ function renderRelics(){
 }
 $('#relic-search').addEventListener('input',filterRelics);
 for(const id of ['relic-category','relic-type','relic-color'])$('#'+id).addEventListener('change',filterRelics);
-$('#relic-pagination').addEventListener('click',e=>{const step=e.target.closest('[data-step]');if(!step)return;state.relicPage+=Number(step.dataset.step);renderRelics();$('#relic-pagination').scrollIntoView({block:'start'});$('#relic-pagination [data-step="'+step.dataset.step+'"]:not(:disabled)')?.focus()});
-$('#relic-pagination').addEventListener('change',e=>{if(e.target.tagName!=='SELECT')return;state.relicPage=Number(e.target.value);renderRelics();$('#relic-pagination').scrollIntoView({block:'start'});$('#relic-pagination select')?.focus()});
+function focusCardPage(selector) {
+  const list = $(selector);
+  const title = list.querySelector('article h2, article h3');
+  if (title) {
+    title.tabIndex = -1;
+    title.focus({ preventScroll: true });
+  }
+  list.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
+$('#relic-pagination').addEventListener('click', event => {
+  const step = event.target.closest('[data-step]');
+  if (!step) return;
+  state.relicPage += Number(step.dataset.step);
+  renderRelics();
+  focusCardPage('#relic-list');
+});
+$('#relic-pagination').addEventListener('change', event => {
+  if (event.target.tagName !== 'SELECT') return;
+  state.relicPage = Number(event.target.value);
+  renderRelics();
+  focusCardPage('#relic-list');
+});
 
 function setupCharacters(){
   const chars=state.vessels.characters||{};

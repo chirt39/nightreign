@@ -1,13 +1,9 @@
 <script setup>
-import { ref } from 'vue';
-import { useCardDetail } from '../lib/card-detail.js';
 defineProps({ active: Boolean });
-const effectList = ref(null), effectDetail = ref(null);
-useCardDetail(effectList, effectDetail, { cardSelector: '.effect-encyclopedia-card', titleSelector: 'h2', subtitleSelector: '.effect-encyclopedia-tags', emptyText: '没有匹配的词条，请调整筛选。' });
 </script>
 
 <template>
-  <section id="view-effects" class="view reference-page atlas-list-page" :class="{ active }">
+  <section id="view-effects" class="view reference-page" :class="{ active }">
     <div class="page-intro reference-heading">
       <p class="eyebrow">NIGHTREIGN / RELIC EFFECTS</p>
       <h1>词条图鉴</h1>
@@ -26,10 +22,8 @@ useCardDetail(effectList, effectDetail, { cardSelector: '.effect-encyclopedia-ca
         <select id="effect-encyclopedia-type" aria-label="按词条类型筛选"><option value="all">全部类型</option></select>
         <span id="effect-encyclopedia-count" class="result-count" aria-live="polite">正在载入词条…</span>
       </div>
-      <div class="atlas-master-detail">
-        <div class="atlas-list-panel"><div ref="effectList" id="effect-encyclopedia-list" class="effect-encyclopedia-list atlas-summary-list" aria-label="词条列表" aria-live="polite"></div><div id="effect-encyclopedia-pagination" class="pagination effect-encyclopedia-pagination" aria-label="词条图鉴页数" hidden></div></div>
-        <article ref="effectDetail" class="atlas-detail" aria-label="词条详情"><p class="atlas-detail-empty">选择左侧词条查看说明。</p></article>
-      </div>
+      <div id="effect-encyclopedia-list" class="effect-encyclopedia-list" aria-label="词条列表" aria-live="polite"></div>
+      <div id="effect-encyclopedia-pagination" class="pagination effect-encyclopedia-pagination" aria-label="词条图鉴页数" hidden></div>
       <p class="hint">分类与说明按 NightreignQuickRef 的四份原始词条表保留。同一编号若出现在多个表中，会分别显示。</p>
     </div>
   </section>
