@@ -5707,7 +5707,7 @@
       "category": "deep-outside",
       "name": "出击时，会持有“涌绿结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "出击时获得 1 份涌绿结晶露滴。暂时加快精力恢复速度。",
+      "explanation": "出击时获得 1 份涌绿结晶露滴。使用后，精力恢复速度每秒增加 15 点，持续 120 秒。",
       "stackability": "可叠加",
       "buffType": "不附带负面词条",
       "supplementSource": "scripts/data/relic_glossary_items.json"
@@ -7148,11 +7148,11 @@
     {
       "id": "6623200",
       "category": "deep-outside",
-      "name": "出击时，会持有“涌绿结晶露滴”",
+      "name": "出击时，会持有“漫绿结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
       "stackability": "可叠加",
       "buffType": "",
-      "explanation": "出击时获得 1 份漫绿结晶露滴。暂时提高精力上限。",
+      "explanation": "出击时获得 1 份漫绿结晶露滴。使用后，精力上限提高 15%，持续 120 秒。",
       "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {

@@ -44,8 +44,8 @@
   {
     "id": "6621700",
     "category": "deep-outside",
-    "explanation": "出击时获得 1 份涌绿结晶露滴。暂时加快精力恢复速度。",
-    "evidence": "AttachEffectParam 6621700 → SpEffectParam 7621700（startingItemAmount=1，startGoodsId=11010）→ EquipParamGoods 11010；简中 GoodsName、GoodsInfo、GoodsCaption 11010。"
+    "explanation": "出击时获得 1 份涌绿结晶露滴。使用后，精力恢复速度每秒增加 15 点，持续 120 秒。",
+    "evidence": "AttachEffectParam 6621700 → SpEffectParam 7621700（startingItemAmount=1，startGoodsId=11010）→ EquipParamGoods 11010；简中 GoodsName、GoodsInfo、GoodsCaption 11010。EquipParamGoods 11010.refId_default → SpEffectParam 511010（staminaRecoverChangeSpeed=15，effectEndurance=120）。"
   },
   {
     "id": "6621800",
@@ -134,9 +134,9 @@
   {
     "id": "6623200",
     "category": "deep-outside",
-    "explanation": "出击时获得 1 份漫绿结晶露滴。暂时提高精力上限。",
-    "evidence": "AttachEffectParam 6623200 → SpEffectParam 7623200（startingItemAmount=1，startGoodsId=11001）→ EquipParamGoods 11001；简中 GoodsName、GoodsInfo、GoodsCaption 11001。词条简中名取 AttachEffectName_dlc01 6623200；物品 11001 名为「漫绿结晶露滴」。叠加规则见 effects_data 同 ID 的 stackable=true。",
-    "name": "出击时，会持有“涌绿结晶露滴”",
+    "explanation": "出击时获得 1 份漫绿结晶露滴。使用后，精力上限提高 15%，持续 120 秒。",
+    "evidence": "词条原名「出击时，会持有“涌绿结晶露滴”」（AttachEffectName_dlc01 6623200）。按实际道具 GoodsName 11001 显示「漫绿」。AttachEffectParam 6623200 → SpEffectParam 7623200（开局 1 份）→ EquipParamGoods 11001.refId_default → SpEffectParam 3501（maxStaminaRate=1.15，effectEndurance=120）。叠加见 effects_data 同 ID。",
+    "name": "出击时，会持有“漫绿结晶露滴”",
     "type": "出击时的道具(结晶露滴)",
     "stackability": "可叠加",
     "buffType": ""
