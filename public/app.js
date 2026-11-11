@@ -34,7 +34,10 @@ async function loadCatalogs(){
     const catalogFiles=['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json'];
     const catalogVersions=window.NIGHTREIGN_CATALOG_VERSIONS;
     if(!catalogVersions||typeof catalogVersions!=='object')throw new Error('数据版本信息缺失，请刷新页面重试。');
-    const enemyImageManifestPromise=loadEnemyImageManifest(catalogVersions['enemy-image-verified.json']);
+    const enemyImagesPromise = Promise.all([
+      loadEnemyImageManifest('enemy-image-verified.json', catalogVersions),
+      loadEnemyImageManifest('enemy-image-candidates.json', catalogVersions),
+    ]);
     const catalogs=await Promise.all(catalogFiles.map(async name=>{
       const version=catalogVersions[name];
       if(typeof version!=='string'||! /^[a-f0-9]{12}$/i.test(version))throw new Error(`${name} 的内容哈希缺失或无效，请刷新页面重试。`);
@@ -44,9 +47,9 @@ async function loadCatalogs(){
     }));
     const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData]=catalogs;
     Object.assign(state,{enemyData:enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData});
-    enemyImageManifestPromise.then(manifest=>{
-      if(manifest?.schemaVersion!==1||!manifest.images||typeof manifest.images!=='object'||Array.isArray(manifest.images))return;
-      state.enemyImageManifest=manifest;
+    enemyImagesPromise.then(([verified, candidates]) => {
+      state.enemyImageManifest = verified;
+      state.enemyImageCandidates = candidates?.images;
       if(state.enemySelected)renderEnemyDetail(state.enemySelected);
       refreshAgentEnemyPortraits();
     });
@@ -64,11 +67,14 @@ async function loadCatalogs(){
     restoreSave();
   }catch(err){$('#enemy-count').textContent='资料载入失败';$('#save-status').textContent='资料载入失败：'+err.message;$('#save-status').classList.add('error')}
 }
-async function loadEnemyImageManifest(version){
+async function loadEnemyImageManifest(file, versions){
+  const version = versions[file];
   if(typeof version!=='string'||! /^[a-f0-9]{12}$/i.test(version))return null;
   try{
-    const response=await fetch(`./enemy-image-verified.json?v=${version}`);
-    return response.ok?await response.json():null;
+    const response = await fetch(`./${file}?v=${version}`);
+    if (!response.ok) return null;
+    const manifest = await response.json();
+    return manifest?.schemaVersion === 1 && manifest.images && typeof manifest.images === 'object' && !Array.isArray(manifest.images) ? manifest : null;
   }catch{return null}
 }
 
@@ -361,8 +367,12 @@ function enemyDetailPlaceholderMarkup(name){
   return `<img class="enemy-detail-image enemy-detail-placeholder" src="./enemy-images/image-pending.svg" alt="${esc(name)}：图片待补" width="80" height="80" decoding="async">`;
 }
 function enemyDetailImageMarkup(record,name){
-  const images=state.enemyImageManifest?.images,id=String(record?.[1]??''),entry=images&&id&&Object.hasOwn(images,id)?images[id]:null,path=entry?.path;
-  if(entry?.matchStatus!=='verified'||typeof path!=='string'||!/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(path))return enemyDetailPlaceholderMarkup(name);
+  const id = String(record?.[1] ?? '');
+  const verified = state.enemyImageManifest?.images?.[id];
+  const candidate = state.enemyImageCandidates?.[id];
+  const entry = verified?.matchStatus === 'verified' ? verified : candidate?.matchStatus === 'candidate' ? candidate : null;
+  const path = entry?.path;
+  if (typeof path !== 'string' || !/^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(path)) return enemyDetailPlaceholderMarkup(name);
   const menuPortrait=entry.imageKind==='nightboss-menu-portrait',label=menuPortrait?`${name}：出击菜单头像`:name;
   return `<img class="enemy-detail-image" src="./${esc(path)}" alt="${esc(label)}"${menuPortrait?' title="出击菜单头像"':''} width="80" height="80" decoding="async">`;
 }

@@ -1,0 +1,2257 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-11-11",
+  "images": {
+    "44700010a": {
+      "path": "enemy-images/candidate-fextralife-39c1e0836f262c8b.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Lesser_Abductor_Virgin",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/8/8d/Lesser-abductor-virgin-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for lesser abductor virgin nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "lesser abductor virgin nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36000020": {
+      "path": "enemy-images/36000010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "36000010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "31700000": {
+      "path": "enemy-images/candidate-fextralife-af201a0631d02cbd.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Albinauric_archer_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/a/a3/Albinauric_archer_enemies_elden_ring_wiki_600px.png/300px-Albinauric_archer_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for albinauric archer enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "albinauric archer enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "31800000": {
+      "path": "enemy-images/candidate-eldenring-api-a9b364bb4d6e5df1.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f69d8f6ecl0i6yzyadne1wptx69k.png",
+      "matchEvidence": "same English enemy name or model family: Albinauric Wolfback Archer",
+      "sourceEnemyName": "Albinauric Wolfback Archer",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46700010b": {
+      "path": "enemy-images/candidate-eldenring-api-f28606efa50c69b3.png",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69590896l0i1ul0hnmor8iyf9xd.png",
+      "matchEvidence": "same English enemy name or model family: Ancestor Spirit",
+      "sourceEnemyName": "Ancestor Spirit",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33700000": {
+      "path": "enemy-images/candidate-fextralife-4050e8b09eeeb44e.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Follower_shaman_enemies_elden_ring_wiki_300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/d/d1/Follower_shaman_enemies_elden_ring_wiki_300px.png",
+      "matchEvidence": "illustrated entry for follower shaman enemies elden ring wiki 300px; variant or stage may differ",
+      "sourceEnemyName": "follower shaman enemies elden ring wiki 300px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45100000": {
+      "path": "enemy-images/candidate-nightreign-gallery-f8e3eef9296183c5.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Ancient-dragon-night-boss-5-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/1/1a/Ancient-dragon-night-boss-5-nightreign-300px.png",
+      "matchEvidence": "gallery image named Ancient-dragon-night-boss-5-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Ancient-dragon-night-boss-5-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "71000020": {
+      "path": "enemy-images/candidate-bwiki-c93635ef375567c2.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B771000012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/1a/r89apc39fkj031lofmd4po7ywuep3r4.jpg/200px-NPC_Avatar_71000012.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "萨米尔的古英雄",
+      "sourceEnemyId": "71000012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "71000110b": {
+      "path": "enemy-images/candidate-bwiki-c93635ef375567c2.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B771000012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/1a/r89apc39fkj031lofmd4po7ywuep3r4.jpg/200px-NPC_Avatar_71000012.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "萨米尔的古英雄",
+      "sourceEnemyId": "71000012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75210000": {
+      "path": "enemy-images/candidate-eldenpedia-44cef6129c675aa3.png",
+      "assetOrigin": "eldenpedia",
+      "sourcePage": "https://eldenring.wiki.gg/wiki/Nightreign:Animus,_Ascendant_Light",
+      "sourceImage": "https://eldenring.wiki.gg/images/thumb/ERN_Animus_-_blurry.png/300px-ERN_Animus_-_blurry.png?cc58d4",
+      "matchEvidence": "same Nightlord; stage may differ",
+      "sourceEnemyName": "Animus, Ascendant Light",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75210010": {
+      "path": "enemy-images/candidate-eldenpedia-44cef6129c675aa3.png",
+      "assetOrigin": "eldenpedia",
+      "sourcePage": "https://eldenring.wiki.gg/wiki/Nightreign:Animus,_Ascendant_Light",
+      "sourceImage": "https://eldenring.wiki.gg/images/thumb/ERN_Animus_-_blurry.png/300px-ERN_Animus_-_blurry.png?cc58d4",
+      "matchEvidence": "same Nightlord; stage may differ",
+      "sourceEnemyName": "Animus, Ascendant Light",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75400100": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-dfc0294f59859710.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Maris_Fathom_of_Night",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/a/ad/Maris-everdark-1-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Maris-everdark-1-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Maris-everdark-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39700000": {
+      "path": "enemy-images/candidate-eldenring-api-0ce93e85d5d9b909.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f6a385eaal0i6z025b3timpwicqi.png",
+      "matchEvidence": "same English enemy name or model family: Azula Beastman",
+      "sourceEnemyName": "Azula Beastman",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39701110": {
+      "path": "enemy-images/candidate-eldenring-api-0ce93e85d5d9b909.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f6a385eaal0i6z025b3timpwicqi.png",
+      "matchEvidence": "same English enemy name or model family: Azula Beastman",
+      "sourceEnemyName": "Azula Beastman",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39703010": {
+      "path": "enemy-images/candidate-eldenring-api-0ce93e85d5d9b909.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f6a385eaal0i6z025b3timpwicqi.png",
+      "matchEvidence": "same English enemy name or model family: Azula Beastman",
+      "sourceEnemyName": "Azula Beastman",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39702310": {
+      "path": "enemy-images/candidate-eldenring-api-0ce93e85d5d9b909.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f6a385eaal0i6z025b3timpwicqi.png",
+      "matchEvidence": "same English enemy name or model family: Azula Beastman",
+      "sourceEnemyName": "Azula Beastman",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30101250b": {
+      "path": "enemy-images/candidate-bwiki-0c8d95fed758a41e.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100814",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/b1/jw40x2lpm9rc3j9urfrb6irz7vfc7ji.jpg/200px-NPC_Avatar_30100814.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "失乡骑士",
+      "sourceEnemyId": "30100814",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30102240": {
+      "path": "enemy-images/candidate-bwiki-38a14b41aaedc5ca.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730102014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/c/c0/0ce1cie19d4trfh8n9ezcovuj8grx17.jpg/200px-NPC_Avatar_30102014.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "失乡骑士",
+      "sourceEnemyId": "30102014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30100270b": {
+      "path": "enemy-images/candidate-bwiki-8f1b50949e61934d.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100114",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/13/nfgchpbf0wormqblg1de33ycab9lho9.jpg/200px-NPC_Avatar_30100114.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "失乡骑士",
+      "sourceEnemyId": "30100114",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30101260": {
+      "path": "enemy-images/candidate-bwiki-0c8d95fed758a41e.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100814",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/b1/jw40x2lpm9rc3j9urfrb6irz7vfc7ji.jpg/200px-NPC_Avatar_30100814.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "失乡骑士",
+      "sourceEnemyId": "30100814",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30100280": {
+      "path": "enemy-images/candidate-bwiki-8f1b50949e61934d.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100114",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/13/nfgchpbf0wormqblg1de33ycab9lho9.jpg/200px-NPC_Avatar_30100114.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "失乡骑士",
+      "sourceEnemyId": "30100114",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41500000": {
+      "path": "enemy-images/candidate-fextralife-a06656893d17f9b9.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Basilisk",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/52/Basilisk-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for basilisk nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "basilisk nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30500110": {
+      "path": "enemy-images/candidate-nightreign-gallery-fd1292d81a1c5ff0.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Battlefield-commander-night-boss-2-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/df/Battlefield-commander-night-boss-2-nightreign-300px.png",
+      "matchEvidence": "gallery image named Battlefield-commander-night-boss-2-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Battlefield-commander-night-boss-2-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "37040000": {
+      "path": "enemy-images/candidate-bwiki-5fc3253f13200cac.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B737040020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/4/42/t2lw2puh22p89mlb2r8e9ii0l0txgqg.jpg/200px-NPC_Avatar_37040020.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "海摩魔法师",
+      "sourceEnemyId": "37040020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "31000030": {
+      "path": "enemy-images/31000020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "31000020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "47701210b": {
+      "path": "enemy-images/candidate-bwiki-49e003bf921d452f.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B747701242",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/1e/rokpgrsnbgzlac26h6jqo2a5ulvlunh.jpg/200px-NPC_Avatar_47701242.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "黑剑眷属",
+      "sourceEnemyId": "47701242",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "21000030": {
+      "path": "enemy-images/candidate-bwiki-df3f42e8f77b104c.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B721000820",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/5/5e/aiy1crmkqykq5potzlivecfvpy52t1o.jpg/200px-NPC_Avatar_21000820.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "黑刀刺客",
+      "sourceEnemyId": "21000820",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39010010": {
+      "path": "enemy-images/candidate-fextralife-ef3543c13c332956.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Blackflame_Monk",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/f/f3/Blackflame-monk-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for blackflame monk nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "blackflame monk nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43860010": {
+      "path": "enemy-images/candidate-fextralife-445b229ee4b3d625.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Bloodthorn_exile_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/9/9b/Bloodthorn_exile_enemies_elden_ring_wiki_600px.png/300px-Bloodthorn_exile_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for bloodthorn exile enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "bloodthorn exile enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41650000": {
+      "path": "enemy-images/candidate-bwiki-cc938aac5ae3852c.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B741610220",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/e3/pnrjohj13ipqubkp6xs9347o2q15vkq.jpg/200px-NPC_Avatar_41610220.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "饿犬",
+      "sourceEnemyId": "41610220",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41640000": {
+      "path": "enemy-images/candidate-bwiki-cc938aac5ae3852c.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B741610220",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/e3/pnrjohj13ipqubkp6xs9347o2q15vkq.jpg/200px-NPC_Avatar_41610220.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "饿犬",
+      "sourceEnemyId": "41610220",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42900000": {
+      "path": "enemy-images/42900020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "42900000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36640010": {
+      "path": "enemy-images/candidate-bwiki-7d1ba3846e808311.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B736640012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/d/de/4zuhxsk7tr3qtpqd2gisxoxtc9f52ad.jpg/200px-NPC_Avatar_36640012.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "墓地影子",
+      "sourceEnemyId": "36640012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "77100010": {
+      "path": "enemy-images/candidate-nightreign-gallery-5288a216d93e4544.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Smelter-demon-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/6/68/Smelter-demon-nightreign-300px.png",
+      "matchEvidence": "gallery image named Smelter-demon-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Smelter-demon-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "77110010": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-aea5fdc63ab963a4.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Centipede_Demon",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/0/0f/Centipede-demon-night-boss-nightreign-300px.png",
+      "matchEvidence": "adult Centipede Demon shown as a family reference for its larva",
+      "sourceEnemyName": "Centipede-demon-night-boss-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36600000": {
+      "path": "enemy-images/36600620.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "36600620",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "22710000": {
+      "path": "enemy-images/22710010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "22710000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "25000000": {
+      "path": "enemy-images/25000010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "25000010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "25001030": {
+      "path": "enemy-images/candidate-bwiki-1112c32402595a67.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B725000014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/b2/heb4jdwbyi1yc2zfnfdt1o2ds5xz0q7.jpg/200px-NPC_Avatar_25000014.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "熔炉骑士",
+      "sourceEnemyId": "25000014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33500020a": {
+      "path": "enemy-images/candidate-bwiki-d2ddaf64c4ba86de.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B733500920",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/0/09/57sdg7pgtq548yk9ruz654jzqiav5al.jpg/200px-NPC_Avatar_33500920.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "结晶人",
+      "sourceEnemyId": "33500920",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33500010": {
+      "path": "enemy-images/candidate-bwiki-d2ddaf64c4ba86de.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B733500920",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/0/09/57sdg7pgtq548yk9ruz654jzqiav5al.jpg/200px-NPC_Avatar_33500920.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "结晶人",
+      "sourceEnemyId": "33500920",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33501010": {
+      "path": "enemy-images/candidate-bwiki-c7120154cc4563cb.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B733501020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/ef/2ie4layfggtrla46hqziocg3ihdscbt.jpg/200px-NPC_Avatar_33501020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "结晶人",
+      "sourceEnemyId": "33501020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33502010": {
+      "path": "enemy-images/candidate-bwiki-c7120154cc4563cb.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B733501020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/ef/2ie4layfggtrla46hqziocg3ihdscbt.jpg/200px-NPC_Avatar_33501020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "结晶人",
+      "sourceEnemyId": "33501020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "79200010": {
+      "path": "enemy-images/candidate-nightreign-gallery-28a382c4888f864a.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Dancer-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/b/b0/Dancer-nightreign-300px.png",
+      "matchEvidence": "gallery image named Dancer-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Dancer-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "49801020b": {
+      "path": "enemy-images/candidate-nightreign-gallery-91bbd6bc408d96e1.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Death-rite-bird-night-boss-1-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/57/Death-rite-bird-night-boss-1-nightreign-300px.png",
+      "matchEvidence": "gallery image named Death-rite-bird-night-boss-1-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Death-rite-bird-night-boss-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41010000": {
+      "path": "enemy-images/41010020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "41010020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41300030": {
+      "path": "enemy-images/candidate-bwiki-53bcf95e7878e0b2.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B741300012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/0/0b/61knhqtlkavftfl1zj2orht3tpj6npv.jpg/200px-NPC_Avatar_41300012.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "亚人女王",
+      "sourceEnemyId": "41300012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41100000": {
+      "path": "enemy-images/41100020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "41100020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "58100920": {
+      "path": "enemy-images/candidate-fextralife-eb470dddfe3cd6e7.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Demi-human_swordmaster_onze.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/d/df/Demi-human_swordmaster_onze.png",
+      "matchEvidence": "illustrated entry for demi human swordmaster onze; variant or stage may differ",
+      "sourceEnemyName": "demi human swordmaster onze",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "37000030": {
+      "path": "enemy-images/candidate-bwiki-6935a3839e7a7aab.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B737000020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/d/d6/2iys79hglvlsd35o6mhax9td7dfclnp.jpg/200px-NPC_Avatar_37000020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "堕落调香师",
+      "sourceEnemyId": "37000020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "32500090b": {
+      "path": "enemy-images/candidate-eldenring-api-37b8f95df6161ab3.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69625d6el0i1upqw478c5kvsjv3.png",
+      "matchEvidence": "same English enemy name or model family: Draconic Tree Sentinel",
+      "sourceEnemyName": "Draconic Tree Sentinel",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46500210": {
+      "path": "enemy-images/candidate-eldenring-api-b86c9c6f54d7d996.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69de1071l0i1uprrms3umg3rug.png",
+      "matchEvidence": "same English enemy name or model family: Dragonkin Soldier",
+      "sourceEnemyName": "Dragonkin Soldier",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "78000010": {
+      "path": "enemy-images/candidate-nightreign-gallery-4441c27366693366.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:The-dukes-dear-freya-night-boss-2-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/a/a7/The-dukes-dear-freya-night-boss-2-nightreign-300px.png",
+      "matchEvidence": "gallery image named The-dukes-dear-freya-night-boss-2-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "The-dukes-dear-freya-night-boss-2-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42700000": {
+      "path": "enemy-images/candidate-fextralife-cdfc597c40e7487d.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Lion_Guardian",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/d7/Lion_guardian_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for lion guardian enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "lion guardian enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "48100010b": {
+      "path": "enemy-images/candidate-bwiki-05e9d297df8e555a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B748100012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/e9/d6hcfr1osy87suwsa3we2u5t2buglfi.jpg/200px-NPC_Avatar_48100012.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "黄金树的化身",
+      "sourceEnemyId": "48100012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42600110": {
+      "path": "enemy-images/42600110.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "42600110",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42601610a": {
+      "path": "enemy-images/candidate-bwiki-427335be1323f48a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742601920",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/d/d2/3xuvroawm3lu7jfbdf6mpahsss51qmt.jpg/200px-NPC_Avatar_42601920.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "归树看门犬",
+      "sourceEnemyId": "42601920",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42600610a": {
+      "path": "enemy-images/candidate-bwiki-57393e0d82961d1b.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742600512",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/f/fa/i3uqjufyyr2kexxfj8tz17epg7l5qxk.jpg/200px-NPC_Avatar_42600512.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "归树看门犬",
+      "sourceEnemyId": "42600512",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36500000": {
+      "path": "enemy-images/candidate-bwiki-f62c1547587cd6c3.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B736500012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/4/43/tqgxrwo01yc1d9in58scgenqe6v4yx5.jpg/200px-NPC_Avatar_36500012.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "小黄金树守卫",
+      "sourceEnemyId": "36500012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30000000": {
+      "path": "enemy-images/30000014.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "30000000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30200000": {
+      "path": "enemy-images/candidate-bwiki-496ae35ef87984b7.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730200014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/1e/d0aa7cna722smwcx72afjfu01wg8ob5.jpg/200px-NPC_Avatar_30200014.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "流刑士兵",
+      "sourceEnemyId": "30200014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "70000000": {
+      "path": "enemy-images/candidate-specific-wiki-image-e07e684e1607e21c.jpg",
+      "assetOrigin": "specific-wiki-image",
+      "sourcePage": "https://darksouls.wikidot.com/undead-soldier",
+      "sourceImage": "https://darksouls.wikidot.com/local--files/enemies/undead-soldier-sword.jpg",
+      "matchEvidence": "same-named Undead Soldier from predecessor game; exact Nightreign model unconfirmed",
+      "sourceEnemyName": "Undead Soldier (sword)",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46801020": {
+      "path": "enemy-images/candidate-nightreign-gallery-55bb78f9aa151d2a.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Fully-grown-fallingstar-beast-2-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/6/65/Fully-grown-fallingstar-beast-2-nightreign-300px.png",
+      "matchEvidence": "gallery image named Fully-grown-fallingstar-beast-2-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Fully-grown-fallingstar-beast-2-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75300000": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-492ac6c0b2d56f4c.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gnoster_Wisdom_of_Night",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/b/bf/Gnoster-1-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gnoster-1-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gnoster-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75300010": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-492ac6c0b2d56f4c.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gnoster_Wisdom_of_Night",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/b/bf/Gnoster-1-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gnoster-1-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gnoster-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75300110": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-492ac6c0b2d56f4c.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gnoster_Wisdom_of_Night",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/b/bf/Gnoster-1-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gnoster-1-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gnoster-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75300120": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-b55578d50b081597.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gnoster_Wisdom_of_Night_Everdark_Sovereign_(sentient_Pest)",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/c5/Gnoster-everdark-4-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gnoster-everdark-4-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gnoster-everdark-4-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75300020": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-b55578d50b081597.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gnoster_Wisdom_of_Night_Everdark_Sovereign_(sentient_Pest)",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/c5/Gnoster-everdark-4-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gnoster-everdark-4-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gnoster-everdark-4-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42400000": {
+      "path": "enemy-images/candidate-fextralife-00aa88660a6849ad.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Fingercreeper",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/0/07/Fingercreeper_enemies_elden_ring_nightreign_wiki_300px.png",
+      "matchEvidence": "illustrated entry for fingercreeper enemies elden ring nightreign wiki 300px; variant or stage may differ",
+      "sourceEnemyName": "fingercreeper enemies elden ring nightreign wiki 300px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42410000": {
+      "path": "enemy-images/candidate-fextralife-07d1f227f0c0636c.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Colossal_Fingercreeper",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/c0/Colossal_fingercreeper_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for colossal fingercreeper enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "colossal fingercreeper enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42410010": {
+      "path": "enemy-images/candidate-fextralife-07d1f227f0c0636c.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Colossal_Fingercreeper",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/c0/Colossal_fingercreeper_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for colossal fingercreeper enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "colossal fingercreeper enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42500030": {
+      "path": "enemy-images/candidate-fextralife-0ddf773e72125d4d.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Lesser_Fingercreeper",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/3/3e/Lesser_fingercreeper_elden_ring_nightreign_wiki_300px.png",
+      "matchEvidence": "illustrated entry for lesser fingercreeper elden ring nightreign wiki 300px; variant or stage may differ",
+      "sourceEnemyName": "lesser fingercreeper elden ring nightreign wiki 300px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42400030": {
+      "path": "enemy-images/candidate-bwiki-31cee19b0d2e7672.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742500021",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/2/2c/8w5us1274yc5adk0v1tplzjkr6dwzo5.jpg/200px-NPC_Avatar_42500021.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "指虫",
+      "sourceEnemyId": "42500021",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42500000": {
+      "path": "enemy-images/candidate-fextralife-0ddf773e72125d4d.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Lesser_Fingercreeper",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/3/3e/Lesser_fingercreeper_elden_ring_nightreign_wiki_300px.png",
+      "matchEvidence": "illustrated entry for lesser fingercreeper elden ring nightreign wiki 300px; variant or stage may differ",
+      "sourceEnemyName": "lesser fingercreeper elden ring nightreign wiki 300px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39100000": {
+      "path": "enemy-images/candidate-fextralife-47ff9bb3893089b3.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Prelate_enemies_elden_ring_wiki_guide.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/8/87/Prelate_enemies_elden_ring_wiki_guide.png/300px-Prelate_enemies_elden_ring_wiki_guide.png",
+      "matchEvidence": "illustrated entry for prelate enemies elden ring wiki guide; variant or stage may differ",
+      "sourceEnemyName": "prelate enemies elden ring wiki guide",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "44600000": {
+      "path": "enemy-images/44607020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "44600000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43810000": {
+      "path": "enemy-images/candidate-fextralife-63443ae47fc33191.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Thorn_Sorcerer",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/1/18/Thorn_sorcerer_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for thorn sorcerer enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "thorn sorcerer enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45050050": {
+      "path": "enemy-images/candidate-fextralife-0cc141c862493529.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Lesser_dragon_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/9/9b/Lesser_dragon_enemies_elden_ring_wiki_600px.png/300px-Lesser_dragon_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for lesser dragon enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "lesser dragon enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45050010": {
+      "path": "enemy-images/candidate-fextralife-0cc141c862493529.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Lesser_dragon_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/9/9b/Lesser_dragon_enemies_elden_ring_wiki_600px.png/300px-Lesser_dragon_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for lesser dragon enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "lesser dragon enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "78100010": {
+      "path": "enemy-images/candidate-specific-wiki-image-adcb455577debbc2.png",
+      "assetOrigin": "specific-wiki-image",
+      "sourcePage": "https://darksouls2.wiki.gg/wiki/Parasite_Spider",
+      "sourceImage": "https://darksouls2.wiki.gg/images/thumb/Parasite_Spider.png/270px-Parasite_Spider.png?b9848a",
+      "matchEvidence": "identified enemy family: Parasite Spider.png; variant may differ",
+      "sourceEnemyName": "Parasite Spider.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46004010a": {
+      "path": "enemy-images/candidate-bwiki-f39694613280fc2a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746000014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/d/d8/dibi03wg9ydqj8u1hf2yygusoebu6yg.jpg/200px-NPC_Avatar_46000014.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "山妖骑士",
+      "sourceEnemyId": "46000014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "31600010": {
+      "path": "enemy-images/31600010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "31600010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "77000010": {
+      "path": "enemy-images/candidate-nightreign-gallery-2957d12e2626156e.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Gaping-dragon-night-boss-1-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/7/73/Gaping-dragon-night-boss-1-nightreign-300px.png",
+      "matchEvidence": "gallery image named Gaping-dragon-night-boss-1-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Gaping-dragon-night-boss-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42800000": {
+      "path": "enemy-images/candidate-fextralife-ff43e49a85c3f2a8.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Giant_Ant",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/9/96/Giant_ant_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for giant ant enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "giant ant enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42810010": {
+      "path": "enemy-images/candidate-bwiki-ad9b3fcd12543d15.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742800160",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/8/87/3tr2mr60dkwdtxgik00np8zccpzoikm.jpg/200px-NPC_Avatar_42800160.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "巨型蚂蚁",
+      "sourceEnemyId": "42800160",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42800520": {
+      "path": "enemy-images/candidate-bwiki-ad9b3fcd12543d15.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742800160",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/8/87/3tr2mr60dkwdtxgik00np8zccpzoikm.jpg/200px-NPC_Avatar_42800160.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "巨型蚂蚁",
+      "sourceEnemyId": "42800160",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42800020": {
+      "path": "enemy-images/candidate-fextralife-ff43e49a85c3f2a8.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Giant_Ant",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/9/96/Giant_ant_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for giant ant enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "giant ant enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42810000": {
+      "path": "enemy-images/candidate-bwiki-ad9b3fcd12543d15.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742800160",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/8/87/3tr2mr60dkwdtxgik00np8zccpzoikm.jpg/200px-NPC_Avatar_42800160.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "巨型蚂蚁",
+      "sourceEnemyId": "42800160",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "22700000": {
+      "path": "enemy-images/22700010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "22700010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45600000": {
+      "path": "enemy-images/candidate-fextralife-3b741143da0bb82a.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Monstrous_crow_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/4/4b/Monstrous_crow_enemies_elden_ring_wiki_600px.png/300px-Monstrous_crow_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for monstrous crow enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "monstrous crow enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45600030": {
+      "path": "enemy-images/candidate-fextralife-3b741143da0bb82a.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Monstrous_crow_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/4/4b/Monstrous_crow_enemies_elden_ring_wiki_600px.png/300px-Monstrous_crow_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for monstrous crow enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "monstrous crow enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "22760000": {
+      "path": "enemy-images/candidate-fextralife-14f4118f7721308f.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Giant_Crab",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/f/f8/Giant-crab-nightreign-wiki-guide.png",
+      "matchEvidence": "illustrated entry for giant crab nightreign wiki guide; variant or stage may differ",
+      "sourceEnemyName": "giant crab nightreign wiki guide",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45500000": {
+      "path": "enemy-images/candidate-fextralife-1b96d0c9e4f18b2f.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Monstrous_Dog",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/6/6a/Monstrous_dog_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for monstrous dog enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "monstrous dog enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45500030": {
+      "path": "enemy-images/candidate-fextralife-1b96d0c9e4f18b2f.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Monstrous_Dog",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/6/6a/Monstrous_dog_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for monstrous dog enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "monstrous dog enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40900000": {
+      "path": "enemy-images/40900020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "40900020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30600000": {
+      "path": "enemy-images/30600020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "30600020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "49600000": {
+      "path": "enemy-images/candidate-specific-wiki-image-e8114718cbfe31ab.png",
+      "assetOrigin": "specific-wiki-image",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/Giant_Skeleton_(Spirit)",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/6/61/Gashadokuro_6.png/273px-Gashadokuro_6.png",
+      "matchEvidence": "identified enemy family: gashadokuro 6; variant may differ",
+      "sourceEnemyName": "gashadokuro 6",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75002210": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-540eb064509838b1.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gladius_Beast_of_Night",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/c0/Gladius-everdark-4-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gladius-everdark-4-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gladius-everdark-4-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75002020": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-a49c274c4da4bc94.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gladius_Beast_of_Night",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/c8/Gladius-1-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gladius-1-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gladius-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43830000": {
+      "path": "enemy-images/43831020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "43831020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43840000": {
+      "path": "enemy-images/candidate-fextralife-0a0fdf26dd51249b.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Glintstone_Miner",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/57/Glintstone_miner_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for glintstone miner enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "glintstone miner enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "37020000": {
+      "path": "enemy-images/candidate-fextralife-c318bbcb594dea89.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Glintstone_Sorcerer",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/ce/Glintstone_sorcerer_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for glintstone sorcerer enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "glintstone sorcerer enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75200020": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-492ac6c0b2d56f4c.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gnoster_Wisdom_of_Night",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/b/bf/Gnoster-1-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gnoster-1-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gnoster-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75200110": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-4ec322e855b7e204.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gnoster_Wisdom_of_Night",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/4/49/Gnoster-2-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gnoster-2-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gnoster-2-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75200030": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-cbcb384f42682db4.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Gnoster_Wisdom_of_Night_Everdark_Sovereign_(sentient_Pest)",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/f/f9/Gnoster-everdark-3-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Gnoster-everdark-3-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Gnoster-everdark-3-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43710000": {
+      "path": "enemy-images/43710510.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "43710510",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43110000": {
+      "path": "enemy-images/43111210.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "43111200",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "35600020": {
+      "path": "enemy-images/candidate-eldenring-api-56151801c0a5e3c5.png",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69c1bc31l0i1utrgxwhdp1csdis.png",
+      "matchEvidence": "same English enemy name or model family: Godskin Apostle",
+      "sourceEnemyName": "Godskin Apostle",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "35700020": {
+      "path": "enemy-images/candidate-eldenring-api-30dec5e2d518a007.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69814439l0i1uuifby3b0bn9gs.png",
+      "matchEvidence": "same English enemy name or model family: Godskin Noble",
+      "sourceEnemyName": "Godskin Noble",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "50110010": {
+      "path": "enemy-images/candidate-nightreign-gallery-fd1f5dd0a65b9668.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Crucible-knight-and-golden-hippopotamus-night-boss-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/db/Crucible-knight-and-golden-hippopotamus-night-boss-nightreign-300px.png",
+      "matchEvidence": "gallery image named Crucible-knight-and-golden-hippopotamus-night-boss-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Crucible-knight-and-golden-hippopotamus-night-boss-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "47509010": {
+      "path": "enemy-images/candidate-nightreign-gallery-6685a5f73480a057.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Grafted-monarch-night-boss-2-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/50/Grafted-monarch-night-boss-2-nightreign-300px.png",
+      "matchEvidence": "gallery image named Grafted-monarch-night-boss-2-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Grafted-monarch-night-boss-2-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46900020": {
+      "path": "enemy-images/candidate-bwiki-e346654696300c5a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746900014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/c/c9/g364c6usujrmgmzsbqxz7a8wx6hj1uq.jpg/200px-NPC_Avatar_46900014.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "“接肢”贵族后裔",
+      "sourceEnemyId": "46900014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "34001010": {
+      "path": "enemy-images/candidate-bwiki-80ff871f20e976b4.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B734001110",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/ee/7b114m5reuw6rjwn1v7d7ne4sfcmnjd.jpg/200px-NPC_Avatar_34001110.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "守墓斗士",
+      "sourceEnemyId": "34001110",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "49110010": {
+      "path": "enemy-images/candidate-nightreign-gallery-35e2ae0336cafc7a.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Great-wyrm-2-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/f/fe/Great-wyrm-2-nightreign-300px.png",
+      "matchEvidence": "gallery image named Great-wyrm-2-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Great-wyrm-2-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46000230": {
+      "path": "enemy-images/candidate-bwiki-f39694613280fc2a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746000014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/d/d8/dibi03wg9ydqj8u1hf2yygusoebu6yg.jpg/200px-NPC_Avatar_46000014.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "山妖骑士",
+      "sourceEnemyId": "46000014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43770000": {
+      "path": "enemy-images/43770012.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "43770000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30800000": {
+      "path": "enemy-images/30800007.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "30800000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "38503000": {
+      "path": "enemy-images/candidate-fextralife-27bf5a8f3c79e456.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Marionette-soldier-nightreign-wiki-guide.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/0/09/Marionette-soldier-nightreign-wiki-guide.png",
+      "matchEvidence": "illustrated entry for marionette soldier nightreign wiki guide; variant or stage may differ",
+      "sourceEnemyName": "marionette soldier nightreign wiki guide",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40500000": {
+      "path": "enemy-images/40500010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "40500000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40600000": {
+      "path": "enemy-images/candidate-bwiki-e83295942aeb7076.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B740500012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/7/73/t6vztvoe27t776silamhhdih3mu0waf.jpg/200px-NPC_Avatar_40500012.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "凯丹佣兵",
+      "sourceEnemyId": "40500012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "38100000": {
+      "path": "enemy-images/candidate-eldenring-api-1c25eaf84e7438c9.png",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69a5abc3l0i1uvfn18gmmqaf8jvj.png",
+      "matchEvidence": "same English enemy name or model family: Kindred of Rot",
+      "sourceEnemyName": "Kindred of Rot",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42300000": {
+      "path": "enemy-images/42300010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "42300010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "44400000": {
+      "path": "enemy-images/44400010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "44400010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "34715000": {
+      "path": "enemy-images/candidate-bwiki-5f158db302ef9af3.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B734715120",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/4/45/1k2740438bfzq7prqkiqo25zdmodunx.jpg/200px-NPC_Avatar_34715120.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "白金之子",
+      "sourceEnemyId": "34715120",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41900000": {
+      "path": "enemy-images/candidate-fextralife-b4b2c0798acd1667.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Teardrop_Scarab",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/5f/Teardrop-scarab-nightreign-300px.png",
+      "matchEvidence": "illustrated entry for teardrop-scarab-nightreign-300px; variant or stage may differ",
+      "sourceEnemyName": "teardrop-scarab-nightreign-300px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45800000": {
+      "path": "enemy-images/candidate-nightreign-gallery-61a5897dde00291c.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Wormface-night-boss-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/3/37/Wormface-night-boss-nightreign-300px.png",
+      "matchEvidence": "gallery image named Wormface-night-boss-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Wormface-night-boss-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "20410000": {
+      "path": "enemy-images/candidate-eldenpedia-8e207598b6803aff.png",
+      "assetOrigin": "eldenpedia",
+      "sourcePage": "https://eldenring.wiki.gg/wiki/Rot_Larva",
+      "sourceImage": "https://eldenring.wiki.gg/images/thumb/ER_Kindred_of_Rot_Larval.png/300px-ER_Kindred_of_Rot_Larval.png?9faf62",
+      "matchEvidence": "larval Kindred of Rot image for the small rot kindred",
+      "sourceEnemyName": "Rot Larva",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "37022010a": {
+      "path": "enemy-images/candidate-fextralife-f50b9cef8f1c77ac.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Twinsage_Sorcerer",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/55/Twinsage-sorcerer-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for twinsage sorcerer nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "twinsage sorcerer nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43730000": {
+      "path": "enemy-images/candidate-fextralife-08e3e3e711d0169f.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Leyndell_Foot_Soldier",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/f/f4/Leyndell_foot_soldier_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for leyndell foot soldier enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "leyndell foot soldier enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43532030a": {
+      "path": "enemy-images/candidate-bwiki-7cc994c73773c68a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743530020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/3/35/6i212u4w8dn8v98046a3e602mz3tj4w.jpg/200px-NPC_Avatar_43530020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "罗德尔骑士",
+      "sourceEnemyId": "43530020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43530030a": {
+      "path": "enemy-images/candidate-bwiki-7cc994c73773c68a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743530020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/3/35/6i212u4w8dn8v98046a3e602mz3tj4w.jpg/200px-NPC_Avatar_43530020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "罗德尔骑士",
+      "sourceEnemyId": "43530020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43531030a": {
+      "path": "enemy-images/candidate-bwiki-7cc994c73773c68a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743530020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/3/35/6i212u4w8dn8v98046a3e602mz3tj4w.jpg/200px-NPC_Avatar_43530020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "罗德尔骑士",
+      "sourceEnemyId": "43530020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43531400": {
+      "path": "enemy-images/candidate-bwiki-7cc994c73773c68a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743530020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/3/35/6i212u4w8dn8v98046a3e602mz3tj4w.jpg/200px-NPC_Avatar_43530020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "罗德尔骑士",
+      "sourceEnemyId": "43530020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43130000": {
+      "path": "enemy-images/candidate-bwiki-00a4e2065657ca19.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743150012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/0/03/p8xdgfy6m0mcjnrpo116y328nb1poc6.jpg/200px-NPC_Avatar_43150012.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "灵庙士兵",
+      "sourceEnemyId": "43150012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "21500000": {
+      "path": "enemy-images/candidate-gameplay-blog-ed5c4732f73f900d.png",
+      "assetOrigin": "gameplay-blog",
+      "sourcePage": "https://blackjackrants.blogspot.com/2025/10/reviewing-monsters-elden-ring-part-20.html",
+      "sourceImage": "https://blogger.googleusercontent.com/img/a/AVvXsEiJ6SkRhvN4fzK2PQ8IMffJc4AZlRWft9HKb2e6PDwYTAMLRc47xwpQRvkHR3Dhuvz9RdwFhFAa2hRv_uFxK2VOzZg_eqniq1FkMrd1y8EG_FYA90k7uk83R-2Ba4rZj4jMDlxvefcLlWA_iMzW2J9RB1zYJ7NBy7t3vz3dllstX4V-XVY6yz_rSF7qATXO",
+      "matchEvidence": "image captioned Wisp, the lightning ball enemy",
+      "sourceEnemyName": "Wisp",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "44910000": {
+      "path": "enemy-images/44910014.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "44910000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "44900000": {
+      "path": "enemy-images/44907014.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "44900000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43510000": {
+      "path": "enemy-images/43510010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "43510000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43511120": {
+      "path": "enemy-images/candidate-bwiki-40a4b4f720b66eee.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743511112",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/1b/h33skum5j3fg33taaer2ucoa6dixkj1.jpg/200px-NPC_Avatar_43511112.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "葛瑞克骑士",
+      "sourceEnemyId": "43511112",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43510040": {
+      "path": "enemy-images/candidate-bwiki-0da68c0d27d558d1.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743510010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/b5/oc7fnkmyiegc53ybju3hicsr5owj92b.jpg/200px-NPC_Avatar_43510010.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "葛瑞克骑士",
+      "sourceEnemyId": "43510010",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43630000": {
+      "path": "enemy-images/candidate-bwiki-40a4b4f720b66eee.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743511112",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/1b/h33skum5j3fg33taaer2ucoa6dixkj1.jpg/200px-NPC_Avatar_43511112.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "葛瑞克骑士",
+      "sourceEnemyId": "43511112",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43401120": {
+      "path": "enemy-images/candidate-bwiki-522996db83115795.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743401110",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/e7/9zsrs6rj3vxoi1y2s48mzihs4airtng.jpg/200px-NPC_Avatar_43401110.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "发狂南瓜头士兵",
+      "sourceEnemyId": "43401110",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "49100190b": {
+      "path": "enemy-images/candidate-eldenring-api-cf15b6c240da7a3e.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69bfa759l0i1uwfa0yrdvzcov1i.png",
+      "matchEvidence": "same English enemy name or model family: Magma Wyrm",
+      "sourceEnemyName": "Magma Wyrm",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46202010": {
+      "path": "enemy-images/candidate-eldenring-api-c245df0aea7c60e2.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69bcfd7dl0i1ul502rklvi8tx62.png",
+      "matchEvidence": "same English enemy name or model family: Astel, Stars Of Darkness",
+      "sourceEnemyName": "Astel, Stars Of Darkness",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42000000": {
+      "path": "enemy-images/42000010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "42000010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39500000": {
+      "path": "enemy-images/candidate-fextralife-912a4101eb8f84b1.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Man_serpent_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/1/16/Man_serpent_enemies_elden_ring_wiki_600px.png/300px-Man_serpent_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for man serpent enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "man serpent enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39502010": {
+      "path": "enemy-images/candidate-fextralife-912a4101eb8f84b1.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Man_serpent_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/1/16/Man_serpent_enemies_elden_ring_wiki_600px.png/300px-Man_serpent_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for man serpent enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "man serpent enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39501110": {
+      "path": "enemy-images/candidate-fextralife-912a4101eb8f84b1.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Man_serpent_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/1/16/Man_serpent_enemies_elden_ring_wiki_600px.png/300px-Man_serpent_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for man serpent enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "man serpent enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "39504010": {
+      "path": "enemy-images/candidate-fextralife-912a4101eb8f84b1.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Man_serpent_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/1/16/Man_serpent_enemies_elden_ring_wiki_600px.png/300px-Man_serpent_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for man serpent enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "man serpent enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "38502100": {
+      "path": "enemy-images/candidate-fextralife-27bf5a8f3c79e456.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Marionette-soldier-nightreign-wiki-guide.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/0/09/Marionette-soldier-nightreign-wiki-guide.png",
+      "matchEvidence": "illustrated entry for marionette soldier nightreign wiki guide; variant or stage may differ",
+      "sourceEnemyName": "marionette soldier nightreign wiki guide",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43750000": {
+      "path": "enemy-images/candidate-fextralife-3fa6875eac30adf4.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Mausoleum_Foot_Soldier",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/c9/Mausoleum-foot-soldier-nightreign-wiki-guide.png",
+      "matchEvidence": "illustrated entry for mausoleum foot soldier nightreign wiki guide; variant or stage may differ",
+      "sourceEnemyName": "mausoleum foot soldier nightreign wiki guide",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43550000": {
+      "path": "enemy-images/candidate-bwiki-3e05c1257b1a26e1.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743550020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/4/49/2hqg7qs6gmh3isd941qzdlted97bakf.jpg/200px-NPC_Avatar_43550020.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "无头骑士",
+      "sourceEnemyId": "43550020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43551020": {
+      "path": "enemy-images/candidate-bwiki-3e05c1257b1a26e1.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B743550020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/4/49/2hqg7qs6gmh3isd941qzdlted97bakf.jpg/200px-NPC_Avatar_43550020.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "无头骑士",
+      "sourceEnemyId": "43550020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43150000": {
+      "path": "enemy-images/candidate-fextralife-4c592200da76b8f7.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Mausoleum_Soldier",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/f/f3/Mausoleum-soldier-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for mausoleum soldier nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "mausoleum soldier nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "44800000": {
+      "path": "enemy-images/44800010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "44800010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "44810000": {
+      "path": "enemy-images/44810010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "44810010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "34500000": {
+      "path": "enemy-images/candidate-bwiki-af8ed3857780de49.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B734510912",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/9/95/0mn71c4hy0q0xrldsxiyrfpgnod5tsf.jpg/200px-NPC_Avatar_34510912.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "片鳞混种",
+      "sourceEnemyId": "34510912",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "34501050": {
+      "path": "enemy-images/candidate-bwiki-af8ed3857780de49.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B734510912",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/9/95/0mn71c4hy0q0xrldsxiyrfpgnod5tsf.jpg/200px-NPC_Avatar_34510912.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "片鳞混种",
+      "sourceEnemyId": "34510912",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "21300510": {
+      "path": "enemy-images/candidate-nightreign-gallery-bc92e53cebea46a1.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Fell-omen-night-boss-1-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/5f/Fell-omen-night-boss-1-nightreign-300px.png",
+      "matchEvidence": "gallery image named Fell-omen-night-boss-1-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Fell-omen-night-boss-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45030010": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-38a21978f70b3c03.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Mountaintop_Ice_Dragon",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/5c/Mountaintops-ice-dragon-1-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Mountaintops-ice-dragon-1-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Mountaintops-ice-dragon-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "79100010": {
+      "path": "enemy-images/candidate-nightreign-gallery-57facc126cbe96a2.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Nameless-king-night-boss-1-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/f/fb/Nameless-king-night-boss-1-nightreign-300px.png",
+      "matchEvidence": "gallery image named Nameless-king-night-boss-1-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Nameless-king-night-boss-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "79000010": {
+      "path": "enemy-images/candidate-nightreign-gallery-57facc126cbe96a2.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Nameless-king-night-boss-1-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/f/fb/Nameless-king-night-boss-1-nightreign-300px.png",
+      "matchEvidence": "gallery image named Nameless-king-night-boss-1-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Nameless-king-night-boss-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46200010": {
+      "path": "enemy-images/candidate-eldenring-api-c245df0aea7c60e2.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/bosses/17f69bcfd7dl0i1ul502rklvi8tx62.png",
+      "matchEvidence": "same English enemy name or model family: Astel, Stars Of Darkness",
+      "sourceEnemyName": "Astel, Stars Of Darkness",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33002010": {
+      "path": "enemy-images/candidate-fextralife-e2715f2cbb38348a.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Night_Maiden",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/e/e6/Night-maiden-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for night maiden nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "night maiden nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "31501010": {
+      "path": "enemy-images/candidate-bwiki-10852836241e8961.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B731501012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/8/8f/47knjtstd4ndb9f55mtbkumq9kc9npp.jpg/200px-NPC_Avatar_31501012.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "黑夜骑兵",
+      "sourceEnemyId": "31501012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "31500010": {
+      "path": "enemy-images/31500010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "31500010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33000010": {
+      "path": "enemy-images/candidate-fextralife-772d505a8bc66ae0.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Nox_Monk",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/d2/Nox-monk-enemies-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for nox monk enemies nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "nox monk enemies nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33001010": {
+      "path": "enemy-images/candidate-fextralife-d748b7846faa8f30.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Nox_Swordstress",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/9/95/Nox-swordstress-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for nox swordstress nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "nox swordstress nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "21400000": {
+      "path": "enemy-images/candidate-eldenring-api-852ea7c25b1fe8cc.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f6a4fb9a1l0i6z5hvvg1hhcj3ei.png",
+      "matchEvidence": "same English enemy name or model family: Omen",
+      "sourceEnemyName": "Omen",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36001020": {
+      "path": "enemy-images/candidate-bwiki-ef8b4dddc4daea34.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B736001920",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/5/5d/74f9s48ltu5b1ggwo0ep2sjtgw983rc.jpg/200px-NPC_Avatar_36001920.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "石肤黑王",
+      "sourceEnemyId": "36001920",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "42010000": {
+      "path": "enemy-images/candidate-fextralife-45c98376885e4c37.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Chanting_Winged_Dame",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/dd/Chanting-winged-dame-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for chanting winged dame nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "chanting winged dame nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36100020a": {
+      "path": "enemy-images/candidate-fextralife-6ce5cd1ce83724cf.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Oracle_envoy_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/b/b7/Oracle_envoy_enemies_elden_ring_wiki_600px.png/300px-Oracle_envoy_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for oracle envoy enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "oracle envoy enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36200000": {
+      "path": "enemy-images/candidate-fextralife-51aae387357cc3a1.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Large_oracle_envoy_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/9/97/Large_oracle_envoy_enemies_elden_ring_wiki_600px.png/300px-Large_oracle_envoy_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for large oracle envoy enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "large oracle envoy enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "30500010": {
+      "path": "enemy-images/candidate-nightreign-gallery-b3448a1ce20ed029.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Outland-commander-night-boss-1-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/db/Outland-commander-night-boss-1-nightreign-300px.png",
+      "matchEvidence": "gallery image named Outland-commander-night-boss-1-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Outland-commander-night-boss-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "37030000": {
+      "path": "enemy-images/candidate-bwiki-85891fb7e8967717.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B737030012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/b3/52p5ut6o59vp0vwnyfmm0arjd3rzz7o.jpg/200px-NPC_Avatar_37030012.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "随从",
+      "sourceEnemyId": "37030012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "37010030": {
+      "path": "enemy-images/candidate-eldenring-api-a4d0037ba189d627.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f69feb47dl0i6z0k3ravqm7glk.png",
+      "matchEvidence": "same English enemy name or model family: Perfumer",
+      "sourceEnemyName": "Perfumer",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33610000": {
+      "path": "enemy-images/candidate-fextralife-d821f67756b22067.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Ancestral_Follower",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/6/6c/Ancestral-follower-soldier-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for ancestral follower soldier nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "ancestral follower soldier nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33710000": {
+      "path": "enemy-images/candidate-fextralife-4050e8b09eeeb44e.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Follower_shaman_enemies_elden_ring_wiki_300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/d/d1/Follower_shaman_enemies_elden_ring_wiki_300px.png",
+      "matchEvidence": "illustrated entry for follower shaman enemies elden ring wiki 300px; variant or stage may differ",
+      "sourceEnemyName": "follower shaman enemies elden ring wiki 300px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36610000": {
+      "path": "enemy-images/candidate-bwiki-317347b06722eb48.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B736610012",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/7/77/jmmp8hgzvmu25pvulhbi80muz10uefm.jpg/200px-NPC_Avatar_36610012.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "腐烂长生者",
+      "sourceEnemyId": "36610012",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36620000": {
+      "path": "enemy-images/candidate-bwiki-ca2fbe0c25b9b0bb.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B736624024",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/c/c7/dw6vypccp8z7jgcao63xxzmzb7hgii3.jpg/200px-NPC_Avatar_36624024.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "猩红腐烂长生者",
+      "sourceEnemyId": "36624024",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36610010": {
+      "path": "enemy-images/candidate-fextralife-4d0f5905bda2232d.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Putrid_Corpse",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/d8/Putrid_corpse_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for putrid corpse enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "putrid corpse enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36612010b": {
+      "path": "enemy-images/candidate-fextralife-4d0f5905bda2232d.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Putrid_Corpse",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/d8/Putrid_corpse_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for putrid corpse enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "putrid corpse enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "36615010b": {
+      "path": "enemy-images/candidate-fextralife-4d0f5905bda2232d.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Putrid_Corpse",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/d8/Putrid_corpse_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for putrid corpse enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "putrid corpse enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41700000": {
+      "path": "enemy-images/41700110.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "41700110",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41710000": {
+      "path": "enemy-images/candidate-fextralife-6fdec8f785e204b9.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Giant_Skeletal_Slime",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/1/15/Giant_skeletal_slime_enemies_elden_ring_nightreign_wiki_1920px.png",
+      "matchEvidence": "illustrated entry for giant skeletal slime enemies elden ring nightreign wiki 1920px; variant or stage may differ",
+      "sourceEnemyName": "giant skeletal slime enemies elden ring nightreign wiki 1920px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43740000": {
+      "path": "enemy-images/candidate-fextralife-46fcb5b2e9fe9863.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Radahn_foot_soldier_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/a/a2/Radahn_foot_soldier_enemies_elden_ring_wiki_600px.png/300px-Radahn_foot_soldier_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for radahn foot soldier enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "radahn foot soldier enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43140000": {
+      "path": "enemy-images/candidate-fextralife-0bd06ccf877d3012.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Radahn_soldier_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/d/df/Radahn_soldier_enemies_elden_ring_wiki_600px.png/300px-Radahn_soldier_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for radahn soldier enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "radahn soldier enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40800000": {
+      "path": "enemy-images/40800010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "40800010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43720000": {
+      "path": "enemy-images/candidate-fextralife-cc59b870fe37a4d1.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Raya_Lucaria_Foot_Soldier",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/d0/Raya-lucaria-foot-soldier-nightreign-wiki-guide-min.png",
+      "matchEvidence": "illustrated entry for raya lucaria foot soldier nightreign wiki guide min; variant or stage may differ",
+      "sourceEnemyName": "raya lucaria foot soldier nightreign wiki guide min",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "31810020": {
+      "path": "enemy-images/31810020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "31810020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43540000": {
+      "path": "enemy-images/candidate-fextralife-32019581f45b98d5.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Redmane_knight_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/8/86/Redmane_knight_enemies_elden_ring_wiki_600px.png/300px-Redmane_knight_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for redmane knight enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "redmane knight enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43542010a": {
+      "path": "enemy-images/candidate-fextralife-32019581f45b98d5.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Redmane_knight_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/8/86/Redmane_knight_enemies_elden_ring_wiki_600px.png/300px-Redmane_knight_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for redmane knight enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "redmane knight enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43541010a": {
+      "path": "enemy-images/candidate-fextralife-32019581f45b98d5.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Redmane_knight_enemies_elden_ring_wiki_600px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/8/86/Redmane_knight_enemies_elden_ring_wiki_600px.png/300px-Redmane_knight_enemies_elden_ring_wiki_600px.png",
+      "matchEvidence": "illustrated entry for redmane knight enemies elden ring wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "redmane knight enemies elden ring wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40000000": {
+      "path": "enemy-images/candidate-eldenring-api-d8e221c64d797a12.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f69f71f60l0i6z6caa01v3eaefsv.png",
+      "matchEvidence": "same English enemy name or model family: Revenant",
+      "sourceEnemyName": "Revenant",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41660000": {
+      "path": "enemy-images/candidate-fextralife-3b000eae566fa2e2.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Rotten_Stray",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/8/8d/Rotten_stray_1_enemies_elden_ring_nightreign_wiki_600px.png",
+      "matchEvidence": "illustrated entry for rotten stray 1 enemies elden ring nightreign wiki 600px; variant or stage may differ",
+      "sourceEnemyName": "rotten stray 1 enemies elden ring nightreign wiki 600px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "32520010b": {
+      "path": "enemy-images/candidate-nightreign-boss-shot-88eb5ae917ba5ebd.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Royal_Carian_Knight",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/7/7e/Royal-carian-knight-field-4-nightreign-300px.png",
+      "matchEvidence": "game screenshot of Royal-carian-knight-field-4-nightreign-300px.png; phase or subject within a duo may differ",
+      "sourceEnemyName": "Royal-carian-knight-field-4-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40210030": {
+      "path": "enemy-images/candidate-bwiki-485226bdbaa86f1f.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B740208020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/4/4c/84mk91qcf02wz6c66cd14lyriyi7m8t.jpg/200px-NPC_Avatar_40208020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "王室幽魂",
+      "sourceEnemyId": "40208020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46300010a": {
+      "path": "enemy-images/candidate-bwiki-2ddb60657d8021f8.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746300010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/7/73/97cl9ueoz7cqfjmotsjfrhoad5sev6y.jpg/200px-NPC_Avatar_46300010.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "卢恩熊",
+      "sourceEnemyId": "46300010",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46300210a": {
+      "path": "enemy-images/candidate-bwiki-a01bf46ede19b906.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746300020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/c/c0/1bn0av7s7nirwd395olzrkva3jbskpr.jpg/200px-NPC_Avatar_46300020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "卢恩熊",
+      "sourceEnemyId": "46300020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "35500010a": {
+      "path": "enemy-images/candidate-bwiki-3de49405c9cce5b2.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B735500020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/9/9d/ccpkdr6ol256p0lxlosknukekzkgw0x.jpg/200px-NPC_Avatar_35500020.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "鲜血贵族",
+      "sourceEnemyId": "35500020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "34510000": {
+      "path": "enemy-images/candidate-bwiki-af8ed3857780de49.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B734510912",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/9/95/0mn71c4hy0q0xrldsxiyrfpgnod5tsf.jpg/200px-NPC_Avatar_34510912.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "片鳞混种",
+      "sourceEnemyId": "34510912",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41910000": {
+      "path": "enemy-images/41912010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "41912010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "33202010": {
+      "path": "enemy-images/candidate-fextralife-45874d440d910309.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Silver_Tear_(enemy)",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/7/79/Silver-tear-nightreign-wiki-guide.png",
+      "matchEvidence": "illustrated entry for silver tear nightreign wiki guide; variant or stage may differ",
+      "sourceEnemyName": "silver tear nightreign wiki guide",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "35004000": {
+      "path": "enemy-images/35004010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "35004010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "35006000": {
+      "path": "enemy-images/35006010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "35006010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "35002000": {
+      "path": "enemy-images/35002010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "35002010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "35003000": {
+      "path": "enemy-images/35003010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "35003010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "35000000": {
+      "path": "enemy-images/35000010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "35000010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40400000": {
+      "path": "enemy-images/candidate-bwiki-37f408cb1a219b28.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B740403020",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/be/25btz0e5mu03tej4a817br25ldj6bdd.jpg/200px-NPC_Avatar_40403020.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "火焰蛞蝓",
+      "sourceEnemyId": "40403020",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46020000": {
+      "path": "enemy-images/candidate-bwiki-f39694613280fc2a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746000014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/d/d8/dibi03wg9ydqj8u1hf2yygusoebu6yg.jpg/200px-NPC_Avatar_46000014.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "山妖骑士",
+      "sourceEnemyId": "46000014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46020030": {
+      "path": "enemy-images/candidate-bwiki-f39694613280fc2a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746000014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/d/d8/dibi03wg9ydqj8u1hf2yygusoebu6yg.jpg/200px-NPC_Avatar_46000014.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "山妖骑士",
+      "sourceEnemyId": "46000014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "51100000": {
+      "path": "enemy-images/candidate-eldenring-api-cdaf30ed307beac4.jpg",
+      "assetOrigin": "eldenring-api",
+      "sourcePage": "https://github.com/deliton/eldenring-api",
+      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f6a2f96a7l0i6ytu14rxjb7bw7x9.png",
+      "matchEvidence": "tentacled Giant Land Octopus used as a visual family reference; exact tentacle enemy unconfirmed",
+      "sourceEnemyName": "Giant Land Octopus",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41800000": {
+      "path": "enemy-images/41800010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "41800000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43800000": {
+      "path": "enemy-images/candidate-fextralife-df36677fbda4ee77.png",
+      "assetOrigin": "fextralife",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Starcaller",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/0/0f/Starcaller_gallery_enemies_elden_ring_nightreign_wiki_300px.png",
+      "matchEvidence": "illustrated entry for starcaller gallery enemies elden ring nightreign wiki 300px; variant or stage may differ",
+      "sourceEnemyName": "starcaller gallery enemies elden ring nightreign wiki 300px",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43820000": {
+      "path": "enemy-images/43821010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "43821010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41610000": {
+      "path": "enemy-images/41610020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "41610020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "41600000": {
+      "path": "enemy-images/candidate-bwiki-ebbc17f31de9ca83.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B741600014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/b8/s34jo4u56qnjqtwec99drig4ipze3wz.jpg/200px-NPC_Avatar_41600014.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "饿犬",
+      "sourceEnemyId": "41600014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "75800010": {
+      "path": "enemy-images/candidate-nightreign-gallery-e905c70b1a539076.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Heolstor-3-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/52/Heolstor-3-nightreign-300px.png",
+      "matchEvidence": "gallery image named Heolstor-3-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Heolstor-3-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "32510020b": {
+      "path": "enemy-images/candidate-bwiki-10cddbdeeb96ee10.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B732510010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/9/98/97od4363yhbzojud9ild5hbybh32o9q.jpg/200px-NPC_Avatar_32510010.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "大树守卫",
+      "sourceEnemyId": "32510010",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46000000": {
+      "path": "enemy-images/46000010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "46000010",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46000110": {
+      "path": "enemy-images/candidate-bwiki-f39694613280fc2a.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746000014",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/d/d8/dibi03wg9ydqj8u1hf2yygusoebu6yg.jpg/200px-NPC_Avatar_46000014.jpg",
+      "matchEvidence": "same enemy family or named variant; candidate only",
+      "sourceEnemyName": "山妖骑士",
+      "sourceEnemyId": "46000014",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46400010b": {
+      "path": "enemy-images/candidate-bwiki-e596ff510d207f78.jpg",
+      "assetOrigin": "bwiki",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746400007",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/f/f7/ah9ao5tc5ptls7us8dbt17uwqxwvb8m.jpg/200px-NPC_Avatar_46400007.jpg",
+      "matchEvidence": "same Chinese base name; source NPC ID may differ",
+      "sourceEnemyName": "腐烂树灵",
+      "sourceEnemyId": "46400007",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "47701030": {
+      "path": "enemy-images/candidate-nightreign-gallery-4fe7578fc94bca48.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Valiant-gargoyle-night-boss-1-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/d/d4/Valiant-gargoyle-night-boss-1-nightreign-300px.png",
+      "matchEvidence": "gallery image named Valiant-gargoyle-night-boss-1-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Valiant-gargoyle-night-boss-1-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43210000": {
+      "path": "enemy-images/43210020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "43210000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "43000000": {
+      "path": "enemy-images/43000020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "43000020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40710000": {
+      "path": "enemy-images/40710010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "40710000",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "40700000": {
+      "path": "enemy-images/40700020.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourceEnemyId": "40700020",
+      "matchEvidence": "existing image map for a row in this displayed entity",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "45700000": {
+      "path": "enemy-images/candidate-nightreign-gallery-61a5897dde00291c.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Wormface-night-boss-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/3/37/Wormface-night-boss-nightreign-300px.png",
+      "matchEvidence": "gallery image named Wormface-night-boss-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Wormface-night-boss-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    }
+  }
+}
