@@ -1,0 +1,429 @@
+{
+  "schemaVersion": 1,
+  "sourceVersion": {
+    "gameVersion": "1.3.3.0",
+    "regulationVersion": "10350000",
+    "worldMapPointIconParamXmlSha256": "712097e448560e3995a3a06dd12f5891b17e0d2e88415fa67653ece1d5d759f8",
+    "nightBossMenuParamXmlSha256": "2ac3945dc6ab69f39cd5a7a3ad5770f7149d80a325a8cb4e6fa216fb2e82e5db",
+    "dlcImageIndexSha256": "d851e28a54fa4a1fb63527296058f75c51618ff1cd90bb71a56d3b08166d670e"
+  },
+  "icons": {
+    "buildingCategory:church": {
+      "src": "/map-icons/church-42001-d392da37173f.png",
+      "nameZh": "教堂",
+      "width": 188,
+      "height": 188,
+      "status": "verified",
+      "worldMapPointIconId": 2,
+      "iconId": 42001,
+      "sha256": "d392da37173fbd7cc1ed78ffec8390d0c35c3edebf225615424f707bf89a161f",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42001.png",
+        "rectangle": [
+          2344,
+          1552,
+          188,
+          188
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:ruins": {
+      "src": "/map-icons/ruins-42002-2f6b81764771.png",
+      "nameZh": "废墟",
+      "width": 234,
+      "height": 234,
+      "status": "verified",
+      "worldMapPointIconId": 3,
+      "iconId": 42002,
+      "sha256": "2f6b81764771e735a3e9f949080314d9d2eba005c1563b294cd2fedcc7338360",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42002.png",
+        "rectangle": [
+          520,
+          0,
+          234,
+          234
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:township": {
+      "src": "/map-icons/township-42003-ec3e420f3efd.png",
+      "nameZh": "聚落",
+      "width": 228,
+      "height": 228,
+      "status": "verified",
+      "worldMapPointIconId": 4,
+      "iconId": 42003,
+      "sha256": "ec3e420f3efdb0fd71536cad091e976f9c52fb7de5fb9aa7692a1dccc17b373a",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42003.png",
+        "rectangle": [
+          520,
+          836,
+          228,
+          228
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:sorcerers": {
+      "src": "/map-icons/sorcerers-42005-a2cf01a0fd81.png",
+      "nameZh": "魔法师塔",
+      "width": 236,
+      "height": 236,
+      "status": "verified",
+      "worldMapPointIconId": 6,
+      "iconId": 42005,
+      "sha256": "a2cf01a0fd81d820d84e9bdafd2bc483b8c7134d0c57cc4db8ea66681429cb53",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42005.png",
+        "rectangle": [
+          520,
+          240,
+          236,
+          236
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:mainencampment": {
+      "src": "/map-icons/mainencampment-42009-07cbf93eefc4.png",
+      "nameZh": "大型营地",
+      "width": 224,
+      "height": 224,
+      "status": "verified",
+      "worldMapPointIconId": 10,
+      "iconId": 42009,
+      "sha256": "07cbf93eefc4aa0e9b036e454c8b87d067a90086a087005c54e2896e2e1f2bd0",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42009.png",
+        "rectangle": [
+          1488,
+          2044,
+          224,
+          224
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:fort": {
+      "src": "/map-icons/fort-42006-e6b321eda406.png",
+      "nameZh": "要塞",
+      "width": 266,
+      "height": 266,
+      "status": "verified",
+      "worldMapPointIconId": 7,
+      "iconId": 42006,
+      "sha256": "e6b321eda4062fe5c377b1e8b249fdac390e192a2c0b3dea091835d6f220c667",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42006.png",
+        "rectangle": [
+          812,
+          3044,
+          266,
+          266
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:greatchurch": {
+      "src": "/map-icons/greatchurch-42023-7f9e8c4e5d92.png",
+      "nameZh": "大教堂",
+      "width": 248,
+      "height": 248,
+      "status": "verified",
+      "worldMapPointIconId": 24,
+      "iconId": 42023,
+      "sha256": "7f9e8c4e5d92068ab9a029c4096d3edbcd3912dc46557df691451d9f0d3ea823",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42023.png",
+        "rectangle": [
+          1488,
+          1316,
+          248,
+          248
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:marsh": {
+      "src": "/map-icons/marsh-42047-a9dc0f0bc5b9.png",
+      "nameZh": "沼泽",
+      "width": 266,
+      "height": 202,
+      "status": "verified",
+      "worldMapPointIconId": 77,
+      "iconId": 42047,
+      "sha256": "a9dc0f0bc5b999cae23278979f600f4e59d5011ced8c498ca75334c2c2567435",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/21_common_dlc01_h.tpf.dcx",
+        "resourceSha256": "71c6d5f2c54dda5b2117ed41693ab642e9a92c0b9087b70c784dc2c91cd9d53f",
+        "texture": "SB_MapIcon_DLC01_0",
+        "ddsSha256": "d182d17afea0ef4bb956d18121046a6ad4ae0514bd82b3c12c026e03012168f6",
+        "layoutResource": "/menu/21_common_dlc01_h.sblytbnd.dcx",
+        "layout": "SB_MapIcon_DLC01_0.layout",
+        "layoutSha256": "22dd4dabae42916c3ecfc0e23c44b29fb9e4438533816b4491c456a4b449d7d1",
+        "atlasWidth": 1024,
+        "atlasHeight": 512,
+        "sprite": "MENU_MAP_42047_077.png",
+        "rectangle": [
+          272,
+          208,
+          266,
+          202
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:forge": {
+      "src": "/map-icons/forge-42048-886d6f893989.png",
+      "nameZh": "锻造设施",
+      "width": 220,
+      "height": 130,
+      "status": "verified",
+      "worldMapPointIconId": 78,
+      "iconId": 42048,
+      "sha256": "886d6f893989e1b81608e1f7227a5c273c7ca7792207309e742d8c5a47e6f317",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/21_common_dlc01_h.tpf.dcx",
+        "resourceSha256": "71c6d5f2c54dda5b2117ed41693ab642e9a92c0b9087b70c784dc2c91cd9d53f",
+        "texture": "SB_MapIcon_DLC01_0",
+        "ddsSha256": "d182d17afea0ef4bb956d18121046a6ad4ae0514bd82b3c12c026e03012168f6",
+        "layoutResource": "/menu/21_common_dlc01_h.sblytbnd.dcx",
+        "layout": "SB_MapIcon_DLC01_0.layout",
+        "layoutSha256": "22dd4dabae42916c3ecfc0e23c44b29fb9e4438533816b4491c456a4b449d7d1",
+        "atlasWidth": 1024,
+        "atlasHeight": 512,
+        "sprite": "MENU_MAP_42048_078.png",
+        "rectangle": [
+          700,
+          0,
+          220,
+          130
+        ]
+      },
+      "identityScope": "native category icon mapping; does not extend building identity coverage"
+    }
+  },
+  "coverage": {
+    "mappedBuildingCategories": 9,
+    "unmappedRawBuildingDefinitions": 167,
+    "unmappedPolicy": "raw_id_only definitions are not inferred or assigned placeholder game art"
+  },
+  "missing": [],
+  "pointIcons": {
+    "16": {
+      "src": "/map-icons/elite-normal-42015-7de84bcef942.png",
+      "width": 112,
+      "height": 112,
+      "status": "verified",
+      "iconId": 42015,
+      "worldMapPointIconId": 16,
+      "tier": "normal",
+      "color": "blue",
+      "sha256": "7de84bcef9424d3436d3dcbc82f696a998207d5869361933300a792bdcec6ac3",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42015.png",
+        "rectangle": [
+          640,
+          720,
+          112,
+          112
+        ]
+      },
+      "tierScope": "native map icon visual tier; not proof of NPC stat modifiers or runtime form"
+    },
+    "28": {
+      "src": "/map-icons/elite-strong-42027-835f54237790.png",
+      "width": 130,
+      "height": 130,
+      "status": "verified",
+      "iconId": 42027,
+      "worldMapPointIconId": 28,
+      "tier": "strong",
+      "color": "red",
+      "sha256": "835f542377907a3ed8745eedc397bf97326d75f5b4d329761a11c716ca82ad85",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42027.png",
+        "rectangle": [
+          1360,
+          928,
+          130,
+          130
+        ]
+      },
+      "tierScope": "native map icon visual tier; not proof of NPC stat modifiers or runtime form"
+    }
+  },
+  "nightlords": {
+    "8": {
+      "src": "/map-icons/nightlord-8-normal-41828-12859eae55e1.png",
+      "width": 460,
+      "height": 460,
+      "status": "verified",
+      "iconId": 41828,
+      "sha256": "12859eae55e1e561440f713de5ebcbaacf9e78a86a9d8dbc3308c3611a7466e8",
+      "nameZh": "哈尔莫妮亚",
+      "variant": "normal-color-menu-portrait",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/21_common_dlc01_h.tpf.dcx",
+        "resourceSha256": "71c6d5f2c54dda5b2117ed41693ab642e9a92c0b9087b70c784dc2c91cd9d53f",
+        "texture": "SB_MenuIcon_DLC01_0",
+        "ddsSha256": "ecc33c58f82a62b89bb6410a4fcb8b8378f20f270cfa991aca535afe5d0ed828",
+        "layoutResource": "/menu/21_common_dlc01_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_DLC01_0.layout",
+        "layoutSha256": "fa0b945f34a62117b37442456ed81f89f7824ff585ceb4d5f04bb5ce763c8bcc",
+        "sprite": "MENU_MenuIcon_41828.png",
+        "rectangle": [
+          1040,
+          1208,
+          460,
+          460
+        ],
+        "param": "NightBossMenuParam",
+        "menuRowId": 8,
+        "field": "largeBossIconId"
+      },
+      "formScope": "menu identity portrait only; does not establish combat mode or NPC stage"
+    },
+    "9": {
+      "src": "/map-icons/nightlord-9-normal-41829-151a9c9853c4.png",
+      "width": 460,
+      "height": 460,
+      "status": "verified",
+      "iconId": 41829,
+      "sha256": "151a9c9853c478ee3eafbccccaf58e610cde3e8d7310fdd1b5c751c880384968",
+      "nameZh": "史柴格斯",
+      "variant": "normal-color-menu-portrait",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/21_common_dlc01_h.tpf.dcx",
+        "resourceSha256": "71c6d5f2c54dda5b2117ed41693ab642e9a92c0b9087b70c784dc2c91cd9d53f",
+        "texture": "SB_MenuIcon_DLC01_0",
+        "ddsSha256": "ecc33c58f82a62b89bb6410a4fcb8b8378f20f270cfa991aca535afe5d0ed828",
+        "layoutResource": "/menu/21_common_dlc01_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_DLC01_0.layout",
+        "layoutSha256": "fa0b945f34a62117b37442456ed81f89f7824ff585ceb4d5f04bb5ce763c8bcc",
+        "sprite": "MENU_MenuIcon_41829.png",
+        "rectangle": [
+          1364,
+          0,
+          460,
+          460
+        ],
+        "param": "NightBossMenuParam",
+        "menuRowId": 9,
+        "field": "largeBossIconId"
+      },
+      "formScope": "menu identity portrait only; does not establish combat mode or NPC stage"
+    }
+  }
+}

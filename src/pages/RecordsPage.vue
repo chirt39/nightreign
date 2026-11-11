@@ -3,8 +3,8 @@ defineProps({ active: Boolean });
 </script>
 
 <template>
-<section id="view-records" class="view" :class="{ active }">
-          <div class="page-intro"><p class="eyebrow">BATTLE RECORDS / LOCAL SAVE</p><h1>日志</h1><p>读取存档后，在此查看游戏内概要、渡夜者使用次数、夜王战绩、累计数据与深层区域纪录。数据仅在浏览器内解析。</p></div>
+<section id="view-records" class="view reference-page" :class="{ active }">
+          <div class="page-intro reference-heading"><p class="eyebrow">BATTLE RECORDS / LOCAL SAVE</p><h1>日志</h1><p>读取存档后，在此查看游戏内概要、渡夜者使用次数、夜王战绩、累计数据与深层区域纪录。数据仅在浏览器内解析。</p></div>
           <div id="records-empty" class="note-panel"><span class="note-icon">▣</span><div><strong>等待存档</strong><p>先在“遗物仪式”选择 NR0000.sl2。</p><button class="text-link button-link" data-go="relics">前往解析存档 ↗</button></div></div>
           <div id="records-panel" class="record-dashboard" hidden>
             <section class="record-panel"><header class="record-header"><span class="record-emblem" aria-hidden="true">♜</span><div><p class="eyebrow">RECORD / OVERVIEW</p><h2>战斗记录－概要</h2></div></header><div id="record-overview" class="record-list"></div></section>

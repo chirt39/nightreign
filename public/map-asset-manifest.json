@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "gameVersion": "1.3.3.0",
+    "regulationVersion": "10350000",
+    "exeSha256": "9545e8732919bb6a63904cb73223641b3c4f9a67869be5722612acca413e8b3a",
+    "regulationSha256": "876a3ca279a4561d0c69f81fe5e510c75c59ab9a8a201694f8cf4a42c91e0268",
+    "dictionarySha256": "7f81526f89bfee584774641259f52b3f3d133e327a491d4d9faf2f2cbe4b6544",
+    "scriptSha256": "e504e5c5e7ad93ac635a68fc5ebf0734a6fa157014a4530b220af215d2ca5467"
+  },
+  "terrains": {
+    "0": {
+      "src": "/map-assets/limveld-L0-425d84c0763e.webp",
+      "width": 1536,
+      "height": 1536,
+      "status": "verified",
+      "name": "limveld",
+      "layer": 0,
+      "coordinateTransform": {
+        "status": "verified-static-calibration",
+        "areaNo": 60,
+        "layer": 0,
+        "subLayer": "",
+        "gridSize": 256,
+        "worldUnitsPerPixel": 1,
+        "width": 1536,
+        "height": 1536,
+        "pixelX": {
+          "gridXNo": 256,
+          "posX": 1,
+          "constant": -10368
+        },
+        "pixelY": {
+          "gridZNo": -256,
+          "posZ": -1,
+          "constant": 10368
+        },
+        "normalizedX": "(gridXNo*256+posX-10368)/1536",
+        "normalizedY": "(10368-gridZNo*256-posZ)/1536",
+        "origin": "top-left",
+        "clamp": false,
+        "runtimeVerified": false,
+        "scope": "area60 surface attachment positions; not underground, building interior, or arbitrary entity coordinates"
+      },
+      "source": {
+        "resource": "/menu/71_maptile_m00.tpf.dcx",
+        "archive": "data0.bdt",
+        "pathHash": "0xa28a0c950aa06c27",
+        "resourceSha256": "6fbaf90461131f762e09d020a3342931b95d565832dff349b71cc5aba78614da",
+        "decodedTpfSha256": "a405711a48e26ae1cd33af9e41e39ecc3eea75c69b73dc0eb71ca33b0fabd674",
+        "rgbaSha256": "d851c69c6f94ab767034042aea13d1f3c69af376307e099eab381b86c78a6cf8",
+        "webpSha256": "425d84c0763efcf72f49a613b186b31d8299f0e976555f6020786e7a8000f0c7",
+        "tiles": 36,
+        "tileSize": [
+          256,
+          256
+        ],
+        "colRange": [
+          0,
+          5
+        ],
+        "rowRange": [
+          0,
+          5
+        ],
+        "stitch": "x=(col-minCol)*tileWidth; y=(maxRow-row)*tileHeight; raw RGBA paste; no resample"
+      },
+      "verification": {
+        "pixelPreservation": "decoded WebP RGBA and all source tile crops compare equal",
+        "coordinateCalibration": "static landmarks; normal 3, Great Hollow 4; variants share tile frame",
+        "runtimeVerified": false
+      }
+    },
+    "1": {
+      "src": "/map-assets/limveld-frost-L0-2d112d61aeeb.webp",
+      "width": 1536,
+      "height": 1536,
+      "status": "verified",
+      "name": "mountaintop",
+      "layer": 0,
+      "coordinateTransform": {
+        "status": "verified-static-calibration",
+        "areaNo": 60,
+        "layer": 0,
+        "subLayer": "",
+        "gridSize": 256,
+        "worldUnitsPerPixel": 1,
+        "width": 1536,
+        "height": 1536,
+        "pixelX": {
+          "gridXNo": 256,
+          "posX": 1,
+          "constant": -10368
+        },
+        "pixelY": {
+          "gridZNo": -256,
+          "posZ": -1,
+          "constant": 10368
+        },
+        "normalizedX": "(gridXNo*256+posX-10368)/1536",
+        "normalizedY": "(10368-gridZNo*256-posZ)/1536",
+        "origin": "top-left",
+        "clamp": false,
+        "runtimeVerified": false,
+        "scope": "area60 surface attachment positions; not underground, building interior, or arbitrary entity coordinates"
+      },
+      "source": {
+        "resource": "/menu/71_maptile_m01.tpf.dcx",
+        "archive": "data0.bdt",
+        "pathHash": "0xa3e5e25a8daa1608",
+        "resourceSha256": "a832547c4842b09882d9ad99420273b7deead44f73cc2af78c0cb25241eaf5c1",
+        "decodedTpfSha256": "c9d374a9129544228703e869eb2051d6844d56103a447ef61f030f98724c3939",
+        "rgbaSha256": "8dea3e35d1939710a5f2d7abf9b0282ea4ad5418370e29235d485a7932979582",
+        "webpSha256": "2d112d61aeebdb9f411f69d6c81c67882204d9d2f6b00a62022b9898919db43c",
+        "tiles": 36,
+        "tileSize": [
+          256,
+          256
+        ],
+        "colRange": [
+          0,
+          5
+        ],
+        "rowRange": [
+          0,
+          5
+        ],
+        "stitch": "x=(col-minCol)*tileWidth; y=(maxRow-row)*tileHeight; raw RGBA paste; no resample"
+      },
+      "verification": {
+        "pixelPreservation": "decoded WebP RGBA and all source tile crops compare equal",
+        "coordinateCalibration": "static landmarks; normal 3, Great Hollow 4; variants share tile frame",
+        "runtimeVerified": false
+      }
+    },
+    "2": {
+      "src": "/map-assets/limveld-volcanic-L0-6bb7b1a0ad18.webp",
+      "width": 1536,
+      "height": 1536,
+      "status": "verified",
+      "name": "crater",
+      "layer": 0,
+      "coordinateTransform": {
+        "status": "verified-static-calibration",
+        "areaNo": 60,
+        "layer": 0,
+        "subLayer": "",
+        "gridSize": 256,
+        "worldUnitsPerPixel": 1,
+        "width": 1536,
+        "height": 1536,
+        "pixelX": {
+          "gridXNo": 256,
+          "posX": 1,
+          "constant": -10368
+        },
+        "pixelY": {
+          "gridZNo": -256,
+          "posZ": -1,
+          "constant": 10368
+        },
+        "normalizedX": "(gridXNo*256+posX-10368)/1536",
+        "normalizedY": "(10368-gridZNo*256-posZ)/1536",
+        "origin": "top-left",
+        "clamp": false,
+        "runtimeVerified": false,
+        "scope": "area60 surface attachment positions; not underground, building interior, or arbitrary entity coordinates"
+      },
+      "source": {
+        "resource": "/menu/71_maptile_m02.tpf.dcx",
+        "archive": "data0.bdt",
+        "pathHash": "0xa541b82010b3bfe9",
+        "resourceSha256": "9c8b3f58c47c384382f9234aec1dd5890d7e382b72a2b38066da74bddb944f45",
+        "decodedTpfSha256": "ca1b54871fb3ea993e03f5d1ac2e3214bd7e816a1bea47e3827a8db1ddca60b4",
+        "rgbaSha256": "00c5b4aef49efb88aaaec993f2b4fd1f692171b6ecdee6c68e6d510511b20bdc",
+        "webpSha256": "6bb7b1a0ad18ad26c61c9e7907afc89dbb5ddb82d9be19dd5a24b8d9fb429e27",
+        "tiles": 36,
+        "tileSize": [
+          256,
+          256
+        ],
+        "colRange": [
+          0,
+          5
+        ],
+        "rowRange": [
+          0,
+          5
+        ],
+        "stitch": "x=(col-minCol)*tileWidth; y=(maxRow-row)*tileHeight; raw RGBA paste; no resample"
+      },
+      "verification": {
+        "pixelPreservation": "decoded WebP RGBA and all source tile crops compare equal",
+        "coordinateCalibration": "static landmarks; normal 3, Great Hollow 4; variants share tile frame",
+        "runtimeVerified": false
+      }
+    },
+    "3": {
+      "src": "/map-assets/limveld-corruption-L0-c452c5a22648.webp",
+      "width": 1536,
+      "height": 1536,
+      "status": "verified",
+      "name": "rotted",
+      "layer": 0,
+      "coordinateTransform": {
+        "status": "verified-static-calibration",
+        "areaNo": 60,
+        "layer": 0,
+        "subLayer": "",
+        "gridSize": 256,
+        "worldUnitsPerPixel": 1,
+        "width": 1536,
+        "height": 1536,
+        "pixelX": {
+          "gridXNo": 256,
+          "posX": 1,
+          "constant": -10368
+        },
+        "pixelY": {
+          "gridZNo": -256,
+          "posZ": -1,
+          "constant": 10368
+        },
+        "normalizedX": "(gridXNo*256+posX-10368)/1536",
+        "normalizedY": "(10368-gridZNo*256-posZ)/1536",
+        "origin": "top-left",
+        "clamp": false,
+        "runtimeVerified": false,
+        "scope": "area60 surface attachment positions; not underground, building interior, or arbitrary entity coordinates"
+      },
+      "source": {
+        "resource": "/menu/71_maptile_m03.tpf.dcx",
+        "archive": "data0.bdt",
+        "pathHash": "0xa69d8de593bd69ca",
+        "resourceSha256": "0f945efa04388b50a1df8505c0bea1e40f1b791a60808ea54a7247baee19d725",
+        "decodedTpfSha256": "9c32a1c324295a6f81c686e269de82b091b9cf106c1e522689b4a4f754cf49a5",
+        "rgbaSha256": "61e26be9b5db4fc30d41d36334dd6dbc456a97da821f99f82e1d801b06710f26",
+        "webpSha256": "c452c5a2264851fe9a9f449431558e341afa6ffb7f31ee9d021a992f355de06d",
+        "tiles": 36,
+        "tileSize": [
+          256,
+          256
+        ],
+        "colRange": [
+          0,
+          5
+        ],
+        "rowRange": [
+          0,
+          5
+        ],
+        "stitch": "x=(col-minCol)*tileWidth; y=(maxRow-row)*tileHeight; raw RGBA paste; no resample"
+      },
+      "verification": {
+        "pixelPreservation": "decoded WebP RGBA and all source tile crops compare equal",
+        "coordinateCalibration": "static landmarks; normal 3, Great Hollow 4; variants share tile frame",
+        "runtimeVerified": false
+      }
+    },
+    "4": {
+      "src": "/map-assets/great-hollow-L0-52743e40fbce.webp",
+      "width": 1536,
+      "height": 1536,
+      "status": "verified",
+      "name": "great-hollow",
+      "layer": 0,
+      "coordinateTransform": {
+        "status": "verified-static-calibration",
+        "areaNo": 60,
+        "layer": 0,
+        "subLayer": "",
+        "gridSize": 256,
+        "worldUnitsPerPixel": 1,
+        "width": 1536,
+        "height": 1536,
+        "pixelX": {
+          "gridXNo": 256,
+          "posX": 1,
+          "constant": -10368
+        },
+        "pixelY": {
+          "gridZNo": -256,
+          "posZ": -1,
+          "constant": 10368
+        },
+        "normalizedX": "(gridXNo*256+posX-10368)/1536",
+        "normalizedY": "(10368-gridZNo*256-posZ)/1536",
+        "origin": "top-left",
+        "clamp": false,
+        "runtimeVerified": false,
+        "scope": "area60 surface attachment positions; not underground, building interior, or arbitrary entity coordinates"
+      },
+      "source": {
+        "resource": "/menu/71_maptile_m04.tpf.dcx",
+        "archive": "data0.bdt",
+        "pathHash": "0xa7f963ab16c713ab",
+        "resourceSha256": "72dfa27059cad5a4fdb297b3e4a5d0212ed494b5c02f1ca2a00c1d2627b8c757",
+        "decodedTpfSha256": "432252333fe6ac3ed756b465d801619010dc473226fdaf276e4d0b1fe927b79b",
+        "rgbaSha256": "bf1aa35327ce60f5ddd25b3ad3931625d1c2ee54d91710a7f3ea202a880da0ec",
+        "webpSha256": "52743e40fbce7ed14a04a2de2460d83211fc340514189d2158a87cd0ea6f92f4",
+        "tiles": 36,
+        "tileSize": [
+          256,
+          256
+        ],
+        "colRange": [
+          0,
+          5
+        ],
+        "rowRange": [
+          0,
+          5
+        ],
+        "stitch": "x=(col-minCol)*tileWidth; y=(maxRow-row)*tileHeight; raw RGBA paste; no resample"
+      },
+      "verification": {
+        "pixelPreservation": "decoded WebP RGBA and all source tile crops compare equal",
+        "coordinateCalibration": "static landmarks; normal 3, Great Hollow 4; variants share tile frame",
+        "runtimeVerified": false
+      }
+    },
+    "5": {
+      "src": "/map-assets/limveld-castle-L0-a93228924ccb.webp",
+      "width": 1536,
+      "height": 1536,
+      "status": "verified",
+      "name": "noklateo",
+      "layer": 0,
+      "coordinateTransform": {
+        "status": "verified-static-calibration",
+        "areaNo": 60,
+        "layer": 0,
+        "subLayer": "",
+        "gridSize": 256,
+        "worldUnitsPerPixel": 1,
+        "width": 1536,
+        "height": 1536,
+        "pixelX": {
+          "gridXNo": 256,
+          "posX": 1,
+          "constant": -10368
+        },
+        "pixelY": {
+          "gridZNo": -256,
+          "posZ": -1,
+          "constant": 10368
+        },
+        "normalizedX": "(gridXNo*256+posX-10368)/1536",
+        "normalizedY": "(10368-gridZNo*256-posZ)/1536",
+        "origin": "top-left",
+        "clamp": false,
+        "runtimeVerified": false,
+        "scope": "area60 surface attachment positions; not underground, building interior, or arbitrary entity coordinates"
+      },
+      "source": {
+        "resource": "/menu/71_maptile_m05.tpf.dcx",
+        "archive": "data0.bdt",
+        "pathHash": "0xa955397099d0bd8c",
+        "resourceSha256": "a5a6005af84c72e56fe4d771a0bd4753b21a0d5d813e85ae790a1d1820cd4148",
+        "decodedTpfSha256": "4734c6d8fadd560ffd114d82c53d521ac69ce517932973e68cd2c98cbe19d749",
+        "rgbaSha256": "561ccfc58ea595ac681bffcb512bbd707614dcd25eec3ec6387a930b0a71fbd6",
+        "webpSha256": "a93228924ccbc5c8c83d17da90be094bb0759f2e8dd209065b91e1863236144c",
+        "tiles": 36,
+        "tileSize": [
+          256,
+          256
+        ],
+        "colRange": [
+          0,
+          5
+        ],
+        "rowRange": [
+          0,
+          5
+        ],
+        "stitch": "x=(col-minCol)*tileWidth; y=(maxRow-row)*tileHeight; raw RGBA paste; no resample"
+      },
+      "verification": {
+        "pixelPreservation": "decoded WebP RGBA and all source tile crops compare equal",
+        "coordinateCalibration": "static landmarks; normal 3, Great Hollow 4; variants share tile frame",
+        "runtimeVerified": false
+      }
+    }
+  }
+}
