@@ -3,7 +3,7 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyImageManifest:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),enemyEntities:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const state = {enemyData:null,enemyImageManifest:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),enemyEntities:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,effectEncyclopediaPageSize:18,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
 const relicColorClasses = Object.freeze({Red:'red',Blue:'blue',Yellow:'yellow',Green:'green',Any:'any'});
 const relicColorClass = (relic) => {const key=String(relic?.itemColor||'Any');return `color-${Object.hasOwn(relicColorClasses,key)?relicColorClasses[key]:'any'}`};
@@ -444,6 +444,18 @@ function renderEffectEncyclopedia(){
   }
   filterEffectEncyclopedia();
 }
+function syncEffectEncyclopediaPageSize(){
+  const list=$('#effect-encyclopedia-list');
+  if(!list?.getClientRects().length)return false;
+  const columns=getComputedStyle(list).gridTemplateColumns.split(/\s+/).filter(track=>track.endsWith('px')).length;
+  if(!columns)return false;
+  const pageSize=columns*Math.max(1,Math.round(EFFECT_ENCYCLOPEDIA_PAGE_SIZE/columns));
+  if(pageSize===state.effectEncyclopediaPageSize)return false;
+  const first=(state.effectEncyclopediaPage-1)*state.effectEncyclopediaPageSize;
+  state.effectEncyclopediaPageSize=pageSize;
+  state.effectEncyclopediaPage=Math.floor(first/pageSize)+1;
+  return true;
+}
 function filterEffectEncyclopedia(resetPage=true){
   const list=$('#effect-encyclopedia-list');if(!list)return;
   const query=($('#effect-encyclopedia-search')?.value||'').trim().toLocaleLowerCase(),category=state.effectEncyclopediaCategory,type=$('#effect-encyclopedia-type')?.value||'all';
@@ -452,14 +464,21 @@ function filterEffectEncyclopedia(resetPage=true){
     if(type!=='all'&&item.type!==type)return false;
     return !query||`${item.name} ${item.type} ${item.explanation} ${item.id} ${item.english} ${item.key} ${item.categoryLabel} ${item.buffType}`.toLocaleLowerCase().includes(query);
   });
+  syncEffectEncyclopediaPageSize();
   if(resetPage)state.effectEncyclopediaPage=1;
-  const pages=Math.max(1,Math.ceil(found.length/EFFECT_ENCYCLOPEDIA_PAGE_SIZE));
+  const pageSize=state.effectEncyclopediaPageSize;
+  const pages=Math.max(1,Math.ceil(found.length/pageSize));
   state.effectEncyclopediaPage=Math.min(Math.max(state.effectEncyclopediaPage,1),pages);
-  const start=(state.effectEncyclopediaPage-1)*EFFECT_ENCYCLOPEDIA_PAGE_SIZE,rows=found.slice(start,start+EFFECT_ENCYCLOPEDIA_PAGE_SIZE);
+  const start=(state.effectEncyclopediaPage-1)*pageSize,rows=found.slice(start,start+pageSize);
   $('#effect-encyclopedia-count').textContent=found.length?`第 ${start+1}–${start+rows.length} 条 / 共 ${found.length} 条匹配`:'0 条匹配结果';
-  list.innerHTML=rows.length?rows.map(item=>`<article class="effect-encyclopedia-card" id="effect-${esc(item.category)}-${esc(item.id)}"><header><h2>${esc(item.name)}</h2><span class="effect-encyclopedia-id">#${esc(item.id)}</span></header><div class="effect-encyclopedia-tags"><span>${esc(item.categoryLabel)}</span><span>${esc(item.type)}</span>${item.stackability?`<span class="effect-encyclopedia-stackability">${esc(item.stackability)}</span>`:''}${item.buffType?`<span>${esc(item.buffType)}</span>`:''}</div><p>${esc(item.explanation||'效果说明暂未收录')}</p></article>`).join(''):'<div class="empty-state"><h3>没有找到匹配词条</h3><p>可以更换关键词或筛选条件。</p></div>';
-  renderPagination('effect-encyclopedia-pagination',found.length,EFFECT_ENCYCLOPEDIA_PAGE_SIZE,state.effectEncyclopediaPage);
+  list.innerHTML=rows.length?rows.map(item=>`<article class="effect-encyclopedia-card" id="effect-${esc(item.category)}-${esc(item.id)}"><header><h2>${esc(item.name)}</h2><span class="effect-encyclopedia-id">#${esc(item.id)}</span></header><div class="effect-encyclopedia-tags"><span>${esc(item.categoryLabel)}</span><span>${esc(item.type)}</span>${item.stackability?`<span class="effect-encyclopedia-stackability">${esc(item.stackability)}</span>`:''}${item.buffType&&item.buffType!=='不附带负面词条'?`<span>${esc(item.buffType)}</span>`:''}</div><p>${esc(item.explanation||'效果说明暂未收录')}</p></article>`).join(''):'<div class="empty-state"><h3>没有找到匹配词条</h3><p>可以更换关键词或筛选条件。</p></div>';
+  renderPagination('effect-encyclopedia-pagination',found.length,pageSize,state.effectEncyclopediaPage);
 }
+// 隐藏页面重新出现和窗口改变都会触发尺寸观察；高度变化不重复渲染。
+const effectEncyclopediaResizeObserver=new ResizeObserver(()=>{
+  if(syncEffectEncyclopediaPageSize())filterEffectEncyclopedia(false);
+});
+effectEncyclopediaResizeObserver.observe($('#effect-encyclopedia-list'));
 $('#effect-encyclopedia-search').addEventListener('input',()=>filterEffectEncyclopedia());
 $('#effect-encyclopedia-type').addEventListener('change',()=>filterEffectEncyclopedia());
 $('.effect-encyclopedia-categories').addEventListener('click',event=>{
