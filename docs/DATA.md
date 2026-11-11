@@ -6,6 +6,7 @@
 | --- | --- | --- | --- |
 | 怪物属性与抗性 | `public/enemy-data.json` | 夜之数据 Wiki、用户提供的 Boss 倍率表 | ID、同名变体、魔火雷圣倍率、异常抗性、遭遇位置、版本 |
 | 遗物基础数据 | `public/items_data.json`、`public/relic_catalog_zh.json` | ERN_RelicForge、Biligame、5gamers | 道具 key、中文名、图片、普通／深夜／独特、专属或夜王类型 |
+| 深夜遗物共用的普通词条 | `public/relic_effect_cross_mode.json`，生成脚本 `scripts/build_relic_effect_cross_mode.py` | Steam Build 22818764，参数版本 10350000。引用本地提取的 EquipParamAntique、AttachEffectTableParam 和 AttachEffectParam | 2026-11-11 遗物与配装及总控核对。按正负槽位和有效抽选权重确认 ID，再与普通、深夜局外图鉴核对。本次收录 167 个正面 ID。公开清单仅含数字 ID，原生参数和文本保留在本地。 |
 | 词条与分类 | `public/effects_data.json`、`public/effect_names_zh.json`、`public/quickref_effects_zh.json`、`public/relic_rule_effects.json`、`public/effect_encyclopedia.json` | 夜之数据 Wiki、NightreignQuickRef（图鉴快照固定为提交 `3e23450094c18125ae5665927ed240b18189a040`） | 原始效果 ID、等级、中文文案、局内／局外、深夜局内／深夜局外、负面配对、可叠加性 |
 | 器皿 | `public/vessels_data.json` | ERN_RelicForge、人工中文对照 | 槽位顺序、颜色、角色限制 |
 | 存档结构与战绩 | `public/relic-parser.js`、`public/save-editor.js` | 当前实现、游戏样本、逆向证据 | 文件版本、字段偏移、类型、数值边界、与游戏画面逐项一致 |

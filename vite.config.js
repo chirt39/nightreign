@@ -22,6 +22,7 @@ const catalogJsonFiles = [
   'relic_catalog_zh.json',
   'relic_rule_effects.json',
   'effect_encyclopedia.json',
+  'relic_effect_cross_mode.json',
   'enemy-image-verified.json',
   'enemy-image-candidates.json',
   'weapon-catalog.json',

@@ -31,7 +31,7 @@ window.navigateTo=navigate;
 
 async function loadCatalogs(){
   try{
-    const catalogFiles=['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json'];
+    const catalogFiles=['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json','relic_effect_cross_mode.json'];
     const catalogVersions=window.NIGHTREIGN_CATALOG_VERSIONS;
     if(!catalogVersions||typeof catalogVersions!=='object')throw new Error('数据版本信息缺失，请刷新页面重试。');
     const enemyImagesPromise = Promise.all([
@@ -45,7 +45,11 @@ async function loadCatalogs(){
       if(!response.ok)throw new Error(name+' 读取失败');
       return response.json();
     }));
-    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData]=catalogs;
+    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData,crossMode]=catalogs;
+    state.deepRelicSharedEffects = {
+      positive: new Set(crossMode.positive),
+      negative: new Set(crossMode.negative),
+    };
     Object.assign(state,{enemyData:enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData});
     enemyImagesPromise.then(([verified, candidates]) => {
       state.enemyImageManifest = verified;
@@ -571,11 +575,17 @@ function pairedEffects(relic){
   }
   return groups;
 }
-function relicEffectTarget(relic, effect) {
+function relicEffectTarget(relic, effect, isNegative) {
   const category = { Relic: 'normal-outside', UniqueRelic: 'normal-outside', DeepRelic: 'deep-outside' }[relic.itemType];
   if (!category) return null;
-  const entry = catalogEffectByKey.get(category + ':' + effect.id);
-  return entry ? { kind: 'effect', category, id: String(entry.id) } : null;
+  const key = category + ':' + effect.id;
+  let entry = catalogEffectByKey.get(key);
+  // A duplicate deep entry is ambiguous. Only a missing entry can use the shared pool.
+  if (category === 'deep-outside' && !catalogEffectByKey.has(key)) {
+    const shared = state.deepRelicSharedEffects[isNegative ? 'negative' : 'positive'];
+    if (shared.has(Number(effect.id))) entry = catalogEffectByKey.get('normal-outside:' + effect.id);
+  }
+  return entry ? { kind: 'effect', category: entry.category, id: String(entry.id) } : null;
 }
 function effectCardUrl(target) {
   const url = new URL(location.href);
@@ -584,9 +594,8 @@ function effectCardUrl(target) {
   url.hash = 'effects';
   return url.pathname + url.search + url.hash;
 }
-function relicEffectText(relic, effect, position, linkEffects) {
+function relicEffectText(relic, effect, position, target) {
   const name = esc(effectName(effect));
-  const target = linkEffects && relicEffectTarget(relic, effect);
   if (!target) return name;
   return `<a class="relic-effect-link" href="${esc(effectCardUrl(target))}"
     data-effect-category="${esc(target.category)}" data-effect-id="${esc(target.id)}"
@@ -597,7 +606,8 @@ function renderEffectRows(relic, showId = false, linkEffects = false) {
   if (!groups.length) return '<div class="game-effect-row empty">此遗物无已识别词条</div>';
   return groups.map((group, groupIndex) => {
     const labels = group.map((effect, index) => {
-      const name = relicEffectText(relic, effect, `${groupIndex}:${index}`, linkEffects);
+      const target = linkEffects && relicEffectTarget(relic, effect, index > 0 || !!effect.isDebuff);
+      const name = relicEffectText(relic, effect, `${groupIndex}:${index}`, target);
       const id = showId ? `<em>#${esc(effect.id)}</em>` : '';
       return `<span${index ? ' class="game-effect-negative"' : ''}>${name}${id}</span>`;
     });
