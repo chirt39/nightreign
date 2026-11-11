@@ -3,8 +3,9 @@ defineProps({ active: Boolean });
 </script>
 
 <template>
-<section id="view-overview" class="view" :class="{ active }">
-          <div class="hero"><div class="hero-content"><p class="eyebrow">NIGHTFARER EXPEDITION · LIMVELD</p><h1>黑夜还没有<br><em>结束</em></h1><p class="hero-copy">选择渡夜者，探索宁姆韦德，在远征尽头迎战夜王。查阅敌人资料、解析遗物，并为下一场出击整备装配。</p><div class="hero-actions"><button class="button primary" data-go="relics">解析遗物存档 <span>↗</span></button><button class="button ghost" data-go="enemies">查阅敌人图鉴 <span>→</span></button></div></div><div class="hero-caption">LIMVELD · THREE-DAY EXPEDITION</div></div>
+<section id="view-overview" class="view reference-page" :class="{ active }">
+          <header class="page-intro reference-heading"><h1>圆桌厅堂</h1><p>查阅资料、整理遗物与准备远征。</p></header>
+          <div class="hero"><div class="hero-content"><p class="eyebrow">NIGHTFARER EXPEDITION · LIMVELD</p><h2>黑夜还没有<br><em>结束</em></h2><p class="hero-copy">选择渡夜者，探索宁姆韦德，在远征尽头迎战夜王。查阅敌人资料、解析遗物，并为下一场出击整备装配。</p><div class="hero-actions"><button class="button primary" data-go="relics">解析遗物存档 <span>↗</span></button><button class="button ghost" data-go="enemies">查阅敌人图鉴 <span>→</span></button></div></div><div class="hero-caption">LIMVELD · THREE-DAY EXPEDITION</div></div>
           <section class="home-agent panel">
             <div class="home-agent-heading"><div><p class="eyebrow">NIGHTREIGN GUIDE</p><h2>黑夜君临助手</h2><p>帮渡夜者解答黑夜君临问题。</p></div></div>
             <p id="agent-transport-warning" class="agent-transport-warning" role="alert" hidden>AI 助手只会通过安全连接发送问题与相关数据。请使用 HTTPS 页面和 HTTPS API；本机开发可让页面与 API 都通过 localhost、127.0.0.1 或 [::1] 访问。当前连接不安全，问答、历史记忆读取/清除和配装请求已禁用。</p>

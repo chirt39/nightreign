@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { computed, nextTick, reactive, ref, watch } from 'vue';
-import { pointChoiceContext, possiblePointChoices, buildingChoicesAtPosition, confirmedBuildingKeys, coincidentMarkers, withoutPointObservations, PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
+import { pointChoiceContext, possiblePointChoices, buildingChoicesAtPosition, confirmedFieldEliteKeys, confirmedBuildingKeys, coincidentMarkers, withoutPointObservations, PRIMARY_BOSS_ROLE, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, displayCategory, layoutMapMarkers, referenceMapGroups, calibratedPointDirectory, collectEvents, collectLayers, definitionOptions, evaluatePattern, eventOptions, findCandidates, nearbyPoints, phaseBossOptions, safeMapAsset } from '../src/lib/map-predictor.js';
 
 // Synthetic state fixtures exercise the filter contract, not game distribution claims.
 const known = value => ({ state: 'known', value });
@@ -382,4 +382,26 @@ test('real marked clues narrow building and elite choices while keeping DLC sour
   const elite=bySlot.get('750');
   assert.equal(possiblePointChoices(c.patterns,{filters:clues.filters},elite.entries,c.definitions).length,4);
   assert.deepEqual(possiblePointChoices(c.patterns,pointChoiceContext(clues,elite,groups),elite.entries,c.definitions).map(e=>e.name),['老狮子','米兰达之花']);
+});
+
+
+test('elite red certainty requires every remaining candidate identity, coverage and coordinate', () => {
+  const defs={features:{a:{kind:'monster',role:'fieldElite',nameZh:'精英甲'},b:{kind:'monster',role:'fieldElite',nameZh:'精英乙'}}};
+  const make=()=>pattern(0,{points:[{attachId:'1',normalized:{x:.5,y:.5},features:[{kind:'monster',role:'fieldElite',sourceId:'a',state:'known'}],coverage:{fieldElite:'known'}}]});
+  const a=make(),b=make(),key='["0","1","a"]';
+  assert.ok(confirmedFieldEliteKeys([a,b],'0',defs).has(key));
+  assert.ok(confirmedFieldEliteKeys([a],'0',defs).has(key));
+  for(const mutate of [p=>p.points[0].features[0].sourceId='b',p=>p.points[0].coverage.fieldElite='unknown',p=>p.points=[],p=>p.points[0].normalized={x:.6,y:.5},p=>p.points[0].features[0].state='unknown',p=>p.terrain={state:'unknown'}]){
+    const changed=make();mutate(changed);assert.equal(confirmedFieldEliteKeys([a,changed],'0',defs).has(key),false);
+  }
+  assert.equal(confirmedFieldEliteKeys([],'0',defs).size,0);
+  assert.equal(confirmedFieldEliteKeys([a],'0',{features:{a:{...defs.features.a,identityStatus:'unverified'}}}).size,0);
+});
+
+test('native filtered scenario confirms elites before any manual point marking', () => {
+  const c=JSON.parse(readFileSync(new URL('../public/map-catalog.json',import.meta.url),'utf8'));
+  const remaining=findCandidates(c.patterns,{filters:{terrain:'1',nightlord:'0',firstNight:'4924',secondNight:'4860'}},c.definitions);
+  const red=confirmedFieldEliteKeys(remaining,'1',c.definitions);
+  assert.ok(remaining.length>0);assert.ok(red.size>0);
+  for(const key of red){const [terrain,attach,source]=JSON.parse(key);assert.equal(terrain,'1');assert.ok(remaining.every(p=>p.points.some(pt=>String(pt.attachId)===attach&&pt.coverage.fieldElite==='known'&&pt.features.some(f=>f.sourceId===source))));}
 });

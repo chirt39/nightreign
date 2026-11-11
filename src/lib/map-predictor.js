@@ -177,6 +177,15 @@ export function confirmedBuildingKeys(patterns, terrainId, definitions) {
     return pattern.terrain?.state === 'known' && point?.coverage?.building === 'known' && buildings.length > 0 && buildings.every(feature => feature.state === 'known' && id(feature.sourceId) === entry.sourceId);
   })).map(entry => JSON.stringify([entry.terrainId, entry.attachId, entry.sourceId])));
 }
+export function confirmedFieldEliteKeys(patterns, terrainId, definitions) {
+  const relevant = patterns.filter(pattern => pattern.terrain?.state !== 'known' || id(pattern.terrain.value) === id(terrainId));
+  if (!relevant.length) return new Set();
+  return new Set(collectLayers(relevant, definitions).filter(entry => entry.role === FIELD_ELITE_ROLE && entry.common && entry.terrainId === id(terrainId) && validPosition(entry.normalized) && relevant.every(pattern => {
+    const point = pattern.points?.find(item => id(item.attachId) === entry.attachId);
+    const features = point?.features?.filter(feature => feature.role === FIELD_ELITE_ROLE) || [];
+    return pattern.terrain?.state === 'known' && point?.coverage?.fieldElite === 'known' && features.length > 0 && features.every(feature => feature.state === 'known' && feature.kind === 'monster' && id(feature.sourceId) === entry.sourceId);
+  })).map(entry => JSON.stringify([entry.terrainId, entry.attachId, entry.sourceId])));
+}
 // Keep native positions; dense markers shrink and expose their names on interaction.
 export function layoutMapMarkers(groups, width, height) {
   return groups.map(group => ({ ...group, markerX: group.normalized.x * width, markerY: group.normalized.y * height,

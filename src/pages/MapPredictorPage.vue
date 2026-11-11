@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue';
-import { buildingChoicesAtPosition, pointChoiceContext, possiblePointChoices, coincidentMarkers, confirmedBuildingKeys, withoutPointObservations, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, calibratedPointDirectory, collectLayers, definitionOptions, eventOptions, findCandidates, layoutMapMarkers, nearbyPoints, phaseBossOptions, referenceMapGroups, safeMapAsset, validPosition } from '../lib/map-predictor.js';
+import { buildingChoicesAtPosition, pointChoiceContext, possiblePointChoices, coincidentMarkers, confirmedBuildingKeys, confirmedFieldEliteKeys, withoutPointObservations, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, calibratedPointDirectory, collectLayers, definitionOptions, eventOptions, findCandidates, layoutMapMarkers, nearbyPoints, phaseBossOptions, referenceMapGroups, safeMapAsset, validPosition } from '../lib/map-predictor.js';
 
 const props = defineProps({ active: Boolean, catalogVersions: Object });
 const catalog = shallowRef(null), manifest = shallowRef(null), iconManifest = shallowRef(null), enemyImages = shallowRef(null), loading = ref(false), error = ref('');
@@ -69,7 +69,8 @@ const mapGroups = computed(() => {
 });
 function sameBuildingPosition(a,b) { return a.terrainId === b.terrainId && a.normalized && b.normalized && Math.abs(a.normalized.x-b.normalized.x)<.000001 && Math.abs(a.normalized.y-b.normalized.y)<.000001; }
 const certainBuildings = computed(() => observations.value.length ? confirmedBuildingKeys(candidates.value, terrainView.value, definitions.value) : new Set());
-function isCertain(group) { return !isObserved(group) && group.entries.some(entry => entry.kind === 'building' && certainBuildings.value.has(JSON.stringify([group.terrainId, group.attachId, entry.sourceId]))); }
+const certainElites = computed(() => confirmedFieldEliteKeys(candidates.value, terrainView.value, definitions.value));
+function isCertain(group) { return !group.reference && !isObserved(group) && group.entries.some(entry => (entry.kind === 'building' ? certainBuildings.value : certainElites.value).has(JSON.stringify([group.terrainId, group.attachId, entry.sourceId]))); }
 const referenceGroups = computed(() => referenceMapGroups(catalog.value?.referencePoints, terrainView.value, layerVisibility));
 const displayedMarkers = computed(() => layoutMapMarkers([...mapGroups.value, ...referenceGroups.value], stageSize.value.width, stageSize.value.height));
 const matchingNameGroups = computed(() => {
@@ -226,7 +227,7 @@ onBeforeUnmount(() => { controller?.abort(); viewportObserver?.disconnect(); if 
             <div class="map-surface" :style="{ width: `${stageSize.width}px`, height: `${stageSize.height}px` }"><div v-if="stageSize.width > 0" class="map-stage" :style="{ width: `${stageSize.width}px`, height: `${stageSize.height}px` }" @click="mapClicked">
               <img :src="asset.src" :alt="`${terrainName(terrainView)}底图`" draggable="false" @error="imageFailed">
               <div v-for="group in displayedMarkers" :key="group.key" class="map-marker-anchor" :style="{ left: `${group.markerX}px`, top: `${group.markerY}px` }">
-                <button class="map-marker" :class="{ observed: isObserved(group), certain: isCertain(group), reference: group.reference, dense: group.dense, 'game-icon': markerIcon(group.entries[0]), building: group.entries[0].displayCategory === 'building' }" type="button" :aria-label="group.reference ? `${groupName(group)}，参考位置` : `${pointLabel(group)}，${groupName(group)}，${isObserved(group) ? '已标注' : '推算点位'}`" @click.stop="markerClicked(group, $event)" :title="groupName(group)"><span aria-hidden="true"><img v-if="markerIcon(group.entries[0])" :src="markerIcon(group.entries[0])" alt="" draggable="false" @error="imageFailed"><svg v-else viewBox="0 0 24 24"><path :d="iconPath(group.entries[0].displayCategory)" /></svg></span><small>{{ groupName(group) }}<em v-if="group.reference">参考</em></small></button>
+                <button class="map-marker" :class="{ observed: isObserved(group), certain: isCertain(group), reference: group.reference, dense: group.dense, 'game-icon': markerIcon(group.entries[0]), building: group.entries[0].displayCategory === 'building', elite: group.entries[0].displayCategory === 'fieldElite' }" type="button" :aria-label="group.reference ? `${groupName(group)}，参考位置` : `${pointLabel(group)}，${groupName(group)}，${isObserved(group) ? '已标注' : '推算点位'}`" @click.stop="markerClicked(group, $event)" :title="groupName(group)"><span aria-hidden="true"><img v-if="markerIcon(group.entries[0])" :src="markerIcon(group.entries[0])" alt="" draggable="false" @error="imageFailed"><svg v-else viewBox="0 0 24 24"><path :d="iconPath(group.entries[0].displayCategory)" /></svg></span><small>{{ groupName(group) }}<em v-if="group.reference">参考</em></small></button>
                 <button v-if="isObserved(group)" type="button" class="map-marker-remove" :aria-label="`取消${pointLabel(group)}的全部标注`" title="取消该点全部标注" @pointerdown.stop @click.stop="removePoint(group)">×</button>
               </div>
             </div></div>
@@ -298,4 +299,5 @@ label{display:grid;gap:4px;min-width:0;color:#c7d3da}select,input{width:100%;min
 .map-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:8px}.map-conditions{padding:8px 10px}.map-heading{margin:0 0 7px}.map-desktop-conditions{display:none}.map-mobile-summary{display:flex;align-items:center;justify-content:space-between;gap:8px}.map-mobile-summary strong{font-size:15px;color:#ecd7a7}.map-mobile-summary button{min-height:34px;padding:5px 10px}.map-canvas-panel{padding:7px}.map-viewport{height:auto;min-height:0}.map-layer-switches{gap:8px}.map-canvas-tools{gap:5px}.map-zoom{gap:4px}.map-zoom button{min-height:32px;padding:4px 8px;font-size:12px}
 }
 @media(max-width:480px){.map-heading h1{font-size:22px}.map-point-dialog{padding:12px}.map-point-dialog>header{top:-12px}.map-more-fields{grid-template-columns:minmax(0,1fr)}.map-nightlord-options{gap:6px}.map-nightlord-options button{padding:6px;font-size:13px}.map-nightlord-options img{width:32px;height:32px}.map-canvas-tools .map-conflict{font-size:12px}.map-conflict button{font-size:12px;min-height:30px}}
+.map-marker.elite:not(.reference) small{display:block;max-width:120px;text-align:center;font-size:11px;line-height:1.3;padding:2px 4px}.map-marker.elite:hover small,.map-marker.elite:focus-visible small{max-width:180px}
 </style>
