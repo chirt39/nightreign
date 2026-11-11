@@ -63,9 +63,33 @@ def main() -> None:
 
     document = {"source": SOURCE, "sourceCommit": COMMIT, "license": "GPL-3.0",
                 "categories": categories, "entries": entries}
+    apply_game_supplements(document)
     output = ROOT / "public" / "effect_encyclopedia.json"
     output.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Wrote {len(entries)} entries to {output}")
+
+
+def apply_game_supplements(document):
+    """Apply checked game data after rebuilding the pinned QuickRef snapshot."""
+    entries = document["entries"]
+    by_key = {(entry["category"], entry["id"]): entry for entry in entries}
+    categories = {group["id"]: group for group in document["categories"]}
+    seen = set()
+    for section in ("general", "items", "characters"):
+        source = f"scripts/data/relic_glossary_{section}.json"
+        for record in json.loads((ROOT / source).read_text(encoding="utf-8-sig")):
+            key = (record["category"], record["id"])
+            if key in seen or not record["explanation"].strip() or not record["evidence"]:
+                raise ValueError(f"Invalid glossary supplement {key} in {source}")
+            seen.add(key)
+            entry = by_key.get(key)
+            if entry is None:
+                entry = {field: record[field] for field in ("id", "category", "name", "type", "stackability", "buffType")}
+                entries.append(entry)
+                by_key[key] = entry
+                categories[key[0]]["count"] += 1
+            entry["explanation"] = record["explanation"]
+            entry["supplementSource"] = source
 
 
 if __name__ == "__main__":

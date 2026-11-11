@@ -1,0 +1,192 @@
+[
+  {
+    "id": "6621000",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份漫红结晶露滴。暂时提高生命值上限。",
+    "evidence": "AttachEffectParam 6621000 → SpEffectParam 7621000（startingItemAmount=1，startGoodsId=11000）→ EquipParamGoods 11000；简中 GoodsName、GoodsInfo、GoodsCaption 11000。"
+  },
+  {
+    "id": "6621100",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份红结晶露滴。立即恢复大量生命值。",
+    "evidence": "AttachEffectParam 6621100 → SpEffectParam 7621100（startingItemAmount=1，startGoodsId=11002）→ EquipParamGoods 11002；简中 GoodsName、GoodsInfo、GoodsCaption 11002。"
+  },
+  {
+    "id": "6621200",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份蓝结晶露滴。立即恢复大量专注值。",
+    "evidence": "AttachEffectParam 6621200 → SpEffectParam 7621200（startingItemAmount=1，startGoodsId=11004）→ EquipParamGoods 11004；简中 GoodsName、GoodsInfo、GoodsCaption 11004。"
+  },
+  {
+    "id": "6621300",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份斑斓硬露滴。清除异常状态，并暂时提高各项异常状态抵抗力。",
+    "evidence": "AttachEffectParam 6621300 → SpEffectParam 7621300（startingItemAmount=1，startGoodsId=11006）→ EquipParamGoods 11006；简中 GoodsName、GoodsInfo、GoodsCaption 11006。"
+  },
+  {
+    "id": "6621400",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份红泡状露滴。在药效持续期间，生命值偏低时自动回血一次。",
+    "evidence": "AttachEffectParam 6621400 → SpEffectParam 7621400（startingItemAmount=1，startGoodsId=11007）→ EquipParamGoods 11007；简中 GoodsName、GoodsInfo、GoodsCaption 11007。"
+  },
+  {
+    "id": "6621500",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份珍珠泡状露滴。大幅减轻下一次受到的伤害。",
+    "evidence": "AttachEffectParam 6621500 → SpEffectParam 7621500（startingItemAmount=1，startGoodsId=11008）→ EquipParamGoods 11008；简中 GoodsName、GoodsInfo、GoodsCaption 11008。"
+  },
+  {
+    "id": "6621600",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份涌红结晶露滴。在一段时间内持续回血。",
+    "evidence": "AttachEffectParam 6621600 → SpEffectParam 7621600（startingItemAmount=1，startGoodsId=11009）→ EquipParamGoods 11009；简中 GoodsName、GoodsInfo、GoodsCaption 11009。"
+  },
+  {
+    "id": "6621700",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份涌绿结晶露滴。暂时加快精力恢复速度。",
+    "evidence": "AttachEffectParam 6621700 → SpEffectParam 7621700（startingItemAmount=1，startGoodsId=11010）→ EquipParamGoods 11010；简中 GoodsName、GoodsInfo、GoodsCaption 11010。"
+  },
+  {
+    "id": "6621800",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份珍珠硬露滴。暂时提高所有伤害类型的减伤率。",
+    "evidence": "AttachEffectParam 6621800 → SpEffectParam 7621800（startingItemAmount=1，startGoodsId=11011）→ EquipParamGoods 11011；简中 GoodsName、GoodsInfo、GoodsCaption 11011。"
+  },
+  {
+    "id": "6621900",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份连刺破露滴。连续命中时，逐步提高攻击力。",
+    "evidence": "AttachEffectParam 6621900 → SpEffectParam 7621900（startingItemAmount=1，startGoodsId=11013）→ EquipParamGoods 11013；简中 GoodsName、GoodsInfo、GoodsCaption 11013。"
+  },
+  {
+    "id": "6622000",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份大刺破露滴。暂时强化蓄力攻击。",
+    "evidence": "AttachEffectParam 6622000 → SpEffectParam 7622000（startingItemAmount=1，startGoodsId=11014）→ EquipParamGoods 11014；简中 GoodsName、GoodsInfo、GoodsCaption 11014。"
+  },
+  {
+    "id": "6622100",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份风结晶露滴。强化闪避，但受到的伤害也会增加。",
+    "evidence": "AttachEffectParam 6622100 → SpEffectParam 7622100（startingItemAmount=1，startGoodsId=11015）→ EquipParamGoods 11015；简中 GoodsName、GoodsInfo、GoodsCaption 11015。"
+  },
+  {
+    "id": "6622200",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份爆裂结晶露滴。使自身发生爆炸。",
+    "evidence": "AttachEffectParam 6622200 → SpEffectParam 7622200（startingItemAmount=1，startGoodsId=11016）→ EquipParamGoods 11016；简中 GoodsName、GoodsInfo、GoodsCaption 11016。"
+  },
+  {
+    "id": "6622300",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份铅化硬露滴。暂时提高强韧度。",
+    "evidence": "AttachEffectParam 6622300 → SpEffectParam 7622300（startingItemAmount=1，startGoodsId=11018）→ EquipParamGoods 11018；简中 GoodsName、GoodsInfo、GoodsCaption 11018。"
+  },
+  {
+    "id": "6622400",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份细枝破露滴。药效期间死亡可保住卢恩和等级。",
+    "evidence": "AttachEffectParam 6622400 → SpEffectParam 7622400（startingItemAmount=1，startGoodsId=11019）→ EquipParamGoods 11019；简中 GoodsName、GoodsInfo、GoodsCaption 11019。"
+  },
+  {
+    "id": "6622500",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份红漩泡状露滴。短时间内将受到的非物理伤害转为生命恢复。",
+    "evidence": "AttachEffectParam 6622500 → SpEffectParam 7622500（startingItemAmount=1，startGoodsId=11020）→ EquipParamGoods 11020；简中 GoodsName、GoodsInfo、GoodsCaption 11020。"
+  },
+  {
+    "id": "6622600",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份蓝秘密露滴。在短时间内，消耗专注值的行动不再花费专注值。",
+    "evidence": "AttachEffectParam 6622600 → SpEffectParam 7622600（startingItemAmount=1，startGoodsId=11025）→ EquipParamGoods 11025；简中 GoodsName、GoodsInfo、GoodsCaption 11025。"
+  },
+  {
+    "id": "6622700",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份岩刺破露滴。攻击更容易让敌人失去平衡。",
+    "evidence": "AttachEffectParam 6622700 → SpEffectParam 7622700（startingItemAmount=1，startGoodsId=11026）→ EquipParamGoods 11026；简中 GoodsName、GoodsInfo、GoodsCaption 11026。"
+  },
+  {
+    "id": "6622800",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份带火破露滴。暂时提高火属性攻击力。",
+    "evidence": "AttachEffectParam 6622800 → SpEffectParam 7622800（startingItemAmount=1，startGoodsId=11028）→ EquipParamGoods 11028；简中 GoodsName、GoodsInfo、GoodsCaption 11028。"
+  },
+  {
+    "id": "6622900",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份带魔力破露滴。暂时提高魔力属性攻击力。",
+    "evidence": "AttachEffectParam 6622900 → SpEffectParam 7622900（startingItemAmount=1，startGoodsId=11029）→ EquipParamGoods 11029；简中 GoodsName、GoodsInfo、GoodsCaption 11029。"
+  },
+  {
+    "id": "6623000",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份带雷破露滴。暂时提高雷属性攻击力。",
+    "evidence": "AttachEffectParam 6623000 → SpEffectParam 7623000（startingItemAmount=1，startGoodsId=11030）→ EquipParamGoods 11030；简中 GoodsName、GoodsInfo、GoodsCaption 11030。"
+  },
+  {
+    "id": "6623100",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份带圣破露滴。暂时提高圣属性攻击力。",
+    "evidence": "AttachEffectParam 6623100 → SpEffectParam 7623100（startingItemAmount=1，startGoodsId=11031）→ EquipParamGoods 11031；简中 GoodsName、GoodsInfo、GoodsCaption 11031。"
+  },
+  {
+    "id": "6623200",
+    "category": "deep-outside",
+    "explanation": "出击时获得 1 份漫绿结晶露滴。暂时提高精力上限。",
+    "evidence": "AttachEffectParam 6623200 → SpEffectParam 7623200（startingItemAmount=1，startGoodsId=11001）→ EquipParamGoods 11001；简中 GoodsName、GoodsInfo、GoodsCaption 11001。词条简中名取 AttachEffectName_dlc01 6623200；物品 11001 名为「漫绿结晶露滴」。叠加规则见 effects_data 同 ID 的 stackable=true。",
+    "name": "出击时，会持有“涌绿结晶露滴”",
+    "type": "出击时的道具(结晶露滴)",
+    "stackability": "可叠加",
+    "buffType": ""
+  },
+  {
+    "id": "6624000",
+    "category": "deep-outside",
+    "explanation": "出击时获得 2 瓶振奋香。提高自己和附近队友的攻击力，并能大幅减轻下一次受到的伤害。",
+    "evidence": "AttachEffectParam 6624000 → SpEffectParam 7624000（startingItemAmount=2，startGoodsId=3500）→ EquipParamGoods 3500；简中 GoodsName、GoodsInfo、GoodsCaption 3500。"
+  },
+  {
+    "id": "6624100",
+    "category": "deep-outside",
+    "explanation": "出击时获得 2 瓶火花香。向前方释放大范围火花。",
+    "evidence": "AttachEffectParam 6624100 → SpEffectParam 7624100（startingItemAmount=2，startGoodsId=3510）→ EquipParamGoods 3510；简中 GoodsName、GoodsInfo、GoodsCaption 3510。"
+  },
+  {
+    "id": "6624200",
+    "category": "deep-outside",
+    "explanation": "出击时获得 2 瓶铁壶香药。暂时提高减伤率、抵抗力和强韧度，但移动变慢，也更易受到雷电伤害。",
+    "evidence": "AttachEffectParam 6624200 → SpEffectParam 7624200（startingItemAmount=2，startGoodsId=3520）→ EquipParamGoods 3520；简中 GoodsName、GoodsInfo、GoodsCaption 3520。"
+  },
+  {
+    "id": "6624300",
+    "category": "deep-outside",
+    "explanation": "出击时获得 2 瓶狂热香药。暂时提高攻击力和精力上限，同时增加受到的伤害。",
+    "evidence": "AttachEffectParam 6624300 → SpEffectParam 7624300（startingItemAmount=2，startGoodsId=3550）→ EquipParamGoods 3550；简中 GoodsName、GoodsInfo、GoodsCaption 3550。"
+  },
+  {
+    "id": "6624400",
+    "category": "deep-outside",
+    "explanation": "出击时获得 2 瓶毒发喷雾。朝前方喷出毒雾，使目标累积中毒。",
+    "evidence": "AttachEffectParam 6624400 → SpEffectParam 7624400（startingItemAmount=2，startGoodsId=3580）→ EquipParamGoods 3580；简中 GoodsName、GoodsInfo、GoodsCaption 3580。"
+  },
+  {
+    "id": "6624500",
+    "category": "deep-outside",
+    "explanation": "出击时获得 2 瓶酸蚀喷雾。朝前方喷出酸雾，暂时降低目标的武器攻击力。",
+    "evidence": "AttachEffectParam 6624500 → SpEffectParam 7624500（startingItemAmount=2，startGoodsId=3610）→ EquipParamGoods 3610；简中 GoodsName、GoodsInfo、GoodsCaption 3610。"
+  },
+  {
+    "id": "7120900",
+    "category": "normal-outside",
+    "explanation": "出击时获得 1 把石剑钥匙。可用来解除小恶魔像的封印，使用后消耗钥匙。",
+    "evidence": "AttachEffectParam 7120900 → SpEffectParam 7120900（startingItemAmount=1，startGoodsId=8000）→ EquipParamGoods 8000；简中 GoodsName、GoodsInfo、GoodsCaption 8000。"
+  },
+  {
+    "id": "7121000",
+    "category": "normal-outside",
+    "explanation": "出击时获得 1 个小型随身包。增加可装备的使用道具数量。",
+    "evidence": "AttachEffectParam 7121000 → SpEffectParam 7121000（startingItemAmount=1，startGoodsId=10055）→ EquipParamGoods 10055；简中 GoodsName、GoodsInfo、GoodsCaption 10050。开局专用道具 10055 无独立文本，使用词条对应 Small Pouch 的同名基础道具 10050 说明。"
+  }
+]
