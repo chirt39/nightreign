@@ -74,7 +74,7 @@ export function checkRelic(catalog, relic, {draft = false} = {}) {
   const priorities = {clear: 0, partial: 1, unknown: 2, anomaly: 3};
   function report(level, slot, role, message) {
     if (priorities[level] > priorities[status]) status = level;
-    issues.push({slot, role, message});
+    issues.push({status: level, slot, role, message});
   }
   if (relic.identificationStatus === 'pending') {
     report('unknown', null, null, '已识别为可能的遗物，存档记录格式仍待核对。');

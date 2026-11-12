@@ -601,15 +601,36 @@ function relicEffectText(relic, effect, position, target) {
     data-effect-category="${esc(target.category)}" data-effect-id="${esc(target.id)}"
     data-relic-id="${esc(relic.id)}" data-effect-position="${position}">${name}</a>`;
 }
+let inspectedAnomalies = new WeakMap();
+window.addEventListener('nightreign:relic-inspection', ({detail}) => {
+  inspectedAnomalies = new WeakMap();
+  for (const {relic, result} of detail) {
+    if (result.status === 'anomaly') inspectedAnomalies.set(relic, result.issues.filter(issue => issue.status === 'anomaly'));
+  }
+  if (state.save) renderRelics();
+});
 function renderEffectRows(relic, showId = false, linkEffects = false) {
   const groups = pairedEffects(relic);
   if (!groups.length) return '<div class="game-effect-row empty">此遗物无已识别词条</div>';
+  const issues = linkEffects && inspectedAnomalies.get(relic);
+  // The save parser omits empty positive slots from the visible effect groups.
+  const visibleSlots = issues && relic.rawEffectSlots.map((pair, i) => pair?.positive != null ? i : -1).filter(i => i >= 0);
   return groups.map((group, groupIndex) => {
     const labels = group.map((effect, index) => {
       const target = linkEffects && relicEffectTarget(relic, effect, index > 0 || !!effect.isDebuff);
       const name = relicEffectText(relic, effect, `${groupIndex}:${index}`, target);
       const id = showId ? `<em>#${esc(effect.id)}</em>` : '';
-      return `<span${index ? ' class="game-effect-negative"' : ''}>${name}${id}</span>`;
+      let mark = '';
+      if (issues) {
+        const rawIndex = visibleSlots[groupIndex], pair = relic.rawEffectSlots[rawIndex];
+        const role = index ? 'negative' : 'positive';
+        const related = issues.filter(issue => issue.slot === rawIndex + 1 && (issue.role === role ||
+          (role === 'positive' && issue.role === 'negative' && pair?.negative == null)));
+        if (pair && Number(pair[role]) === Number(effect.id) && related.length) {
+          mark = `<small class="relic-effect-anomaly" title="${esc(related.map(issue => issue.message).join('；'))}">异常</small>`;
+        }
+      }
+      return `<span${index ? ' class="game-effect-negative"' : ''}>${name}${mark}${id}</span>`;
     });
     return `<div class="game-effect-row"><span class="game-effect-icon" aria-hidden="true">✧</span><div class="game-effect-copy">${labels.join('')}</div></div>`;
   }).join('');
@@ -778,6 +799,7 @@ window.NightreignLegalityNames = {
   },
 };
 function notifyRelicCollectionChanged() {
+  inspectedAnomalies = new WeakMap();
   window.dispatchEvent(new Event('nightreign:collection-changed'));
 }
 function showSave(parsed){

@@ -23,6 +23,9 @@ test('two individually rollable levels of the same effect conflict within one re
   const result = check(101, [pair(7000000), pair(7000001)]);
   assert.equal(result.status, 'anomaly');
   assert.ok(result.issues.some(issue => issue.slot === 2 && issue.message.includes('第 1 槽')));
+  const mixed = check(101, [pair(7000000), pair(7000001), pair(99999999)]);
+  assert.deepEqual([...new Set(mixed.issues.filter(i => i.status === 'anomaly').map(i => i.slot))].sort(), [1, 2]);
+  assert.ok(mixed.issues.some(i => i.slot === 3 && i.status === 'unknown'));
 });
 
 test('named fixed presets use the supplied order and exact effect IDs', () => {
