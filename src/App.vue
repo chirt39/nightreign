@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import OverviewPage from './pages/OverviewPage.vue';
 import EnemiesPage from './pages/EnemiesPage.vue';
 import RelicsPage from './pages/RelicsPage.vue';
@@ -8,12 +8,16 @@ import BuildsPage from './pages/BuildsPage.vue';
 import SourcesPage from './pages/SourcesPage.vue';
 import EffectsPage from './pages/EffectsPage.vue';
 import WeaponsPage from './pages/WeaponsPage.vue';
+import ArtsPage from './pages/ArtsPage.vue';
+import SpellsPage from './pages/SpellsPage.vue';
 import MapPredictorPage from './pages/MapPredictorPage.vue';
 
 const labels = {
   overview: '圆桌厅堂',
   enemies: '怪物图鉴',
   weapons: '武器图鉴',
+  arts: '战技',
+  spells: '魔法与祷告',
   map: '地图与夜王推算',
   relics: '遗物仪式',
   records: '日志',
@@ -23,7 +27,16 @@ const labels = {
 };
 const currentView = ref(location.hash.slice(1) in labels ? location.hash.slice(1) : 'overview');
 const sidebarOpen = ref(false);
-const weaponNavImageFailed = ref(false);
+const atlasPages = [
+  { view: 'enemies', label: '怪物' },
+  { view: 'weapons', label: '武器' },
+  { view: 'arts', label: '战技' },
+  { view: 'spells', label: '魔法与祷告' },
+  { view: 'effects', label: '词条' },
+];
+const isAtlas = computed(() => atlasPages.some(page => page.view === currentView.value));
+const weaponsPage = ref(null);
+const artsPage = ref(null);
 const scriptsReady = ref(false);
 const loadError = ref(false);
 const classicScriptVersions = typeof __CLASSIC_SCRIPT_VERSIONS__ === 'undefined' ? null : __CLASSIC_SCRIPT_VERSIONS__;
@@ -37,15 +50,18 @@ function setView(view, updateUrl = true, restoreScrollY = null, cardNavigation =
       ...history.state,
       view: currentView.value,
       scrollY: window.scrollY,
-      cardNavigation: sourceSnapshot || (currentView.value === 'relics' ? null : history.state?.cardNavigation),
+      cardNavigation: sourceSnapshot || (['relics', 'weapons'].includes(currentView.value) ? null : history.state?.cardNavigation),
     }, '', location.href);
   }
   currentView.value = nextView;
   const targetUrl = new URL(location.href);
-  const hasEffectTarget = targetUrl.searchParams.has('effectCategory') || targetUrl.searchParams.has('effectId');
+  const hasEffectTarget = ['effectCategory', 'effectId', 'artId', 'spellId'].some(key => targetUrl.searchParams.has(key));
   if (updateUrl && (location.hash !== `#${nextView}` || cardNavigation || hasEffectTarget)) {
     targetUrl.searchParams.delete('effectCategory');
     targetUrl.searchParams.delete('effectId');
+    targetUrl.searchParams.delete('artId');
+    targetUrl.searchParams.delete('spellId');
+    if (cardNavigation?.kind === 'art') targetUrl.searchParams.set('artId', cardNavigation.id);
     targetUrl.hash = nextView;
     const url = cardNavigation?.kind === 'effect'
       ? window.NightreignRelicEffectNavigation.url(cardNavigation)
@@ -56,7 +72,11 @@ function setView(view, updateUrl = true, restoreScrollY = null, cardNavigation =
   }
   closeMobileNavigation(true);
   if (cardNavigation) {
-    nextTick(() => window.NightreignRelicEffectNavigation?.restore(cardNavigation));
+    nextTick(() => {
+      if (cardNavigation.kind === 'weapon') weaponsPage.value?.restoreNavigation(cardNavigation);
+      else if (cardNavigation.kind === 'art') artsPage.value?.restoreNavigation(cardNavigation);
+      else window.NightreignRelicEffectNavigation?.restore(cardNavigation);
+    });
   } else if (restoreScrollY !== null) {
     nextTick(() => window.scrollTo({ top: restoreScrollY, behavior: 'auto' }));
   } else if (changed || updateUrl) {
@@ -87,6 +107,7 @@ function handleShellClick(event) {
   if (hashLink && !hashLink.matches('[data-view], [data-go]')) {
     const view = hashLink.getAttribute('href').slice(1);
     if (view in labels) {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       setView(view);
       return;
@@ -187,7 +208,7 @@ onUnmounted(() => {
     <h1>页面未能完整加载</h1>
     <p>必要功能暂时无法启动，请刷新页面重试。</p>
   </main>
-  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
+  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map', 'ability-fullscreen': currentView === 'arts' || currentView === 'spells' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
     <a class="skip-link" href="#main-content">跳转到主要内容</a>
     <aside id="mobile-navigation" class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
@@ -198,13 +219,11 @@ onUnmounted(() => {
       <p class="side-label">探索</p>
       <nav class="nav-list">
         <button class="nav-link" :class="{ active: currentView === 'overview' }" :aria-current="currentView === 'overview' ? 'page' : null" data-view="overview"><img class="nav-icon" src="/nav-icons/roundtable.webp" alt="" />圆桌厅堂</button>
-        <button class="nav-link" :class="{ active: currentView === 'enemies' }" :aria-current="currentView === 'enemies' ? 'page' : null" data-view="enemies"><img class="nav-icon" src="/nav-icons/bestiary.webp" alt="" />怪物图鉴 <b id="nav-enemy-count">—</b></button>
-        <button class="nav-link" :class="{ active: currentView === 'weapons' }" :aria-current="currentView === 'weapons' ? 'page' : null" data-view="weapons"><img v-if="!weaponNavImageFailed" class="nav-icon" src="/nav-icons/weapons.webp" alt="" @error="weaponNavImageFailed = true"><span v-else class="nav-icon weapon-nav-placeholder" aria-hidden="true"></span>武器图鉴</button>
+        <button class="nav-link" :class="{ active: isAtlas }" :aria-current="isAtlas ? 'page' : null" data-view="enemies"><img class="nav-icon" src="/nav-icons/bestiary.webp" alt="" />图鉴</button>
         <button class="nav-link" :class="{ active: currentView === 'map' }" :aria-current="currentView === 'map' ? 'page' : null" data-view="map"><span class="nav-icon map-nav-icon" aria-hidden="true">◇</span>地图与夜王推算</button>
         <button class="nav-link" :class="{ active: currentView === 'relics' }" :aria-current="currentView === 'relics' ? 'page' : null" data-view="relics"><img class="nav-icon" src="/nav-icons/relic-rite.png" alt="" />遗物仪式</button>
         <button class="nav-link" :class="{ active: currentView === 'records' }" :aria-current="currentView === 'records' ? 'page' : null" data-view="records"><img class="nav-icon" src="/nav-icons/journal.png" alt="" />日志</button>
         <button class="nav-link" :class="{ active: currentView === 'builds' }" :aria-current="currentView === 'builds' ? 'page' : null" data-view="builds"><img class="nav-icon" src="/nav-icons/relic-equip.png" alt="" />遗物装配</button>
-        <button class="nav-link" :class="{ active: currentView === 'effects' }" :aria-current="currentView === 'effects' ? 'page' : null" data-view="effects"><img class="nav-icon" src="/nav-icons/effects-battle-record.png" alt="" />词条图鉴</button>
         <button class="nav-link" :class="{ active: currentView === 'sources' }" :aria-current="currentView === 'sources' ? 'page' : null" data-view="sources"><img class="nav-icon" src="/nav-icons/sources.png" alt="" />资料说明</button>
       </nav>
       <div class="side-bottom"><a class="side-license-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a></div>
@@ -219,9 +238,14 @@ onUnmounted(() => {
         </div>
       </header>
       <div class="content">
+        <nav v-show="isAtlas" class="atlas-navigation" aria-label="图鉴分类">
+          <a v-for="page in atlasPages" :key="page.view" :href="`#${page.view}`" :aria-current="currentView === page.view ? 'page' : null">{{ page.label }}<small v-if="page.view === 'enemies'" id="nav-enemy-count">—</small></a>
+        </nav>
         <OverviewPage :active="currentView === 'overview'" />
         <EnemiesPage :active="currentView === 'enemies'" />
-        <WeaponsPage :active="currentView === 'weapons'" :catalog-versions="catalogJsonVersions" />
+        <WeaponsPage ref="weaponsPage" :active="currentView === 'weapons'" :catalog-versions="catalogJsonVersions" />
+        <ArtsPage ref="artsPage" :active="currentView === 'arts'" :catalog-versions="catalogJsonVersions" />
+        <SpellsPage :active="currentView === 'spells'" :catalog-versions="catalogJsonVersions" />
         <MapPredictorPage :active="currentView === 'map'" :catalog-versions="catalogJsonVersions" />
         <RelicsPage :active="currentView === 'relics'" />
         <RecordsPage :active="currentView === 'records'" />
@@ -233,3 +257,16 @@ onUnmounted(() => {
     </main>
   </div>
 </template>
+
+<style>
+.atlas-navigation{display:flex;flex:0 0 auto;align-items:center;gap:5px;min-width:0;max-width:100%;margin:0 0 12px;padding:0 0 8px;border-bottom:1px solid #3e566e;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.atlas-navigation a{display:flex;flex:0 0 auto;align-items:center;gap:7px;min-height:38px;padding:7px 14px;border:1px solid transparent;border-radius:4px;background:#172638;color:#b8c9d4;white-space:nowrap;font-size:14px}
+.atlas-navigation a:hover{border-color:#536c82;color:#e7d5ac}
+.atlas-navigation a[aria-current=page]{border-color:#8f7a50;background:#2b3b45;color:#efdcaa}
+.atlas-navigation small{font-size:10px;color:#a5b8c8;font-variant-numeric:tabular-nums}
+@media(min-width:851px){
+.app-shell.ability-fullscreen>.main{display:flex;height:100dvh;flex-direction:column;overflow:hidden}
+.app-shell.ability-fullscreen>.main>.content{display:flex;flex:1;flex-direction:column;min-height:0;overflow:hidden}
+}
+@media(max-width:850px){.atlas-navigation{gap:4px;margin-bottom:12px}.atlas-navigation a{min-height:36px;padding:6px 11px;font-size:13px}}
+</style>

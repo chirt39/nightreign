@@ -65,7 +65,8 @@ async function loadCatalogs(){
     if (location.hash === '#effects' && effectCategory && effectId) {
       requestAnimationFrame(() => restoreRelicEffectNavigation({ kind: 'effect', category: effectCategory, id: effectId }));
     }
-    $('#nav-enemy-count').textContent=enemy.rows.length.toLocaleString('zh-CN');
+    const enemyNavCount = $('#nav-enemy-count');
+    if (enemyNavCount) enemyNavCount.textContent = enemy.rows.length.toLocaleString('zh-CN');
     buildEnemyMetadata();
     buildEnemyDisplayIndex();
     setupEnemyFilters();

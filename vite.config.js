@@ -28,6 +28,8 @@ const catalogJsonFiles = [
   'weapon-catalog.json',
   'weapon-image-manifest.json',
   'skill-image-manifest.json',
+  'arts-catalog.json',
+  'spells-catalog.json',
   'map-catalog.json',
   'map-asset-manifest.json',
 ];

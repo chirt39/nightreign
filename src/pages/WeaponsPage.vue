@@ -7,6 +7,8 @@ const skillImages = ref({});
 const query = ref(''), category = ref('all'), weaponId = ref(''), variantId = ref(''), page = ref(1);
 const failedImages = ref(new Set());
 const detailHeading = ref(null);
+const listRoot = ref(null), detailRoot = ref(null);
+let catalogRequest = null;
 const pageSize = 24;
 let controller = null;
 const attackLabels = { physical: '物理', magic: '魔力', fire: '火', lightning: '雷', holy: '圣' };
@@ -21,7 +23,7 @@ const filtered = computed(() => {
 });
 const pageCount = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize)));
 const visible = computed(() => filtered.value.slice((page.value - 1) * pageSize, page.value * pageSize));
-const selected = computed(() => weaponId.value ? weapons.value.find(weapon => weapon.id === weaponId.value) : filtered.value[0]);
+const selected = computed(() => weaponId.value ? weapons.value.find(weapon => weapon.id === weaponId.value) : visible.value[0]);
 const unknownWeapon = computed(() => Boolean(catalog.value && weaponId.value && !selected.value));
 const variant = computed(() => {
   const weapon = selected.value;
@@ -57,20 +59,20 @@ function readUrl() {
   category.value = params.get('weaponCategory') || 'all';
   weaponId.value = params.get('weaponId') || '';
   variantId.value = params.get('weaponVariant') || '';
-  page.value = 1;
+  page.value = Math.max(1, Number.parseInt(params.get('weaponPage'), 10) || 1);
   if (catalog.value) normalizeLocation();
 }
 function normalizeLocation() {
   if (!categories.value.some(item => item.id === category.value)) category.value = 'all';
   const index = filtered.value.findIndex(item => item.id === weaponId.value);
-  page.value = index >= 0 ? Math.floor(index / pageSize) + 1 : 1;
+  page.value = index >= 0 ? Math.floor(index / pageSize) + 1 : Math.min(pageCount.value, page.value);
 }
 function writeUrl(push = false) {
   const url = new URL(location.href);
-  for (const [key, value] of Object.entries({ weaponId: weaponId.value, weaponVariant: variantId.value, weaponQ: query.value, weaponCategory: category.value === 'all' ? '' : category.value })) {
+  for (const [key, value] of Object.entries({ weaponId: weaponId.value, weaponVariant: variantId.value, weaponQ: query.value, weaponCategory: category.value === 'all' ? '' : category.value, weaponPage: page.value > 1 ? String(page.value) : '' })) {
     if (value) url.searchParams.set(key, value); else url.searchParams.delete(key);
   }
-  const state = { ...history.state };
+  const state = { ...history.state, cardNavigation: null };
   if (push) history.pushState(state, '', url); else history.replaceState(state, '', url);
 }
 function filterChanged(push = false) { page.value = 1; weaponId.value = ''; variantId.value = ''; writeUrl(push); }
@@ -87,8 +89,13 @@ function turnPage(step) {
   page.value = Math.min(pageCount.value, Math.max(1, page.value + step));
   weaponId.value = filtered.value[(page.value - 1) * pageSize]?.id || ''; variantId.value = ''; writeUrl(true);
 }
-async function loadCatalog() {
-  if (loading.value || catalog.value) return;
+function loadCatalog() {
+  if (catalog.value) return Promise.resolve();
+  if (loading.value) return catalogRequest;
+  catalogRequest = fetchCatalog();
+  return catalogRequest;
+}
+async function fetchCatalog() {
   controller?.abort(); loading.value = true; error.value = ''; controller = new AbortController();
   const signal = controller.signal;
   const imageVersion = props.catalogVersions?.['weapon-image-manifest.json'];
@@ -106,6 +113,52 @@ async function loadCatalog() {
   } catch (cause) { if (cause.name !== 'AbortError') error.value = cause.message || '武器资料载入失败，请重试。'; }
   finally { loading.value = false; }
 }
+function artIdFor(index, name) {
+  const id = variant.value?.skill?.itemIds?.[index];
+  if (id == null || String(id) === '10') return '';
+  const definition = catalog.value?.skillDefinitions?.[String(id)];
+  return definition?.name === name ? String(id) : '';
+}
+function artUrl(id) {
+  const url = new URL(location.href);
+  url.searchParams.set('artId', id);
+  url.searchParams.delete('artQ');
+  url.searchParams.delete('artPage');
+  url.hash = 'arts';
+  return url.pathname + url.search + url.hash;
+}
+function openArt(event, id) {
+  if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  const source = {
+    kind: 'weapon', query: query.value, category: category.value,
+    weaponId: weaponId.value, variantId: variantId.value, page: page.value,
+    listScroll: listRoot.value?.scrollTop || 0,
+    detailScroll: detailRoot.value?.scrollTop || 0,
+    scrollY: window.scrollY, artId: id,
+  };
+  window.dispatchEvent(new CustomEvent('nightreign:navigate', {
+    detail: { view: 'arts', source, cardNavigation: { kind: 'art', id } },
+  }));
+}
+async function restoreNavigation(snapshot) {
+  await loadCatalog();
+  query.value = snapshot.query;
+  category.value = snapshot.category;
+  weaponId.value = snapshot.weaponId;
+  variantId.value = snapshot.variantId;
+  page.value = Math.min(pageCount.value, Math.max(1, snapshot.page));
+  await nextTick();
+  requestAnimationFrame(() => {
+    const link = [...(detailRoot.value?.querySelectorAll('[data-art-id]') || [])]
+      .find(element => element.dataset.artId === snapshot.artId);
+    link?.focus({ preventScroll: true });
+    if (listRoot.value) listRoot.value.scrollTop = snapshot.listScroll;
+    if (detailRoot.value) detailRoot.value.scrollTop = snapshot.detailScroll;
+    window.scrollTo({ top: snapshot.scrollY, behavior: 'instant' });
+  });
+}
+defineExpose({ restoreNavigation });
 function locationChanged() { readUrl(); }
 onMounted(() => { readUrl(); window.addEventListener('popstate', locationChanged); window.addEventListener('hashchange', locationChanged); });
 onBeforeUnmount(() => { controller?.abort(); window.removeEventListener('popstate', locationChanged); window.removeEventListener('hashchange', locationChanged); });
@@ -126,7 +179,7 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
       </div>
       <div class="weapon-layout">
         <div class="weapon-list-panel">
-          <ul v-if="visible.length" class="weapon-list" aria-label="武器列表">
+          <ul v-if="visible.length" ref="listRoot" class="weapon-list" aria-label="武器列表">
             <li v-for="weapon in visible" :key="weapon.id"><button type="button" class="weapon-row" :class="{ selected: selected?.id === weapon.id }" :aria-pressed="selected?.id === weapon.id" @click="selectWeapon(weapon)">
               <span class="weapon-thumbnail"><img v-if="imageFor(weapon)" :src="imageFor(weapon)" alt="" loading="lazy" @error="imageFailed"><span v-else aria-hidden="true">⚔</span></span>
               <span class="weapon-row-copy"><strong>{{ weapon.name }}</strong><small>{{ weapon.categoryLabel || '分类待核对' }}</small></span><span v-if="weapon.dlc === true" class="weapon-dlc">DLC</span>
@@ -135,7 +188,7 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
           <div v-else class="weapon-notice"><strong>没有找到匹配武器</strong><p>试试其他名称或分类，或清空筛选。</p></div>
           <nav v-if="pageCount > 1" class="weapon-pagination" aria-label="武器列表分页"><button type="button" :disabled="page === 1" @click="turnPage(-1)">上一页</button><span>{{ page }} / {{ pageCount }}</span><button type="button" :disabled="page === pageCount" @click="turnPage(1)">下一页</button></nav>
         </div>
-        <article class="weapon-detail" aria-label="武器详情">
+        <article ref="detailRoot" class="weapon-detail" aria-label="武器详情">
           <div v-if="unknownWeapon" class="weapon-notice" role="status"><h2>未找到链接中的武器</h2><p>该编号可能已变更，请从列表重新选择。</p></div>
           <template v-else-if="selected">
             <header class="weapon-detail-heading"><span class="weapon-portrait"><img v-if="imageFor(selected, variant)" :src="imageFor(selected, variant)" :alt="selected.name" @error="imageFailed"><span v-else aria-label="暂无核验图片">⚔</span></span><div><p class="weapon-category">{{ selected.categoryLabel || '分类待核对' }} <span v-if="selected.dlc === true" class="weapon-dlc">DLC</span></p><h2 ref="detailHeading" tabindex="-1">{{ selected.name }}</h2><p class="weapon-id">资料编号 {{ selected.id }}</p></div></header>
@@ -144,7 +197,7 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
             <template v-if="variant">
               <section class="weapon-section"><h3>基础攻击</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in attackLabels" :key="key"><dt class="weapon-attack-label"><img v-if="attackIcon(key)" :src="attackIcon(key)" class="weapon-attack-icon" width="18" height="18" alt="" @error="imageFailed"><span v-else class="weapon-attack-icon weapon-icon-placeholder" aria-hidden="true"></span><span>{{ label }}</span></dt><dd>{{ displayValue(variant.attack?.[key]) }}</dd></div></dl><p v-if="variant.attackTypes?.length" class="weapon-note">攻击类型：{{ variant.attackTypes.join('、') }}</p></section>
               <section class="weapon-section"><h3>能力补正</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in abilityLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayScalingGrade(variant.scalingGrades?.[key]) }}</dd></div></dl></section>
-              <section class="weapon-section"><h3>{{ variant.skill?.kind === 'fixed' ? '固定战技' : variant.skill?.kind === 'pool' ? '战技候选池' : '战技' }}</h3><ul v-if="variant.skill?.names?.length" class="weapon-skill-list"><li v-for="(name, index) in variant.skill.names" :key="`${index}-${name}`"><span class="weapon-skill-icon"><img v-if="skillImageFor(index, name)" :src="skillImageFor(index, name)" width="30" height="30" alt="" loading="lazy" @error="imageFailed"><span v-else class="weapon-icon-placeholder" aria-hidden="true"></span></span><span class="weapon-skill-name">{{ name }}</span></li></ul><p v-else>待核对</p><p v-if="variant.skill?.kind !== 'pool' && variant.skill?.note" class="weapon-note">{{ variant.skill.note }}</p></section>
+              <section class="weapon-section"><h3>{{ variant.skill?.kind === 'fixed' ? '固定战技' : variant.skill?.kind === 'pool' ? '战技候选池' : '战技' }}</h3><ul v-if="variant.skill?.names?.length" class="weapon-skill-list"><li v-for="(name, index) in variant.skill.names" :key="`${index}-${name}`"><span class="weapon-skill-icon"><img v-if="skillImageFor(index, name)" :src="skillImageFor(index, name)" width="30" height="30" alt="" loading="lazy" @error="imageFailed"><span v-else class="weapon-icon-placeholder" aria-hidden="true"></span></span><a v-if="artIdFor(index, name)" class="weapon-skill-name weapon-art-link" :href="artUrl(artIdFor(index, name))" :data-art-id="artIdFor(index, name)" @click="openArt($event, artIdFor(index, name))">{{ name }}</a><span v-else class="weapon-skill-name">{{ name }}</span></li></ul><p v-else>待核对</p><p v-if="variant.skill?.kind !== 'pool' && variant.skill?.note" class="weapon-note">{{ variant.skill.note }}</p></section>
             </template>
             <p v-else class="weapon-note">该武器的参数变体待核对。</p>
           </template>
@@ -154,3 +207,8 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
     </template>
   </section>
 </template>
+
+<style scoped>
+.weapon-art-link{color:#e7d5ac;text-underline-offset:3px}
+.weapon-art-link:hover{text-decoration:underline;color:#f0d69f}
+</style>
