@@ -767,9 +767,23 @@ async function readSave(file){
     setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改；${transferNote}${state.saveEditor?'当前为只读模式；存档写回尚未验收。':'此存档版式暂不支持编辑。'}`);
   }catch(err){setSaveFailureStatus('无法解析此存档：'+(err?.message||String(err)))}
 }
+window.NightreignRelicCollection = () => state.save?.relics || [];
+window.NightreignLegalityNames = {
+  item(id) {
+    const item = state.items?.items?.[id];
+    return state.relicCatalog?.items?.[item?.key]?.name_zh || item?.name_en;
+  },
+  effect(id) {
+    return effectName({ ...state.effects?.effects?.[id], id });
+  },
+};
+function notifyRelicCollectionChanged() {
+  window.dispatchEvent(new Event('nightreign:collection-changed'));
+}
 function showSave(parsed){
   if(!parsed||!Array.isArray(parsed.relics))throw new Error('遗物数据格式错误');
   state.save=parsed;const all=parsed.relics;
+  notifyRelicCollectionChanged();
   if(typeof renderSaveEditorUi==='function')renderSaveEditorUi();
   state.relicPage=1;state.poolPage=1;state.activeSlot={group:'normal',index:0};state.slotFilterActive=false;
   $('#relic-dashboard').hidden=false;$('#build-empty').hidden=true;$('#build-workspace').hidden=false;
@@ -980,7 +994,7 @@ $('#loadout-slots').addEventListener('dragleave',e=>e.target.closest('.loadout-s
 $('#loadout-slots').addEventListener('drop',e=>{const slot=e.target.closest('.loadout-slot');if(!slot)return;e.preventDefault();slot.classList.remove('drag-over');const index=state.dragRelicIndex;state.dragRelicIndex=null;if(Number.isInteger(index))equipRelic(index,slot.dataset.group,Number(slot.dataset.slot))});
 document.addEventListener('dragend',()=>{state.dragRelicIndex=null;$$('.loadout-slot.drag-over').forEach(x=>x.classList.remove('drag-over'))});
 $('#loadout-slots').addEventListener('click',e=>{const remove=e.target.closest('.slot-remove'),slot=e.target.closest('.loadout-slot'),control=remove||slot;if(!control)return;const group=control.dataset.group,index=Number(control.dataset.slot);activateSlot(group,index);if(remove){state.equipped[group][index]=null;state.selectedRelicIndex=null;renderBuildWorkspace();return}const pending=state.selectedRelicIndex;if(pending!==null&&canEquip(pending,group,index))equipRelic(pending,group,index);else{state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent=`右侧显示能放入${group==='normal'?'普通':'深夜'}第 ${index+1} 槽的遗物，点击即可装配。`}});
-$('#clear-save').addEventListener('click',()=>{try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(_){}invalidateBuildResults();state.save=null;state.saveEditor=null;state.saveFileName=null;state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;$('#relic-dashboard').hidden=true;$('#build-workspace').hidden=true;$('#build-empty').hidden=false;renderBattleRecords();if(typeof renderSaveEditorUi==='function')renderSaveEditorUi();$('#save-file').value='';setSaveStatus('已清除本页解析结果，可重新选择存档。')});
+$('#clear-save').addEventListener('click',()=>{try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(_){}invalidateBuildResults();state.save=null;notifyRelicCollectionChanged();state.saveEditor=null;state.saveFileName=null;state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;$('#relic-dashboard').hidden=true;$('#build-workspace').hidden=true;$('#build-empty').hidden=false;renderBattleRecords();if(typeof renderSaveEditorUi==='function')renderSaveEditorUi();$('#save-file').value='';setSaveStatus('已清除本页解析结果，可重新选择存档。')});
 function ownedEffects(){
   const map=new Map();
   for(const r of state.save?.relics||[])for(const e of effectGroups(r)){
@@ -1451,4 +1465,4 @@ $('#run-build').addEventListener('click',()=>{
   }catch(error){stopBuildWorker(worker);btn.disabled=false;$('#build-status').textContent='计算失败：'+error.message}
 });
 
-loadCatalogs();navigate(location.hash.slice(1)||'overview');
+window.NightreignCatalogReady = loadCatalogs();navigate(location.hash.slice(1)||'overview');
