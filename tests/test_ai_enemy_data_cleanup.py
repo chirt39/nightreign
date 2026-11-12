@@ -15,8 +15,11 @@ class EnemyCorpusCleanupTests(unittest.TestCase):
         records = build_knowledge_base.build()
         enemy_rows = [row for row in records if row["category"] == "enemy"]
         image_rows = [row for row in records if row["category"] == "enemy_image"]
-        self.assertEqual(len(enemy_rows), 1658)
-        self.assertEqual(len(image_rows), 371)
+        self.assertEqual(len(enemy_rows), 1573)
+        self.assertEqual(len(image_rows), 307)
+        knights = [row for row in enemy_rows if row["title"].startswith("敌人图鉴｜失乡骑士")]
+        self.assertEqual({row["id"] for row in knights}, {"enemy:30100000", "enemy:30100100"})
+        self.assertFalse(any("白金之子弓手的狼" in row["title"] for row in enemy_rows))
         for row in enemy_rows:
             self.assertFalse(any(label in row["content"] for label in build_knowledge_base.REMOVED_ENEMY_FIELD_LABELS))
         for field in ("第一日生命值", "增益率", "等效韧性值"):

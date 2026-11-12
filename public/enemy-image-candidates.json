@@ -30,16 +30,6 @@
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
-    "31800000": {
-      "path": "enemy-images/candidate-eldenring-api-a9b364bb4d6e5df1.jpg",
-      "assetOrigin": "eldenring-api",
-      "sourcePage": "https://github.com/deliton/eldenring-api",
-      "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f69d8f6ecl0i6yzyadne1wptx69k.png",
-      "matchEvidence": "same English enemy name or model family: Albinauric Wolfback Archer",
-      "sourceEnemyName": "Albinauric Wolfback Archer",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
     "46700010b": {
       "path": "enemy-images/candidate-eldenring-api-f28606efa50c69b3.png",
       "assetOrigin": "eldenring-api",
@@ -180,39 +170,6 @@
       "sourceImage": "https://eldenring.fanapis.com/images/creatures/17f6a385eaal0i6z025b3timpwicqi.png",
       "matchEvidence": "same English enemy name or model family: Azula Beastman",
       "sourceEnemyName": "Azula Beastman",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "30101250b": {
-      "path": "enemy-images/candidate-bwiki-0c8d95fed758a41e.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100814",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/b/b1/jw40x2lpm9rc3j9urfrb6irz7vfc7ji.jpg/200px-NPC_Avatar_30100814.jpg",
-      "matchEvidence": "same Chinese base name; source NPC ID may differ",
-      "sourceEnemyName": "失乡骑士",
-      "sourceEnemyId": "30100814",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "30102240": {
-      "path": "enemy-images/candidate-bwiki-38a14b41aaedc5ca.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730102014",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/c/c0/0ce1cie19d4trfh8n9ezcovuj8grx17.jpg/200px-NPC_Avatar_30102014.jpg",
-      "matchEvidence": "same Chinese base name; source NPC ID may differ",
-      "sourceEnemyName": "失乡骑士",
-      "sourceEnemyId": "30102014",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "30100270b": {
-      "path": "enemy-images/candidate-bwiki-8f1b50949e61934d.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100114",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/13/nfgchpbf0wormqblg1de33ycab9lho9.jpg/200px-NPC_Avatar_30100114.jpg",
-      "matchEvidence": "same Chinese base name; source NPC ID may differ",
-      "sourceEnemyName": "失乡骑士",
-      "sourceEnemyId": "30100114",
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
@@ -2251,6 +2208,17 @@
       "sourceEnemyName": "Wormface-night-boss-nightreign-300px.png",
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
+    },
+    "30100100": {
+      "path": "enemy-images/30100114.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B730100114",
+      "sourceEnemyId": "30100114",
+      "sourceEnemyName": "失乡骑士",
+      "matchEvidence": "red-hood Banished Knight image associated with source row 30100100; Dragon Communion form needs visual confirmation",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/13/nfgchpbf0wormqblg1de33ycab9lho9.jpg/200px-NPC_Avatar_30100114.jpg"
     }
   }
 }

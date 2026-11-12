@@ -239,7 +239,7 @@ onUnmounted(() => {
       </header>
       <div class="content">
         <nav v-show="isAtlas" class="atlas-navigation" aria-label="图鉴分类">
-          <a v-for="page in atlasPages" :key="page.view" :href="`#${page.view}`" :aria-current="currentView === page.view ? 'page' : null">{{ page.label }}<small v-if="page.view === 'enemies'" id="nav-enemy-count">—</small></a>
+          <a v-for="page in atlasPages" :key="page.view" :href="`#${page.view}`" :aria-current="currentView === page.view ? 'page' : null">{{ page.label }}</a>
         </nav>
         <OverviewPage :active="currentView === 'overview'" />
         <EnemiesPage :active="currentView === 'enemies'" />
@@ -263,7 +263,6 @@ onUnmounted(() => {
 .atlas-navigation a{display:flex;flex:0 0 auto;align-items:center;gap:7px;min-height:38px;padding:7px 14px;border:1px solid transparent;border-radius:4px;background:#172638;color:#b8c9d4;white-space:nowrap;font-size:14px}
 .atlas-navigation a:hover{border-color:#536c82;color:#e7d5ac}
 .atlas-navigation a[aria-current=page]{border-color:#8f7a50;background:#2b3b45;color:#efdcaa}
-.atlas-navigation small{font-size:10px;color:#a5b8c8;font-variant-numeric:tabular-nums}
 @media(min-width:851px){
 .app-shell.ability-fullscreen>.main{display:flex;height:100dvh;flex-direction:column;overflow:hidden}
 .app-shell.ability-fullscreen>.main>.content{display:flex;flex:1;flex-direction:column;min-height:0;overflow:hidden}
