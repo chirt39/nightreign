@@ -51,20 +51,64 @@ test('unresolved identities and missing original slots cannot pass', () => {
 test('manual selection searches all templates and keeps a negative with its positive', () => {
   const slots = [pair(6002600, 6820000), pair(7001402), pair(6630000)];
   assert.equal(checkCombination(catalog, slots).status, 'clear');
-  assert.equal(checkCombination(catalog, [slots[1], slots[0], slots[2]]).status, 'unknown');
-  assert.match(checkCombination(catalog, [pair(6002600), slots[1], slots[2]]).message, /第 1 条补选负面/);
-  assert.match(checkCombination(catalog, [slots[1], pair(6002600), slots[2]]).message, /第 2 条补选负面/);
+  assert.equal(checkCombination(catalog, [slots[1], slots[0], slots[2]]).status, 'anomaly');
+  assert.equal(checkCombination(catalog, [pair(6002600), slots[1], slots[2]]).status, 'clear');
+  assert.equal(checkCombination(catalog, [slots[1], pair(6002600), slots[2]]).status, 'anomaly');
+  // Moving only the negative to a different positive cannot satisfy the template.
+  assert.equal(checkCombination(catalog, [pair(6002600), pair(7001402, 6820000), slots[2]]).status, 'anomaly');
   assert.match(checkCombination(catalog, [pair(7003500), pair(), pair(7003500)]).message, /第 1、3 条词条重复/);
   assert.match(checkCombination(catalog, [pair(7000000), pair(7000001)]).message, /词条互斥/);
-  assert.equal(checkCombination(catalog, [pair(7001402)]).status, 'partial');
   // Individual pool membership does not prove there is a common normal/deep template.
-  assert.match(checkCombination(catalog, [pair(6090000, 6830000), pair(7121700), pair(7003500)]).message, /未找到已核实/);
+  assert.equal(checkCombination(catalog, [pair(6090000, 6830000), pair(7121700), pair(7003500)]).status, 'anomaly');
+});
+
+test('manual empty fields are unspecified without moving selected slots', () => {
+  for (const slots of [
+    [pair(7001402)],
+    [pair(6002600)],
+    [pair(6002600, 6820000)],
+    [pair(), pair(7001402)],
+    [pair(), pair(), pair(7001402)],
+    [pair(6002600), pair(), pair(6630000)],
+    [pair(), pair(6002600)],
+    [pair(), pair(6002600, 6820000)],
+    [pair(10000)],
+  ]) {
+    assert.deepEqual(checkCombination(catalog, slots), {status: 'clear', message: '未发现异常'});
+  }
+  assert.equal(checkCombination(catalog, [pair(), pair(10000)]).status, 'anomaly');
+});
+
+test('manual empty input and unknown IDs keep their unresolved states', () => {
+  assert.equal(checkCombination(catalog, []).status, 'partial');
+  assert.equal(checkCombination(catalog, [pair(), pair(), pair()]).status, 'partial');
+  assert.equal(checkCombination(catalog, [pair(null, 6820000)]).status, 'partial');
+  assert.equal(checkCombination(catalog, [pair(99999999)]).status, 'unknown');
+  assert.equal(checkCombination(catalog, [pair(6002600, 99999999)]).status, 'unknown');
+  assert.equal(checkCombination(catalog, [pair(6820000)]).status, 'anomaly');
 });
 
 test('manual lookup includes every fixed preset even when random combinations conflict', () => {
   for (const t of catalog.templates.filter(t => t.generation === 'fixed')) {
     const slots = t.presetPositive.map((id, i) => pair(id, t.presetNegative[i]));
     const result = checkCombination(catalog, slots);
-    assert.ok(['clear', 'partial'].includes(result.status), String(t.id));
+    assert.equal(result.status, 'clear', String(t.id));
   }
+});
+
+test('manual fixed preset exceptions require a direct match', () => {
+  const rules = {
+    items: {
+      1: {generation: 'fixed', positive: [10, 11, null], negative: [null, null, null]},
+      2: {generation: 'random', positive: [12, 12, null], negative: [null, null, null]},
+    },
+    pools: {10: [1], 11: [2], 12: [1, 2]},
+    effects: {1: {negative: false, compatibilityId: 7}, 2: {negative: false, compatibilityId: 7}},
+  };
+  const fixedCatalog = prepareLegalityCatalog(rules);
+  assert.equal(checkCombination(fixedCatalog, [pair(1), pair(2)]).status, 'clear');
+  assert.equal(checkCombination(fixedCatalog, [pair(2), pair(1)]).status, 'anomaly');
+  assert.equal(checkCombination(fixedCatalog, [pair(1), pair(1)]).status, 'anomaly');
+  const randomCatalog = prepareLegalityCatalog({...rules, items: {2: rules.items[2]}});
+  assert.equal(checkCombination(randomCatalog, [pair(1), pair(2)]).status, 'anomaly');
 });

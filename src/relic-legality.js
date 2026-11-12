@@ -167,43 +167,15 @@ export function checkCombination(catalog, slots) {
   }
   if (!count) return {status: 'partial', message: '请先选择词条。'};
 
-  // Unfilled fields are wildcards. Keep each positive and its negative together.
+  // Unfilled fields are wildcards; only selected positions constrain a template.
   // A fixed preset is allowed to witness an exception to random-relic restrictions.
   const candidates = conflict ? catalog.templates.filter(t => t.generation === 'fixed') : catalog.templates;
-  function matches(item, order) {
-    return order.every((source, i) => roles.every(role => {
-      const id = slots[source]?.[role];
+  const matching = candidates.some(item =>
+    [0,1,2].every(i => roles.every(role => {
+      const id = slots[i]?.[role];
       return id == null || catalog.pools[item[role][i]]?.includes(Number(id));
-    }));
-  }
-  const direct = [0,1,2];
-  const matching = candidates.filter(item => matches(item, direct));
-  function missingNegative(item, order) {
-    return order.find((source, nativeSlot) => {
-      return slots[source]?.positive != null && slots[source].negative == null && item.negative[nativeSlot] != null;
-    });
-  }
-  function needNegative(i) {
-    return {status: 'partial', message: `请为第 ${i + 1} 条补选负面词条。`};
-  }
-  if (matching.length) {
-    if (!matching.some(item => missingNegative(item, direct) === undefined)) {
-      return needNegative(missingNegative(matching[0], direct));
-    }
-    return count === 3
-      ? {status: 'clear', message: '这组词条可在同一件遗物上出现。'}
-      : {status: 'partial', message: `已选的 ${count} 条可匹配，可继续添加词条。`};
-  }
-  let missingInAlternative;
-  for (const order of otherOrders) {
-    for (const item of candidates) {
-      if (!matches(item, order)) continue;
-      const missing = missingNegative(item, order);
-      if (missing === undefined) return {status: 'unknown', message: '这些词条可以匹配同一件遗物，当前排列待核对。'};
-      missingInAlternative ??= missing;
-    }
-  }
-  if (missingInAlternative !== undefined) return needNegative(missingInAlternative);
+    })));
+  if (matching) return {status: 'clear', message: '未发现异常'};
   if (conflict) return {status: 'anomaly', message: conflict};
-  return {status: 'unknown', message: '未找到已核实的组合。'};
+  return {status: 'anomaly', message: '异常'};
 }
