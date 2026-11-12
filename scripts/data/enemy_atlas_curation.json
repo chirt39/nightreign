@@ -1,0 +1,29 @@
+{
+  "sourceGameVersion": "1.3.3.0",
+  "sourceRegulation": "10350000",
+  "hostilePrefixes": ["600030", "610030"],
+  "generatedIds": [
+    "600030000", "600030010", "600030100", "600030110",
+    "600030200", "600030210", "600030300", "600030310",
+    "600030400", "600030410", "600030500", "600030510",
+    "600030600", "600030610", "600030700", "600030710",
+    "600030800", "600030810", "600030900", "600030910",
+    "610030300", "610030500"
+  ],
+  "retiredPrefixes": ["3010", "3180"],
+  "retiredIds": ["75400100", "75700000", "75700010", "75700020", "75700030"],
+  "excludedGeneratedIds": {
+    "10000020": "Group healthbar proxy, not an individual enemy card",
+    "21500600": "Shared three-girls healthbar; individual form unresolved",
+    "21500610": "Shared three-girls healthbar; individual form unresolved",
+    "21500620": "Shared three-girls healthbar; individual form unresolved",
+    "46410010": "Community alias is Everdark Worm; FMG name is a misleading form match",
+    "521030700": "Ironeye Remembrance; excluded remembrance actor",
+    "521060800": "Tutorial/Revenant encounter actor; excluded NPC or tutorial",
+    "75001110": "One member of a shared three-beasts healthbar; individual name unresolved",
+    "75002110": "One member of a shared three-beasts healthbar; individual name unresolved",
+    "75003110": "One member of a shared three-beasts healthbar; individual name unresolved"
+  },
+  "nonEnemyPrefixes": ["500010", "5210", "5211", "5230", "5231"],
+  "notes": "Retired IDs follow approved atlas removals; a native NPC row alone does not authorize reinstatement. Only exact game-text-named hostile prefixes create cards."
+}

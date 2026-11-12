@@ -1,0 +1,379 @@
+{
+  "43529000": {
+    "model": "c4352",
+    "modelAlias": "Cuckoo Knight",
+    "familyName": "杜鹃骑士",
+    "termSource": "NpcName:904352600",
+    "scenes": [
+      "m10_00_00_00"
+    ]
+  },
+  "51900010": {
+    "model": "c5190",
+    "modelAlias": "Spider Scorpion",
+    "familyName": "蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m50_01_00_00"
+    ]
+  },
+  "51902010": {
+    "model": "c5190",
+    "modelAlias": "Spider Scorpion",
+    "familyName": "蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m50_01_00_00"
+    ]
+  },
+  "51901010": {
+    "model": "c5190",
+    "modelAlias": "Spider Scorpion",
+    "familyName": "蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m50_01_00_00"
+    ]
+  },
+  "51920010": {
+    "model": "c5192",
+    "modelAlias": "Spider Scorpion (Large)",
+    "familyName": "大型蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m50_01_00_00"
+    ]
+  },
+  "51930010": {
+    "model": "c5193",
+    "modelAlias": "Spider Scorpion (Small)",
+    "familyName": "小型蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m50_01_00_00"
+    ]
+  },
+  "43520020": {
+    "model": "c4352",
+    "modelAlias": "Cuckoo Knight",
+    "familyName": "杜鹃骑士",
+    "termSource": "NpcName:904352600",
+    "scenes": [
+      "m50_03_00_00"
+    ]
+  },
+  "43521020": {
+    "model": "c4352",
+    "modelAlias": "Cuckoo Knight",
+    "familyName": "杜鹃骑士",
+    "termSource": "NpcName:904352600",
+    "scenes": [
+      "m50_03_00_00"
+    ]
+  },
+  "38000010": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m50_04_00_00"
+    ]
+  },
+  "50800210": {
+    "model": "c5080",
+    "modelAlias": "Bloodfiend",
+    "familyName": "血怪",
+    "termSource": "NpcName:905081000",
+    "scenes": [
+      "m50_10_00_00",
+      "m52_50_00_00"
+    ]
+  },
+  "50802010": {
+    "model": "c5080",
+    "modelAlias": "Bloodfiend",
+    "familyName": "血怪",
+    "termSource": "NpcName:905081000",
+    "scenes": [
+      "m50_10_00_00",
+      "m52_50_00_00"
+    ]
+  },
+  "50800010": {
+    "model": "c5080",
+    "modelAlias": "Bloodfiend",
+    "familyName": "血怪",
+    "termSource": "NpcName:905081000",
+    "scenes": [
+      "m50_10_00_00"
+    ]
+  },
+  "50801010": {
+    "model": "c5080",
+    "modelAlias": "Bloodfiend",
+    "familyName": "血怪",
+    "termSource": "NpcName:905081000",
+    "scenes": [
+      "m50_10_00_00"
+    ]
+  },
+  "50801110": {
+    "model": "c5080",
+    "modelAlias": "Bloodfiend",
+    "familyName": "血怪",
+    "termSource": "NpcName:905081000",
+    "scenes": [
+      "m50_10_00_00"
+    ]
+  },
+  "48200010": {
+    "model": "c4820",
+    "modelAlias": "Omenkiller",
+    "familyName": "恶兆猎人",
+    "termSource": "NpcName:904820700",
+    "scenes": [
+      "m50_11_00_00"
+    ]
+  },
+  "38000030": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m52_42_00_00"
+    ]
+  },
+  "38001020": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m52_42_00_00"
+    ]
+  },
+  "50801210": {
+    "model": "c5080",
+    "modelAlias": "Bloodfiend",
+    "familyName": "血怪",
+    "termSource": "NpcName:905081000",
+    "scenes": [
+      "m52_50_00_00"
+    ]
+  },
+  "51900020": {
+    "model": "c5190",
+    "modelAlias": "Spider Scorpion",
+    "familyName": "蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m52_52_00_00"
+    ]
+  },
+  "51902020": {
+    "model": "c5190",
+    "modelAlias": "Spider Scorpion",
+    "familyName": "蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m52_52_00_00"
+    ]
+  },
+  "51903010": {
+    "model": "c5190",
+    "modelAlias": "Spider Scorpion",
+    "familyName": "蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m52_52_00_00"
+    ]
+  },
+  "51920020": {
+    "model": "c5192",
+    "modelAlias": "Spider Scorpion (Large)",
+    "familyName": "大型蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m52_52_00_00"
+    ]
+  },
+  "51930020": {
+    "model": "c5193",
+    "modelAlias": "Spider Scorpion (Small)",
+    "familyName": "小型蜘蛛蝎",
+    "termSource": "NpcName:905192000",
+    "scenes": [
+      "m52_52_00_00"
+    ]
+  },
+  "50803010": {
+    "model": "c5080",
+    "modelAlias": "Bloodfiend",
+    "familyName": "血怪",
+    "termSource": "NpcName:905081000",
+    "scenes": [
+      "m52_57_00_00"
+    ]
+  },
+  "50804010": {
+    "model": "c5080",
+    "modelAlias": "Bloodfiend",
+    "familyName": "血怪",
+    "termSource": "NpcName:905081000",
+    "scenes": [
+      "m52_57_00_00"
+    ]
+  },
+  "48200020": {
+    "model": "c4820",
+    "modelAlias": "Omenkiller",
+    "familyName": "恶兆猎人",
+    "termSource": "NpcName:904820700",
+    "scenes": [
+      "m53_52_00_00",
+      "m53_64_00_00"
+    ]
+  },
+  "38000120": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m53_67_00_00",
+      "m53_80_00_00"
+    ]
+  },
+  "38001110": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m53_67_00_00"
+    ]
+  },
+  "38000110": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m53_67_00_00"
+    ]
+  },
+  "38001120": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m53_67_00_00",
+      "m53_81_00_00"
+    ]
+  },
+  "38000050": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m53_67_00_00",
+      "m53_81_00_00"
+    ]
+  },
+  "38001040": {
+    "model": "c3800",
+    "modelAlias": "Cleanrot Knight",
+    "familyName": "尊腐骑士",
+    "termSource": "NpcName:903800600",
+    "scenes": [
+      "m53_67_00_00"
+    ]
+  },
+  "43562010": {
+    "model": "c4356",
+    "modelAlias": "Haligtree Knight",
+    "familyName": "圣树骑士",
+    "termSource": "WeaponCaption:18100000",
+    "scenes": [
+      "m53_67_00_00"
+    ]
+  },
+  "43560010": {
+    "model": "c4356",
+    "modelAlias": "Haligtree Knight",
+    "familyName": "圣树骑士",
+    "termSource": "WeaponCaption:18100000",
+    "scenes": [
+      "m53_80_00_00"
+    ]
+  },
+  "43520000": {
+    "model": "c4352",
+    "modelAlias": "Cuckoo Knight",
+    "familyName": "杜鹃骑士",
+    "termSource": "NpcName:904352600",
+    "scenes": [
+      "m60_42_39_40"
+    ]
+  },
+  "43520030": {
+    "model": "c4352",
+    "modelAlias": "Cuckoo Knight",
+    "familyName": "杜鹃骑士",
+    "termSource": "NpcName:904352600",
+    "scenes": [
+      "m60_42_39_40"
+    ]
+  },
+  "43521030": {
+    "model": "c4352",
+    "modelAlias": "Cuckoo Knight",
+    "familyName": "杜鹃骑士",
+    "termSource": "NpcName:904352600",
+    "scenes": [
+      "m60_42_39_40"
+    ]
+  },
+  "37500020": {
+    "model": "c3750",
+    "modelAlias": "Clayman",
+    "familyName": "泥人",
+    "termSource": "WeaponName:16030000",
+    "scenes": [
+      "m60_43_36_40",
+      "m60_43_37_40",
+      "m60_44_36_40",
+      "m60_44_38_40",
+      "m60_45_39_40"
+    ]
+  },
+  "37501020": {
+    "model": "c3750",
+    "modelAlias": "Clayman",
+    "familyName": "泥人",
+    "termSource": "WeaponName:16030000",
+    "scenes": [
+      "m60_43_37_40",
+      "m60_43_38_40",
+      "m60_44_36_40",
+      "m60_44_38_40",
+      "m60_45_39_40"
+    ]
+  },
+  "37502020": {
+    "model": "c3750",
+    "modelAlias": "Clayman",
+    "familyName": "泥人",
+    "termSource": "WeaponName:16030000",
+    "scenes": [
+      "m60_43_37_40",
+      "m60_43_38_40",
+      "m60_44_36_40",
+      "m60_45_39_40"
+    ]
+  }
+}

@@ -258,7 +258,7 @@
     },
     "buildingCategory:forge": {
       "src": "/map-icons/forge-42048-886d6f893989.png",
-      "nameZh": "锻造设施",
+      "nameZh": "锻造村",
       "width": 220,
       "height": 130,
       "status": "verified",

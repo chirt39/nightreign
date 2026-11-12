@@ -377,7 +377,7 @@ test('real marked clues narrow building and elite choices while keeping DLC sour
   const target=bySlot.get('108'),raw=buildingChoicesAtPosition(groups,target,false);
   const building=possiblePointChoices(c.patterns,pointChoiceContext(clues,target,groups),raw,c.definitions);
   const names=[...new Set(building.map(e=>e.name))];
-  assert.ok(names.includes('大型营地'));assert.ok(names.includes('沼泽'));assert.ok(names.includes('锻造设施'));
+  assert.ok(names.includes('大型营地'));assert.ok(names.includes('沼泽'));assert.ok(names.includes('锻造村'));
   assert.equal(names.includes('大教堂'),false);assert.equal(names.includes('要塞'),false);
   const elite=bySlot.get('750');
   assert.equal(possiblePointChoices(c.patterns,{filters:clues.filters},elite.entries,c.definitions).length,4);

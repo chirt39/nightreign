@@ -98,9 +98,9 @@ python scripts/extract_map_assets.py --scenes
 | fort | 要塞 | 7 | 42006 | 266×266 |
 | greatchurch | 大教堂 | 24 | 42023 | 248×248 |
 | marsh | 沼泽 | 77 | 42047 | 266×202 |
-| forge | 锻造设施 | 78 | 42048 | 220×130 |
+| forge | 锻造村 | 78 | 42048 | 220×130 |
 
-关联链为当前 `map-catalog.json` 建筑类别的 worldMapPointIconId → 原生 `WorldMapPointIconParam.iconId` → 布局文件中同编号 sprite。基础七类来自 `/menu/01_common_h.tpf.dcx` 的 `SB_MenuIcon_1`，精确布局来自 `/menu/01_common_h.sblytbnd.dcx` 内的 `SB_MenuIcon_1.layout`，sprite 名为 `MENU_MenuIcon_{iconId}.png`。沼泽与锻造设施来自 `/menu/21_common_dlc01_h.tpf.dcx` 的 `SB_MapIcon_DLC01_0`，布局为对应 `/menu/21_common_dlc01_h.sblytbnd.dcx` 内的 `SB_MapIcon_DLC01_0.layout`，精确 sprite 分别为 `MENU_MAP_42047_077.png` 与 `MENU_MAP_42048_078.png`。两组资源均由前轮本机 `data0.bdt` 提取，此次只读取仓库外缓存，不再打开或解包游戏安装资源。
+关联链为当前 `map-catalog.json` 建筑类别的 worldMapPointIconId → 原生 `WorldMapPointIconParam.iconId` → 布局文件中同编号 sprite。基础七类来自 `/menu/01_common_h.tpf.dcx` 的 `SB_MenuIcon_1`，精确布局来自 `/menu/01_common_h.sblytbnd.dcx` 内的 `SB_MenuIcon_1.layout`，sprite 名为 `MENU_MenuIcon_{iconId}.png`。沼泽与锻造村来自 `/menu/21_common_dlc01_h.tpf.dcx` 的 `SB_MapIcon_DLC01_0`，布局为对应 `/menu/21_common_dlc01_h.sblytbnd.dcx` 内的 `SB_MapIcon_DLC01_0.layout`，精确 sprite 分别为 `MENU_MAP_42047_077.png` 与 `MENU_MAP_42048_078.png`。两组资源均由前轮本机 `data0.bdt` 提取，此次只读取仓库外缓存，不再打开或解包游戏安装资源。
 
 按原生布局矩形从 DDS 解码后的 RGBA 图集裁切，原尺寸输出透明 PNG，保留游戏自带色彩、发光与透明留白，没有重绘、缩放、裁掉透明边或加背景。逐张验证 PNG 重新解码的 RGBA 等于源图集对应矩形。九张共 419,930 字节；完整资源、DDS、layout、图片哈希与矩形均在图标清单。图标取到原版素材不扩大建筑身份覆盖范围：要塞、大教堂的既有类别次数差异仍沿用数据专项的限制。
 

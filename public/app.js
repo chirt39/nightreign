@@ -2,8 +2,8 @@
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyImageManifest:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),enemyEntities:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,effectEncyclopediaPageSize:18,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const fmt = (v) => v == null || typeof v === 'string' && !v.trim() || typeof v === 'number' && !Number.isFinite(v) ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
+const state = {enemyData:null,enemyEncounters:new Map(),enemyEncounterRows:[],enemyRowsById:new Map(),enemyImageManifest:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),enemyEntities:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,effectEncyclopediaPageSize:18,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
 const relicColorClasses = Object.freeze({Red:'red',Blue:'blue',Yellow:'yellow',Green:'green',Any:'any'});
 const relicColorClass = (relic) => {const key=String(relic?.itemColor||'Any');return `color-${Object.hasOwn(relicColorClasses,key)?relicColorClasses[key]:'any'}`};
@@ -95,8 +95,37 @@ const enemyExcludedNumericSourceIds=new Set(['30200100','30200110','30208000','3
 const enemyPrimarySourceIds=new Set(['30200000','30200030','30200010a','30200020']);
 const enemyExplicitVariantPairs=new Map([['30200010b','30200000'],['45803020b','45803020a'],['30000010b','30000010a'],['30000110b','30000110a'],['30001010b','30001010a'],['36622010b','36622010a'],['44700010b','44700010a'],['43002410b','43000010a'],['71000110b','71000110a']]);
 const enemyUnpairedDisasterIds=new Set(['36612010b','36615010b']);
-const enemyAreaDisplayAliases=new Map([['永夜Boss','第三夜Boss'],['原野Boss - 恐怖强敌','原野Boss']]);
-const enemyRequiredAreas=['沼泽','锻造设施','大空洞'];
+const enemyAreaDisplayAliases=new Map([['永夜Boss','第三夜Boss'],['原野Boss - 恐怖强敌','原野Boss'],['锻造设施','锻造村']]);
+const enemyRequiredAreas=['沼泽','锻造村','大空洞'];
+function prepareEnemyEncounters() {
+  const previous = new Set(state.enemyEncounterRows || []);
+  const rows = state.enemyData.rows.filter(row => !previous.has(row));
+  state.enemyRowsById = new Map();
+  for (const row of rows) {
+    const id = String(row[1]);
+    if (!state.enemyRowsById.has(id)) state.enemyRowsById.set(id, row);
+  }
+  state.enemyEncounters = new Map();
+  for (const entry of state.enemyData.encounters || []) {
+    if (!/^encounter-\d+$/.test(String(entry.id)) || state.enemyEncounters.has(String(entry.id))) continue;
+    state.enemyEncounters.set(String(entry.id), entry);
+  }
+  state.enemyEncounterRows = [...state.enemyEncounters.values()].map(entry => [entry.name || entry.id, String(entry.id)]);
+  // Virtual display rows keep native record indices stable and never invent group stats.
+  state.enemyData.rows = [...rows, ...state.enemyEncounterRows];
+}
+function enemyEncounterFor(row) { return state.enemyEncounters?.get(String(row?.[1])); }
+function encounterMemberRow(member) { return state.enemyRowsById?.get(String(member.enemyId)); }
+function encounterMemberName(member) {
+  if (member.name) return member.name;
+  const row = encounterMemberRow(member);
+  return row ? state.enemyEntities.get(enemyEntityKey(row))?.name || enemyDisplayName(row) : `#${member.enemyId}`;
+}
+function enemySearchText(row) {
+  const encounter = enemyEncounterFor(row);
+  const members = (encounter?.members || []).map(member => `${encounterMemberName(member)} ${member.enemyId}`).join(' ');
+  return `${enemyName(row)} ${row[1]} ${enemyCategoryLabel(row)} ${enemyDisplayLocations(row).join(' ')} ${members}`;
+}
 function enemyName(r){return String(r[0]||'未知敌人')}
 function isBoss(r){return bossRe.test(enemyName(r))}
 function stripDisasterMarker(name){return String(name||'').replace(/\s*\[灾域\]\s*/g,' ').replace(/\s+/g,' ').trim()}
@@ -107,16 +136,18 @@ function stripEnemyOccurrenceAnnotations(name){return stripDisasterMarker(name).
 function enemyGroupName(r){return stripEnemyOccurrenceAnnotations(enemyName(r)).replace(/[「」『』“”‘’\s]/g,'').toLocaleLowerCase()}
 function enemyClassificationSignature(row){return JSON.stringify([...enemyMetaFor(row).categories].sort())}
 function enemyEntityKey(row){
-  const id=String(row[1]||''),pairedId=enemyExplicitVariantPairs.get(id);
+  const id=String(row[1]||'');
+  if(enemyEncounterFor(row))return `encounter:${id}`;
+  const pairedId=enemyExplicitVariantPairs.get(id);
   if(pairedId){const pairedRow=state.enemyData.rows.find(item=>String(item[1])===pairedId);if(pairedRow)return `enemy:${enemyGroupName(pairedRow)}`}
   const name=enemyName(row),isDisaster=name.includes('[灾域]');
   const groupName=enemyGroupName(row);
   if(isDisaster&&enemyUnpairedDisasterIds.has(id))return `disaster:${groupName}:${id}`;
-  if(isDisaster&&state.enemyData.rows.some(item=>!enemyName(item).includes('[灾域]')&&enemyGroupName(item)===groupName&&enemyClassificationSignature(item)===enemyClassificationSignature(row)))return `enemy:${groupName}`;
+  if(isDisaster&&state.enemyData.rows.some(item=>!enemyEncounterFor(item)&&!enemyName(item).includes('[灾域]')&&enemyGroupName(item)===groupName&&enemyClassificationSignature(item)===enemyClassificationSignature(row)))return `enemy:${groupName}`;
   return `${isDisaster?`disaster:${groupName}:${id}`:`enemy:${groupName}`}`;
 }
 function isIndependentDisaster(row){return enemyName(row).includes('[灾域]')&&enemyEntityKey(row).startsWith('disaster:')}
-function enemyDisplayName(row){return stripEnemyOccurrenceAnnotations(enemyName(row))}
+function enemyDisplayName(row){return enemyEncounterFor(row)?.name||stripEnemyOccurrenceAnnotations(enemyName(row))}
 function buildEnemyDisplayIndex(){
   const entities=new Map();
   state.enemyData.rows.forEach((row,index)=>{
@@ -153,12 +184,20 @@ function buildEnemyDisplayIndex(){
   for(const entity of entities.values()){
     const representative=entity.statGroups[0]?.anchor.row||entity.records[0]?.row||entity.pairedDisaster[0]?.row||entity.sourceOnly[0]?.row;
     entity.categoryKey=representative?enemyRowCategoryKey(representative):'other';
-    entity.locations=displayEnemyLocations([...entity.records,...entity.pairedDisaster,...entity.sourceOnly].flatMap(({row})=>enemySourceNote(row).locations));
+    entity.locations=displayEnemyLocations([...entity.records,...entity.pairedDisaster,...entity.sourceOnly].flatMap(({row})=>[
+      ...enemySourceNote(row).locations,
+      ...(state.enemyData.entityLocationsBySourceId?.[String(row[1])]||[]),
+    ]));
   }
   state.enemyEntities=entities;
 }
 function enemyDisasterMatchSignature(row){return JSON.stringify(row.slice(5))}
 function enemySourceNote(row){
+  const encounter=enemyEncounterFor(row);
+  if(encounter){
+    const extra=state.enemyData.extraLocations?.[String(encounter.id)];
+    return {sourceName:encounter.name||String(encounter.id),locations:displayEnemyLocations([...(encounter.locations||[]),...(Array.isArray(extra)?extra:[])]),variant:'群体遭遇'};
+  }
   const sourceName=stripDisasterMarker(enemyName(row));
   const annotations=[...sourceName.matchAll(/\(([^)]*)\)|（([^）]*)）|\[([^\]]*)\]|【([^】]*)】/g)].map(match=>match.slice(1).find(value=>typeof value==='string')||'');
   const locations=new Set(locationFor(row));
@@ -176,6 +215,7 @@ function enemyDisplayLocations(row){
   return locations.length?locations:['出现地点未收录'];
 }
 function buildEnemyMetadata(){
+  prepareEnemyEncounters();
   const map=new Map(),locations=new Set(),categories=new Set();
   for(const row of state.enemyData.scale?.rows||[]){
     const key=normalizeName(row[0]);if(!key)continue;
@@ -186,6 +226,9 @@ function buildEnemyMetadata(){
   }
   for(const values of Object.values(state.enemyData.extraLocations||{})){
     if(Array.isArray(values))for(const location of values)if(typeof location==='string'&&location.trim())locations.add(location.trim());
+  }
+  for(const encounter of state.enemyEncounters.values()){
+    for(const area of encounter.locations||[])if(typeof area==='string'&&area.trim())locations.add(area.trim());
   }
   for(const area of enemyRequiredAreas)locations.add(area);
   state.enemyMeta=map;state.enemyMetaLocations=locations;state.enemyMetaCategories=categories;
@@ -222,6 +265,13 @@ function enemyMatchedLocations(context,locations){const normalized=enemyQualifie
 function longestEnemyLocations(locations){const sorted=[...new Set(locations)].sort((a,b)=>enemyQualifierText(b).length-enemyQualifierText(a).length);return sorted.filter((location,index)=>!sorted.slice(0,index).some(longer=>enemyQualifierText(longer).includes(enemyQualifierText(location))))}
 function enemyMetaFromRecords(records){return {categories:new Set(records.map(record=>record.category==='中boss'?'小boss':record.category).filter(Boolean)),locations:new Set(records.map(record=>record.location).filter(Boolean))}}
 function enemyRowCategoryKey(row){
+  const encounter=enemyEncounterFor(row);
+  if(encounter){
+    const aliases={'夜晚首领':'夜晚Boss','强敌首领':'强敌boss','小型首领':'小boss','中boss':'小boss','Boss':'boss','特殊敌人':'特殊','未细分首领':'otherboss','小型敌人':'other'};
+    const key=aliases[encounter.category]||encounter.category;
+    if(Object.hasOwn(enemyCategoryLabels,key)||['otherboss','other'].includes(key))return key;
+    return typeof key==='string'&&key.trim()?`encounter-category:${key.trim()}`:'otherboss';
+  }
   const categories=enemyMetaFor(row).categories;
   for(const key of ['夜王','夜晚Boss','古代封印监牢','封印监牢','强敌boss','小boss','特殊','boss'])if(categories.has(key))return key;
   return isBoss(row)?'otherboss':'other';
@@ -234,6 +284,7 @@ function matchesEnemyCategory(row,filter){
   const key=enemyCategoryKey(row);
   if(filter==='boss')return key!=='other'&&key!=='特殊';
   if(filter==='fieldboss')return fieldBossCategories.has(key);
+  if(filter.startsWith('encounter-category:'))return key===filter;
   const keys={nightlord:'夜王',nightboss:'夜晚Boss',strongboss:'强敌boss',smallboss:'小boss',genericboss:'boss',sealed:'封印监牢',ancient:'古代封印监牢',special:'特殊',otherboss:'otherboss',other:'other'};
   return keys[filter]===key;
 }
@@ -242,23 +293,31 @@ function displayEnemyLocations(locations){return [...new Set(locations.map(enemy
 function matchesEnemyArea(row,area){return area==='all'||enemyDisplayLocations(row).includes(enemyAreaDisplayName(area))}
 function enemyCategoryLabel(row){
   const key=enemyCategoryKey(row);
+  if(key.startsWith('encounter-category:'))return key.slice('encounter-category:'.length);
   return enemyCategoryLabels[key]||(key==='otherboss'?'未细分首领':'小型敌人');
+}
+function availableEnemyFilterOptions(){
+  const extra=[...new Set([...state.enemyEntities.values()].map(entity=>entity.categoryKey).filter(key=>key.startsWith('encounter-category:')))];
+  return [...enemyFilterOptions,...extra.map(key=>[key,key.slice('encounter-category:'.length)])];
 }
 function setupEnemyFilters(){
   const entities=[...state.enemyEntities.values()];
   const rows=entities.map(entity=>entity.statGroups[0]?.anchor.row||entity.records[0]?.row||entity.pairedDisaster[0]?.row||entity.sourceOnly[0]?.row).filter(Boolean);
-  $('#enemy-filter').innerHTML=enemyFilterOptions.map(([key,label])=>{
+  $('#enemy-filter').innerHTML=availableEnemyFilterOptions().map(([key,label])=>{
     const count=key==='all'?rows.length:rows.filter(row=>matchesEnemyCategory(row,key)).length;
-    return `<option value="${key}" ${count===0?'hidden':''}>${label} · ${count.toLocaleString('zh-CN')}</option>`;
+    return `<option value="${esc(key)}" ${count===0?'hidden':''}>${esc(label)} · ${count.toLocaleString('zh-CN')}</option>`;
   }).join('');
   const areas=new Set(entities.flatMap(entity=>entity.locations.length?entity.locations:['出现地点未收录']));
+  for(const values of Object.values(state.enemyData.extraLocations||{})){
+    if(Array.isArray(values))for(const area of values)if(typeof area==='string'&&area.trim())areas.add(enemyAreaDisplayName(area.trim()));
+  }
   for(const area of enemyRequiredAreas)areas.add(area);
   $('#enemy-area').innerHTML='<option value="all">全部区域 / 遭遇</option>'+[...areas].map(area=>`<option value="${esc(area)}">${esc(area)}</option>`).join('');
 }
 function restoreEnemyUrlState(){
   const params=new URL(location.href).searchParams;
   $('#enemy-search').value=params.get('enemyQ')||'';
-  $('#enemy-filter').value=enemyFilterOptions.some(([key])=>key===params.get('enemyType'))?params.get('enemyType'):'all';
+  $('#enemy-filter').value=availableEnemyFilterOptions().some(([key])=>key===params.get('enemyType'))?params.get('enemyType'):'all';
   const requestedArea=enemyAreaDisplayName(params.get('enemyArea')||'all');
   $('#enemy-area').value=[...$('#enemy-area').options].some(option=>option.value===requestedArea)?requestedArea:'all';
   state.enemyPage=Math.max(1,Number(params.get('enemyPage'))||1);
@@ -290,7 +349,7 @@ function resolveEnemyUrlMatch(filteredRows,allRows,recordIndex,enemyId){
 function filterEnemies(resetPage=true){
   if(!state.enemyData)return;
   const q=$('#enemy-search').value.trim().toLocaleLowerCase(),filter=$('#enemy-filter').value,area=$('#enemy-area').value;
-  const rows=state.enemyData.rows.map((row,index)=>({row,index})).filter(({row})=>(!q||(enemyName(row)+' '+row[1]+' '+enemyCategoryLabel(row)+' '+enemyDisplayLocations(row).join(' ')).toLocaleLowerCase().includes(q))&&matchesEnemyCategory(row,filter)&&matchesEnemyArea(row,area));
+  const rows=state.enemyData.rows.map((row,index)=>({row,index})).filter(({row})=>(!q||enemySearchText(row).toLocaleLowerCase().includes(q))&&matchesEnemyCategory(row,filter)&&matchesEnemyArea(row,area));
   state.enemyFiltered=rows;
   const groups=new Map();
   rows.forEach(item=>{const key=enemyEntityKey(item.row);if(!groups.has(key)){const entity=state.enemyEntities.get(key);if(!entity)return;groups.set(key,{...entity,filteredRecords:[],filteredPairedDisaster:[],filteredSourceOnly:[]})}const group=groups.get(key);if(enemyExcludedNumericSourceIds.has(String(item.row[1])))group.filteredSourceOnly.push(item);else if(enemyName(item.row).includes('[灾域]')&&key.startsWith('enemy:'))group.filteredPairedDisaster.push(item);else group.filteredRecords.push(item)});
@@ -332,7 +391,7 @@ function locationFor(row){
 // 敌人表的伤害列存的是减伤百分比；图鉴使用玩家实际造成伤害的倍率。
 function enemyDamageMultiplier(value){
   const reduction=Number(value);
-  return value==null||value===''||!Number.isFinite(reduction)?null:Math.round((1-reduction/100)*1000)/1000;
+  return value==null||typeof value==='string'&&!value.trim()||!Number.isFinite(reduction)?null:Math.round((1-reduction/100)*1000)/1000;
 }
 function enemyDamageText(value){const multiplier=enemyDamageMultiplier(value);return multiplier==null?'未收录':`×${fmt(multiplier)}`}
 function enemyMetricDisplay(row,index){return index>=5&&index<=12?enemyDamageText(row[index]):String(row[index]).toLowerCase()==='immune'?'免疫':fmt(row[index])}
@@ -393,7 +452,30 @@ function enemyDetailImageMarkup(record,name){
   const menuPortrait=entry.imageKind==='nightboss-menu-portrait',label=menuPortrait?`${name}：出击菜单头像`:name;
   return `<img class="enemy-detail-image" src="./${esc(path)}" alt="${esc(label)}"${menuPortrait?' title="出击菜单头像"':''} width="80" height="80" decoding="async">`;
 }
+function encounterMemberHref(row) {
+  const url = new URL(location.href);
+  for (const key of ['enemyQ', 'enemyType', 'enemyArea', 'enemyPage']) url.searchParams.delete(key);
+  url.searchParams.set('enemyId', String(row[1]));
+  url.searchParams.set('enemyRecordIndex', String(state.enemyData.rows.indexOf(row)));
+  url.hash = 'enemies';
+  return url.pathname + url.search + url.hash;
+}
+function renderEnemyEncounterDetail(row, encounter) {
+  const entity = state.enemyEntities.get(enemyEntityKey(row));
+  const index = state.enemyData.rows.indexOf(row);
+  const members = (encounter.members || []).map(member => {
+    const target = encounterMemberRow(member);
+    const name = esc(encounterMemberName(member));
+    const count = Number.isInteger(member.count) && member.count > 0 ? `<span>×${member.count}</span>` : '';
+    const label = target ? `<a href="${esc(encounterMemberHref(target))}">${name}</a>` : `<span>${name}</span>`;
+    return `<li>${label}${count}</li>`;
+  }).join('');
+  $('#enemy-detail').innerHTML = `<div class="detail-top"><div class="enemy-detail-title"><div><span class="card-kicker">${esc(enemyCategoryLabel(row))} / 怪物分类</span><h2>${esc(encounter.name || encounter.id)}</h2></div></div><div class="enemy-detail-actions">${enemyDetailNavigationMarkup()}<button type="button" class="enemy-report-trigger" data-enemy-report-open data-enemy-index="${index}" data-enemy-id="${esc(encounter.id)}">资料有误？</button><span class="badge enemy-category-badge">${esc(enemyCategoryLabel(row))}</span></div></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(enemyLocationSummary(entity))}</p><section class="enemy-encounter-members"><h3>成员</h3>${members ? `<ul>${members}</ul>` : '<p>成员信息未收录。</p>'}</section>`;
+  $('#enemy-detail').scrollTop = 0;
+}
 function renderEnemyDetail(r){
+  const encounter=enemyEncounterFor(r);
+  if(encounter){renderEnemyEncounterDetail(r,encounter);return}
   if(!r){$('#enemy-detail').innerHTML=`<div class="enemy-detail-actions enemy-detail-actions-empty">${enemyDetailNavigationMarkup(-1)}</div><div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>`;$('#enemy-detail').scrollTop=0;return}
   const entity=state.enemyEntities.get(enemyEntityKey(r)),dataGroups=entity?.statGroups||[],selectedGroup=dataGroups[0],dataRow=selectedGroup?.anchor.row||r,c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录',locationDifferences=enemyLocationDifferences(entity),selectedIndex=state.enemyData.rows.indexOf(dataRow),enemyId=String(dataRow[1]??'');
   const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',resist=title==='异常状态抗性'||indexes.length>8,grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=enemyMetricLabel(c[i].label,i);return `<div class="${resist?'resist':'kv'} ${tone}"><span class="enemy-metric-label">${enemyMetricIconMarkup(i)}${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${core?indexes.length+1:indexes.length} 项</small></summary>${core?'':extra}<div class="${resist?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};

@@ -87,6 +87,8 @@ def build() -> list[dict[str, Any]]:
     # to the effective damage multiplier used by the site's enemy viewer.
     enemy_data = load_public("enemy-data.json")
     enemy_columns = enemy_data.get("columns", [])
+    extra_locations = enemy_data.get("extraLocations", {})
+    entity_locations = enemy_data.get("entityLocationsBySourceId", {})
     enemy_id_counts: dict[str, int] = {}
     for row in enemy_data.get("rows", []):
         values = {col.get("k", ""): row[i] for i, col in enumerate(enemy_columns) if i < len(row)}
@@ -96,6 +98,12 @@ def build() -> list[dict[str, Any]]:
         enemy_id_counts[enemy_id] = enemy_id_counts.get(enemy_id, 0) + 1
         record_id = f"enemy:{enemy_id}" if enemy_id_counts[enemy_id] == 1 else f"enemy:{enemy_id}:{enemy_id_counts[enemy_id]}"
         fields: list[str] = []
+        locations = extra_locations.get(enemy_id, [])
+        if locations:
+            fields.append("出现地点：" + "、".join(locations))
+        family_locations = [name for name in entity_locations.get(enemy_id, []) if name not in locations]
+        if family_locations:
+            fields.append("同种怪物的其他出现地点：" + "、".join(family_locations))
         damage_values: list[tuple[str, float]] = []
         for index, col in enumerate(enemy_columns):
             key = col.get("k", "")
@@ -125,6 +133,21 @@ def build() -> list[dict[str, Any]]:
         title = f"敌人图鉴｜{name}｜ID {enemy_id}"
         add(records, "enemy", title, title + "｜" + "；".join(fields), "public/enemy-data.json",
             [name, enemy_id, "敌人 怪物 Boss 首领 弱点 伤害倍率 抗性 属性"], record_id)
+
+    for encounter in enemy_data.get("encounters", []):
+        name = encounter["name"]
+        locations = encounter.get("locations", [])
+        members = [
+            f"{member.get('name', '')}（{member['enemyId']}）" if member.get("name") else str(member["enemyId"])
+            for member in encounter["members"] if str(member["enemyId"]) not in REMOVED_ENEMY_IDS
+        ]
+        fields = [f"遭遇：{name}"]
+        if locations:
+            fields.append("出现地点：" + "、".join(locations))
+        if members:
+            fields.append("配置中出现的成员：" + "、".join(members))
+        add(records, "enemy", f"敌人遭遇｜{name}", "｜".join(fields), "public/enemy-data.json",
+            [name, *locations], f"enemy:{encounter['id']}")
 
     # Boss/field scaling table, including HP, poise and status multipliers.
     scale = enemy_data.get("scale", {})

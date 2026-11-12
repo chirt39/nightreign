@@ -1,0 +1,3817 @@
+{
+  "21000000": {
+    "rowAlias": "Black Knife Assassin",
+    "matchedText": "Black Knife Assassin",
+    "nameZh": "黑刀刺客",
+    "nativeNameIds": [
+      "902100600"
+    ]
+  },
+  "21000020": {
+    "rowAlias": "Black Knife Assassin (Field Boss)",
+    "matchedText": "Black Knife Assassin",
+    "nameZh": "黑刀刺客",
+    "nativeNameIds": [
+      "902100600"
+    ]
+  },
+  "21000030": {
+    "rowAlias": "Black Knife Assassin (Castle)",
+    "matchedText": "Black Knife Assassin",
+    "nameZh": "黑刀刺客",
+    "nativeNameIds": [
+      "902100600"
+    ]
+  },
+  "21000040": {
+    "rowAlias": "Black Knife Assassin (Noklateo)",
+    "matchedText": "Black Knife Assassin",
+    "nameZh": "黑刀刺客",
+    "nativeNameIds": [
+      "902100600"
+    ]
+  },
+  "25000000": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25000010": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25000020": {
+    "rowAlias": "Crucible Knight (Night Boss)",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25000030": {
+    "rowAlias": "Crucible Knight (Evergaol, Sword)",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25000040": {
+    "rowAlias": "Crucible Knight (Castle, Sword)",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25000100": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25001000": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25001010": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25001020": {
+    "rowAlias": "Crucible Knight (Evergaol, Treespear)",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25001030": {
+    "rowAlias": "Crucible Knight (Castle, Treespear)",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25001100": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25001110": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25006000": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25006100": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25007000": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25007100": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25008000": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25008100": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25009000": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "25009999": {
+    "rowAlias": "Crucible Knight",
+    "matchedText": "Crucible Knight",
+    "nameZh": "熔炉骑士",
+    "nativeNameIds": [
+      "902500110",
+      "902500300",
+      "902500301",
+      "902500500",
+      "902500520",
+      "902500600"
+    ]
+  },
+  "30500000": {
+    "rowAlias": "Outland Commander",
+    "matchedText": "Outland Commander",
+    "nameZh": "偏地老将",
+    "nativeNameIds": [
+      "903050500"
+    ]
+  },
+  "30500010": {
+    "rowAlias": "Outland Commander (Night Boss)",
+    "matchedText": "Outland Commander",
+    "nameZh": "偏地老将",
+    "nativeNameIds": [
+      "903050500"
+    ]
+  },
+  "30500100": {
+    "rowAlias": "Battlefield Commander",
+    "matchedText": "Battlefield Commander",
+    "nameZh": "战场老将",
+    "nativeNameIds": [
+      "903050600"
+    ]
+  },
+  "30500110": {
+    "rowAlias": "Battlefield Commander (Night Boss)",
+    "matchedText": "Battlefield Commander",
+    "nameZh": "战场老将",
+    "nativeNameIds": [
+      "903050600"
+    ]
+  },
+  "31000000": {
+    "rowAlias": "Bell Bearing Hunter",
+    "matchedText": "Bell Bearing Hunter",
+    "nameZh": "铃珠猎人",
+    "nativeNameIds": [
+      "903100600"
+    ]
+  },
+  "31000010": {
+    "rowAlias": "Bell Bearing Hunter (Field Boss)",
+    "matchedText": "Bell Bearing Hunter",
+    "nameZh": "铃珠猎人",
+    "nativeNameIds": [
+      "903100600"
+    ]
+  },
+  "31000020": {
+    "rowAlias": "Bell Bearing Hunter (Night Boss)",
+    "matchedText": "Bell Bearing Hunter",
+    "nameZh": "铃珠猎人",
+    "nativeNameIds": [
+      "903100600"
+    ]
+  },
+  "31000030": {
+    "rowAlias": "Bell Bearing Hunter (Castle Basement)",
+    "matchedText": "Bell Bearing Hunter",
+    "nameZh": "铃珠猎人",
+    "nativeNameIds": [
+      "903100600"
+    ]
+  },
+  "31500000": {
+    "rowAlias": "Night's Cavalry",
+    "matchedText": "Night's Cavalry",
+    "nameZh": "黑夜骑兵",
+    "nativeNameIds": [
+      "903150600"
+    ]
+  },
+  "31500010": {
+    "rowAlias": "Night's Cavalry (Field Boss; Glaive)",
+    "matchedText": "Night's Cavalry",
+    "nameZh": "黑夜骑兵",
+    "nativeNameIds": [
+      "903150600"
+    ]
+  },
+  "31500020": {
+    "rowAlias": "Night's Cavalry (Night Boss; Glaive)",
+    "matchedText": "Night's Cavalry",
+    "nameZh": "黑夜骑兵",
+    "nativeNameIds": [
+      "903150600"
+    ]
+  },
+  "31501000": {
+    "rowAlias": "Night's Cavalry",
+    "matchedText": "Night's Cavalry",
+    "nameZh": "黑夜骑兵",
+    "nativeNameIds": [
+      "903150600"
+    ]
+  },
+  "31501010": {
+    "rowAlias": "Night's Cavalry",
+    "matchedText": "Night's Cavalry",
+    "nameZh": "黑夜骑兵",
+    "nativeNameIds": [
+      "903150600"
+    ]
+  },
+  "31501020": {
+    "rowAlias": "Night's Cavalry (Night Boss; Flail)",
+    "matchedText": "Night's Cavalry",
+    "nameZh": "黑夜骑兵",
+    "nativeNameIds": [
+      "903150600"
+    ]
+  },
+  "31810040": {
+    "rowAlias": "Red Wolf of the Champion (Ruins Boss)",
+    "matchedText": "Red Wolf of the Champion",
+    "nameZh": "英雄的红狼",
+    "nativeNameIds": [
+      "903181100"
+    ]
+  },
+  "32500000": {
+    "rowAlias": "Draconic Tree Sentinel",
+    "matchedText": "Draconic Tree Sentinel",
+    "nameZh": "龙装大树守卫",
+    "nativeNameIds": [
+      "903250600"
+    ]
+  },
+  "32500010": {
+    "rowAlias": "Draconic Tree Sentinel",
+    "matchedText": "Draconic Tree Sentinel",
+    "nameZh": "龙装大树守卫",
+    "nativeNameIds": [
+      "903250600"
+    ]
+  },
+  "32500090": {
+    "rowAlias": "Draconic Tree Sentinel (Field Boss)",
+    "matchedText": "Draconic Tree Sentinel",
+    "nameZh": "龙装大树守卫",
+    "nativeNameIds": [
+      "903250600"
+    ]
+  },
+  "32500100": {
+    "rowAlias": "Draconic Tree Sentinel",
+    "matchedText": "Draconic Tree Sentinel",
+    "nameZh": "龙装大树守卫",
+    "nativeNameIds": [
+      "903250600"
+    ]
+  },
+  "32500110": {
+    "rowAlias": "Draconic Tree Sentinel (Night Boss)",
+    "matchedText": "Draconic Tree Sentinel",
+    "nameZh": "龙装大树守卫",
+    "nativeNameIds": [
+      "903250600"
+    ]
+  },
+  "32510000": {
+    "rowAlias": "Tree Sentinel",
+    "matchedText": "Tree Sentinel",
+    "nameZh": "大树守卫",
+    "nativeNameIds": [
+      "903251600"
+    ]
+  },
+  "32510020": {
+    "rowAlias": "Tree Sentinel (Field Boss)",
+    "matchedText": "Tree Sentinel",
+    "nameZh": "大树守卫",
+    "nativeNameIds": [
+      "903251600"
+    ]
+  },
+  "32510030": {
+    "rowAlias": "Tree Sentinel",
+    "matchedText": "Tree Sentinel",
+    "nameZh": "大树守卫",
+    "nativeNameIds": [
+      "903251600"
+    ]
+  },
+  "32510040": {
+    "rowAlias": "Tree Sentinel (Western Underground Fort Variant)",
+    "matchedText": "Tree Sentinel",
+    "nameZh": "大树守卫",
+    "nativeNameIds": [
+      "903251600"
+    ]
+  },
+  "32510100": {
+    "rowAlias": "Tree Sentinel",
+    "matchedText": "Tree Sentinel",
+    "nameZh": "大树守卫",
+    "nativeNameIds": [
+      "903251600"
+    ]
+  },
+  "32510110": {
+    "rowAlias": "Tree Sentinel (Night Boss)",
+    "matchedText": "Tree Sentinel",
+    "nameZh": "大树守卫",
+    "nativeNameIds": [
+      "903251600"
+    ]
+  },
+  "32511000": {
+    "rowAlias": "Tree Sentinel",
+    "matchedText": "Tree Sentinel",
+    "nameZh": "大树守卫",
+    "nativeNameIds": [
+      "903251600"
+    ]
+  },
+  "32520000": {
+    "rowAlias": "Royal Carian Knight",
+    "matchedText": "Royal Carian Knight",
+    "nameZh": "卡利亚禁卫骑士",
+    "nativeNameIds": [
+      "903253500"
+    ]
+  },
+  "32520010": {
+    "rowAlias": "Royal Carian Knight (Field Boss)",
+    "matchedText": "Royal Carian Knight",
+    "nameZh": "卡利亚禁卫骑士",
+    "nativeNameIds": [
+      "903253500"
+    ]
+  },
+  "32520020": {
+    "rowAlias": "Royal Carian Knight",
+    "matchedText": "Royal Carian Knight",
+    "nameZh": "卡利亚禁卫骑士",
+    "nativeNameIds": [
+      "903253500"
+    ]
+  },
+  "32520100": {
+    "rowAlias": "Royal Carian Knight",
+    "matchedText": "Royal Carian Knight",
+    "nameZh": "卡利亚禁卫骑士",
+    "nativeNameIds": [
+      "903253500"
+    ]
+  },
+  "33500000": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33500010": {
+    "rowAlias": "Crystalian (Evergaol, Ringblade)",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33500020": {
+    "rowAlias": "Crystalian (Fort)",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33500030": {
+    "rowAlias": "Crystalian (Remembrance)",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33500500": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33501000": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33501010": {
+    "rowAlias": "Crystalian (Evergaol, Spear)",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33501020": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33501500": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33502000": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33502010": {
+    "rowAlias": "Crystalian (Evergaol, Staff)",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33502500": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33507000": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33507100": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33507200": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33507300": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "33509000": {
+    "rowAlias": "Crystalian",
+    "matchedText": "Crystalian",
+    "nameZh": "结晶人",
+    "nativeNameIds": [
+      "903350330"
+    ]
+  },
+  "34000000": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34000100": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34000200": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34000300": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34000700": {
+    "rowAlias": "Grave Warden Duelist (Remembrance)",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34000800": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34000900": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34001000": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34001010": {
+    "rowAlias": "Grave Warden Duelist (Evergaol)",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34001100": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34001200": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34001300": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34001800": {
+    "rowAlias": "Grave Warden Duelist",
+    "matchedText": "Grave Warden Duelist",
+    "nameZh": "守墓斗士",
+    "nativeNameIds": [
+      "903400000",
+      "903400300"
+    ]
+  },
+  "34600000": {
+    "rowAlias": "Leonine Misbegotten",
+    "matchedText": "Leonine Misbegotten",
+    "nameZh": "狮子混种",
+    "nativeNameIds": [
+      "903460500"
+    ]
+  },
+  "34600010": {
+    "rowAlias": "Leonine Misbegotten (Encampment)",
+    "matchedText": "Leonine Misbegotten",
+    "nameZh": "狮子混种",
+    "nativeNameIds": [
+      "903460500"
+    ]
+  },
+  "34600020": {
+    "rowAlias": "Leonine Misbegotten (Field Boss)",
+    "matchedText": "Leonine Misbegotten",
+    "nameZh": "狮子混种",
+    "nativeNameIds": [
+      "903460500"
+    ]
+  },
+  "34600030": {
+    "rowAlias": "Leonine Misbegotten",
+    "matchedText": "Leonine Misbegotten",
+    "nameZh": "狮子混种",
+    "nativeNameIds": [
+      "903460500"
+    ]
+  },
+  "34600040": {
+    "rowAlias": "Leonine Misbegotten (Castle)",
+    "matchedText": "Leonine Misbegotten",
+    "nameZh": "狮子混种",
+    "nativeNameIds": [
+      "903460500"
+    ]
+  },
+  "34601000": {
+    "rowAlias": "Leonine Misbegotten",
+    "matchedText": "Leonine Misbegotten",
+    "nameZh": "狮子混种",
+    "nativeNameIds": [
+      "903460500"
+    ]
+  },
+  "35500000": {
+    "rowAlias": "Sanguine Noble",
+    "matchedText": "Sanguine Noble",
+    "nameZh": "鲜血贵族",
+    "nativeNameIds": [
+      "903550541"
+    ]
+  },
+  "35500010": {
+    "rowAlias": "Sanguine Noble (Ruins)",
+    "matchedText": "Sanguine Noble",
+    "nameZh": "鲜血贵族",
+    "nativeNameIds": [
+      "903550541"
+    ]
+  },
+  "35500015": {
+    "rowAlias": "Sanguine Noble",
+    "matchedText": "Sanguine Noble",
+    "nameZh": "鲜血贵族",
+    "nativeNameIds": [
+      "903550541"
+    ]
+  },
+  "35500020": {
+    "rowAlias": "Sanguine Noble (Lord of Blood Prelude)",
+    "matchedText": "Sanguine Noble",
+    "nameZh": "鲜血贵族",
+    "nativeNameIds": [
+      "903550541"
+    ]
+  },
+  "35500040": {
+    "rowAlias": "Sanguine Noble (Marsh Group Boss)",
+    "matchedText": "Sanguine Noble",
+    "nameZh": "鲜血贵族",
+    "nativeNameIds": [
+      "903550541"
+    ]
+  },
+  "35600000": {
+    "rowAlias": "Godskin Apostle",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35600010": {
+    "rowAlias": "Godskin Apostle (Duo Night Boss)",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35600020": {
+    "rowAlias": "Godskin Apostle (Evergaol)",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35600040": {
+    "rowAlias": "Godskin Apostle (Western Underground Fort Elite)",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35600050": {
+    "rowAlias": "Godskin Apostle (Western Underground Fort Group Boss)",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35600100": {
+    "rowAlias": "Godskin Apostle",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35600110": {
+    "rowAlias": "Godskin Apostle (The Oldest Gaol)",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35600900": {
+    "rowAlias": "Godskin Apostle",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35609000": {
+    "rowAlias": "Godskin Apostle",
+    "matchedText": "Godskin Apostle",
+    "nameZh": "神皮使徒",
+    "nativeNameIds": [
+      "903560000"
+    ]
+  },
+  "35700000": {
+    "rowAlias": "Godskin Noble",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "35700010": {
+    "rowAlias": "Godskin Noble (Duo Night Boss)",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "35700020": {
+    "rowAlias": "Godskin Noble (Evergaol)",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "35700030": {
+    "rowAlias": "Godskin Noble",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "35700050": {
+    "rowAlias": "Godskin Noble (Western Underground Fort Group Boss)",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "35700060": {
+    "rowAlias": "Godskin Noble (Western Underground Fort Elite)",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "35700100": {
+    "rowAlias": "Godskin Noble",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "35700110": {
+    "rowAlias": "Godskin Noble (The Oldest Gaol)",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "35709000": {
+    "rowAlias": "Godskin Noble",
+    "matchedText": "Godskin Noble",
+    "nameZh": "神皮贵族",
+    "nativeNameIds": [
+      "903570000"
+    ]
+  },
+  "37000000": {
+    "rowAlias": "Depraved Perfumer",
+    "matchedText": "Depraved Perfumer",
+    "nameZh": "堕落调香师",
+    "nativeNameIds": [
+      "903700301"
+    ]
+  },
+  "37000010": {
+    "rowAlias": "Depraved Perfumer (Ruins)",
+    "matchedText": "Depraved Perfumer",
+    "nameZh": "堕落调香师",
+    "nativeNameIds": [
+      "903700301"
+    ]
+  },
+  "37000030": {
+    "rowAlias": "Depraved Perfumer (Bell Bearing Hunter Prelude)",
+    "matchedText": "Depraved Perfumer",
+    "nameZh": "堕落调香师",
+    "nativeNameIds": [
+      "903700301"
+    ]
+  },
+  "37000092": {
+    "rowAlias": "Depraved Perfumer",
+    "matchedText": "Depraved Perfumer",
+    "nameZh": "堕落调香师",
+    "nativeNameIds": [
+      "903700301"
+    ]
+  },
+  "37000093": {
+    "rowAlias": "Depraved Perfumer",
+    "matchedText": "Depraved Perfumer",
+    "nameZh": "堕落调香师",
+    "nativeNameIds": [
+      "903700301"
+    ]
+  },
+  "37001000": {
+    "rowAlias": "Depraved Perfumer",
+    "matchedText": "Depraved Perfumer",
+    "nameZh": "堕落调香师",
+    "nativeNameIds": [
+      "903700301"
+    ]
+  },
+  "37010000": {
+    "rowAlias": "Perfumer",
+    "matchedText": "Perfumer",
+    "nameZh": "调香师",
+    "nativeNameIds": [
+      "903701000"
+    ]
+  },
+  "37010010": {
+    "rowAlias": "Perfumer",
+    "matchedText": "Perfumer",
+    "nameZh": "调香师",
+    "nativeNameIds": [
+      "903701000"
+    ]
+  },
+  "37010020": {
+    "rowAlias": "Perfumer",
+    "matchedText": "Perfumer",
+    "nameZh": "调香师",
+    "nativeNameIds": [
+      "903701000"
+    ]
+  },
+  "37010030": {
+    "rowAlias": "Perfumer (Ruins)",
+    "matchedText": "Perfumer",
+    "nameZh": "调香师",
+    "nativeNameIds": [
+      "903701000"
+    ]
+  },
+  "37011000": {
+    "rowAlias": "Perfumer",
+    "matchedText": "Perfumer",
+    "nameZh": "调香师",
+    "nativeNameIds": [
+      "903701000"
+    ]
+  },
+  "37011010": {
+    "rowAlias": "Perfumer",
+    "matchedText": "Perfumer",
+    "nameZh": "调香师",
+    "nativeNameIds": [
+      "903701000"
+    ]
+  },
+  "37011020": {
+    "rowAlias": "Perfumer",
+    "matchedText": "Perfumer",
+    "nameZh": "调香师",
+    "nativeNameIds": [
+      "903701000"
+    ]
+  },
+  "37020000": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37020010": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37020020": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37020030": {
+    "rowAlias": "Glintstone Sorcerer (Fort Boss)",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37021000": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37022000": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37022010": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37023000": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37023010": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37024000": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "37024010": {
+    "rowAlias": "Glintstone Sorcerer",
+    "matchedText": "Glintstone Sorcerer",
+    "nameZh": "辉石魔法师",
+    "nativeNameIds": [
+      "903350331"
+    ]
+  },
+  "38000000": {
+    "rowAlias": "Cleanrot Knight",
+    "matchedText": "Cleanrot Knight",
+    "nameZh": "尊腐骑士",
+    "nativeNameIds": [
+      "903800600"
+    ]
+  },
+  "38001000": {
+    "rowAlias": "Cleanrot Knight",
+    "matchedText": "Cleanrot Knight",
+    "nameZh": "尊腐骑士",
+    "nativeNameIds": [
+      "903800600"
+    ]
+  },
+  "38100000": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38100010": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38100020": {
+    "rowAlias": "Kindred of Rot (Marsh Group Boss)",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38101000": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38101010": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38102000": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38102010": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38102020": {
+    "rowAlias": "Kindred of Rot (Marsh Group Boss)",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38103000": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38103010": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "38109000": {
+    "rowAlias": "Kindred of Rot",
+    "matchedText": "Kindred of Rot",
+    "nameZh": "腐败眷属",
+    "nativeNameIds": [
+      "903810600"
+    ]
+  },
+  "39000000": {
+    "rowAlias": "Fire Monk",
+    "matchedText": "Fire Monk",
+    "nameZh": "火焰习武修士",
+    "nativeNameIds": [
+      "903900000"
+    ]
+  },
+  "39000010": {
+    "rowAlias": "Fire Monk",
+    "matchedText": "Fire Monk",
+    "nameZh": "火焰习武修士",
+    "nativeNameIds": [
+      "903900000"
+    ]
+  },
+  "39000020": {
+    "rowAlias": "Fire Monk (Cathedral)",
+    "matchedText": "Fire Monk",
+    "nameZh": "火焰习武修士",
+    "nativeNameIds": [
+      "903900000"
+    ]
+  },
+  "39000030": {
+    "rowAlias": "Fire Monk (Crater by fog gate)",
+    "matchedText": "Fire Monk",
+    "nameZh": "火焰习武修士",
+    "nativeNameIds": [
+      "903900000"
+    ]
+  },
+  "39001000": {
+    "rowAlias": "Fire Monk",
+    "matchedText": "Fire Monk",
+    "nameZh": "火焰习武修士",
+    "nativeNameIds": [
+      "903900000"
+    ]
+  },
+  "39001010": {
+    "rowAlias": "Fire Monk",
+    "matchedText": "Fire Monk",
+    "nameZh": "火焰习武修士",
+    "nativeNameIds": [
+      "903900000"
+    ]
+  },
+  "39001030": {
+    "rowAlias": "Fire Monk (Crater by fog gate)",
+    "matchedText": "Fire Monk",
+    "nameZh": "火焰习武修士",
+    "nativeNameIds": [
+      "903900000"
+    ]
+  },
+  "39100000": {
+    "rowAlias": "Fire Prelate",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39100010": {
+    "rowAlias": "Fire Prelate",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39100100": {
+    "rowAlias": "Fire Prelate",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39100110": {
+    "rowAlias": "Fire Prelate",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39100120": {
+    "rowAlias": "Fire Prelate",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39100130": {
+    "rowAlias": "Fire Prelate (Crater by fog gate)",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39100140": {
+    "rowAlias": "Fire Prelate (Crater)",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39101000": {
+    "rowAlias": "Fire Prelate",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39101100": {
+    "rowAlias": "Fire Prelate",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39101110": {
+    "rowAlias": "Fire Prelate",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "39101120": {
+    "rowAlias": "Fire Prelate (Crater)",
+    "matchedText": "Fire Prelate",
+    "nameZh": "火焰主教",
+    "nativeNameIds": [
+      "903910000"
+    ]
+  },
+  "40200000": {
+    "rowAlias": "Royal Revenant",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40200010": {
+    "rowAlias": "Royal Revenant",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40200020": {
+    "rowAlias": "Royal Revenant",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40200030": {
+    "rowAlias": "Royal Revenant (Noklateo)",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40200100": {
+    "rowAlias": "Royal Revenant",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40210000": {
+    "rowAlias": "Royal Revenant",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40210010": {
+    "rowAlias": "Royal Revenant (Field Boss)",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40210020": {
+    "rowAlias": "Royal Revenant (Night Boss)",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40210030": {
+    "rowAlias": "Royal Revenant (Castle)",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40210700": {
+    "rowAlias": "Royal Revenant (Remembrance)",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "40219000": {
+    "rowAlias": "Royal Revenant",
+    "matchedText": "Royal Revenant",
+    "nameZh": "王室幽魂",
+    "nativeNameIds": [
+      "904020540"
+    ]
+  },
+  "41300000": {
+    "rowAlias": "Demi-Human Queen",
+    "matchedText": "Demi-Human Queen",
+    "nameZh": "亚人女王",
+    "nativeNameIds": [
+      "904130700",
+      "904130701"
+    ]
+  },
+  "41300020": {
+    "rowAlias": "Demi-Human Queen (Field Boss)",
+    "matchedText": "Demi-Human Queen",
+    "nameZh": "亚人女王",
+    "nativeNameIds": [
+      "904130700",
+      "904130701"
+    ]
+  },
+  "41300030": {
+    "rowAlias": "Demi-Human Queen (Crater)",
+    "matchedText": "Demi-Human Queen",
+    "nameZh": "亚人女王",
+    "nativeNameIds": [
+      "904130700",
+      "904130701"
+    ]
+  },
+  "41301000": {
+    "rowAlias": "Demi-Human Queen",
+    "matchedText": "Demi-Human Queen",
+    "nameZh": "亚人女王",
+    "nativeNameIds": [
+      "904130700",
+      "904130701"
+    ]
+  },
+  "41301010": {
+    "rowAlias": "Demi-Human Queen (Night Boss)",
+    "matchedText": "Demi-Human Queen",
+    "nameZh": "亚人女王",
+    "nativeNameIds": [
+      "904130700",
+      "904130701"
+    ]
+  },
+  "41402210": {
+    "rowAlias": "Spiritcaller Snail (Great Church Boss)",
+    "matchedText": "Spiritcaller Snail",
+    "nameZh": "唤灵蜗牛",
+    "nativeNameIds": [
+      "904140200"
+    ]
+  },
+  "42700000": {
+    "rowAlias": "Elder Lion",
+    "matchedText": "Elder Lion",
+    "nameZh": "老狮子",
+    "nativeNameIds": [
+      "904270100",
+      "904270600"
+    ]
+  },
+  "42700010": {
+    "rowAlias": "Elder Lion",
+    "matchedText": "Elder Lion",
+    "nameZh": "老狮子",
+    "nativeNameIds": [
+      "904270100",
+      "904270600"
+    ]
+  },
+  "42700020": {
+    "rowAlias": "Elder Lion (Field Boss)",
+    "matchedText": "Elder Lion",
+    "nameZh": "老狮子",
+    "nativeNameIds": [
+      "904270100",
+      "904270600"
+    ]
+  },
+  "42700030": {
+    "rowAlias": "Elder Lion (Encampment)",
+    "matchedText": "Elder Lion",
+    "nameZh": "老狮子",
+    "nativeNameIds": [
+      "904270100",
+      "904270600"
+    ]
+  },
+  "42700035": {
+    "rowAlias": "Elder Lion",
+    "matchedText": "Elder Lion",
+    "nameZh": "老狮子",
+    "nativeNameIds": [
+      "904270100",
+      "904270600"
+    ]
+  },
+  "42700040": {
+    "rowAlias": "Elder Lion (Castle)",
+    "matchedText": "Elder Lion",
+    "nameZh": "老狮子",
+    "nativeNameIds": [
+      "904270100",
+      "904270600"
+    ]
+  },
+  "42700700": {
+    "rowAlias": "Elder Lion (Remembrance)",
+    "matchedText": "Elder Lion",
+    "nameZh": "老狮子",
+    "nativeNameIds": [
+      "904270100",
+      "904270600"
+    ]
+  },
+  "42701000": {
+    "rowAlias": "Elder Lion",
+    "matchedText": "Elder Lion",
+    "nameZh": "老狮子",
+    "nativeNameIds": [
+      "904270100",
+      "904270600"
+    ]
+  },
+  "42900000": {
+    "rowAlias": "Bloodhound Knight",
+    "matchedText": "Bloodhound Knight",
+    "nameZh": "猎犬骑士",
+    "nativeNameIds": [
+      "904290030",
+      "904290310"
+    ]
+  },
+  "42900010": {
+    "rowAlias": "Bloodhound Knight (Evergaol)",
+    "matchedText": "Bloodhound Knight",
+    "nameZh": "猎犬骑士",
+    "nativeNameIds": [
+      "904290030",
+      "904290310"
+    ]
+  },
+  "42900020": {
+    "rowAlias": "Bloodhound Knight (Remembrance)",
+    "matchedText": "Bloodhound Knight",
+    "nameZh": "猎犬骑士",
+    "nativeNameIds": [
+      "904290030",
+      "904290310"
+    ]
+  },
+  "42900030": {
+    "rowAlias": "Bloodhound Knight (Western Underground Fort Elite)",
+    "matchedText": "Bloodhound Knight",
+    "nameZh": "猎犬骑士",
+    "nativeNameIds": [
+      "904290030",
+      "904290310"
+    ]
+  },
+  "42901000": {
+    "rowAlias": "Bloodhound Knight",
+    "matchedText": "Bloodhound Knight",
+    "nameZh": "猎犬骑士",
+    "nativeNameIds": [
+      "904290030",
+      "904290310"
+    ]
+  },
+  "42909000": {
+    "rowAlias": "Bloodhound Knight",
+    "matchedText": "Bloodhound Knight",
+    "nameZh": "猎犬骑士",
+    "nativeNameIds": [
+      "904290030",
+      "904290310"
+    ]
+  },
+  "43510000": {
+    "rowAlias": "Lordsworn Captain",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43510010": {
+    "rowAlias": "Lordsworn Captain",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43510020": {
+    "rowAlias": "Lordsworn Captain (Fort)",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43510030": {
+    "rowAlias": "Lordsworn Captain (Mountaintop)",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43510040": {
+    "rowAlias": "Lordsworn Captain (Rotted Woods)",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43510100": {
+    "rowAlias": "Lordsworn Captain",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43510110": {
+    "rowAlias": "Lordsworn Captain",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43511100": {
+    "rowAlias": "Lordsworn Captain",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43511110": {
+    "rowAlias": "Lordsworn Captain",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43511120": {
+    "rowAlias": "Lordsworn Captain (Mine)",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43512000": {
+    "rowAlias": "Lordsworn Captain",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43512010": {
+    "rowAlias": "Lordsworn Captain",
+    "matchedText": "Lordsworn Captain",
+    "nameZh": "君王军的士兵长",
+    "nativeNameIds": [
+      "904311000"
+    ]
+  },
+  "43550000": {
+    "rowAlias": "Mausoleum Knight",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "43550010": {
+    "rowAlias": "Mausoleum Knight (Noklateo)",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "43550020": {
+    "rowAlias": "Mausoleum Knight (Cathedral)",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "43550030": {
+    "rowAlias": "Mausoleum Knight",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "43551000": {
+    "rowAlias": "Mausoleum Knight",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "43551010": {
+    "rowAlias": "Mausoleum Knight (Noklateo)",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "43551020": {
+    "rowAlias": "Mausoleum Knight (Noklateo, Flaming Sword)",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "43551100": {
+    "rowAlias": "Mausoleum Knight",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "43552000": {
+    "rowAlias": "Mausoleum Knight",
+    "matchedText": "Mausoleum Knight",
+    "nameZh": "灵庙骑士",
+    "nativeNameIds": [
+      "904355000"
+    ]
+  },
+  "44202010": {
+    "rowAlias": "Giant Crayfish (Great Church Boss)",
+    "matchedText": "Giant Crayfish",
+    "nameZh": "巨型螯虾",
+    "nativeNameIds": [
+      "904420100"
+    ]
+  },
+  "44203010": {
+    "rowAlias": "Frost Crayfish (Marsh Boss)",
+    "matchedText": "Frost Crayfish",
+    "nameZh": "冰寒螯虾",
+    "nativeNameIds": [
+      "904421600"
+    ]
+  },
+  "44700000": {
+    "rowAlias": "Abductor Virgin",
+    "matchedText": "Abductor Virgin",
+    "nameZh": "掳人少女人偶",
+    "nativeNameIds": [
+      "904470002"
+    ]
+  },
+  "44700010": {
+    "rowAlias": "Abductor Virgin (Fort)",
+    "matchedText": "Abductor Virgin",
+    "nameZh": "掳人少女人偶",
+    "nativeNameIds": [
+      "904470002"
+    ]
+  },
+  "44700020": {
+    "rowAlias": "Abductor Virgin",
+    "matchedText": "Abductor Virgin",
+    "nameZh": "掳人少女人偶",
+    "nativeNameIds": [
+      "904470002"
+    ]
+  },
+  "44701000": {
+    "rowAlias": "Abductor Virgin",
+    "matchedText": "Abductor Virgin",
+    "nameZh": "掳人少女人偶",
+    "nativeNameIds": [
+      "904470002"
+    ]
+  },
+  "44701100": {
+    "rowAlias": "Abductor Virgin",
+    "matchedText": "Abductor Virgin",
+    "nameZh": "掳人少女人偶",
+    "nativeNameIds": [
+      "904470002"
+    ]
+  },
+  "44702000": {
+    "rowAlias": "Abductor Virgin",
+    "matchedText": "Abductor Virgin",
+    "nameZh": "掳人少女人偶",
+    "nativeNameIds": [
+      "904470002"
+    ]
+  },
+  "44910000": {
+    "rowAlias": "Small Jar Merchant",
+    "matchedText": "Small Jar Merchant",
+    "nameZh": "小壶商人",
+    "nativeNameIds": [
+      "110020"
+    ]
+  },
+  "45000000": {
+    "rowAlias": "Flying Dragon",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45000010": {
+    "rowAlias": "Flying Dragon (Field Boss)",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45001000": {
+    "rowAlias": "Flying Dragon",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45008000": {
+    "rowAlias": "Flying Dragon",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45030000": {
+    "rowAlias": "Borealis the Freezing Fog",
+    "matchedText": "Borealis the Freezing Fog",
+    "nameZh": "“冻结冰雾”玻列琉斯",
+    "nativeNameIds": [
+      "904503601"
+    ]
+  },
+  "45030010": {
+    "rowAlias": "Mountaintop Ice Dragon (Boss)",
+    "matchedText": "Mountaintop Ice Dragon",
+    "nameZh": "山顶冰龙",
+    "nativeNameIds": [
+      "904503600"
+    ]
+  },
+  "45030020": {
+    "rowAlias": "Borealis the Freezing Fog",
+    "matchedText": "Borealis the Freezing Fog",
+    "nameZh": "“冻结冰雾”玻列琉斯",
+    "nativeNameIds": [
+      "904503601"
+    ]
+  },
+  "45050000": {
+    "rowAlias": "Flying Dragon (Small)",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45050010": {
+    "rowAlias": "Flying Dragon (Night Horde, Small)",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45050020": {
+    "rowAlias": "Flying Dragon (Small; Nameless King Prelude)",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45050030": {
+    "rowAlias": "Flying Dragon (Small)",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45050040": {
+    "rowAlias": "Flying Dragon (Small; Mountaintop)",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45050050": {
+    "rowAlias": "Flying Dragon (Small; Crater)",
+    "matchedText": "Flying Dragon",
+    "nameZh": "飞龙",
+    "nativeNameIds": [
+      "904505000"
+    ]
+  },
+  "45100000": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45100010": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45100020": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45101000": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45101100": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45101110": {
+    "rowAlias": "Ancient Dragon (Night Boss)",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45101200": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45102000": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45102010": {
+    "rowAlias": "Ancient Dragon (The Oldest Gaol)",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45102100": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45102200": {
+    "rowAlias": "Ancient Dragon",
+    "matchedText": "Ancient Dragon",
+    "nameZh": "古龙",
+    "nativeNameIds": [
+      "904510601",
+      "904510602"
+    ]
+  },
+  "45700000": {
+    "rowAlias": "Wormface",
+    "matchedText": "Wormface",
+    "nameZh": "蚯蚓脸",
+    "nativeNameIds": [
+      "904580600",
+      "904580601"
+    ]
+  },
+  "45700010": {
+    "rowAlias": "Wormface",
+    "matchedText": "Wormface",
+    "nameZh": "蚯蚓脸",
+    "nativeNameIds": [
+      "904580600",
+      "904580601"
+    ]
+  },
+  "45701000": {
+    "rowAlias": "Wormface",
+    "matchedText": "Wormface",
+    "nameZh": "蚯蚓脸",
+    "nativeNameIds": [
+      "904580600",
+      "904580601"
+    ]
+  },
+  "45702000": {
+    "rowAlias": "Wormface",
+    "matchedText": "Wormface",
+    "nameZh": "蚯蚓脸",
+    "nativeNameIds": [
+      "904580600",
+      "904580601"
+    ]
+  },
+  "46000220": {
+    "rowAlias": "Headless Troll (Remembrance)",
+    "matchedText": "Headless Troll",
+    "nameZh": "无头山妖",
+    "nativeNameIds": [
+      "904600200"
+    ]
+  },
+  "46000230": {
+    "rowAlias": "Headless Troll (Noklateo)",
+    "matchedText": "Headless Troll",
+    "nameZh": "无头山妖",
+    "nativeNameIds": [
+      "904600200"
+    ]
+  },
+  "46004010": {
+    "rowAlias": "Frenzied Flame Troll (Encampment)",
+    "matchedText": "Frenzied Flame Troll",
+    "nameZh": "癫火山妖",
+    "nativeNameIds": [
+      "904600600"
+    ]
+  },
+  "46010020": {
+    "rowAlias": "Troll Knight",
+    "matchedText": "Troll Knight",
+    "nameZh": "骑士山妖",
+    "nativeNameIds": [
+      "904601000"
+    ]
+  },
+  "46020000": {
+    "rowAlias": "Snowfield Troll",
+    "matchedText": "Snowfield Troll",
+    "nameZh": "雪原山妖",
+    "nativeNameIds": [
+      "904601001"
+    ]
+  },
+  "46020010": {
+    "rowAlias": "Snowfield Troll",
+    "matchedText": "Snowfield Troll",
+    "nameZh": "雪原山妖",
+    "nativeNameIds": [
+      "904601001"
+    ]
+  },
+  "46020020": {
+    "rowAlias": "Snowfield Troll",
+    "matchedText": "Snowfield Troll",
+    "nameZh": "雪原山妖",
+    "nativeNameIds": [
+      "904601001"
+    ]
+  },
+  "46020030": {
+    "rowAlias": "Snowfield Troll (Mountaintop, Duo)",
+    "matchedText": "Snowfield Troll",
+    "nameZh": "雪原山妖",
+    "nativeNameIds": [
+      "904601001"
+    ]
+  },
+  "46020040": {
+    "rowAlias": "Snowfield Troll",
+    "matchedText": "Snowfield Troll",
+    "nameZh": "雪原山妖",
+    "nativeNameIds": [
+      "904601001"
+    ]
+  },
+  "46020050": {
+    "rowAlias": "Snowfield Troll (Mountaintop)",
+    "matchedText": "Snowfield Troll",
+    "nameZh": "雪原山妖",
+    "nativeNameIds": [
+      "904601001"
+    ]
+  },
+  "46021000": {
+    "rowAlias": "Snowfield Troll",
+    "matchedText": "Snowfield Troll",
+    "nameZh": "雪原山妖",
+    "nativeNameIds": [
+      "904601001"
+    ]
+  },
+  "46022000": {
+    "rowAlias": "Snowfield Troll",
+    "matchedText": "Snowfield Troll",
+    "nameZh": "雪原山妖",
+    "nativeNameIds": [
+      "904601001"
+    ]
+  },
+  "46200010": {
+    "rowAlias": "Naturalborn of the Void (Noklateo)",
+    "matchedText": "Naturalborn of the Void",
+    "nameZh": "黑暗弃子",
+    "nativeNameIds": [
+      "904620320"
+    ]
+  },
+  "46300000": {
+    "rowAlias": "Runebear",
+    "matchedText": "Runebear",
+    "nameZh": "卢恩熊",
+    "nativeNameIds": [
+      "904630310"
+    ]
+  },
+  "46300010": {
+    "rowAlias": "Runebear (Ruins, Brown)",
+    "matchedText": "Runebear",
+    "nameZh": "卢恩熊",
+    "nativeNameIds": [
+      "904630310"
+    ]
+  },
+  "46300020": {
+    "rowAlias": "Runebear",
+    "matchedText": "Runebear",
+    "nameZh": "卢恩熊",
+    "nativeNameIds": [
+      "904630310"
+    ]
+  },
+  "46300030": {
+    "rowAlias": "Runebear (Great Red Bear Prelude)",
+    "matchedText": "Runebear",
+    "nameZh": "卢恩熊",
+    "nativeNameIds": [
+      "904630310"
+    ]
+  },
+  "46300100": {
+    "rowAlias": "Runebear",
+    "matchedText": "Runebear",
+    "nameZh": "卢恩熊",
+    "nativeNameIds": [
+      "904630310"
+    ]
+  },
+  "46300110": {
+    "rowAlias": "Runebear (Frost Marsh Elite)",
+    "matchedText": "Runebear",
+    "nameZh": "卢恩熊",
+    "nativeNameIds": [
+      "904630310"
+    ]
+  },
+  "46300200": {
+    "rowAlias": "Runebear",
+    "matchedText": "Runebear",
+    "nameZh": "卢恩熊",
+    "nativeNameIds": [
+      "904630310"
+    ]
+  },
+  "46300210": {
+    "rowAlias": "Runebear (Ruins, Silver)",
+    "matchedText": "Runebear",
+    "nameZh": "卢恩熊",
+    "nativeNameIds": [
+      "904630310"
+    ]
+  },
+  "46400000": {
+    "rowAlias": "Ulcerated Tree Spirit",
+    "matchedText": "Ulcerated Tree Spirit",
+    "nameZh": "腐烂树灵",
+    "nativeNameIds": [
+      "904640000"
+    ]
+  },
+  "46400010": {
+    "rowAlias": "Ulcerated Tree Spirit (Field Boss)",
+    "matchedText": "Ulcerated Tree Spirit",
+    "nameZh": "腐烂树灵",
+    "nativeNameIds": [
+      "904640000"
+    ]
+  },
+  "46400020": {
+    "rowAlias": "Ulcerated Tree Spirit (Night Boss)",
+    "matchedText": "Ulcerated Tree Spirit",
+    "nameZh": "腐烂树灵",
+    "nativeNameIds": [
+      "904640000"
+    ]
+  },
+  "46400030": {
+    "rowAlias": "Ulcerated Tree Spirit",
+    "matchedText": "Ulcerated Tree Spirit",
+    "nameZh": "腐烂树灵",
+    "nativeNameIds": [
+      "904640000"
+    ]
+  },
+  "46400110": {
+    "rowAlias": "Ulcerated Tree Spirit (Eastern Underground Fort Variant)",
+    "matchedText": "Ulcerated Tree Spirit",
+    "nameZh": "腐烂树灵",
+    "nativeNameIds": [
+      "904640000"
+    ]
+  },
+  "46400700": {
+    "rowAlias": "Ulcerated Tree Spirit (Remembrance)",
+    "matchedText": "Ulcerated Tree Spirit",
+    "nameZh": "腐烂树灵",
+    "nativeNameIds": [
+      "904640000"
+    ]
+  },
+  "46410000": {
+    "rowAlias": "Weapon-Bequeathed Harmonia (Everdark Worm)",
+    "matchedText": "Weapon-Bequeathed Harmonia",
+    "nameZh": "“继承英雄武器的众女孩”哈尔莫妮亚",
+    "nativeNameIds": [
+      "907640000"
+    ]
+  },
+  "46410010": {
+    "rowAlias": "Weapon-Bequeathed Harmonia (Everdark Worm)",
+    "matchedText": "Weapon-Bequeathed Harmonia",
+    "nameZh": "“继承英雄武器的众女孩”哈尔莫妮亚",
+    "nativeNameIds": [
+      "907640000"
+    ]
+  },
+  "46500000": {
+    "rowAlias": "Dragonkin Soldier",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46500010": {
+    "rowAlias": "Dragonkin Soldier (Night Boss)",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46500100": {
+    "rowAlias": "Dragonkin Soldier",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46500200": {
+    "rowAlias": "Dragonkin Soldier",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46500210": {
+    "rowAlias": "Dragonkin Soldier (Evergaol)",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46500220": {
+    "rowAlias": "Dragonkin Soldier",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46500230": {
+    "rowAlias": "Dragonkin Soldier (Noklateo)",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46500300": {
+    "rowAlias": "Dragonkin Soldier",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46500900": {
+    "rowAlias": "Dragonkin Soldier",
+    "matchedText": "Dragonkin Soldier",
+    "nameZh": "龙人士兵",
+    "nativeNameIds": [
+      "904650601"
+    ]
+  },
+  "46600000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46600010": {
+    "rowAlias": "Guardian Golem (Night Horde)",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46600020": {
+    "rowAlias": "Guardian Golem (Remembrance)",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46600030": {
+    "rowAlias": "Guardian Golem (Cathedral)",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46600100": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46601000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46601010": {
+    "rowAlias": "Guardian Golem (Fort)",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46601100": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46602000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46602100": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46603000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46603100": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46604000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46604100": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46605000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46605100": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46606000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46607000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46608000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46609000": {
+    "rowAlias": "Guardian Golem",
+    "matchedText": "Guardian Golem",
+    "nameZh": "魔像守卫",
+    "nativeNameIds": [
+      "904660310",
+      "904660320"
+    ]
+  },
+  "46700000": {
+    "rowAlias": "Ancestor Spirit",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46700010": {
+    "rowAlias": "Ancestor Spirit (Field Boss)",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46700020": {
+    "rowAlias": "Ancestor Spirit",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46700100": {
+    "rowAlias": "Ancestor Spirit",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46700200": {
+    "rowAlias": "Ancestor Spirit",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46700300": {
+    "rowAlias": "Ancestor Spirit",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46700400": {
+    "rowAlias": "Ancestor Spirit",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46705000": {
+    "rowAlias": "Ancestor Spirit",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46705010": {
+    "rowAlias": "Ancestor Spirit",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46705020": {
+    "rowAlias": "Ancestor Spirit (Ruins Boss)",
+    "matchedText": "Ancestor Spirit",
+    "nameZh": "祖灵",
+    "nativeNameIds": [
+      "904670000",
+      "904670030"
+    ]
+  },
+  "46800000": {
+    "rowAlias": "Fallingstar Beast",
+    "matchedText": "Fallingstar Beast",
+    "nameZh": "坠星兽物",
+    "nativeNameIds": [
+      "904680320"
+    ]
+  },
+  "46801000": {
+    "rowAlias": "Fallingstar Beast",
+    "matchedText": "Fallingstar Beast",
+    "nameZh": "坠星兽物",
+    "nativeNameIds": [
+      "904680320"
+    ]
+  },
+  "46801010": {
+    "rowAlias": "Fallingstar Beast (Random Encounter)",
+    "matchedText": "Fallingstar Beast",
+    "nameZh": "坠星兽物",
+    "nativeNameIds": [
+      "904680320"
+    ]
+  },
+  "46801020": {
+    "rowAlias": "Fallingstar Beast (Crater)",
+    "matchedText": "Fallingstar Beast",
+    "nameZh": "坠星兽物",
+    "nativeNameIds": [
+      "904680320"
+    ]
+  },
+  "46809000": {
+    "rowAlias": "Fallingstar Beast",
+    "matchedText": "Fallingstar Beast",
+    "nameZh": "坠星兽物",
+    "nativeNameIds": [
+      "904680320"
+    ]
+  },
+  "46809010": {
+    "rowAlias": "Fallingstar Beast (Night Boss)",
+    "matchedText": "Fallingstar Beast",
+    "nameZh": "坠星兽物",
+    "nativeNameIds": [
+      "904680320"
+    ]
+  },
+  "46900000": {
+    "rowAlias": "Grafted Scion",
+    "matchedText": "Grafted Scion",
+    "nameZh": "“接肢”贵族后裔",
+    "nativeNameIds": [
+      "904690000"
+    ]
+  },
+  "46900010": {
+    "rowAlias": "Grafted Scion (Field Boss)",
+    "matchedText": "Grafted Scion",
+    "nameZh": "“接肢”贵族后裔",
+    "nativeNameIds": [
+      "904690000"
+    ]
+  },
+  "46900020": {
+    "rowAlias": "Grafted Scion (Castle)",
+    "matchedText": "Grafted Scion",
+    "nameZh": "“接肢”贵族后裔",
+    "nativeNameIds": [
+      "904690000"
+    ]
+  },
+  "47509010": {
+    "rowAlias": "Grafted Monarch (Night Boss)",
+    "matchedText": "Grafted Monarch",
+    "nameZh": "“接肢”君王",
+    "nativeNameIds": [
+      "904750000"
+    ]
+  },
+  "47700000": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47700010": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47700020": {
+    "rowAlias": "Valiant Gargoyle (Night Boss)",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47700100": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47700200": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47701000": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47701010": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47701020": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47701030": {
+    "rowAlias": "Valiant Gargoyle (Crater)",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47701100": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47701200": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47701210": {
+    "rowAlias": "Black Blade Kindred (Field Boss)",
+    "matchedText": "Black Blade Kindred",
+    "nameZh": "黑剑眷属",
+    "nativeNameIds": [
+      "904770001"
+    ]
+  },
+  "47702000": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "47709900": {
+    "rowAlias": "Valiant Gargoyle",
+    "matchedText": "Valiant Gargoyle",
+    "nameZh": "英雄石像鬼",
+    "nativeNameIds": [
+      "904770000"
+    ]
+  },
+  "48100000": {
+    "rowAlias": "Erdtree Avatar",
+    "matchedText": "Erdtree Avatar",
+    "nameZh": "黄金树的化身",
+    "nativeNameIds": [
+      "904810600",
+      "912000070"
+    ]
+  },
+  "48100010": {
+    "rowAlias": "Erdtree Avatar (Field Boss)",
+    "matchedText": "Erdtree Avatar",
+    "nameZh": "黄金树的化身",
+    "nativeNameIds": [
+      "904810600",
+      "912000070"
+    ]
+  },
+  "48100020": {
+    "rowAlias": "Erdtree Avatar (Remembrance)",
+    "matchedText": "Erdtree Avatar",
+    "nameZh": "黄金树的化身",
+    "nativeNameIds": [
+      "904810600",
+      "912000070"
+    ]
+  },
+  "48100030": {
+    "rowAlias": "Erdtree Avatar",
+    "matchedText": "Erdtree Avatar",
+    "nameZh": "黄金树的化身",
+    "nativeNameIds": [
+      "904810600",
+      "912000070"
+    ]
+  },
+  "48100100": {
+    "rowAlias": "Erdtree Avatar",
+    "matchedText": "Erdtree Avatar",
+    "nameZh": "黄金树的化身",
+    "nativeNameIds": [
+      "904810600",
+      "912000070"
+    ]
+  },
+  "49000040": {
+    "rowAlias": "Caligo, Miasma of Night (Raid)",
+    "matchedText": "Caligo, Miasma of Night",
+    "nameZh": "“黑夜雾霾”卡莉果",
+    "nativeNameIds": [
+      "907620000"
+    ]
+  },
+  "49100000": {
+    "rowAlias": "Magma Wyrm",
+    "matchedText": "Magma Wyrm",
+    "nameZh": "熔岩土龙",
+    "nativeNameIds": [
+      "904910320"
+    ]
+  },
+  "49100100": {
+    "rowAlias": "Magma Wyrm",
+    "matchedText": "Magma Wyrm",
+    "nameZh": "熔岩土龙",
+    "nativeNameIds": [
+      "904910320"
+    ]
+  },
+  "49100110": {
+    "rowAlias": "Magma Wyrm",
+    "matchedText": "Magma Wyrm",
+    "nameZh": "熔岩土龙",
+    "nativeNameIds": [
+      "904910320"
+    ]
+  },
+  "49100120": {
+    "rowAlias": "Magma Wyrm (Crater)",
+    "matchedText": "Magma Wyrm",
+    "nameZh": "熔岩土龙",
+    "nativeNameIds": [
+      "904910320"
+    ]
+  },
+  "49100190": {
+    "rowAlias": "Magma Wyrm (Field Boss)",
+    "matchedText": "Magma Wyrm",
+    "nameZh": "熔岩土龙",
+    "nativeNameIds": [
+      "904910320"
+    ]
+  },
+  "49110000": {
+    "rowAlias": "Great Wyrm",
+    "matchedText": "Great Wyrm",
+    "nameZh": "大土龙",
+    "nativeNameIds": [
+      "904911320"
+    ]
+  },
+  "49110010": {
+    "rowAlias": "Great Wyrm (Night Boss)",
+    "matchedText": "Great Wyrm",
+    "nameZh": "大土龙",
+    "nativeNameIds": [
+      "904911320"
+    ]
+  },
+  "49500000": {
+    "rowAlias": "Tibia Mariner",
+    "matchedText": "Tibia Mariner",
+    "nameZh": "提比亚的唤声船",
+    "nativeNameIds": [
+      "904950600"
+    ]
+  },
+  "49500010": {
+    "rowAlias": "Tibia Mariner (Night Boss)",
+    "matchedText": "Tibia Mariner",
+    "nameZh": "提比亚的唤声船",
+    "nativeNameIds": [
+      "904950600"
+    ]
+  },
+  "49800000": {
+    "rowAlias": "Death Rite Bird",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "49800010": {
+    "rowAlias": "Death Rite Bird",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "49800020": {
+    "rowAlias": "Death Rite Bird",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "49801000": {
+    "rowAlias": "Death Rite Bird",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "49801010": {
+    "rowAlias": "Death Rite Bird (Night Boss)",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "49801020": {
+    "rowAlias": "Death Rite Bird (Field Boss)",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "49801030": {
+    "rowAlias": "Death Rite Bird (The Oldest Gaol)",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "49801040": {
+    "rowAlias": "Death Rite Bird (Eastern Underground Fort Variant)",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "49801100": {
+    "rowAlias": "Death Rite Bird",
+    "matchedText": "Death Rite Bird",
+    "nameZh": "死亡仪式鸟",
+    "nativeNameIds": [
+      "904980600",
+      "904980601"
+    ]
+  },
+  "50110000": {
+    "rowAlias": "Golden Hippopotamus",
+    "matchedText": "Golden Hippopotamus",
+    "nameZh": "黄金河马",
+    "nativeNameIds": [
+      "905011000"
+    ]
+  },
+  "50110010": {
+    "rowAlias": "Golden Hippopotamus (Field Boss)",
+    "matchedText": "Golden Hippopotamus",
+    "nameZh": "黄金河马",
+    "nativeNameIds": [
+      "905011000"
+    ]
+  },
+  "50110020": {
+    "rowAlias": "Golden Hippopotamus (Night Boss)",
+    "matchedText": "Golden Hippopotamus",
+    "nameZh": "黄金河马",
+    "nativeNameIds": [
+      "905011000"
+    ]
+  },
+  "50110030": {
+    "rowAlias": "Golden Hippopotamus (Remembrance)",
+    "matchedText": "Golden Hippopotamus",
+    "nameZh": "黄金河马",
+    "nativeNameIds": [
+      "905011000"
+    ]
+  },
+  "50110040": {
+    "rowAlias": "Golden Hippopotamus (Noklateo)",
+    "matchedText": "Golden Hippopotamus",
+    "nameZh": "黄金河马",
+    "nativeNameIds": [
+      "905011000"
+    ]
+  },
+  "50400010": {
+    "rowAlias": "Curseblade (Eastern Underground Fort Elite)",
+    "matchedText": "Curseblade",
+    "nameZh": "咒剑士",
+    "nativeNameIds": [
+      "905040000",
+      "905040600"
+    ]
+  },
+  "50400020": {
+    "rowAlias": "Curseblade (Ruins Boss)",
+    "matchedText": "Curseblade",
+    "nameZh": "咒剑士",
+    "nativeNameIds": [
+      "905040000",
+      "905040600"
+    ]
+  },
+  "50810010": {
+    "rowAlias": "Chief Bloodfiend (Blacksmith Boss)",
+    "matchedText": "Chief Bloodfiend",
+    "nameZh": "血怪之首",
+    "nativeNameIds": [
+      "905081000"
+    ]
+  },
+  "50810020": {
+    "rowAlias": "Chief Bloodfiend (Ruins Boss)",
+    "matchedText": "Chief Bloodfiend",
+    "nameZh": "血怪之首",
+    "nativeNameIds": [
+      "905081000"
+    ]
+  },
+  "50811010": {
+    "rowAlias": "Chief Purple Fiend (Ruins Boss)",
+    "matchedText": "Chief Purple Fiend",
+    "nameZh": "紫怪之首",
+    "nativeNameIds": [
+      "905081100"
+    ]
+  },
+  "52100010": {
+    "rowAlias": "Divine Beast Dancing Lion (Night Boss)",
+    "matchedText": "Divine Beast Dancing Lion",
+    "nameZh": "神兽舞狮",
+    "nativeNameIds": [
+      "905210600"
+    ]
+  },
+  "52500110": {
+    "rowAlias": "Divine Bird Warrior (Eastern Underground Fort Elite)",
+    "matchedText": "Divine Bird Warrior",
+    "nameZh": "神鸟战士",
+    "nativeNameIds": [
+      "905250610"
+    ]
+  },
+  "52500120": {
+    "rowAlias": "Divine Bird Warrior (Blacksmith Boss)",
+    "matchedText": "Divine Bird Warrior",
+    "nameZh": "神鸟战士",
+    "nativeNameIds": [
+      "905250610"
+    ]
+  },
+  "53120010": {
+    "rowAlias": "Elder Inquisitor (Great Church Boss)",
+    "matchedText": "Elder Inquisitor",
+    "nameZh": "拷问老者",
+    "nativeNameIds": [
+      "905312000"
+    ]
+  },
+  "58100000": {
+    "rowAlias": "Demi-Human Swordmaster",
+    "matchedText": "Demi-Human Swordmaster",
+    "nameZh": "亚人剑圣",
+    "nativeNameIds": [
+      "905810000"
+    ]
+  },
+  "58100900": {
+    "rowAlias": "Demi-Human Swordmaster",
+    "matchedText": "Demi-Human Swordmaster",
+    "nameZh": "亚人剑圣",
+    "nativeNameIds": [
+      "905810000"
+    ]
+  },
+  "58100910": {
+    "rowAlias": "Demi-Human Swordmaster (Night Boss)",
+    "matchedText": "Demi-Human Swordmaster",
+    "nameZh": "亚人剑圣",
+    "nativeNameIds": [
+      "905810000"
+    ]
+  },
+  "58100920": {
+    "rowAlias": "Demi-Human Swordmaster (Mountaintop)",
+    "matchedText": "Demi-Human Swordmaster",
+    "nameZh": "亚人剑圣",
+    "nativeNameIds": [
+      "905810000"
+    ]
+  },
+  "58200010": {
+    "rowAlias": "Great Red Bear (Night Boss)",
+    "matchedText": "Great Red Bear",
+    "nameZh": "大红熊",
+    "nativeNameIds": [
+      "905820600"
+    ]
+  },
+  "58600010": {
+    "rowAlias": "Ghostflame Dragon (Great Church Boss)",
+    "matchedText": "Ghostflame Dragon",
+    "nameZh": "灵火龙",
+    "nativeNameIds": [
+      "905860000"
+    ]
+  },
+  "75300000": {
+    "rowAlias": "Faurtis Stoneshield",
+    "matchedText": "Faurtis Stoneshield",
+    "nameZh": "“坚盾”弗堤士",
+    "nativeNameIds": [
+      "907530000"
+    ]
+  },
+  "75300010": {
+    "rowAlias": "Faurtis Stoneshield (Boss Phase 1)",
+    "matchedText": "Faurtis Stoneshield",
+    "nameZh": "“坚盾”弗堤士",
+    "nativeNameIds": [
+      "907530000"
+    ]
+  },
+  "75300020": {
+    "rowAlias": "Faurtis Stoneshield (Everdark Sovereign Phase 2)",
+    "matchedText": "Faurtis Stoneshield",
+    "nameZh": "“坚盾”弗堤士",
+    "nativeNameIds": [
+      "907530000"
+    ]
+  },
+  "75300110": {
+    "rowAlias": "Faurtis Stoneshield (Boss Phase 2)",
+    "matchedText": "Faurtis Stoneshield",
+    "nameZh": "“坚盾”弗堤士",
+    "nativeNameIds": [
+      "907530000"
+    ]
+  },
+  "75300120": {
+    "rowAlias": "Faurtis Stoneshield (Everdark Sovereign Phase 1)",
+    "matchedText": "Faurtis Stoneshield",
+    "nameZh": "“坚盾”弗堤士",
+    "nativeNameIds": [
+      "907530000"
+    ]
+  },
+  "76100000": {
+    "rowAlias": "Traitorous Straghess",
+    "matchedText": "Traitorous Straghess",
+    "nameZh": "反叛的史柴格斯",
+    "nativeNameIds": [
+      "907630000"
+    ]
+  },
+  "76100010": {
+    "rowAlias": "Traitorous Straghess (Expedition)",
+    "matchedText": "Traitorous Straghess",
+    "nameZh": "反叛的史柴格斯",
+    "nativeNameIds": [
+      "907630000"
+    ]
+  },
+  "76100020": {
+    "rowAlias": "Traitorous Straghess (Dreglord Intro)",
+    "matchedText": "Traitorous Straghess",
+    "nameZh": "反叛的史柴格斯",
+    "nativeNameIds": [
+      "907630000"
+    ]
+  },
+  "76109000": {
+    "rowAlias": "Pure Impulse Straghess",
+    "matchedText": "Pure Impulse Straghess",
+    "nameZh": "冲动的史柴格斯",
+    "nativeNameIds": [
+      "907630001"
+    ]
+  },
+  "76200000": {
+    "rowAlias": "Weapon-Bequeathed Harmonia",
+    "matchedText": "Weapon-Bequeathed Harmonia",
+    "nameZh": "“继承英雄武器的众女孩”哈尔莫妮亚",
+    "nativeNameIds": [
+      "907640000"
+    ]
+  },
+  "77200000": {
+    "rowAlias": "Knight Artorias",
+    "matchedText": "Knight Artorias",
+    "nameZh": "骑士亚尔特留斯",
+    "nativeNameIds": [
+      "907720600"
+    ]
+  },
+  "77200010": {
+    "rowAlias": "Knight Artorias (Night Boss)",
+    "matchedText": "Knight Artorias",
+    "nameZh": "骑士亚尔特留斯",
+    "nativeNameIds": [
+      "907720600"
+    ]
+  },
+  "79300000": {
+    "rowAlias": "Demon from Below",
+    "matchedText": "Demon from Below",
+    "nameZh": "洞底恶魔",
+    "nativeNameIds": [
+      "907930605"
+    ]
+  },
+  "79300010": {
+    "rowAlias": "Demon from Below (Night Boss)",
+    "matchedText": "Demon from Below",
+    "nameZh": "洞底恶魔",
+    "nativeNameIds": [
+      "907930605"
+    ]
+  },
+  "79300100": {
+    "rowAlias": "Demon in Pain",
+    "matchedText": "Demon in Pain",
+    "nameZh": "负伤恶魔",
+    "nativeNameIds": [
+      "907930600"
+    ]
+  },
+  "79300110": {
+    "rowAlias": "Demon in Pain (Night Boss)",
+    "matchedText": "Demon in Pain",
+    "nameZh": "负伤恶魔",
+    "nativeNameIds": [
+      "907930600"
+    ]
+  },
+  "521010000": {
+    "rowAlias": "Wylder (Roundtable NPC)",
+    "matchedText": "Wylder",
+    "nameZh": "追踪者",
+    "nativeNameIds": [
+      "100000"
+    ]
+  },
+  "521020000": {
+    "rowAlias": "Guardian (Roundtable NPC)",
+    "matchedText": "Guardian",
+    "nameZh": "守护者",
+    "nativeNameIds": [
+      "100030"
+    ]
+  },
+  "521030000": {
+    "rowAlias": "Ironeye (Roundtable NPC)",
+    "matchedText": "Ironeye",
+    "nameZh": "铁之眼",
+    "nativeNameIds": [
+      "100050"
+    ]
+  },
+  "521030100": {
+    "rowAlias": "Traitor (Ironeye Remembrance)",
+    "matchedText": "Traitor",
+    "nameZh": "叛徒",
+    "nativeNameIds": [
+      "100110"
+    ]
+  },
+  "521030700": {
+    "rowAlias": "Night Hunter (Ironeye Remembrance)",
+    "matchedText": "Night Hunter",
+    "nameZh": "黑夜猎人",
+    "nativeNameIds": [
+      "140020"
+    ]
+  },
+  "521040000": {
+    "rowAlias": "Duchess (Roundtable NPC)",
+    "matchedText": "Duchess",
+    "nameZh": "女爵",
+    "nativeNameIds": [
+      "100010"
+    ]
+  },
+  "521040010": {
+    "rowAlias": "Duchess",
+    "matchedText": "Duchess",
+    "nameZh": "女爵",
+    "nativeNameIds": [
+      "100010"
+    ]
+  },
+  "521050000": {
+    "rowAlias": "Raider (Roundtable NPC)",
+    "matchedText": "Raider",
+    "nameZh": "无赖",
+    "nativeNameIds": [
+      "100040"
+    ]
+  },
+  "521050700": {
+    "rowAlias": "White Horn (Raider Remembrance)",
+    "matchedText": "White Horn",
+    "nameZh": "白角",
+    "nativeNameIds": [
+      "911000070"
+    ]
+  },
+  "521060000": {
+    "rowAlias": "Revenant (Roundtable NPC)",
+    "matchedText": "Revenant",
+    "nameZh": "复仇者",
+    "nativeNameIds": [
+      "100090",
+      "911000010"
+    ]
+  },
+  "521060100": {
+    "rowAlias": "Revenant",
+    "matchedText": "Revenant",
+    "nameZh": "复仇者",
+    "nativeNameIds": [
+      "100090",
+      "911000010"
+    ]
+  },
+  "521060200": {
+    "rowAlias": "Revenant (Unlock Fight Ghost)",
+    "matchedText": "Revenant",
+    "nameZh": "复仇者",
+    "nativeNameIds": [
+      "100090",
+      "911000010"
+    ]
+  },
+  "521060700": {
+    "rowAlias": "Revenant (Duchess Remembrance)",
+    "matchedText": "Revenant",
+    "nameZh": "复仇者",
+    "nativeNameIds": [
+      "100090",
+      "911000010"
+    ]
+  },
+  "521060800": {
+    "rowAlias": "Revenant",
+    "matchedText": "Revenant",
+    "nameZh": "复仇者",
+    "nativeNameIds": [
+      "100090",
+      "911000010"
+    ]
+  },
+  "521070000": {
+    "rowAlias": "Recluse (Roundtable NPC)",
+    "matchedText": "Recluse",
+    "nameZh": "隐士",
+    "nativeNameIds": [
+      "100070"
+    ]
+  },
+  "521080000": {
+    "rowAlias": "Executor (Roundtable NPC)",
+    "matchedText": "Executor",
+    "nameZh": "执行者",
+    "nativeNameIds": [
+      "100060"
+    ]
+  },
+  "521080700": {
+    "rowAlias": "Executor's Cry (Executor Remembrance)",
+    "matchedText": "Executor's Cry",
+    "nameZh": "执行者的唤声",
+    "nativeNameIds": [
+      "911000000"
+    ]
+  },
+  "521090000": {
+    "rowAlias": "Scholar (Roundtable NPC)",
+    "matchedText": "Scholar",
+    "nameZh": "学者",
+    "nativeNameIds": [
+      "110000"
+    ]
+  },
+  "521090100": {
+    "rowAlias": "Scholar",
+    "matchedText": "Scholar",
+    "nameZh": "学者",
+    "nativeNameIds": [
+      "110000"
+    ]
+  },
+  "521090200": {
+    "rowAlias": "Scholar (Dreglord Intro)",
+    "matchedText": "Scholar",
+    "nameZh": "学者",
+    "nativeNameIds": [
+      "110000"
+    ]
+  },
+  "521100000": {
+    "rowAlias": "Undertaker (Roundtable NPC)",
+    "matchedText": "Undertaker",
+    "nameZh": "送葬者",
+    "nativeNameIds": [
+      "110010"
+    ]
+  },
+  "521100100": {
+    "rowAlias": "Undertaker",
+    "matchedText": "Undertaker",
+    "nameZh": "送葬者",
+    "nativeNameIds": [
+      "110010"
+    ]
+  },
+  "521100200": {
+    "rowAlias": "Undertaker (Dreglord Intro)",
+    "matchedText": "Undertaker",
+    "nameZh": "送葬者",
+    "nativeNameIds": [
+      "110010"
+    ]
+  },
+  "523090000": {
+    "rowAlias": "Priestess (Duchess)",
+    "matchedText": "Priestess",
+    "nameZh": "女巫",
+    "nativeNameIds": [
+      "100020"
+    ]
+  },
+  "523120000": {
+    "rowAlias": "Witch of the Wheel (Recluse Remembrance)",
+    "matchedText": "Witch of the Wheel",
+    "nameZh": "轮之魔女",
+    "nativeNameIds": [
+      "100080"
+    ]
+  },
+  "600030010": {
+    "rowAlias": "Night Assassin (Wylder)",
+    "matchedText": "Night Assassin",
+    "nameZh": "黑夜刺客",
+    "nativeNameIds": [
+      "140000"
+    ]
+  },
+  "600030110": {
+    "rowAlias": "Night Fallen (Guardian)",
+    "matchedText": "Night Fallen",
+    "nameZh": "黑夜堕落者",
+    "nativeNameIds": [
+      "140010"
+    ]
+  },
+  "600030210": {
+    "rowAlias": "Night Hunter (Ironeye)",
+    "matchedText": "Night Hunter",
+    "nameZh": "黑夜猎人",
+    "nativeNameIds": [
+      "140020"
+    ]
+  },
+  "600030310": {
+    "rowAlias": "Night Thief (Duchess)",
+    "matchedText": "Night Thief",
+    "nameZh": "黑夜盗贼",
+    "nativeNameIds": [
+      "140030"
+    ]
+  },
+  "600030410": {
+    "rowAlias": "Night Raider (Raider)",
+    "matchedText": "Night Raider",
+    "nameZh": "黑夜破坏者",
+    "nativeNameIds": [
+      "140040"
+    ]
+  },
+  "600030610": {
+    "rowAlias": "Night Witch (Recluse)",
+    "matchedText": "Night Witch",
+    "nameZh": "黑夜魔女",
+    "nativeNameIds": [
+      "140060"
+    ]
+  },
+  "600030710": {
+    "rowAlias": "Night Executor (Executor)",
+    "matchedText": "Night Executor",
+    "nameZh": "黑夜执行人",
+    "nativeNameIds": [
+      "140070"
+    ]
+  },
+  "600030810": {
+    "rowAlias": "Night Deceiver (Scholar)",
+    "matchedText": "Night Deceiver",
+    "nameZh": "黑夜蒙骗者",
+    "nativeNameIds": [
+      "140080"
+    ]
+  },
+  "600030910": {
+    "rowAlias": "Night Profaner (Undertaker)",
+    "matchedText": "Night Profaner",
+    "nameZh": "黑夜亵渎者",
+    "nativeNameIds": [
+      "140090"
+    ]
+  },
+  "610030000": {
+    "rowAlias": "Wylder (Undertaker Remembrance)",
+    "matchedText": "Wylder",
+    "nameZh": "追踪者",
+    "nativeNameIds": [
+      "100000"
+    ]
+  },
+  "610030100": {
+    "rowAlias": "Guardian (Undertaker Remembrance)",
+    "matchedText": "Guardian",
+    "nameZh": "守护者",
+    "nativeNameIds": [
+      "100030"
+    ]
+  },
+  "610030200": {
+    "rowAlias": "Ironeye (Undertaker Remembrance)",
+    "matchedText": "Ironeye",
+    "nameZh": "铁之眼",
+    "nativeNameIds": [
+      "100050"
+    ]
+  },
+  "610030300": {
+    "rowAlias": "Duchess (Undertaker Remembrance - Unused?)",
+    "matchedText": "Duchess",
+    "nameZh": "女爵",
+    "nativeNameIds": [
+      "100010"
+    ]
+  },
+  "610030400": {
+    "rowAlias": "Raider (Undertaker Remembrance)",
+    "matchedText": "Raider",
+    "nameZh": "无赖",
+    "nativeNameIds": [
+      "100040"
+    ]
+  },
+  "610030500": {
+    "rowAlias": "Revenant (Undertaker Remembrance - Unused?)",
+    "matchedText": "Revenant",
+    "nameZh": "复仇者",
+    "nativeNameIds": [
+      "100090",
+      "911000010"
+    ]
+  },
+  "610030600": {
+    "rowAlias": "Recluse (Undertaker Remembrance)",
+    "matchedText": "Recluse",
+    "nameZh": "隐士",
+    "nativeNameIds": [
+      "100070"
+    ]
+  },
+  "610030700": {
+    "rowAlias": "Executor (Undertaker Remembrance)",
+    "matchedText": "Executor",
+    "nameZh": "执行者",
+    "nativeNameIds": [
+      "100060"
+    ]
+  }
+}

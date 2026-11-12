@@ -22,8 +22,30 @@
 [地点对照表](../scripts/data/enemy_dlc_location_evidence.json)按图鉴来源 ID 记录关联依据。对照表仅登记出现地点。具名遭遇可以对应同种怪物的一张图鉴卡，战斗数值仍取卡片原有的来源行。
 
 - 大空洞按地图方案的地形值 4 查得 94 个据点模板。用模板 MSB 的敌人配置编号与图鉴来源编号对应。对照表为每个命中的来源 ID 留有一组地图方案、附着点、模板和敌人部件。例如方案 1005 的附着点 1103 对应模板 4654，卡利亚禁卫骑士的原生 NPC 编号为 32520010，图鉴原野记录为 `32520010a`。
-- 沼泽对应模板 5000–5006，锻造设施对应 5010、5011。16 个原生 NPC 编号可直接关联已有图鉴记录。另外五种怪物由简中遭遇名、事件指定的实体或组、MSB 成员和图鉴角色配置共同定位。
+- 沼泽对应模板 5000–5006，锻造村对应 5010、5011。16 个原生 NPC 编号可直接关联已有图鉴记录。另外五种怪物由简中遭遇名、事件指定的实体或组、MSB 成员和图鉴角色配置共同定位。
 - 本地工作区的 `outputs/enemy-great-hollow` 和 `outputs/enemy-dlc-locations` 保存了提取脚本、模板清单和逐项证据。涉及的游戏档案、完整场景和事件留在本地。静态配置能证明一种遭遇可能出现，实战刷新仍由本局配置决定。
+
+### 本体与 DLC 怪物、场景对账
+
+游戏版本为 1.3.3.0，参数版本为 10350000。本地解析从五个已安装档案的资源索引出发，结合地图参数、资源路径清单及标准场景名扫描。此次命中的 402 个 MSB 和 278 个事件文件均已解析。场景内有 7,476 条敌人摆放和 1,225 条占位摆放。NPC 参数表的 3,016 行、345 个原生字段与 XML 的行值及字段默认值逐格一致。
+
+公开图鉴使用游戏简中名、事件指定成员、已有图鉴的来源编号，以及经核对的模型或社区配置别名。群体血条保留成员关系。地图模板里出现的敌人可能受波次、事件开关或出击方案约束。普通、灾域和夜王形态继续按怪物图鉴原有要求展示。
+
+社区地图别名和用于比对的英文配置名来自 [Smithbox 固定版本](https://github.com/vawser/Smithbox/tree/610d3412c1d9433749720eab9739f8911b1b8fe9/src/Smithbox.Data/Assets)，上游许可见 [Smithbox-LICENSE.txt](../scripts/data/Smithbox-LICENSE.txt)。游戏简中术语来自本机同版本文本。
+
+工作区 `outputs/enemy-full-audit/native` 保存逐场景摆放、事件指令、血条、条件与无法对应的引用。`outputs/enemy-full-audit/atlas` 保存每个 NPC 编号的识别结果和去向。`outputs/enemy-full-audit/review` 提供可离线检索的完整参数、按地点整理的预览清单及本次核对脚本。玩家图鉴的卡片数与参数表行数按各自口径统计。
+
+从仓库根目录使用已解包的同版本文件重新生成：
+
+```powershell
+python scripts/build_enemy_atlas.py `
+  --native-csv ../outputs/nightreign-data-20261109/csv/NpcParam.csv `
+  --localized-csv ../outputs/nightreign-data-20261109/localized/csv/NpcParam.zh-CN.csv `
+  --scene ../outputs/enemy-full-audit/native/scenes.jsonl `
+  --encounters ../outputs/enemy-dlc-locations/named-encounters.json `
+  --native-encounters ../outputs/enemy-full-audit/native/named-encounters.jsonl `
+  --audit-dir ../outputs/enemy-full-audit/atlas --write
+```
 
 ## 样本管理
 
