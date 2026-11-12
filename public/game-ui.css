@@ -690,7 +690,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-weapons .weapon-list-panel{container:weapon-list / inline-size}
 #view-weapons .weapon-list{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:6px;list-style:none;margin:0;padding:6px;max-height:650px;overflow:auto;scrollbar-gutter:stable}
 #view-weapons .weapon-list li{min-width:0;margin:0}
-@container weapon-list (min-width:600px){#view-weapons .weapon-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container weapon-list (min-width:400px){#view-weapons .weapon-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #view-weapons .weapon-row{display:grid;grid-template-columns:48px minmax(0,1fr) 36px;align-items:center;gap:10px;width:100%;min-height:72px;padding:9px;border:1px solid transparent;border-bottom-color:#2d4052;border-radius:3px;background:transparent;color:#e2e7e7;text-align:left;cursor:pointer;font:inherit}
 #view-weapons .weapon-row:hover{background:#203247}
 #view-weapons .weapon-row.selected{border-color:#b59a62;background:#29333b;box-shadow:inset 3px 0 #d2b77c}
@@ -845,7 +845,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-enemies .toolbar #enemy-filter,#view-enemies .toolbar #enemy-area{min-width:0;width:100%}
 #view-enemies .toolbar .result-count{margin:0;white-space:nowrap}
 #view-enemies.active{margin-top:-26px;margin-inline:calc(-1 * (clamp(24px,4vw,62px) - 16px))}
-#view-enemies .enemy-layout{grid-template-columns:minmax(250px,clamp(250px,21vw,280px)) minmax(0,1fr);gap:14px;align-items:stretch}
+#view-enemies .enemy-layout{grid-template-columns:minmax(280px,38%) minmax(0,1fr);gap:14px;align-items:stretch}
 #view-enemies .enemy-list-column,#view-enemies .enemy-detail{height:calc(100vh - 200px);min-height:420px;max-height:none}
 #view-enemies .enemy-list-column .enemy-list{height:auto}
 #view-enemies .enemy-detail{container-type:inline-size;padding:14px 18px;overscroll-behavior:contain;scrollbar-gutter:stable}
@@ -1029,7 +1029,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 :is(#view-records,#view-builds) .note-panel{padding:18px}:is(#view-records,#view-builds) .record-header h2{font-size:20px}:is(#view-records,#view-builds) .page-intro p{max-width:none}
 .reference-page :is(.button,.button-link){font-size:14px;min-height:38px;border-radius:4px}
 @media(min-width:851px){
-#view-weapons .weapon-layout{grid-template-columns:minmax(250px,clamp(250px,21vw,280px)) minmax(0,1fr);gap:14px}
+#view-weapons .weapon-layout{grid-template-columns:minmax(280px,2fr) minmax(0,3fr);gap:14px}
 }
 @media(max-width:850px){
 #view-effects .effect-encyclopedia-categories{display:flex;flex-wrap:wrap;gap:6px}#view-effects .effect-encyclopedia-categories button{flex:1 1 90px;min-height:38px;font-size:12px;padding:7px}#view-effects .effect-encyclopedia-toolbar{grid-template-columns:minmax(0,1fr);gap:8px}#view-effects .effect-encyclopedia-toolbar .result-count{justify-self:start}
@@ -1050,3 +1050,25 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 #view-effects .effect-encyclopedia-card{scroll-margin-top:16px}
 
 #view-effects .effect-encyclopedia-card:focus-within{border-color:#91a5ba}
+
+/* 图鉴列表按自身可用宽度排一列或两列，长名称与地点保留完整换行。 */
+#view-enemies .enemy-list-column{container:enemy-catalog-list / inline-size;min-width:0}
+#view-enemies .enemy-list{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:4px;padding:5px;min-width:0;scrollbar-gutter:stable}
+#view-enemies .enemy-row{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;align-items:start;gap:6px;height:100%;min-width:0;padding:10px;border-radius:3px}
+#view-enemies .enemy-list>.empty-state{grid-column:1/-1}
+#view-enemies .enemy-row-copy{min-width:0;max-width:100%}
+#view-enemies .enemy-row-copy strong{font-size:14px;line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+#view-enemies .enemy-row-copy small{font-size:12px;line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+#view-enemies .enemy-row>.enemy-category-badge{justify-self:start;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+@container enemy-catalog-list (min-width:420px){#view-enemies .enemy-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#view-weapons .weapon-row{grid-template-columns:48px minmax(0,1fr);gap:6px 8px;height:100%;min-width:0}
+#view-weapons .weapon-row-copy small{white-space:normal;overflow-wrap:anywhere}
+#view-weapons .weapon-list .weapon-dlc{grid-column:2;justify-self:start;max-width:100%}
+
+@container enemy-catalog-list (min-width:320px){
+  #view-enemies .enemy-row{grid-template-columns:minmax(0,1fr) fit-content(42%);gap:3px 6px;padding:8px 9px}
+  #view-enemies .enemy-row-copy{display:contents}
+  #view-enemies .enemy-row-copy strong{grid-column:1/-1;grid-row:1;min-width:0}
+  #view-enemies .enemy-row-copy small{grid-column:1;grid-row:2;min-width:0;margin:0}
+  #view-enemies .enemy-row>.enemy-category-badge{grid-column:2;grid-row:2;justify-self:end;padding:1px 5px;line-height:1.5}
+}
