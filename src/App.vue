@@ -29,19 +29,35 @@ const loadError = ref(false);
 const classicScriptVersions = typeof __CLASSIC_SCRIPT_VERSIONS__ === 'undefined' ? null : __CLASSIC_SCRIPT_VERSIONS__;
 const catalogJsonVersions = typeof __CATALOG_JSON_VERSIONS__ === 'undefined' ? null : __CATALOG_JSON_VERSIONS__;
 
-function setView(view, updateUrl = true, restoreScrollY = null) {
+function setView(view, updateUrl = true, restoreScrollY = null, cardNavigation = null, sourceSnapshot = null) {
   const nextView = view in labels ? view : 'overview';
   const changed = nextView !== currentView.value;
   if (updateUrl && changed) {
-    history.replaceState({ ...history.state, view: currentView.value, scrollY: window.scrollY }, '', location.href);
+    history.replaceState({
+      ...history.state,
+      view: currentView.value,
+      scrollY: window.scrollY,
+      cardNavigation: sourceSnapshot || (currentView.value === 'relics' ? null : history.state?.cardNavigation),
+    }, '', location.href);
   }
   currentView.value = nextView;
-  if (updateUrl && location.hash !== `#${nextView}`) {
-    if (changed) history.pushState({ ...history.state, view: nextView, scrollY: 0 }, '', `#${nextView}`);
-    else history.replaceState({ ...history.state, view: nextView, scrollY: window.scrollY }, '', `#${nextView}`);
+  const targetUrl = new URL(location.href);
+  const hasEffectTarget = targetUrl.searchParams.has('effectCategory') || targetUrl.searchParams.has('effectId');
+  if (updateUrl && (location.hash !== `#${nextView}` || cardNavigation || hasEffectTarget)) {
+    targetUrl.searchParams.delete('effectCategory');
+    targetUrl.searchParams.delete('effectId');
+    targetUrl.hash = nextView;
+    const url = cardNavigation?.kind === 'effect'
+      ? window.NightreignRelicEffectNavigation.url(cardNavigation)
+      : targetUrl.pathname + targetUrl.search + targetUrl.hash;
+    const entry = { ...history.state, view: nextView, scrollY: changed ? 0 : window.scrollY, cardNavigation };
+    if (changed || cardNavigation) history.pushState(entry, '', url);
+    else history.replaceState(entry, '', url);
   }
   closeMobileNavigation(true);
-  if (restoreScrollY !== null) {
+  if (cardNavigation) {
+    nextTick(() => window.NightreignRelicEffectNavigation?.restore(cardNavigation));
+  } else if (restoreScrollY !== null) {
     nextTick(() => window.scrollTo({ top: restoreScrollY, behavior: 'auto' }));
   } else if (changed || updateUrl) {
     const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
@@ -62,6 +78,7 @@ function handleGlobalKeydown(event) {
 }
 
 function handleShellClick(event) {
+  if (event.defaultPrevented) return;
   if (event.target.closest('#mobile-menu')) {
     sidebarOpen.value = !sidebarOpen.value;
     return;
@@ -83,21 +100,28 @@ function handleShellClick(event) {
 }
 
 function handleNavigation(event) {
-  setView(event.detail?.view);
+  setView(event.detail?.view, true, null, event.detail?.cardNavigation, event.detail?.source);
 }
 
+let restoredHistoryUrl = '';
 function handleHashChange() {
+  if (restoredHistoryUrl === location.href) {
+    restoredHistoryUrl = '';
+    return;
+  }
+  restoredHistoryUrl = '';
   if (location.hash === '#main-content') return;
   setView(location.hash.slice(1), false);
 }
 
 function handlePopState(event) {
+  restoredHistoryUrl = location.href;
   if (location.hash === '#main-content') {
     const view = event.state?.view in labels ? event.state.view : currentView.value;
     setView(view, false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0);
     return;
   }
-  setView(location.hash.slice(1), false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0);
+  setView(location.hash.slice(1), false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0, event.state?.cardNavigation);
 }
 
 function loadClassicScript(file) {
@@ -163,7 +187,7 @@ onUnmounted(() => {
     <h1>页面未能完整加载</h1>
     <p>必要功能暂时无法启动，请刷新页面重试。</p>
   </main>
-  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'atlas-list-fullscreen': currentView === 'effects', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
+  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
     <a class="skip-link" href="#main-content">跳转到主要内容</a>
     <aside id="mobile-navigation" class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
@@ -183,7 +207,7 @@ onUnmounted(() => {
         <button class="nav-link" :class="{ active: currentView === 'effects' }" :aria-current="currentView === 'effects' ? 'page' : null" data-view="effects"><img class="nav-icon" src="/nav-icons/effects-battle-record.png" alt="" />词条图鉴</button>
         <button class="nav-link" :class="{ active: currentView === 'sources' }" :aria-current="currentView === 'sources' ? 'page' : null" data-view="sources"><img class="nav-icon" src="/nav-icons/sources.png" alt="" />资料说明</button>
       </nav>
-      <div class="side-bottom"><span class="pulse-dot"></span> 离线资料 · 本地解析<br /><small>存档始终留在你的浏览器中</small><a class="side-license-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a></div>
+      <div class="side-bottom"><a class="side-license-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a></div>
     </aside>
 
     <main id="main-content" class="main" tabindex="-1">

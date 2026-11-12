@@ -3,7 +3,7 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = (v) => v == null || v === '' ? '未收录' : typeof v === 'number' ? new Intl.NumberFormat('zh-CN',{maximumFractionDigits:2}).format(v) : String(v);
-const state = {enemyData:null,enemyImageManifest:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),enemyEntities:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
+const state = {enemyData:null,enemyImageManifest:null,enemyMeta:new Map(),enemyMetaLocations:new Set(),enemyMetaCategories:new Set(),enemyEntities:new Map(),items:null,effects:null,zh:null,wikiZh:null,vessels:null,relicCatalog:null,relicRuleEffects:null,effectEncyclopediaData:null,effectEncyclopedia:[],effectEncyclopediaCategory:'all',effectEncyclopediaPage:1,effectEncyclopediaPageSize:18,save:null,saveEditor:null,saveFileName:null,enemyFiltered:[],enemyGroups:[],enemyPage:1,enemyPageSize:36,enemySelected:null,enemyUrlId:'',enemyUrlIndex:null,rules:[],ruleProfiles:[],activeRuleProfileId:null,relicFiltered:[],relicPage:1,poolPage:1,selectedEffects:new Map(),worker:null,equipped:{normal:[null,null,null],deep:[null,null,null]},selectedRelicIndex:null,buildResults:[],activeSlot:{group:'normal',index:0},slotFilterActive:false};
 const typeLabel = {Relic:'普通',DeepRelic:'深夜',UniqueRelic:'独特'};
 const relicColorClasses = Object.freeze({Red:'red',Blue:'blue',Yellow:'yellow',Green:'green',Any:'any'});
 const relicColorClass = (relic) => {const key=String(relic?.itemColor||'Any');return `color-${Object.hasOwn(relicColorClasses,key)?relicColorClasses[key]:'any'}`};
@@ -31,7 +31,7 @@ window.navigateTo=navigate;
 
 async function loadCatalogs(){
   try{
-    const catalogFiles=['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json'];
+    const catalogFiles=['enemy-data.json','items_data.json','effects_data.json','quickref_effects_zh.json','effect_names_zh.json','vessels_data.json','relic_catalog_zh.json','relic_rule_effects.json','effect_encyclopedia.json','relic_effect_cross_mode.json'];
     const catalogVersions=window.NIGHTREIGN_CATALOG_VERSIONS;
     if(!catalogVersions||typeof catalogVersions!=='object')throw new Error('数据版本信息缺失，请刷新页面重试。');
     const enemyImagesPromise = Promise.all([
@@ -45,7 +45,11 @@ async function loadCatalogs(){
       if(!response.ok)throw new Error(name+' 读取失败');
       return response.json();
     }));
-    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData]=catalogs;
+    const [enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData,crossMode]=catalogs;
+    state.deepRelicSharedEffects = {
+      positive: new Set(crossMode.positive),
+      negative: new Set(crossMode.negative),
+    };
     Object.assign(state,{enemyData:enemy,items,effects,zh,wikiZh,vessels,relicCatalog,relicRuleEffects,effectEncyclopediaData});
     enemyImagesPromise.then(([verified, candidates]) => {
       state.enemyImageManifest = verified;
@@ -55,6 +59,12 @@ async function loadCatalogs(){
     });
     buildEffectCategoryIndex();
     renderEffectEncyclopedia();
+    const effectUrl = new URL(location.href);
+    const effectCategory = effectUrl.searchParams.get('effectCategory');
+    const effectId = effectUrl.searchParams.get('effectId');
+    if (location.hash === '#effects' && effectCategory && effectId) {
+      requestAnimationFrame(() => restoreRelicEffectNavigation({ kind: 'effect', category: effectCategory, id: effectId }));
+    }
     $('#nav-enemy-count').textContent=enemy.rows.length.toLocaleString('zh-CN');
     buildEnemyMetadata();
     buildEnemyDisplayIndex();
@@ -260,7 +270,7 @@ function syncEnemyUrl(){
   const selectedIndex=state.enemySelected?state.enemyData.rows.indexOf(state.enemySelected):-1;
   if(selectedIndex>=0){params.set('enemyId',String(state.enemySelected[1]));params.set('enemyRecordIndex',String(selectedIndex))}
   else{params.delete('enemyId');params.delete('enemyRecordIndex')}
-  url.search=params.toString();history.replaceState(null,'',url);
+  url.search=params.toString();history.replaceState(history.state,'',url);
 }
 function resolveEnemyUrlMatch(filteredRows,allRows,recordIndex,enemyId){
   let selectedRecord=null;
@@ -428,6 +438,7 @@ function outOfGameEffectCatalog(){
   }
   return catalog;
 }
+const catalogEffectByKey = new Map();
 function renderEffectEncyclopedia(){
   const data=state.effectEncyclopediaData||{},labels=new Map((data.categories||[]).map(group=>[group.id,group.label]));
   const entries=(data.entries||[]).map(entry=>{
@@ -438,11 +449,29 @@ function renderEffectEncyclopedia(){
   const typeSelect=$('#effect-encyclopedia-type');if(!typeSelect)return;
   typeSelect.innerHTML='<option value="all">全部类型</option>'+types.map(type=>`<option value="${esc(type)}">${esc(type)}</option>`).join('');
   state.effectEncyclopedia=entries;
+  catalogEffectByKey.clear();
+  for (const entry of entries) {
+    const key = entry.category + ':' + entry.id;
+    // A duplicate within one category cannot be a link target.
+    catalogEffectByKey.set(key, catalogEffectByKey.has(key) ? null : entry);
+  }
   for(const button of $$('.effect-encyclopedia-categories [data-effect-category]')){
     const category=button.dataset.effectCategory,count=category==='all'?entries.length:entries.filter(item=>item.category===category).length;
     button.querySelector('span').textContent=count.toLocaleString('zh-CN');
   }
   filterEffectEncyclopedia();
+}
+function syncEffectEncyclopediaPageSize(){
+  const list=$('#effect-encyclopedia-list');
+  if(!list?.getClientRects().length)return false;
+  const columns=getComputedStyle(list).gridTemplateColumns.split(/\s+/).filter(track=>track.endsWith('px')).length;
+  if(!columns)return false;
+  const pageSize=columns*Math.max(1,Math.round(EFFECT_ENCYCLOPEDIA_PAGE_SIZE/columns));
+  if(pageSize===state.effectEncyclopediaPageSize)return false;
+  const first=(state.effectEncyclopediaPage-1)*state.effectEncyclopediaPageSize;
+  state.effectEncyclopediaPageSize=pageSize;
+  state.effectEncyclopediaPage=Math.floor(first/pageSize)+1;
+  return true;
 }
 function filterEffectEncyclopedia(resetPage=true){
   const list=$('#effect-encyclopedia-list');if(!list)return;
@@ -452,14 +481,21 @@ function filterEffectEncyclopedia(resetPage=true){
     if(type!=='all'&&item.type!==type)return false;
     return !query||`${item.name} ${item.type} ${item.explanation} ${item.id} ${item.english} ${item.key} ${item.categoryLabel} ${item.buffType}`.toLocaleLowerCase().includes(query);
   });
+  syncEffectEncyclopediaPageSize();
   if(resetPage)state.effectEncyclopediaPage=1;
-  const pages=Math.max(1,Math.ceil(found.length/EFFECT_ENCYCLOPEDIA_PAGE_SIZE));
+  const pageSize=state.effectEncyclopediaPageSize;
+  const pages=Math.max(1,Math.ceil(found.length/pageSize));
   state.effectEncyclopediaPage=Math.min(Math.max(state.effectEncyclopediaPage,1),pages);
-  const start=(state.effectEncyclopediaPage-1)*EFFECT_ENCYCLOPEDIA_PAGE_SIZE,rows=found.slice(start,start+EFFECT_ENCYCLOPEDIA_PAGE_SIZE);
+  const start=(state.effectEncyclopediaPage-1)*pageSize,rows=found.slice(start,start+pageSize);
   $('#effect-encyclopedia-count').textContent=found.length?`第 ${start+1}–${start+rows.length} 条 / 共 ${found.length} 条匹配`:'0 条匹配结果';
-  list.innerHTML=rows.length?rows.map(item=>`<article class="effect-encyclopedia-card" id="effect-${esc(item.category)}-${esc(item.id)}"><header><h2>${esc(item.name)}</h2><span class="effect-encyclopedia-id">#${esc(item.id)}</span></header><div class="effect-encyclopedia-tags"><span>${esc(item.categoryLabel)}</span><span>${esc(item.type)}</span>${item.buffType?`<span>${esc(item.buffType)}</span>`:''}</div><p>${esc(item.explanation||'效果说明暂未收录')}</p>${item.stackability?`<small>${esc(item.stackability)}</small>`:''}</article>`).join(''):'<div class="empty-state"><h3>没有找到匹配词条</h3><p>可以更换关键词或筛选条件。</p></div>';
-  renderPagination('effect-encyclopedia-pagination',found.length,EFFECT_ENCYCLOPEDIA_PAGE_SIZE,state.effectEncyclopediaPage);
+  list.innerHTML=rows.length?rows.map(item=>`<article class="effect-encyclopedia-card" id="effect-${esc(item.category)}-${esc(item.id)}"><header><h2>${esc(item.name)}</h2><span class="effect-encyclopedia-id">#${esc(item.id)}</span></header><div class="effect-encyclopedia-tags"><span>${esc(item.categoryLabel)}</span><span>${esc(item.type)}</span>${item.stackability?`<span class="effect-encyclopedia-stackability">${esc(item.stackability)}</span>`:''}${item.buffType&&item.buffType!=='不附带负面词条'?`<span>${esc(item.buffType)}</span>`:''}</div><p>${esc(item.explanation||'效果说明暂未收录')}</p></article>`).join(''):'<div class="empty-state"><h3>没有找到匹配词条</h3><p>可以更换关键词或筛选条件。</p></div>';
+  renderPagination('effect-encyclopedia-pagination',found.length,pageSize,state.effectEncyclopediaPage);
 }
+// 隐藏页面重新出现和窗口改变都会触发尺寸观察；高度变化不重复渲染。
+const effectEncyclopediaResizeObserver=new ResizeObserver(()=>{
+  if(syncEffectEncyclopediaPageSize())filterEffectEncyclopedia(false);
+});
+effectEncyclopediaResizeObserver.observe($('#effect-encyclopedia-list'));
 $('#effect-encyclopedia-search').addEventListener('input',()=>filterEffectEncyclopedia());
 $('#effect-encyclopedia-type').addEventListener('change',()=>filterEffectEncyclopedia());
 $('.effect-encyclopedia-categories').addEventListener('click',event=>{
@@ -471,12 +507,12 @@ $('.effect-encyclopedia-categories').addEventListener('click',event=>{
 $('#effect-encyclopedia-pagination').addEventListener('click',event=>{
   const step=event.target.closest('[data-step]');if(!step)return;
   state.effectEncyclopediaPage+=Number(step.dataset.step);filterEffectEncyclopedia(false);
-  const pager=$('#effect-encyclopedia-pagination');pager.scrollIntoView({block:'nearest'});pager.querySelector(`[data-step="${step.dataset.step}"]:not(:disabled)`)?.focus();
+  focusCardPage('#effect-encyclopedia-list');
 });
 $('#effect-encyclopedia-pagination').addEventListener('change',event=>{
   if(event.target.tagName!=='SELECT')return;
   state.effectEncyclopediaPage=Number(event.target.value);filterEffectEncyclopedia(false);
-  const pager=$('#effect-encyclopedia-pagination');pager.scrollIntoView({block:'nearest'});pager.querySelector('select')?.focus();
+  focusCardPage('#effect-encyclopedia-list');
 });
 function effectGroups(relic){return (relic.effects||[]).flat().filter(Boolean)}
 function normalizedEffectName(name){return String(name||'').normalize('NFKC').replace(/\s+/g,'').replace(/\+\d+$/,'')}
@@ -539,10 +575,148 @@ function pairedEffects(relic){
   }
   return groups;
 }
-function renderEffectRows(relic,showId=false){
-  const groups=pairedEffects(relic);
-  return groups.length?groups.map(group=>`<div class="game-effect-row"><span class="game-effect-icon" aria-hidden="true">✧</span><div class="game-effect-copy"><span>${esc(effectName(group[0]))}${showId?`<em>#${esc(group[0].id)}</em>`:''}</span>${group.slice(1).map(e=>`<span class="game-effect-negative">${esc(effectName(e))}${showId?`<em>#${esc(e.id)}</em>`:''}</span>`).join('')}</div></div>`).join(''):'<div class="game-effect-row empty">此遗物无已识别词条</div>';
+function relicEffectTarget(relic, effect, isNegative) {
+  const category = { Relic: 'normal-outside', UniqueRelic: 'normal-outside', DeepRelic: 'deep-outside' }[relic.itemType];
+  if (!category) return null;
+  const key = category + ':' + effect.id;
+  let entry = catalogEffectByKey.get(key);
+  // A duplicate deep entry is ambiguous. Only a missing entry can use the shared pool.
+  if (category === 'deep-outside' && !catalogEffectByKey.has(key)) {
+    const shared = state.deepRelicSharedEffects[isNegative ? 'negative' : 'positive'];
+    if (shared.has(Number(effect.id))) entry = catalogEffectByKey.get('normal-outside:' + effect.id);
+  }
+  return entry ? { kind: 'effect', category: entry.category, id: String(entry.id) } : null;
 }
+function effectCardUrl(target) {
+  const url = new URL(location.href);
+  url.searchParams.set('effectCategory', target.category);
+  url.searchParams.set('effectId', target.id);
+  url.hash = 'effects';
+  return url.pathname + url.search + url.hash;
+}
+function relicEffectText(relic, effect, position, target) {
+  const name = esc(effectName(effect));
+  if (!target) return name;
+  return `<a class="relic-effect-link" href="${esc(effectCardUrl(target))}"
+    data-effect-category="${esc(target.category)}" data-effect-id="${esc(target.id)}"
+    data-relic-id="${esc(relic.id)}" data-effect-position="${position}">${name}</a>`;
+}
+let inspectedAnomalies = new WeakMap();
+window.addEventListener('nightreign:relic-inspection', ({detail}) => {
+  inspectedAnomalies = new WeakMap();
+  for (const {relic, result} of detail) {
+    if (result.status === 'anomaly') inspectedAnomalies.set(relic, result.issues.filter(issue => issue.status === 'anomaly'));
+  }
+  if (state.save) renderRelics();
+});
+function renderEffectRows(relic, showId = false, linkEffects = false) {
+  const groups = pairedEffects(relic);
+  if (!groups.length) return '<div class="game-effect-row empty">此遗物无已识别词条</div>';
+  const issues = linkEffects && inspectedAnomalies.get(relic);
+  // The save parser omits empty positive slots from the visible effect groups.
+  const visibleSlots = issues && relic.rawEffectSlots.map((pair, i) => pair?.positive != null ? i : -1).filter(i => i >= 0);
+  return groups.map((group, groupIndex) => {
+    const labels = group.map((effect, index) => {
+      const target = linkEffects && relicEffectTarget(relic, effect, index > 0 || !!effect.isDebuff);
+      const name = relicEffectText(relic, effect, `${groupIndex}:${index}`, target);
+      const id = showId ? `<em>#${esc(effect.id)}</em>` : '';
+      let mark = '';
+      if (issues) {
+        const rawIndex = visibleSlots[groupIndex], pair = relic.rawEffectSlots[rawIndex];
+        const role = index ? 'negative' : 'positive';
+        const related = issues.filter(issue => issue.slot === rawIndex + 1 && (issue.role === role ||
+          (role === 'positive' && issue.role === 'negative' && pair?.negative == null)));
+        if (pair && Number(pair[role]) === Number(effect.id) && related.length) {
+          mark = `<small class="relic-effect-anomaly" title="${esc(related.map(issue => issue.message).join('；'))}">异常</small>`;
+        }
+      }
+      return `<span${index ? ' class="game-effect-negative"' : ''}>${name}${mark}${id}</span>`;
+    });
+    return `<div class="game-effect-row"><span class="game-effect-icon" aria-hidden="true">✧</span><div class="game-effect-copy">${labels.join('')}</div></div>`;
+  }).join('');
+}
+function captureRelicEffectNavigation(link) {
+  const filters = Object.fromEntries(
+    ['relic-search', 'relic-category', 'relic-type', 'relic-color'].map(id => [id, $('#' + id).value])
+  );
+  return {
+    kind: 'relics',
+    filters,
+    page: state.relicPage,
+    relicId: link.dataset.relicId,
+    position: link.dataset.effectPosition,
+    offset: link.getBoundingClientRect().top,
+    scrollY: window.scrollY,
+  };
+}
+function restoreRelicEffectNavigation(snapshot) {
+  if (snapshot.kind === 'relics') {
+    if (!state.save) return;
+    const findLink = () => $$('#relic-list .relic-effect-link').find(item =>
+      item.dataset.relicId === snapshot.relicId && item.dataset.effectPosition === snapshot.position
+    );
+    const sameFilters = Object.entries(snapshot.filters).every(([id, value]) => $('#' + id).value === value);
+    if (!sameFilters || state.relicPage !== snapshot.page || !findLink()) {
+      for (const [id, value] of Object.entries(snapshot.filters)) {
+        $('#' + id).value = value;
+      }
+      filterRelics();
+      state.relicPage = snapshot.page;
+      renderRelics();
+    }
+    requestAnimationFrame(() => {
+      const link = findLink();
+      link?.focus({ preventScroll: true });
+      const top = link
+        ? window.scrollY + link.getBoundingClientRect().top - snapshot.offset
+        : snapshot.scrollY;
+      window.scrollTo({ top, behavior: 'instant' });
+    });
+    return;
+  }
+  if (snapshot.kind !== 'effect') return;
+  const entry = catalogEffectByKey.get(snapshot.category + ':' + snapshot.id);
+  if (!entry) return;
+  state.effectEncyclopediaCategory = snapshot.category;
+  $('#effect-encyclopedia-search').value = '';
+  $('#effect-encyclopedia-type').value = 'all';
+  for (const button of $$('.effect-encyclopedia-categories [data-effect-category]')) {
+    button.setAttribute('aria-pressed', String(button.dataset.effectCategory === snapshot.category));
+  }
+  filterEffectEncyclopedia();
+  const entries = state.effectEncyclopedia.filter(item => item.category === snapshot.category);
+  state.effectEncyclopediaPage = Math.floor(entries.indexOf(entry) / state.effectEncyclopediaPageSize) + 1;
+  filterEffectEncyclopedia(false);
+  requestAnimationFrame(() => {
+    const card = document.getElementById(`effect-${snapshot.category}-${snapshot.id}`);
+    const heading = card?.querySelector('h2');
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+      card.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
+  });
+}
+window.NightreignRelicEffectNavigation = {
+  restore: restoreRelicEffectNavigation,
+  url: effectCardUrl,
+};
+$('#relic-list').addEventListener('click', event => {
+  const link = event.target.closest('.relic-effect-link');
+  if (!link || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  window.dispatchEvent(new CustomEvent('nightreign:navigate', {
+    detail: {
+      view: 'effects',
+      source: captureRelicEffectNavigation(link),
+      cardNavigation: {
+        kind: 'effect',
+        category: link.dataset.effectCategory,
+        id: link.dataset.effectId,
+      },
+    },
+  }));
+});
 function relicType(r){return r.itemType||'Relic'}
 function relicEntry(r){return state.relicCatalog?.items?.[r.itemKey]||null}
 function safeSourceUrl(value){
@@ -614,9 +788,24 @@ async function readSave(file){
     setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改；${transferNote}${state.saveEditor?'当前为只读模式；存档写回尚未验收。':'此存档版式暂不支持编辑。'}`);
   }catch(err){setSaveFailureStatus('无法解析此存档：'+(err?.message||String(err)))}
 }
+window.NightreignRelicCollection = () => state.save?.relics || [];
+window.NightreignLegalityNames = {
+  item(id) {
+    const item = state.items?.items?.[id];
+    return state.relicCatalog?.items?.[item?.key]?.name_zh || item?.name_en;
+  },
+  effect(id) {
+    return effectName({ ...state.effects?.effects?.[id], id });
+  },
+};
+function notifyRelicCollectionChanged() {
+  inspectedAnomalies = new WeakMap();
+  window.dispatchEvent(new Event('nightreign:collection-changed'));
+}
 function showSave(parsed){
   if(!parsed||!Array.isArray(parsed.relics))throw new Error('遗物数据格式错误');
   state.save=parsed;const all=parsed.relics;
+  notifyRelicCollectionChanged();
   if(typeof renderSaveEditorUi==='function')renderSaveEditorUi();
   state.relicPage=1;state.poolPage=1;state.activeSlot={group:'normal',index:0};state.slotFilterActive=false;
   $('#relic-dashboard').hidden=false;$('#build-empty').hidden=true;$('#build-workspace').hidden=false;
@@ -658,14 +847,46 @@ function renderRelics(){
   state.relicPage=Math.min(Math.max(state.relicPage,1),pages);
   const start=(state.relicPage-1)*RELIC_PAGE_SIZE,rows=state.relicFiltered.slice(start,start+RELIC_PAGE_SIZE);
   $('#relic-count').textContent=total?`第 ${start+1}–${start+rows.length} 件 / 共 ${total} 件`:'0 件';
-  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),sourcePage=safeSourceUrl(entry?.source_page),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${sourcePage?`<a href="${esc(sourcePage)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
+  $('#relic-list').innerHTML=rows.map(r=>{const type=relicType(r),entry=relicEntry(r),sourcePage=safeSourceUrl(entry?.source_page),rarity={Relic:'normal',DeepRelic:'deep',UniqueRelic:'unique'}[type]||'normal',title=`<h3>${esc(relicName(r))}</h3>`;return `<article class="relic-card ${type==='DeepRelic'?'deep':type==='UniqueRelic'?'unique':''}"><header><div class="relic-identity">${relicImage(r)}<div>${sourcePage?`<a href="${esc(sourcePage)}" target="_blank" rel="noopener noreferrer" title="查看中文图鉴来源">${title}</a>`:title}<small>${esc(relicCategory(r))} · ${relicColorTag(r)}<br>实例 #${esc(r.id)} · 道具 #${esc(r.itemId)}</small></div></div><span class="badge relic-rarity-tag rarity-${rarity} ${type==='Relic'?'muted':''}">${esc(typeLabel[type]||type)}</span></header><div class="effect-list game-effect-list">${renderEffectRows(r,true,true)}</div></article>`}).join('')||'<div class="empty-state"><h3>没有匹配的遗物</h3><p>请调整搜索或类型筛选。</p></div>';
   if(typeof decorateRelicEditorCards==='function')decorateRelicEditorCards(rows);
   renderPagination('relic-pagination',total,RELIC_PAGE_SIZE,state.relicPage);
 }
-$('#relic-search').addEventListener('input',filterRelics);
-for(const id of ['relic-category','relic-type','relic-color'])$('#'+id).addEventListener('change',filterRelics);
-$('#relic-pagination').addEventListener('click',e=>{const step=e.target.closest('[data-step]');if(!step)return;state.relicPage+=Number(step.dataset.step);renderRelics();$('#relic-pagination').scrollIntoView({block:'start'});$('#relic-pagination [data-step="'+step.dataset.step+'"]:not(:disabled)')?.focus()});
-$('#relic-pagination').addEventListener('change',e=>{if(e.target.tagName!=='SELECT')return;state.relicPage=Number(e.target.value);renderRelics();$('#relic-pagination').scrollIntoView({block:'start'});$('#relic-pagination select')?.focus()});
+function clearRelicEffectSnapshot() {
+  if (history.state?.cardNavigation?.kind !== 'relics') return;
+  history.replaceState({ ...history.state, cardNavigation: null }, '', location.href);
+}
+function handleRelicFilterChange() {
+  clearRelicEffectSnapshot();
+  filterRelics();
+}
+$('#relic-search').addEventListener('input', handleRelicFilterChange);
+for (const id of ['relic-category', 'relic-type', 'relic-color']) {
+  $('#' + id).addEventListener('change', handleRelicFilterChange);
+}
+function focusCardPage(selector) {
+  const list = $(selector);
+  const title = list.querySelector('article h2, article h3');
+  if (title) {
+    title.tabIndex = -1;
+    title.focus({ preventScroll: true });
+  }
+  list.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
+$('#relic-pagination').addEventListener('click', event => {
+  const step = event.target.closest('[data-step]');
+  if (!step) return;
+  clearRelicEffectSnapshot();
+  state.relicPage += Number(step.dataset.step);
+  renderRelics();
+  focusCardPage('#relic-list');
+});
+$('#relic-pagination').addEventListener('change', event => {
+  if (event.target.tagName !== 'SELECT') return;
+  clearRelicEffectSnapshot();
+  state.relicPage = Number(event.target.value);
+  renderRelics();
+  focusCardPage('#relic-list');
+});
 
 function setupCharacters(){
   const chars=state.vessels.characters||{};
@@ -795,7 +1016,7 @@ $('#loadout-slots').addEventListener('dragleave',e=>e.target.closest('.loadout-s
 $('#loadout-slots').addEventListener('drop',e=>{const slot=e.target.closest('.loadout-slot');if(!slot)return;e.preventDefault();slot.classList.remove('drag-over');const index=state.dragRelicIndex;state.dragRelicIndex=null;if(Number.isInteger(index))equipRelic(index,slot.dataset.group,Number(slot.dataset.slot))});
 document.addEventListener('dragend',()=>{state.dragRelicIndex=null;$$('.loadout-slot.drag-over').forEach(x=>x.classList.remove('drag-over'))});
 $('#loadout-slots').addEventListener('click',e=>{const remove=e.target.closest('.slot-remove'),slot=e.target.closest('.loadout-slot'),control=remove||slot;if(!control)return;const group=control.dataset.group,index=Number(control.dataset.slot);activateSlot(group,index);if(remove){state.equipped[group][index]=null;state.selectedRelicIndex=null;renderBuildWorkspace();return}const pending=state.selectedRelicIndex;if(pending!==null&&canEquip(pending,group,index))equipRelic(pending,group,index);else{state.selectedRelicIndex=null;renderBuildWorkspace();$('#equip-status').textContent=`右侧显示能放入${group==='normal'?'普通':'深夜'}第 ${index+1} 槽的遗物，点击即可装配。`}});
-$('#clear-save').addEventListener('click',()=>{try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(_){}invalidateBuildResults();state.save=null;state.saveEditor=null;state.saveFileName=null;state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;$('#relic-dashboard').hidden=true;$('#build-workspace').hidden=true;$('#build-empty').hidden=false;renderBattleRecords();if(typeof renderSaveEditorUi==='function')renderSaveEditorUi();$('#save-file').value='';setSaveStatus('已清除本页解析结果，可重新选择存档。')});
+$('#clear-save').addEventListener('click',()=>{try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(_){}invalidateBuildResults();state.save=null;notifyRelicCollectionChanged();state.saveEditor=null;state.saveFileName=null;state.equipped={normal:[null,null,null],deep:[null,null,null]};state.slotFilterActive=false;$('#relic-dashboard').hidden=true;$('#build-workspace').hidden=true;$('#build-empty').hidden=false;renderBattleRecords();if(typeof renderSaveEditorUi==='function')renderSaveEditorUi();$('#save-file').value='';setSaveStatus('已清除本页解析结果，可重新选择存档。')});
 function ownedEffects(){
   const map=new Map();
   for(const r of state.save?.relics||[])for(const e of effectGroups(r)){
@@ -1266,4 +1487,4 @@ $('#run-build').addEventListener('click',()=>{
   }catch(error){stopBuildWorker(worker);btn.disabled=false;$('#build-status').textContent='计算失败：'+error.message}
 });
 
-loadCatalogs();navigate(location.hash.slice(1)||'overview');
+window.NightreignCatalogReady = loadCatalogs();navigate(location.hash.slice(1)||'overview');

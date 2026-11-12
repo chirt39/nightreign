@@ -19,7 +19,7 @@
       "id": "deep-outside",
       "label": "深夜局外词条",
       "sourceFile": "deep_night_entries.json",
-      "count": 195
+      "count": 202
     },
     {
       "id": "deep-inside",
@@ -619,9 +619,10 @@
       "category": "normal-outside",
       "name": "使用圣杯瓶时，连同恢复周围我方人物",
       "type": "队伍成员",
-      "explanation": "",
+      "explanation": "饮用圣杯瓶恢复生命值时，你和身边的队友都会受到治疗。",
       "stackability": "不可叠加",
-      "buffType": ""
+      "buffType": "",
+      "supplementSource": "scripts/data/relic_glossary_general.json"
     },
     {
       "id": "7010500",
@@ -1222,9 +1223,10 @@
       "category": "normal-outside",
       "name": "道具效用能扩及我方人物",
       "type": "队伍成员",
-      "explanation": "",
+      "explanation": "使用食物等适用道具时，附近队友也会获得该道具的效果。",
       "stackability": "未知",
-      "buffType": ""
+      "buffType": "",
+      "supplementSource": "scripts/data/relic_glossary_general.json"
     },
     {
       "id": "7060000",
@@ -1258,9 +1260,10 @@
       "category": "normal-outside",
       "name": "能显示地图上隐藏宝藏的位置",
       "type": "场地环境",
-      "explanation": "",
+      "explanation": "打开地图可以看到埋藏宝藏的标记，按标记前往即可寻找宝藏。",
       "stackability": "不可叠加",
-      "buffType": ""
+      "buffType": "",
+      "supplementSource": "scripts/data/relic_glossary_general.json"
     },
     {
       "id": "7080000",
@@ -1645,18 +1648,20 @@
       "category": "normal-outside",
       "name": "出击时，会持有“石剑钥匙”",
       "type": "出击时的道具",
-      "explanation": "",
+      "explanation": "出击时获得 1 把石剑钥匙。可用来解除小恶魔像的封印，使用后消耗钥匙。",
       "stackability": "不可叠加",
-      "buffType": ""
+      "buffType": "",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "7121000",
       "category": "normal-outside",
       "name": "出击时，会持有“小型随身包包”",
       "type": "出击时的道具",
-      "explanation": "",
+      "explanation": "出击时获得 1 个小型随身包。增加可装备的使用道具数量。",
       "stackability": "可叠加",
-      "buffType": ""
+      "buffType": "",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "7121100",
@@ -5632,252 +5637,280 @@
       "category": "deep-outside",
       "name": "出击时，会持有“漫红结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份漫红结晶露滴。暂时提高生命值上限。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621100",
       "category": "deep-outside",
       "name": "出击时，会持有“红结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份红结晶露滴。立即恢复大量生命值。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621200",
       "category": "deep-outside",
       "name": "出击时，会持有“蓝结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份蓝结晶露滴。立即恢复大量专注值。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621300",
       "category": "deep-outside",
       "name": "出击时，会持有“斑斓硬露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份斑斓硬露滴。清除异常状态，并暂时提高各项异常状态抵抗力。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621400",
       "category": "deep-outside",
       "name": "出击时，会持有“红泡状露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份红泡状露滴。在药效持续期间，生命值偏低时自动回血一次。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621500",
       "category": "deep-outside",
       "name": "出击时，会持有“珍珠泡状露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份珍珠泡状露滴。大幅减轻下一次受到的伤害。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621600",
       "category": "deep-outside",
       "name": "出击时，会持有“涌红结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份涌红结晶露滴。在一段时间内持续回血。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621700",
       "category": "deep-outside",
       "name": "出击时，会持有“涌绿结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份涌绿结晶露滴。使用后，精力恢复速度每秒增加 15 点，持续 120 秒。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621800",
       "category": "deep-outside",
       "name": "出击时，会持有“珍珠硬露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份珍珠硬露滴。暂时提高所有伤害类型的减伤率。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6621900",
       "category": "deep-outside",
       "name": "出击时，会持有“连刺破露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份连刺破露滴。连续命中时，逐步提高攻击力。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622000",
       "category": "deep-outside",
       "name": "出击时，会持有“大刺破露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份大刺破露滴。暂时强化蓄力攻击。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622100",
       "category": "deep-outside",
       "name": "出击时，会持有“风结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份风结晶露滴。强化闪避，但受到的伤害也会增加。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622200",
       "category": "deep-outside",
       "name": "出击时，会持有“爆裂结晶露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份爆裂结晶露滴。使自身发生爆炸。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622300",
       "category": "deep-outside",
       "name": "出击时，会持有“铅化硬露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份铅化硬露滴。暂时提高强韧度。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622400",
       "category": "deep-outside",
       "name": "出击时，会持有“细枝破露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份细枝破露滴。药效期间死亡可保住卢恩和等级。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622500",
       "category": "deep-outside",
       "name": "出击时，会持有“红漩泡状露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份红漩泡状露滴。短时间内将受到的非物理伤害转为生命恢复。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622600",
       "category": "deep-outside",
       "name": "出击时，会持有“蓝秘密露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份蓝秘密露滴。在短时间内，消耗专注值的行动不再花费专注值。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622700",
       "category": "deep-outside",
       "name": "出击时，会持有“岩刺破露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份岩刺破露滴。攻击更容易让敌人失去平衡。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622800",
       "category": "deep-outside",
       "name": "出击时，会持有“带火破露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份带火破露滴。暂时提高火属性攻击力。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6622900",
       "category": "deep-outside",
       "name": "出击时，会持有“带魔力破露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份带魔力破露滴。暂时提高魔力属性攻击力。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6623000",
       "category": "deep-outside",
       "name": "出击时，会持有“带雷破露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份带雷破露滴。暂时提高雷属性攻击力。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6623100",
       "category": "deep-outside",
       "name": "出击时，会持有“带圣破露滴”",
       "type": "出击时的道具(结晶露滴)",
-      "explanation": "",
+      "explanation": "出击时获得 1 份带圣破露滴。暂时提高圣属性攻击力。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6624000",
       "category": "deep-outside",
       "name": "出击时，会持有“振奋香”",
       "type": "出击时的道具",
-      "explanation": "",
+      "explanation": "出击时获得 2 瓶振奋香。提高自己和附近队友的攻击力，并能大幅减轻下一次受到的伤害。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6624100",
       "category": "deep-outside",
       "name": "出击时，会持有“火花香”",
       "type": "出击时的道具",
-      "explanation": "",
+      "explanation": "出击时获得 2 瓶火花香。向前方释放大范围火花。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6624200",
       "category": "deep-outside",
       "name": "出击时，会持有“铁壶香药”",
       "type": "出击时的道具",
-      "explanation": "",
+      "explanation": "出击时获得 2 瓶铁壶香药。暂时提高减伤率、抵抗力和强韧度，但移动变慢，也更易受到雷电伤害。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6624300",
       "category": "deep-outside",
       "name": "出击时，会持有“狂热香药”",
       "type": "出击时的道具",
-      "explanation": "",
+      "explanation": "出击时获得 2 瓶狂热香药。暂时提高攻击力和精力上限，同时增加受到的伤害。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6624400",
       "category": "deep-outside",
       "name": "出击时，会持有“毒发喷雾”",
       "type": "出击时的道具",
-      "explanation": "",
+      "explanation": "出击时获得 2 瓶毒发喷雾。朝前方喷出毒雾，使目标累积中毒。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6624500",
       "category": "deep-outside",
       "name": "出击时，会持有“酸蚀喷雾”",
       "type": "出击时的道具",
-      "explanation": "",
+      "explanation": "出击时获得 2 瓶酸蚀喷雾。朝前方喷出酸雾，暂时降低目标的武器攻击力。",
       "stackability": "可叠加",
-      "buffType": "不附带负面词条"
+      "buffType": "不附带负面词条",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
     },
     {
       "id": "6630000",
@@ -7111,6 +7144,76 @@
       "explanation": "维持防御时，能提升魔法、祷告的攻击力与缩短咏唱时间; 双手共持法术触媒时，按照维持防御的时间触发增益buff，最多3层; 3层buff可互相叠加，但buff结束时间独立计算; 每2.5秒触发一层持续时间为25秒的增益; 法术伤害+10%，获得相当于30点灵巧所带来的施法速度",
       "stackability": "相同词条不可叠加",
       "buffType": ""
+    },
+    {
+      "id": "6623200",
+      "category": "deep-outside",
+      "name": "出击时，会持有“漫绿结晶露滴”",
+      "type": "出击时的道具(结晶露滴)",
+      "stackability": "可叠加",
+      "buffType": "",
+      "explanation": "出击时获得 1 份漫绿结晶露滴。使用后，精力上限提高 15%，持续 120 秒。",
+      "supplementSource": "scripts/data/relic_glossary_items.json"
+    },
+    {
+      "id": "6500800",
+      "category": "deep-outside",
+      "name": "【学者】对自己使用技艺时，能减少消耗的专注值",
+      "type": "仅限特定角色",
+      "stackability": "",
+      "buffType": "",
+      "explanation": "对自己使用技艺后，暂时降低自身的专注值消耗。",
+      "supplementSource": "scripts/data/relic_glossary_characters.json"
+    },
+    {
+      "id": "6500900",
+      "category": "deep-outside",
+      "name": "【送葬者】发动绝招后，能再次使用技艺",
+      "type": "仅限特定角色",
+      "stackability": "",
+      "buffType": "",
+      "explanation": "发动绝招后，技艺恢复为可再次使用的状态。",
+      "supplementSource": "scripts/data/relic_glossary_characters.json"
+    },
+    {
+      "id": "6647200",
+      "category": "deep-outside",
+      "name": "【学者】提升集中力，但降低生命力",
+      "type": "仅限特定角色",
+      "stackability": "",
+      "buffType": "",
+      "explanation": "等级1：集中力+1、生命力−1；等级12：集中力+9、生命力−3。",
+      "supplementSource": "scripts/data/relic_glossary_characters.json"
+    },
+    {
+      "id": "6647300",
+      "category": "deep-outside",
+      "name": "【学者】提升耐力、灵巧，但降低智力、感应",
+      "type": "仅限特定角色",
+      "stackability": "",
+      "buffType": "",
+      "explanation": "等级1：耐力+1、灵巧+6、智力−1、感应−5；等级12：耐力+6、灵巧+40、智力−4、感应−20。",
+      "supplementSource": "scripts/data/relic_glossary_characters.json"
+    },
+    {
+      "id": "6647400",
+      "category": "deep-outside",
+      "name": "【送葬者】提升灵巧，但降低生命力、信仰",
+      "type": "仅限特定角色",
+      "stackability": "",
+      "buffType": "",
+      "explanation": "等级1：灵巧+2、生命力−1、信仰−2；等级12：灵巧+19、生命力−5、信仰−13。",
+      "supplementSource": "scripts/data/relic_glossary_characters.json"
+    },
+    {
+      "id": "6647500",
+      "category": "deep-outside",
+      "name": "【送葬者】提升集中力、信仰，但降低力气",
+      "type": "仅限特定角色",
+      "stackability": "",
+      "buffType": "",
+      "explanation": "等级1：集中力+1、信仰+1、力气−2；等级12：集中力+9、信仰+12、力气−15。",
+      "supplementSource": "scripts/data/relic_glossary_characters.json"
     }
   ]
 }

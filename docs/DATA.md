@@ -6,12 +6,15 @@
 | --- | --- | --- | --- |
 | 怪物属性与抗性 | `public/enemy-data.json` | 夜之数据 Wiki、用户提供的 Boss 倍率表 | ID、同名变体、魔火雷圣倍率、异常抗性、遭遇位置、版本 |
 | 遗物基础数据 | `public/items_data.json`、`public/relic_catalog_zh.json` | ERN_RelicForge、Biligame、5gamers | 道具 key、中文名、图片、普通／深夜／独特、专属或夜王类型 |
+| 深夜遗物共用的普通词条 | `public/relic_effect_cross_mode.json`，生成脚本 `scripts/build_relic_effect_cross_mode.py` | Steam Build 22818764，参数版本 10350000。引用本地提取的 EquipParamAntique、AttachEffectTableParam 和 AttachEffectParam | 2026-11-11 遗物与配装及总控核对。按正负槽位和有效抽选权重确认 ID，再与普通、深夜局外图鉴核对。本次收录 167 个正面 ID。公开清单仅含数字 ID，原生参数和文本保留在本地。 |
 | 词条与分类 | `public/effects_data.json`、`public/effect_names_zh.json`、`public/quickref_effects_zh.json`、`public/relic_rule_effects.json`、`public/effect_encyclopedia.json` | 夜之数据 Wiki、NightreignQuickRef（图鉴快照固定为提交 `3e23450094c18125ae5665927ed240b18189a040`） | 原始效果 ID、等级、中文文案、局内／局外、深夜局内／深夜局外、负面配对、可叠加性 |
 | 器皿 | `public/vessels_data.json` | ERN_RelicForge、人工中文对照 | 槽位顺序、颜色、角色限制 |
 | 存档结构与战绩 | `public/relic-parser.js`、`public/save-editor.js` | 当前实现、游戏样本、逆向证据 | 文件版本、字段偏移、类型、数值边界、与游戏画面逐项一致 |
 | 图片 | `public/enemy-images/`、`public/enemy-image-map.json`、`public/enemy-image-verified.json`、`public/relic-images/`、`public/character-images/`、`public/nav-icons/` | 用户提供与第三方页面；首批怪物图的 Bilibili Wiki 外观参考与逐项状态见 [ENEMY_IMAGES.md](ENEMY_IMAGES.md) | 精确 ID 对应、来源、许可、缺失时不显示图片；来源或许可未知时如实标记 |
 
 每条新增或修正记录至少登记：稳定 ID、中文显示名、原始值、来源 URL 或本地样本代号、游戏版本、核对日期、核对人、状态（待核对／已核对／有争议）。推断值必须注明推断方法。没有依据时显示“未收录”，不得用 0 冒充缺失值。
+
+遗物词条补录以 Steam Build 22818764（参数版本 10350000）为依据。遗物与配装、存档与逆向及总控按词条 ID 核对了 7 个新增深夜条目和 33 个原有局外条目。核对依据随每条记录存放在 `scripts/data/relic_glossary_*.json`，同步 QuickRef 时一并应用到图鉴。游戏简中遗物词条同名，网站按实际道具名区分：6623200「漫绿结晶露滴」基础效果为精力上限 +15%，6621700「涌绿结晶露滴」为精力恢复速度 +15 点/秒，均持续 120 秒。玩家提供的[神攻略遗物效果](https://kamikouryaku.net/nightreign_eldenring/?%E9%81%BA%E7%89%A9%E5%8A%B9%E6%9E%9C#be19fc74)作为参考入口，本次未能读取其正文。
 
 ## 样本管理
 

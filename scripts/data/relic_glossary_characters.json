@@ -1,0 +1,62 @@
+[
+  {
+    "id": "6500800",
+    "category": "deep-outside",
+    "name": "【学者】对自己使用技艺时，能减少消耗的专注值",
+    "type": "仅限特定角色",
+    "explanation": "对自己使用技艺后，暂时降低自身的专注值消耗。",
+    "stackability": "",
+    "buffType": "",
+    "evidence": "本机游戏1.3.3.0、regulation 10350000；简中 AttachEffectName_dlc01.fmg.xml 同ID文本；AttachEffectParam 6500800.passiveSpEffectId_1=7500800；SpEffectParam 7500800.analyzeSelfLevel1/2/3_effectId 分别为7500801/7500802/7500803。三个子效果 effectEndurance 均40，artsConsumptionRate/magicConsumptionRate/shamanConsumptionRate/miracleConsumptionRate/goodsConsumptionRate 均0.85；这些静态值不能单独闭合进行率各档的最终减耗算法，因此不沿用本地旧说明的15%/30%/45%，仅保留定性说明。叠加及刷新规则未核实。 public/effects_data.json 同ID的stackable=false、stackNotes=\"キャラクター固有効果\"仅作资料线索，尚未由原生叠加逻辑确认，stackability留空。"
+  },
+  {
+    "id": "6500900",
+    "category": "deep-outside",
+    "name": "【送葬者】发动绝招后，能再次使用技艺",
+    "type": "仅限特定角色",
+    "explanation": "发动绝招后，技艺恢复为可再次使用的状态。",
+    "stackability": "",
+    "buffType": "",
+    "evidence": "本机游戏1.3.3.0、regulation 10350000；简中 AttachEffectName_dlc01.fmg.xml 同ID文本；AttachEffectParam 6500900.passiveSpEffectId_1=7500900；SpEffectParam 7500900.stateInfo=2059。触发与效果取原生简中文本，不把未解析的stateInfo推导为冷却数值或额外使用次数；叠加未核实。 public/effects_data.json 同ID的stackable=false、stackNotes=\"キャラクター固有効果\"仅作资料线索，尚未由原生叠加逻辑确认，stackability留空。"
+  },
+  {
+    "id": "6647200",
+    "category": "deep-outside",
+    "name": "【学者】提升集中力，但降低生命力",
+    "type": "仅限特定角色",
+    "explanation": "等级1：集中力+1、生命力−1；等级12：集中力+9、生命力−3。",
+    "stackability": "",
+    "buffType": "",
+    "evidence": "本机游戏1.3.3.0、regulation 10350000；简中 AttachEffectName_dlc01.fmg.xml 同ID文本；AttachEffectParam 6647200 → SpEffectParam 7647200.heroStatusModifier=308000；HeroStatusParam 308000(totalLevel=1,statMind=1,statVigor=-1)、308001(totalLevel=12,statMind=9,statVigor=-3)。仅列已核对的两个等级，不外推中间等级、等级12以后或宣称该数值为全等级固定值。叠加规则未核实。 public/effects_data.json 同ID的stackable=false、stackNotes=\"キャラクター固有効果\"仅作资料线索，尚未由原生叠加逻辑确认，stackability留空。"
+  },
+  {
+    "id": "6647300",
+    "category": "deep-outside",
+    "name": "【学者】提升耐力、灵巧，但降低智力、感应",
+    "type": "仅限特定角色",
+    "explanation": "等级1：耐力+1、灵巧+6、智力−1、感应−5；等级12：耐力+6、灵巧+40、智力−4、感应−20。",
+    "stackability": "",
+    "buffType": "",
+    "evidence": "本机游戏1.3.3.0、regulation 10350000；简中 AttachEffectName_dlc01.fmg.xml 同ID文本；AttachEffectParam 6647300 → SpEffectParam 7647300.heroStatusModifier=308100；HeroStatusParam 308100(totalLevel=1,statEndurance=1,statDexterity=6,statIntelligence=-1,statArcane=-5)、308101(totalLevel=12,statEndurance=6,statDexterity=40,statIntelligence=-4,statArcane=-20)。仅列已核对的两个等级，不外推中间等级、等级12以后或宣称该数值为全等级固定值。叠加规则未核实。 public/effects_data.json 同ID的stackable=false、stackNotes=\"キャラクター固有効果\"仅作资料线索，尚未由原生叠加逻辑确认，stackability留空。"
+  },
+  {
+    "id": "6647400",
+    "category": "deep-outside",
+    "name": "【送葬者】提升灵巧，但降低生命力、信仰",
+    "type": "仅限特定角色",
+    "explanation": "等级1：灵巧+2、生命力−1、信仰−2；等级12：灵巧+19、生命力−5、信仰−13。",
+    "stackability": "",
+    "buffType": "",
+    "evidence": "本机游戏1.3.3.0、regulation 10350000；简中 AttachEffectName_dlc01.fmg.xml 同ID文本；AttachEffectParam 6647400 → SpEffectParam 7647400.heroStatusModifier=309000；HeroStatusParam 309000(totalLevel=1,statDexterity=2,statVigor=-1,statFaith=-2)、309001(totalLevel=12,statDexterity=19,statVigor=-5,statFaith=-13)。仅列已核对的两个等级，不外推中间等级、等级12以后或宣称该数值为全等级固定值。叠加规则未核实。 public/effects_data.json 同ID的stackable=false、stackNotes=\"キャラクター固有効果\"仅作资料线索，尚未由原生叠加逻辑确认，stackability留空。"
+  },
+  {
+    "id": "6647500",
+    "category": "deep-outside",
+    "name": "【送葬者】提升集中力、信仰，但降低力气",
+    "type": "仅限特定角色",
+    "explanation": "等级1：集中力+1、信仰+1、力气−2；等级12：集中力+9、信仰+12、力气−15。",
+    "stackability": "",
+    "buffType": "",
+    "evidence": "本机游戏1.3.3.0、regulation 10350000；简中 AttachEffectName_dlc01.fmg.xml 同ID文本；AttachEffectParam 6647500 → SpEffectParam 7647500.heroStatusModifier=309100；HeroStatusParam 309100(totalLevel=1,statMind=1,statFaith=1,statStrength=-2)、309101(totalLevel=12,statMind=9,statFaith=12,statStrength=-15)。仅列已核对的两个等级，不外推中间等级、等级12以后或宣称该数值为全等级固定值。叠加规则未核实。 public/effects_data.json 同ID的stackable=false、stackNotes=\"キャラクター固有効果\"仅作资料线索，尚未由原生叠加逻辑确认，stackability留空。"
+  }
+]

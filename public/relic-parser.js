@@ -11,13 +11,10 @@ const IV_SIZE = 0x10;
 const BND4_HEADER_LEN = 64;
 const BND4_ENTRY_HEADER_LEN = 32;
 const SLOT_SIZE_FULL = 80;
-const SLOT_SIZE_SMALL = 16;
 const EMPTY_EFFECT = 0xFFFFFFFF;
 const BND4_MAGIC = [0x42, 0x4E, 0x44, 0x34];
 
 const VALID_B3_VALUES = new Set([0x80, 0x83, 0x81, 0x82, 0x84, 0x85]);
-const VALID_B4_VALUES = new Set([0x80, 0x90, 0xc0]);
-const SLOT_SIZE_MAP = { 0xc0: SLOT_SIZE_FULL, 0x90: SLOT_SIZE_SMALL, 0x80: SLOT_SIZE_FULL };
 
 // Expected entry header magic bytes
 const ENTRY_MAGIC = [0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff];
@@ -26,13 +23,6 @@ const ENTRY_MAGIC = [0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff];
 const NAME_PATTERN = [0x27, 0x00, 0x00, 0x46, 0x41, 0x43, 0x45];
 
 // === Helper Functions ===
-
-/**
- * Read a little-endian 24-bit unsigned integer from Uint8Array
- */
-function readUint24LE(data, offset) {
-  return data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16);
-}
 
 /**
  * Read a little-endian 32-bit unsigned integer from Uint8Array
@@ -291,11 +281,11 @@ function getCharacterName(entries) {
 /**
  * Parse relics from a decrypted entry
  * @param {Uint8Array} entryData - decrypted entry data
- * @param {Set} validItems - set of valid item IDs
- * @param {Set} validEffects - set of valid effect IDs
+ * @param {Set} validItems - known Relic/DeepRelic/UniqueRelic item IDs
+ * @param {Set} validEffects - known effect IDs for legacy, pending candidates
  * @returns {Array} array of relic objects
  */
-function parseRelicsFromEntry(entryData, validItems, validEffects) {
+function parseRelicsFromEntry(entryData, validItems, validEffects = new Set()) {
   const dataLength = entryData.length;
   const potentialSlots = [];
   const searchLimit = dataLength - 4;
@@ -305,13 +295,21 @@ function parseRelicsFromEntry(entryData, validItems, validEffects) {
     const b3 = entryData[pos + 2];
     const b4 = entryData[pos + 3];
 
-    if (VALID_B3_VALUES.has(b3) && VALID_B4_VALUES.has(b4)) {
-      const slotSize = SLOT_SIZE_MAP[b4];
-      if (!slotSize || pos + slotSize > dataLength) continue;
+    // Full c0 records can be identified structurally. Keep the old 80-byte
+    // 0x80 path only as pending when its known-item/effect evidence agrees.
+    if (VALID_B3_VALUES.has(b3) && (b4 === 0xc0 || b4 === 0x80)) {
+      if (pos + SLOT_SIZE_FULL > dataLength) continue;
 
       // Extract IDs
       const relicId = readUint32LE(entryData, pos);
-      const itemId = readUint24LE(entryData, pos + 4);
+      const itemReference = readUint32LE(entryData, pos + 4);
+      // Antique references use category nibble 8. Keep all 28 ID bits rather
+      // than truncating the fourth byte and aliasing a different native ID.
+      if ((itemReference >>> 28) !== 8) continue;
+      const verifiedLayout = b4 === 0xc0 &&
+        readUint32LE(entryData, pos + 8) === itemReference &&
+        readUint32LE(entryData, pos + 12) === EMPTY_EFFECT;
+      const itemId = itemReference & 0x0fffffff;
 
       // Validate item ID
       if (!validItems.has(itemId)) continue;
@@ -323,21 +321,8 @@ function parseRelicsFromEntry(entryData, validItems, validEffects) {
         readUint32LE(entryData, pos + 24),
         readUint32LE(entryData, pos + 28),
       ];
-
-      // Validate effects
-      let allValid = true;
-      let validCount = 0;
-      for (const effId of effectKeys) {
-        if (effId !== EMPTY_EFFECT) {
-          if (!validEffects.has(effId)) {
-            allValid = false;
-            break;
-          }
-          validCount++;
-        }
-      }
-
-      if (!allValid || validCount === 0) continue;
+      if (!verifiedLayout && (!effectKeys.some(id => id !== EMPTY_EFFECT) ||
+          !effectKeys.every(id => id === EMPTY_EFFECT || validEffects.has(id)))) continue;
 
       // Extract debuff keys
       const debuffKeys = [
@@ -346,6 +331,12 @@ function parseRelicsFromEntry(entryData, validItems, validEffects) {
         readUint32LE(entryData, pos + 64),
         readUint32LE(entryData, pos + 68),
       ];
+      // Keep empty positions and orphan negatives for later validation. The
+      // legacy effects list below remains positive-led for existing consumers.
+      const rawEffectSlots = effectKeys.map((positive, idx) => ({
+        positive: positive === EMPTY_EFFECT ? null : positive,
+        negative: debuffKeys[idx] === EMPTY_EFFECT ? null : debuffKeys[idx],
+      }));
 
       // Build effects list
       const effects = [];
@@ -366,13 +357,17 @@ function parseRelicsFromEntry(entryData, validItems, validEffects) {
         id: relicId,
         itemId: itemId,
         effects: effects,
+        rawEffectSlots: rawEffectSlots,
+        // Parser identification only; pending candidates must not yield a
+        // definitive combination verdict in the separate legality checker.
+        identificationStatus: verifiedLayout ? 'verified' : 'pending',
       });
     }
   }
 
   // Build sort key index in single O(N) pass
   const sortKeyIndex = new Map();
-  const scanEnd = dataLength - 8;
+  const scanEnd = dataLength - 10;
   for (let i = 0; i <= scanEnd; i++) {
     if (entryData[i + 4] === 0x01 && entryData[i + 5] === 0x00 &&
         entryData[i + 6] === 0x00 && entryData[i + 7] === 0x00) {
@@ -393,6 +388,8 @@ function parseRelicsFromEntry(entryData, validItems, validEffects) {
         id: slot.id,
         itemId: slot.itemId,
         effects: slot.effects,
+        rawEffectSlots: slot.rawEffectSlots,
+        identificationStatus: slot.identificationStatus,
         sortKey: sortKey,
       });
     }
@@ -540,7 +537,9 @@ function parseSaveFile(arrayBuffer, itemsData, effectsData) {
   for (const [id, item] of Object.entries(itemsData.items || {})) {
     const numId = parseInt(id);
     itemsMap[numId] = item;
-    validItems.add(numId);
+    if (['Relic', 'DeepRelic', 'UniqueRelic'].includes(item.type)) {
+      validItems.add(numId);
+    }
   }
 
   const effectsMap = {};
@@ -607,6 +606,8 @@ function parseSaveFile(arrayBuffer, itemsData, effectsData) {
       itemColor: itemInfo.color || null,
       itemType: itemInfo.type || null,
       effects: effectsList,
+      rawEffectSlots: relic.rawEffectSlots,
+      identificationStatus: relic.identificationStatus,
       coordinates: relic.coordinates,
       coordinatesByColor: relic.coordinatesByColor,
       sortKey: relic.sortKey || 0,

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "7010200",
+    "category": "normal-outside",
+    "explanation": "饮用圣杯瓶恢复生命值时，你和身边的队友都会受到治疗。",
+    "evidence": "AttachEffectParam 7010200 → SpEffectParam 7010200；游戏中日词条名均指定周围队友。本地两份资料对恢复比例的记录不同，略去比例。"
+  },
+  {
+    "id": "7050100",
+    "category": "normal-outside",
+    "explanation": "使用食物等适用道具时，附近队友也会获得该道具的效果。",
+    "evidence": "AttachEffectParam 7050100 → SpEffectParam 7050100、7050200、7050300；effects_data 同 ID 的日文备注确认食物适用。"
+  },
+  {
+    "id": "7070000",
+    "category": "normal-outside",
+    "explanation": "打开地图可以看到埋藏宝藏的标记，按标记前往即可寻找宝藏。",
+    "evidence": "AttachEffectParam 7070000 → SpEffectParam 7070001；effects_data 同 ID 日文名指埋藏的宝藏。"
+  }
+]

@@ -172,7 +172,7 @@ def build() -> list[dict[str, Any]]:
             if value:
                 fields.append(f"{field_label}：{value}")
         add(records, "effect", f"遗物词条｜{entry['name']}｜{label}", "｜".join(fields),
-            f"public/effect_encyclopedia.json → {glossary_sources[category]}",
+            f"public/effect_encyclopedia.json → {entry.get('supplementSource') or glossary_sources[category]}",
             [effect_id, entry["name"], label, entry.get("type", ""), entry.get("explanation", "")],
             f"effect-glossary:{category}:{effect_id}")
     for effect_id, entry in effect_data.items():
