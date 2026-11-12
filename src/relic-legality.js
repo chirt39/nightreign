@@ -18,8 +18,22 @@ export function prepareLegalityCatalog(rules, labels) {
   const effects = Object.entries(rules.effects).map(([key, rule]) => ({
     ...rule, id: Number(key), name: labels?.effect(key) || rule.name || `词条 #${key}`,
   }));
+  // Colour and item variants with the same ordered pools admit the same combinations.
+  const templates = new Map();
+  const negativeEligible = new Set();
+  for (const item of items) {
+    const key = JSON.stringify([item.generation, item.positive, item.negative]);
+    if (templates.has(key)) continue;
+    templates.set(key, item);
+    item.positive.forEach((pool, i) => {
+      if (item.negative[i] != null) {
+        for (const id of rules.pools[pool]) negativeEligible.add(id);
+      }
+    });
+  }
   return {
     items, effects, pools: rules.pools, version: rules.version,
+    templates: [...templates.values()], negativeEligible,
     itemsById: new Map(items.map(item => [item.id, item])),
     effectsById: new Map(effects.map(effect => [effect.id, effect])),
   };
@@ -27,6 +41,13 @@ export function prepareLegalityCatalog(rules, labels) {
 
 const roles = ['positive', 'negative'];
 const fieldNames = {positive: '正面', negative: '负面'};
+const otherOrders = [[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+
+// A repeated ID or a shared, nonnegative compatibility group conflicts on a random relic.
+function conflictKey(effect) {
+  return effect.compatibilityId >= 0 && effect.compatibilityId != null
+    ? 'group:' + effect.compatibilityId : 'id:' + effect.id;
+}
 
 function canRollPair(catalog, item, index, pair) {
   return roles.every(role => {
@@ -40,7 +61,7 @@ function canRollPair(catalog, item, index, pair) {
 // The save's ordering relative to the native draws is not verified. If a
 // permutation fits all three draws, report the discrepancy as unresolved.
 function canRollInAnotherOrder(catalog, item, slots) {
-  for (const order of [[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]]) {
+  for (const order of otherOrders) {
     if (order.every((source, i) => canRollPair(catalog, item, i, slots[source]))) return true;
   }
   return false;
@@ -69,7 +90,6 @@ export function checkRelic(catalog, relic, {draft = false} = {}) {
     return {status, issues};
   }
   const usedGroups = new Map();
-  const usedIds = new Map();
   const orderUncertain = canRollInAnotherOrder(catalog, item, slots);
   for (let index = 0; index < Math.max(3, slots.length); index++) {
     const pair = slots[index];
@@ -107,17 +127,83 @@ export function checkRelic(catalog, relic, {draft = false} = {}) {
           ? `该遗物在此处没有${label}槽。` : `「${effect.name}」不在此槽的抽选池。`);
       }
       if (item.generation === 'fixed') continue;
-      const group = effect.compatibilityId;
-      let previous = usedIds.get(effect.id);
-      if (!previous && group != null && group >= 0) previous = usedGroups.get(group);
+      const key = conflictKey(effect);
+      const previous = usedGroups.get(key);
       if (previous) {
         report('anomaly', previous.slot, previous.role, `「${previous.name}」与第 ${slot} 槽的「${effect.name}」互斥。`);
         report('anomaly', slot, role, `「${effect.name}」与第 ${previous.slot} 槽的「${previous.name}」不能在同一件随机遗物上共存。`);
       }
       const source = {slot, role, name: effect.name};
-      usedIds.set(effect.id, source);
-      if (group != null && group >= 0) usedGroups.set(group, source);
+      usedGroups.set(key, source);
     }
   }
   return {status, issues};
+}
+
+export function checkCombination(catalog, slots) {
+  const seen = new Map();
+  let conflict = '';
+  let count = 0;
+  for (let i = 0; i < slots.length; i++) {
+    const pair = slots[i];
+    if (pair?.positive != null) {
+      count++;
+    } else if (pair?.negative != null) {
+      return {status: 'partial', message: `请先选择第 ${i + 1} 条主词条。`};
+    }
+    for (const role of roles) {
+      const id = pair?.[role];
+      if (id == null) continue;
+      const effect = catalog.effectsById.get(Number(id));
+      if (!effect) return {status: 'unknown', message: `第 ${i + 1} 条的词条 #${id} 尚未收录。`};
+      const key = conflictKey(effect);
+      const prev = seen.get(key);
+      if (prev && !conflict) {
+        const subject = role === 'negative' && prev.role === 'negative' ? '负面词条' : '词条';
+        conflict = `第 ${prev.slot}、${i + 1} 条${subject}${effect.id === prev.id ? '重复' : '互斥'}，请替换其中一条。`;
+      }
+      seen.set(key, {slot: i + 1, id: effect.id, role});
+    }
+  }
+  if (!count) return {status: 'partial', message: '请先选择词条。'};
+
+  // Unfilled fields are wildcards. Keep each positive and its negative together.
+  // A fixed preset is allowed to witness an exception to random-relic restrictions.
+  const candidates = conflict ? catalog.templates.filter(t => t.generation === 'fixed') : catalog.templates;
+  function matches(item, order) {
+    return order.every((source, i) => roles.every(role => {
+      const id = slots[source]?.[role];
+      return id == null || catalog.pools[item[role][i]]?.includes(Number(id));
+    }));
+  }
+  const direct = [0,1,2];
+  const matching = candidates.filter(item => matches(item, direct));
+  function missingNegative(item, order) {
+    return order.find((source, nativeSlot) => {
+      return slots[source]?.positive != null && slots[source].negative == null && item.negative[nativeSlot] != null;
+    });
+  }
+  function needNegative(i) {
+    return {status: 'partial', message: `请为第 ${i + 1} 条补选负面词条。`};
+  }
+  if (matching.length) {
+    if (!matching.some(item => missingNegative(item, direct) === undefined)) {
+      return needNegative(missingNegative(matching[0], direct));
+    }
+    return count === 3
+      ? {status: 'clear', message: '这组词条可在同一件遗物上出现。'}
+      : {status: 'partial', message: `已选的 ${count} 条可匹配，可继续添加词条。`};
+  }
+  let missingInAlternative;
+  for (const order of otherOrders) {
+    for (const item of candidates) {
+      if (!matches(item, order)) continue;
+      const missing = missingNegative(item, order);
+      if (missing === undefined) return {status: 'unknown', message: '这些词条可以匹配同一件遗物，当前排列待核对。'};
+      missingInAlternative ??= missing;
+    }
+  }
+  if (missingInAlternative !== undefined) return needNegative(missingInAlternative);
+  if (conflict) return {status: 'anomaly', message: conflict};
+  return {status: 'unknown', message: '未找到已核实的组合。'};
 }

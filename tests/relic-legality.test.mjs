@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { prepareLegalityCatalog, checkRelic } from '../src/relic-legality.js';
+import { prepareLegalityCatalog, checkRelic, checkCombination } from '../src/relic-legality.js';
 
 const raw = JSON.parse(readFileSync(new URL('../src/data/relic-legality.json', import.meta.url)));
 const catalog = prepareLegalityCatalog(raw);
@@ -43,4 +43,25 @@ test('unresolved identities and missing original slots cannot pass', () => {
     rawEffectSlots: [pair(7001402, 6820000), pair(), pair(), pair()]}).status, 'unknown');
   assert.equal(check(100, [pair(7001402), pair(), pair(), pair(7001402)]).status, 'unknown');
   assert.equal(check(100, [pair(7001402, 6820000)]).status, 'anomaly');
+});
+
+test('manual selection searches all templates and keeps a negative with its positive', () => {
+  const slots = [pair(6002600, 6820000), pair(7001402), pair(6630000)];
+  assert.equal(checkCombination(catalog, slots).status, 'clear');
+  assert.equal(checkCombination(catalog, [slots[1], slots[0], slots[2]]).status, 'unknown');
+  assert.match(checkCombination(catalog, [pair(6002600), slots[1], slots[2]]).message, /第 1 条补选负面/);
+  assert.match(checkCombination(catalog, [slots[1], pair(6002600), slots[2]]).message, /第 2 条补选负面/);
+  assert.match(checkCombination(catalog, [pair(7003500), pair(), pair(7003500)]).message, /第 1、3 条词条重复/);
+  assert.match(checkCombination(catalog, [pair(7000000), pair(7000001)]).message, /词条互斥/);
+  assert.equal(checkCombination(catalog, [pair(7001402)]).status, 'partial');
+  // Individual pool membership does not prove there is a common normal/deep template.
+  assert.match(checkCombination(catalog, [pair(6090000, 6830000), pair(7121700), pair(7003500)]).message, /未找到已核实/);
+});
+
+test('manual lookup includes every fixed preset even when random combinations conflict', () => {
+  for (const t of catalog.templates.filter(t => t.generation === 'fixed')) {
+    const slots = t.presetPositive.map((id, i) => pair(id, t.presetNegative[i]));
+    const result = checkCombination(catalog, slots);
+    assert.ok(['clear', 'partial'].includes(result.status), String(t.id));
+  }
 });
