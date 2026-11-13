@@ -1,0 +1,1309 @@
+{
+  "38503120": {
+    "entityName": "人偶兵",
+    "model": "c3850",
+    "behaviorVariationId": "38500",
+    "sourceIds": [
+      "38503000",
+      "38503100"
+    ],
+    "rowAlias": "Marionette Soldier - Iron Menial (Undertaker Remembrance)",
+    "matchingAlias": true
+  },
+  "43779000": {
+    "entityName": "强盗",
+    "model": "c4377",
+    "behaviorVariationId": "43700",
+    "sourceIds": [
+      "43770010",
+      "43770510",
+      "43772010"
+    ],
+    "rowAlias": "Highwayman (Scholar Remembrance)",
+    "matchingAlias": true
+  },
+  "21500600": {
+    "entityName": "闪电光球",
+    "model": "c2150",
+    "behaviorVariationId": "21500",
+    "sourceIds": [
+      "21500200",
+      "21500300",
+      "21500310",
+      "21500400",
+      "21500510"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "21500610": {
+    "entityName": "闪电光球",
+    "model": "c2150",
+    "behaviorVariationId": "21500",
+    "sourceIds": [
+      "21500200",
+      "21500300",
+      "21500310",
+      "21500400",
+      "21500510"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "21500620": {
+    "entityName": "闪电光球",
+    "model": "c2150",
+    "behaviorVariationId": "21500",
+    "sourceIds": [
+      "21500200",
+      "21500300",
+      "21500310",
+      "21500400",
+      "21500510"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "21500700": {
+    "entityName": "闪电光球",
+    "model": "c2150",
+    "behaviorVariationId": "21500",
+    "sourceIds": [
+      "21500200",
+      "21500300",
+      "21500310",
+      "21500400",
+      "21500510"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "36100010": {
+    "entityName": "小神谕使者",
+    "model": "c3610",
+    "behaviorVariationId": "36100",
+    "sourceIds": [
+      "36100020"
+    ],
+    "rowAlias": "Oracle Envoy",
+    "matchingAlias": true
+  },
+  "36100011": {
+    "entityName": "小神谕使者",
+    "model": "c3610",
+    "behaviorVariationId": "36100",
+    "sourceIds": [
+      "36100020"
+    ],
+    "rowAlias": "Oracle Envoy",
+    "matchingAlias": true
+  },
+  "34700220": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34701410": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34704210": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34715230": {
+    "entityName": "大型白金之子",
+    "model": "c3471",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34715310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "21300520": {
+    "entityName": "恶兆妖鬼",
+    "model": "c2130",
+    "behaviorVariationId": "21300",
+    "sourceIds": [
+      "21300510"
+    ],
+    "rowAlias": "Morgott (Tutorial)",
+    "matchingAlias": true
+  },
+  "46700020": {
+    "entityName": "祖灵",
+    "model": "c4670",
+    "behaviorVariationId": "46700",
+    "sourceIds": [
+      "46700010"
+    ],
+    "rowAlias": "Ancestor Spirit",
+    "matchingAlias": true
+  },
+  "20410020": {
+    "entityName": "小腐败眷属",
+    "model": "c2041",
+    "behaviorVariationId": "20410",
+    "sourceIds": [
+      "20410010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "38102020": {
+    "entityName": "腐败眷属",
+    "model": "c3810",
+    "behaviorVariationId": "38100",
+    "sourceIds": [
+      "38100010",
+      "38103010"
+    ],
+    "rowAlias": "Kindred of Rot (Marsh Group Boss)",
+    "matchingAlias": true
+  },
+  "38100020": {
+    "entityName": "腐败眷属",
+    "model": "c3810",
+    "behaviorVariationId": "38100",
+    "sourceIds": [
+      "38100010",
+      "38103010"
+    ],
+    "rowAlias": "Kindred of Rot (Marsh Group Boss)",
+    "matchingAlias": true
+  },
+  "34702520": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34703220": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34701620": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34700320": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34715320": {
+    "entityName": "大型白金之子",
+    "model": "c3471",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34715310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "36626010": {
+    "entityName": "活尸 - 大体型",
+    "model": "c3662",
+    "behaviorVariationId": "36620",
+    "sourceIds": [
+      "36620010",
+      "36620020",
+      "36620120",
+      "36622010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "41660020": {
+    "entityName": "腐败巨型犬",
+    "model": "c4166",
+    "behaviorVariationId": "41600",
+    "sourceIds": [
+      "41660010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "36602110": {
+    "entityName": "奴隶居民",
+    "model": "c3660",
+    "behaviorVariationId": "36600",
+    "sourceIds": [
+      "36600010",
+      "36600020",
+      "36600620",
+      "36601010",
+      "36601220",
+      "36602010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "40800310": {
+    "entityName": "老鼠",
+    "model": "c4080",
+    "behaviorVariationId": "40800",
+    "sourceIds": [
+      "40800010",
+      "40800030",
+      "40800040"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "40900310": {
+    "entityName": "巨型鼠",
+    "model": "c4090",
+    "behaviorVariationId": "40900",
+    "sourceIds": [
+      "40900010",
+      "40900030",
+      "40900040"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34702420": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34703110": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34702430": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34704220": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34703120": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34700230": {
+    "entityName": "白金之子",
+    "model": "c3470",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34700310",
+      "34700410",
+      "34701510",
+      "34701610",
+      "34702510",
+      "34703210",
+      "34704310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34715220": {
+    "entityName": "大型白金之子",
+    "model": "c3471",
+    "behaviorVariationId": "34700",
+    "sourceIds": [
+      "34715310"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "35500040": {
+    "entityName": "鲜血贵族",
+    "model": "c3550",
+    "behaviorVariationId": "35500",
+    "sourceIds": [
+      "35500010"
+    ],
+    "rowAlias": "Sanguine Noble (Marsh Group Boss)",
+    "matchingAlias": true
+  },
+  "41640020": {
+    "entityName": "血池大型野狗",
+    "model": "c4164",
+    "behaviorVariationId": "41600",
+    "sourceIds": [
+      "41640010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "41650020": {
+    "entityName": "血池野狗",
+    "model": "c4165",
+    "behaviorVariationId": "41610",
+    "sourceIds": [
+      "41650010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "41700010": {
+    "entityName": "软泥怪",
+    "model": "c4170",
+    "behaviorVariationId": "41700",
+    "sourceIds": [
+      "41700120"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "30000210": {
+    "entityName": "流刑士兵",
+    "model": "c3000",
+    "behaviorVariationId": "30000",
+    "sourceIds": [
+      "30000010",
+      "30000020",
+      "30000110",
+      "30000120",
+      "30001010",
+      "30001020",
+      "30002010",
+      "30003210",
+      "30004010",
+      "30004020",
+      "30004110",
+      "30004120",
+      "30005010",
+      "30005030",
+      "30006030",
+      "30008020"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "30000810": {
+    "entityName": "流刑士兵",
+    "model": "c3000",
+    "behaviorVariationId": "30000",
+    "sourceIds": [
+      "30000010",
+      "30000020",
+      "30000110",
+      "30000120",
+      "30001010",
+      "30001020",
+      "30002010",
+      "30003210",
+      "30004010",
+      "30004020",
+      "30004110",
+      "30004120",
+      "30005010",
+      "30005030",
+      "30006030",
+      "30008020"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "37010040": {
+    "entityName": "调香师",
+    "model": "c3701",
+    "behaviorVariationId": "37000",
+    "sourceIds": [
+      "37010030",
+      "37011020"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "37011030": {
+    "entityName": "调香师",
+    "model": "c3701",
+    "behaviorVariationId": "37000",
+    "sourceIds": [
+      "37010030",
+      "37011020"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "42010010": {
+    "entityName": "唱歌人面蝙蝠",
+    "model": "c4201",
+    "behaviorVariationId": "42010",
+    "sourceIds": [
+      "42010110",
+      "42011110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43722010": {
+    "entityName": "雷卢卡利亚士兵",
+    "model": "c4372",
+    "behaviorVariationId": "43700",
+    "sourceIds": [
+      "43720010",
+      "43726010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "41500020": {
+    "entityName": "咒蛙",
+    "model": "c4150",
+    "behaviorVariationId": "41500",
+    "sourceIds": [
+      "41500010"
+    ],
+    "rowAlias": "Basilisk (Death Knights Prelude)",
+    "matchingAlias": true
+  },
+  "43810120": {
+    "entityName": "罪恶荆棘信徒",
+    "model": "c4381",
+    "behaviorVariationId": "43810",
+    "sourceIds": [
+      "43810010",
+      "43810110",
+      "43811010"
+    ],
+    "rowAlias": "Guilty (Demon Duo Prelude)",
+    "matchingAlias": true
+  },
+  "43811020": {
+    "entityName": "罪恶荆棘信徒",
+    "model": "c4381",
+    "behaviorVariationId": "43810",
+    "sourceIds": [
+      "43810010",
+      "43810110",
+      "43811010"
+    ],
+    "rowAlias": "Guilty (Demon Duo/Demon Prince Prelude)",
+    "matchingAlias": true
+  },
+  "35500020": {
+    "entityName": "鲜血贵族",
+    "model": "c3550",
+    "behaviorVariationId": "35500",
+    "sourceIds": [
+      "35500010"
+    ],
+    "rowAlias": "Sanguine Noble (Lord of Blood Prelude)",
+    "matchingAlias": true
+  },
+  "43810020": {
+    "entityName": "罪恶荆棘信徒",
+    "model": "c4381",
+    "behaviorVariationId": "43810",
+    "sourceIds": [
+      "43810010",
+      "43810110",
+      "43811010"
+    ],
+    "rowAlias": "Guilty (Demon Prince Prelude)",
+    "matchingAlias": true
+  },
+  "49800030": {
+    "entityName": "死亡仪式鸟",
+    "model": "c4980",
+    "behaviorVariationId": "49800",
+    "sourceIds": [
+      "49801010",
+      "49801020",
+      "49801030",
+      "49801110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "30600050": {
+    "entityName": "大型骷髅",
+    "model": "c3060",
+    "behaviorVariationId": "30600",
+    "sourceIds": [
+      "30600020",
+      "30601020",
+      "30601030"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "30601050": {
+    "entityName": "大型骷髅",
+    "model": "c3060",
+    "behaviorVariationId": "30600",
+    "sourceIds": [
+      "30600020",
+      "30601020",
+      "30601030"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "71000030": {
+    "entityName": "萨米尔的古英雄",
+    "model": "c7100",
+    "behaviorVariationId": "71000",
+    "sourceIds": [
+      "71000010",
+      "71000020",
+      "71000110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "44702010": {
+    "entityName": "掳人少女人偶",
+    "model": "c4470",
+    "behaviorVariationId": "44700",
+    "sourceIds": [
+      "44700010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "44800210": {
+    "entityName": "大米兰达花",
+    "model": "c4480",
+    "behaviorVariationId": "44800",
+    "sourceIds": [
+      "44800020",
+      "44800410"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "44811210": {
+    "entityName": "小米兰达花",
+    "model": "c4481",
+    "behaviorVariationId": "44810",
+    "sourceIds": [
+      "44810020",
+      "44810410",
+      "44811410"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "33000030": {
+    "entityName": "诺克斯修士",
+    "model": "c3300",
+    "behaviorVariationId": "33000",
+    "sourceIds": [
+      "33000010",
+      "33000020"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "33202020": {
+    "entityName": "银色泪滴",
+    "model": "c3320",
+    "behaviorVariationId": "33200",
+    "sourceIds": [
+      "33202010",
+      "33202110",
+      "33202210"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "33202220": {
+    "entityName": "银色泪滴",
+    "model": "c3320",
+    "behaviorVariationId": "33200",
+    "sourceIds": [
+      "33202010",
+      "33202110",
+      "33202210"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "33202120": {
+    "entityName": "银色泪滴",
+    "model": "c3320",
+    "behaviorVariationId": "33200",
+    "sourceIds": [
+      "33202010",
+      "33202110",
+      "33202210"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "33200220": {
+    "entityName": "银色泪滴",
+    "model": "c3320",
+    "behaviorVariationId": "33200",
+    "sourceIds": [
+      "33202010",
+      "33202110",
+      "33202210"
+    ],
+    "rowAlias": "Silver Tear (Great Church)",
+    "matchingAlias": true
+  },
+  "35500050": {
+    "entityName": "鲜血贵族",
+    "model": "c3550",
+    "behaviorVariationId": "35500",
+    "sourceIds": [
+      "35500010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "36640030": {
+    "entityName": "墓地影子",
+    "model": "c3664",
+    "behaviorVariationId": "36640",
+    "sourceIds": [
+      "36640010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "42701010": {
+    "entityName": "老狮子",
+    "model": "c4270",
+    "behaviorVariationId": "42700",
+    "sourceIds": [
+      "42700020",
+      "42700030",
+      "42700040"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "46705020": {
+    "entityName": "祖灵",
+    "model": "c4670",
+    "behaviorVariationId": "46700",
+    "sourceIds": [
+      "46700010"
+    ],
+    "rowAlias": "Ancestor Spirit (Ruins Boss)",
+    "matchingAlias": true
+  },
+  "34000010": {
+    "entityName": "守墓斗士",
+    "model": "c3400",
+    "behaviorVariationId": "34000",
+    "sourceIds": [
+      "34001010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "34001020": {
+    "entityName": "守墓斗士",
+    "model": "c3400",
+    "behaviorVariationId": "34000",
+    "sourceIds": [
+      "34001010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "42900030": {
+    "entityName": "猎犬骑士",
+    "model": "c4290",
+    "behaviorVariationId": "42900",
+    "sourceIds": [
+      "42900010"
+    ],
+    "rowAlias": "Bloodhound Knight (Western Underground Fort Elite)",
+    "matchingAlias": true
+  },
+  "32510040": {
+    "entityName": "大树守卫",
+    "model": "c3251",
+    "behaviorVariationId": "32510",
+    "sourceIds": [
+      "32510020",
+      "32510110"
+    ],
+    "rowAlias": "Tree Sentinel (Western Underground Fort Variant)",
+    "matchingAlias": true
+  },
+  "43212210": {
+    "entityName": "恶兵",
+    "model": "c4321",
+    "behaviorVariationId": "43210",
+    "sourceIds": [
+      "43210010",
+      "43211010",
+      "43212010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43210210": {
+    "entityName": "恶兵",
+    "model": "c4321",
+    "behaviorVariationId": "43210",
+    "sourceIds": [
+      "43210010",
+      "43211010",
+      "43212010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43211210": {
+    "entityName": "恶兵",
+    "model": "c4321",
+    "behaviorVariationId": "43210",
+    "sourceIds": [
+      "43210010",
+      "43211010",
+      "43212010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "35600050": {
+    "entityName": "神皮使徒",
+    "model": "c3560",
+    "behaviorVariationId": "35600",
+    "sourceIds": [
+      "35600010",
+      "35600020",
+      "35600110"
+    ],
+    "rowAlias": "Godskin Apostle (Western Underground Fort Group Boss)",
+    "matchingAlias": true
+  },
+  "35600040": {
+    "entityName": "神皮使徒",
+    "model": "c3560",
+    "behaviorVariationId": "35600",
+    "sourceIds": [
+      "35600010",
+      "35600020",
+      "35600110"
+    ],
+    "rowAlias": "Godskin Apostle (Western Underground Fort Elite)",
+    "matchingAlias": true
+  },
+  "35700050": {
+    "entityName": "神皮贵族",
+    "model": "c3570",
+    "behaviorVariationId": "35700",
+    "sourceIds": [
+      "35700010",
+      "35700020",
+      "35700110"
+    ],
+    "rowAlias": "Godskin Noble (Western Underground Fort Group Boss)",
+    "matchingAlias": true
+  },
+  "35700060": {
+    "entityName": "神皮贵族",
+    "model": "c3570",
+    "behaviorVariationId": "35700",
+    "sourceIds": [
+      "35700010",
+      "35700020",
+      "35700110"
+    ],
+    "rowAlias": "Godskin Noble (Western Underground Fort Elite)",
+    "matchingAlias": true
+  },
+  "39010040": {
+    "entityName": "黑焰习武修士",
+    "model": "c3901",
+    "behaviorVariationId": "39010",
+    "sourceIds": [
+      "39010010",
+      "39011010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "39011030": {
+    "entityName": "黑焰习武修士",
+    "model": "c3901",
+    "behaviorVariationId": "39010",
+    "sourceIds": [
+      "39010010",
+      "39011010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "41610040": {
+    "entityName": "野犬",
+    "model": "c4161",
+    "behaviorVariationId": "41610",
+    "sourceIds": [
+      "41610010",
+      "41610030",
+      "41610210",
+      "41610220"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43860040": {
+    "entityName": "黑焰罪恶荆棘信徒",
+    "model": "c4386",
+    "behaviorVariationId": "43810",
+    "sourceIds": [
+      "43860010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43860110": {
+    "entityName": "黑焰罪恶荆棘信徒",
+    "model": "c4386",
+    "behaviorVariationId": "43810",
+    "sourceIds": [
+      "43860010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43861010": {
+    "entityName": "黑焰罪恶荆棘信徒",
+    "model": "c4386",
+    "behaviorVariationId": "43810",
+    "sourceIds": [
+      "43860010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "37030030": {
+    "entityName": "调香师弩随从",
+    "model": "c3703",
+    "behaviorVariationId": "37030",
+    "sourceIds": [
+      "37030020",
+      "37030110",
+      "37031010",
+      "37031020",
+      "37031110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "37031030": {
+    "entityName": "调香师弩随从",
+    "model": "c3703",
+    "behaviorVariationId": "37030",
+    "sourceIds": [
+      "37030020",
+      "37030110",
+      "37031010",
+      "37031020",
+      "37031110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "46400110": {
+    "entityName": "腐烂树灵",
+    "model": "c4640",
+    "behaviorVariationId": "46400",
+    "sourceIds": [
+      "46400010",
+      "46400020"
+    ],
+    "rowAlias": "Ulcerated Tree Spirit (Eastern Underground Fort Variant)",
+    "matchingAlias": true
+  },
+  "50110050": {
+    "entityName": "黄金河马",
+    "model": "c5011",
+    "behaviorVariationId": "50110",
+    "sourceIds": [
+      "50110010",
+      "50110020",
+      "50110040"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "49801040": {
+    "entityName": "死亡仪式鸟",
+    "model": "c4980",
+    "behaviorVariationId": "49800",
+    "sourceIds": [
+      "49801010",
+      "49801020",
+      "49801030"
+    ],
+    "rowAlias": "Death Rite Bird (Eastern Underground Fort Variant)",
+    "matchingAlias": true
+  },
+  "70004010": {
+    "entityName": "小活死人士兵",
+    "model": "c7000",
+    "behaviorVariationId": "70000",
+    "sourceIds": [
+      "70000110",
+      "70001110",
+      "70003110",
+      "70004110",
+      "70005110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "70000010": {
+    "entityName": "小活死人士兵",
+    "model": "c7000",
+    "behaviorVariationId": "70000",
+    "sourceIds": [
+      "70000110",
+      "70001110",
+      "70003110",
+      "70004110",
+      "70005110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "70003010": {
+    "entityName": "小活死人士兵",
+    "model": "c7000",
+    "behaviorVariationId": "70000",
+    "sourceIds": [
+      "70000110",
+      "70001110",
+      "70003110",
+      "70004110",
+      "70005110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "70001010": {
+    "entityName": "小活死人士兵",
+    "model": "c7000",
+    "behaviorVariationId": "70000",
+    "sourceIds": [
+      "70000110",
+      "70001110",
+      "70003110",
+      "70004110",
+      "70005110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "70005010": {
+    "entityName": "小活死人士兵",
+    "model": "c7000",
+    "behaviorVariationId": "70000",
+    "sourceIds": [
+      "70000110",
+      "70001110",
+      "70003110",
+      "70004110",
+      "70005110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "41500030": {
+    "entityName": "咒蛙",
+    "model": "c4150",
+    "behaviorVariationId": "41500",
+    "sourceIds": [
+      "41500010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "31000040": {
+    "entityName": "铃珠猎人",
+    "model": "c3100",
+    "behaviorVariationId": "31000",
+    "sourceIds": [
+      "31000010",
+      "31000020",
+      "31000030"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "47509020": {
+    "entityName": "“接肢”君王",
+    "model": "c4750",
+    "behaviorVariationId": "47500",
+    "sourceIds": [
+      "47509010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "40400030": {
+    "entityName": "蛞蝓",
+    "model": "c4040",
+    "behaviorVariationId": "40400",
+    "sourceIds": [
+      "40400010",
+      "40400020",
+      "40401010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "40500030": {
+    "entityName": "凯丹佣兵",
+    "model": "c4050",
+    "behaviorVariationId": "40500",
+    "sourceIds": [
+      "40500010",
+      "40500110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "36624010": {
+    "entityName": "活尸 - 大体型",
+    "model": "c3662",
+    "behaviorVariationId": "36620",
+    "sourceIds": [
+      "36620010",
+      "36620020",
+      "36620120",
+      "36622010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "48100020": {
+    "entityName": "黄金树的化身",
+    "model": "c4810",
+    "behaviorVariationId": "48100",
+    "sourceIds": [
+      "48100010"
+    ],
+    "rowAlias": "Erdtree Avatar (Remembrance)",
+    "matchingAlias": true
+  },
+  "35600060": {
+    "entityName": "神皮使徒",
+    "model": "c3560",
+    "behaviorVariationId": "35600",
+    "sourceIds": [
+      "35600010",
+      "35600020",
+      "35600110"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "36609010": {
+    "entityName": "奴隶居民",
+    "model": "c3660",
+    "behaviorVariationId": "36600",
+    "sourceIds": [
+      "36600010",
+      "36600020",
+      "36600620",
+      "36601010",
+      "36601220",
+      "36602010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43831030": {
+    "entityName": "挖辉石矿工",
+    "model": "c4383",
+    "behaviorVariationId": "43830",
+    "sourceIds": [
+      "43830010",
+      "43831020"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "31810030": {
+    "entityName": "王夫的红狼",
+    "model": "c3181",
+    "behaviorVariationId": "31810",
+    "sourceIds": [
+      "31810010",
+      "31810020"
+    ],
+    "rowAlias": "Red Wolf of Radagon",
+    "matchingAlias": true
+  },
+  "44900020": {
+    "entityName": "大壶",
+    "model": "c4490",
+    "behaviorVariationId": "44900",
+    "sourceIds": [
+      "44900010",
+      "44900210"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43724010": {
+    "entityName": "雷卢卡利亚士兵",
+    "model": "c4372",
+    "behaviorVariationId": "43700",
+    "sourceIds": [
+      "43720010",
+      "43726010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  },
+  "43720020": {
+    "entityName": "雷卢卡利亚士兵",
+    "model": "c4372",
+    "behaviorVariationId": "43700",
+    "sourceIds": [
+      "43720010",
+      "43726010"
+    ],
+    "rowAlias": "",
+    "matchingAlias": false
+  }
+}

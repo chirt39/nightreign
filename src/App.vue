@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue';
 import OverviewPage from './pages/OverviewPage.vue';
 import EnemiesPage from './pages/EnemiesPage.vue';
 import RelicsPage from './pages/RelicsPage.vue';
@@ -8,22 +8,74 @@ import BuildsPage from './pages/BuildsPage.vue';
 import SourcesPage from './pages/SourcesPage.vue';
 import EffectsPage from './pages/EffectsPage.vue';
 import WeaponsPage from './pages/WeaponsPage.vue';
+import ArtsPage from './pages/ArtsPage.vue';
+import SpellsPage from './pages/SpellsPage.vue';
 import MapPredictorPage from './pages/MapPredictorPage.vue';
+import DamageCalculatorPage from './pages/DamageCalculatorPage.vue';
 
 const labels = {
   overview: '圆桌厅堂',
   enemies: '怪物图鉴',
   weapons: '武器图鉴',
+  arts: '战技',
+  spells: '魔法与祷告',
   map: '地图与夜王推算',
   relics: '遗物仪式',
   records: '日志',
   builds: '遗物装配',
   effects: '词条图鉴',
+  damage: '伤害计算器',
   sources: '资料说明',
 };
 const currentView = ref(location.hash.slice(1) in labels ? location.hash.slice(1) : 'overview');
 const sidebarOpen = ref(false);
-const weaponNavImageFailed = ref(false);
+const atlasPages = [
+  { view: 'enemies', label: '怪物' },
+  { view: 'weapons', label: '武器' },
+  { view: 'arts', label: '战技' },
+  { view: 'spells', label: '魔法与祷告' },
+  { view: 'effects', label: '词条' },
+  { view: 'damage', label: '伤害计算器' },
+];
+const isAtlas = computed(() => atlasPages.some(page => page.view === currentView.value));
+const weaponsPage = ref(null);
+const artsPage = ref(null);
+const damagePage = ref(null);
+const pickerKind = ref('');
+let pickerSession = null;
+let pickerReturn = null;
+let pickerSequence = 0;
+
+function closePicker() {
+  if (pickerKind.value === 'enemy') window.NightreignDamageEnemyPicker?.close();
+  pickerKind.value = '';
+  pickerSession = null;
+  pickerReturn = null;
+}
+
+function openPicker(event) {
+  const { kind, targetId, targets } = event.detail || {};
+  if (currentView.value !== 'damage' || !['enemy', 'relic'].includes(kind)) return;
+  const token = ++pickerSequence;
+  const view = kind === 'enemy' ? 'enemies' : 'relics';
+  const focus = document.activeElement;
+  history.replaceState({ ...history.state, pickerOrigin: token }, '', location.href);
+  setView(view);
+  pickerSession = { token, view, focus };
+  pickerKind.value = kind;
+  if (kind === 'enemy') window.NightreignDamageEnemyPicker?.open(targets, targetId);
+}
+
+function returnFromPicker(detail = null) {
+  if (!pickerSession || currentView.value !== pickerSession.view || pickerSession.returning) return;
+  if (detail && detail.kind !== pickerKind.value) return;
+  pickerReturn = detail;
+  pickerSession.returning = true;
+  history.back();
+}
+
+function confirmPicker(event) { returnFromPicker(event.detail); }
+
 const scriptsReady = ref(false);
 const loadError = ref(false);
 const classicScriptVersions = typeof __CLASSIC_SCRIPT_VERSIONS__ === 'undefined' ? null : __CLASSIC_SCRIPT_VERSIONS__;
@@ -31,32 +83,47 @@ const catalogJsonVersions = typeof __CATALOG_JSON_VERSIONS__ === 'undefined' ? n
 
 function setView(view, updateUrl = true, restoreScrollY = null, cardNavigation = null, sourceSnapshot = null) {
   const nextView = view in labels ? view : 'overview';
+  if (pickerSession && nextView !== pickerSession.view) closePicker();
   const changed = nextView !== currentView.value;
   if (updateUrl && changed) {
     history.replaceState({
       ...history.state,
       view: currentView.value,
       scrollY: window.scrollY,
-      cardNavigation: sourceSnapshot || (currentView.value === 'relics' ? null : history.state?.cardNavigation),
+      cardNavigation: sourceSnapshot || (['relics', 'weapons'].includes(currentView.value) ? null : history.state?.cardNavigation),
     }, '', location.href);
   }
   currentView.value = nextView;
   const targetUrl = new URL(location.href);
-  const hasEffectTarget = targetUrl.searchParams.has('effectCategory') || targetUrl.searchParams.has('effectId');
+  const hasEffectTarget = ['effectCategory', 'effectId', 'artId', 'spellId'].some(key => targetUrl.searchParams.has(key));
   if (updateUrl && (location.hash !== `#${nextView}` || cardNavigation || hasEffectTarget)) {
     targetUrl.searchParams.delete('effectCategory');
     targetUrl.searchParams.delete('effectId');
+    targetUrl.searchParams.delete('artId');
+    targetUrl.searchParams.delete('spellId');
+    for (const key of ['damageWeapon', 'damageVariant', 'damageArt', 'damageAction']) targetUrl.searchParams.delete(key);
+    if (cardNavigation?.kind === 'art') targetUrl.searchParams.set('artId', cardNavigation.id);
+    if (cardNavigation?.kind === 'damage') {
+      for (const [key, value] of Object.entries({ damageWeapon: cardNavigation.weaponId, damageVariant: cardNavigation.variantId, damageArt: cardNavigation.artId, damageAction: cardNavigation.actionId })) {
+        if (value) targetUrl.searchParams.set(key, String(value));
+      }
+    }
     targetUrl.hash = nextView;
     const url = cardNavigation?.kind === 'effect'
       ? window.NightreignRelicEffectNavigation.url(cardNavigation)
       : targetUrl.pathname + targetUrl.search + targetUrl.hash;
-    const entry = { ...history.state, view: nextView, scrollY: changed ? 0 : window.scrollY, cardNavigation };
+    const entry = { ...history.state, view: nextView, scrollY: changed ? 0 : window.scrollY, pickerOrigin: null, cardNavigation, damageReturn: cardNavigation?.kind === 'damage' && Boolean(sourceSnapshot) };
     if (changed || cardNavigation) history.pushState(entry, '', url);
     else history.replaceState(entry, '', url);
   }
   closeMobileNavigation(true);
   if (cardNavigation) {
-    nextTick(() => window.NightreignRelicEffectNavigation?.restore(cardNavigation));
+    nextTick(() => {
+      if (cardNavigation.kind === 'weapon') weaponsPage.value?.restoreNavigation(cardNavigation);
+      else if (cardNavigation.kind === 'art') artsPage.value?.restoreNavigation(cardNavigation);
+      else if (cardNavigation.kind === 'damage') damagePage.value?.restoreNavigation(cardNavigation);
+      else window.NightreignRelicEffectNavigation?.restore(cardNavigation);
+    });
   } else if (restoreScrollY !== null) {
     nextTick(() => window.scrollTo({ top: restoreScrollY, behavior: 'auto' }));
   } else if (changed || updateUrl) {
@@ -87,6 +154,7 @@ function handleShellClick(event) {
   if (hashLink && !hashLink.matches('[data-view], [data-go]')) {
     const view = hashLink.getAttribute('href').slice(1);
     if (view in labels) {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       setView(view);
       return;
@@ -116,6 +184,22 @@ function handleHashChange() {
 
 function handlePopState(event) {
   restoredHistoryUrl = location.href;
+  if (pickerSession && event.state?.pickerOrigin === pickerSession.token && location.hash === '#damage') {
+    const chosen = pickerReturn;
+    const focus = pickerSession.focus;
+    const scroll = Number.isFinite(event.state.scrollY) ? event.state.scrollY : 0;
+    closePicker();
+    setView('damage', false, scroll);
+    nextTick(() => {
+      if (currentView.value !== 'damage') return;
+      if (chosen) window.dispatchEvent(new CustomEvent('damage-picked', { detail: chosen }));
+      nextTick(() => {
+        focus?.focus({ preventScroll: true });
+        window.scrollTo({ top: scroll, behavior: 'instant' });
+      });
+    });
+    return;
+  }
   if (location.hash === '#main-content') {
     const view = event.state?.view in labels ? event.state.view : currentView.value;
     setView(view, false, Number.isFinite(event.state?.scrollY) ? event.state.scrollY : 0);
@@ -167,6 +251,8 @@ onMounted(async () => {
       return;
     }
   }
+  window.addEventListener('damage-open-picker', openPicker);
+  window.addEventListener('damage-confirm-picker', confirmPicker);
   window.addEventListener('nightreign:navigate', handleNavigation);
   window.addEventListener('hashchange', handleHashChange);
   window.addEventListener('popstate', handlePopState);
@@ -175,6 +261,8 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  window.removeEventListener('damage-open-picker', openPicker);
+  window.removeEventListener('damage-confirm-picker', confirmPicker);
   window.removeEventListener('nightreign:navigate', handleNavigation);
   window.removeEventListener('hashchange', handleHashChange);
   window.removeEventListener('popstate', handlePopState);
@@ -187,7 +275,7 @@ onUnmounted(() => {
     <h1>页面未能完整加载</h1>
     <p>必要功能暂时无法启动，请刷新页面重试。</p>
   </main>
-  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
+  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map', 'ability-fullscreen': currentView === 'arts' || currentView === 'spells' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
     <a class="skip-link" href="#main-content">跳转到主要内容</a>
     <aside id="mobile-navigation" class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
@@ -198,13 +286,11 @@ onUnmounted(() => {
       <p class="side-label">探索</p>
       <nav class="nav-list">
         <button class="nav-link" :class="{ active: currentView === 'overview' }" :aria-current="currentView === 'overview' ? 'page' : null" data-view="overview"><img class="nav-icon" src="/nav-icons/roundtable.webp" alt="" />圆桌厅堂</button>
-        <button class="nav-link" :class="{ active: currentView === 'enemies' }" :aria-current="currentView === 'enemies' ? 'page' : null" data-view="enemies"><img class="nav-icon" src="/nav-icons/bestiary.webp" alt="" />怪物图鉴 <b id="nav-enemy-count">—</b></button>
-        <button class="nav-link" :class="{ active: currentView === 'weapons' }" :aria-current="currentView === 'weapons' ? 'page' : null" data-view="weapons"><img v-if="!weaponNavImageFailed" class="nav-icon" src="/nav-icons/weapons.webp" alt="" @error="weaponNavImageFailed = true"><span v-else class="nav-icon weapon-nav-placeholder" aria-hidden="true"></span>武器图鉴</button>
+        <button class="nav-link" :class="{ active: isAtlas }" :aria-current="isAtlas ? 'page' : null" data-view="enemies"><img class="nav-icon" src="/nav-icons/bestiary.webp" alt="" />图鉴</button>
         <button class="nav-link" :class="{ active: currentView === 'map' }" :aria-current="currentView === 'map' ? 'page' : null" data-view="map"><span class="nav-icon map-nav-icon" aria-hidden="true">◇</span>地图与夜王推算</button>
         <button class="nav-link" :class="{ active: currentView === 'relics' }" :aria-current="currentView === 'relics' ? 'page' : null" data-view="relics"><img class="nav-icon" src="/nav-icons/relic-rite.png" alt="" />遗物仪式</button>
         <button class="nav-link" :class="{ active: currentView === 'records' }" :aria-current="currentView === 'records' ? 'page' : null" data-view="records"><img class="nav-icon" src="/nav-icons/journal.png" alt="" />日志</button>
         <button class="nav-link" :class="{ active: currentView === 'builds' }" :aria-current="currentView === 'builds' ? 'page' : null" data-view="builds"><img class="nav-icon" src="/nav-icons/relic-equip.png" alt="" />遗物装配</button>
-        <button class="nav-link" :class="{ active: currentView === 'effects' }" :aria-current="currentView === 'effects' ? 'page' : null" data-view="effects"><img class="nav-icon" src="/nav-icons/effects-battle-record.png" alt="" />词条图鉴</button>
         <button class="nav-link" :class="{ active: currentView === 'sources' }" :aria-current="currentView === 'sources' ? 'page' : null" data-view="sources"><img class="nav-icon" src="/nav-icons/sources.png" alt="" />资料说明</button>
       </nav>
       <div class="side-bottom"><a class="side-license-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a></div>
@@ -219,11 +305,21 @@ onUnmounted(() => {
         </div>
       </header>
       <div class="content">
+        <nav v-show="isAtlas" class="atlas-navigation" aria-label="图鉴分类">
+          <a v-for="page in atlasPages" :key="page.view" :href="`#${page.view}`" :aria-current="currentView === page.view ? 'page' : null">{{ page.label }}</a>
+        </nav>
+        <div v-if="pickerKind" class="damage-picker-nav">
+          <strong>{{ pickerKind === 'enemy' ? '选择计算目标' : '选择计算用遗物' }}</strong>
+          <button class="button ghost" type="button" @click="returnFromPicker()">取消选择</button>
+        </div>
         <OverviewPage :active="currentView === 'overview'" />
         <EnemiesPage :active="currentView === 'enemies'" />
-        <WeaponsPage :active="currentView === 'weapons'" :catalog-versions="catalogJsonVersions" />
+        <WeaponsPage ref="weaponsPage" :active="currentView === 'weapons'" :catalog-versions="catalogJsonVersions" />
+        <ArtsPage ref="artsPage" :active="currentView === 'arts'" :catalog-versions="catalogJsonVersions" />
+        <SpellsPage :active="currentView === 'spells'" :catalog-versions="catalogJsonVersions" />
+        <DamageCalculatorPage ref="damagePage" :active="currentView === 'damage'" :catalog-versions="catalogJsonVersions" />
         <MapPredictorPage :active="currentView === 'map'" :catalog-versions="catalogJsonVersions" />
-        <RelicsPage :active="currentView === 'relics'" />
+        <RelicsPage :damage-picking="pickerKind === 'relic'" :active="currentView === 'relics'" />
         <RecordsPage :active="currentView === 'records'" />
         <BuildsPage :active="currentView === 'builds'" />
         <EffectsPage :active="currentView === 'effects'" />
@@ -233,3 +329,20 @@ onUnmounted(() => {
     </main>
   </div>
 </template>
+
+<style>
+.damage-picker-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:0 0 auto;margin-bottom:8px;color:#e3cd99}
+.enemy-damage-pick{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0}
+.enemy-damage-pick label{display:flex;align-items:center;gap:6px;min-width:0}
+.enemy-damage-pick select{max-width:min(62vw,380px)}
+
+.atlas-navigation{display:flex;flex:0 0 auto;align-items:center;gap:5px;min-width:0;max-width:100%;margin:0 0 12px;padding:0 0 8px;border-bottom:1px solid #3e566e;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
+.atlas-navigation a{display:flex;flex:0 0 auto;align-items:center;gap:7px;min-height:38px;padding:7px 14px;border:1px solid transparent;border-radius:4px;background:#172638;color:#b8c9d4;white-space:nowrap;font-size:14px}
+.atlas-navigation a:hover{border-color:#536c82;color:#e7d5ac}
+.atlas-navigation a[aria-current=page]{border-color:#8f7a50;background:#2b3b45;color:#efdcaa}
+@media(min-width:851px){
+.app-shell.ability-fullscreen>.main{display:flex;height:100dvh;flex-direction:column;overflow:hidden}
+.app-shell.ability-fullscreen>.main>.content{display:flex;flex:1;flex-direction:column;min-height:0;overflow:hidden}
+}
+@media(max-width:850px){.atlas-navigation{gap:4px;margin-bottom:12px}.atlas-navigation a{min-height:36px;padding:6px 11px;font-size:13px}}
+</style>

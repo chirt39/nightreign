@@ -4,7 +4,7 @@ defineProps({ active: Boolean });
 
 <template>
 <section id="view-overview" class="view reference-page" :class="{ active }">
-          <header class="page-intro reference-heading"><h1>圆桌厅堂</h1><p>查阅资料、整理遗物与准备远征。</p></header>
+          <header class="page-intro reference-heading"><h1>圆桌厅堂</h1><p>黑夜君临玩家百科 · <a href="/relics/">查阅遗物图鉴</a></p></header>
           <div class="hero"><div class="hero-content"><p class="eyebrow">NIGHTFARER EXPEDITION · LIMVELD</p><h2>黑夜还没有<br><em>结束</em></h2><p class="hero-copy">选择渡夜者，探索宁姆韦德，在远征尽头迎战夜王。查阅敌人资料、解析遗物，并为下一场出击整备装配。</p><div class="hero-actions"><button class="button primary" data-go="relics">解析遗物存档 <span>↗</span></button><button class="button ghost" data-go="enemies">查阅敌人图鉴 <span>→</span></button></div></div><div class="hero-caption">LIMVELD · THREE-DAY EXPEDITION</div></div>
           <section class="home-agent panel">
             <div class="home-agent-heading"><div><p class="eyebrow">NIGHTREIGN GUIDE</p><h2>黑夜君临助手</h2><p>帮渡夜者解答黑夜君临问题。</p></div></div>

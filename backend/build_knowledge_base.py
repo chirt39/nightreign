@@ -21,7 +21,8 @@ REMOVED_ENEMY_IDS = frozenset({
     "43738030", "43738130", "43530130", "43134030", "75600010",
     "75600110", "75600130", "75700030", "75700020", "75700010",
     "43630400", "75400010", "21300010", "40001020", "46004080",
-    "75400100", "30101260", "30101010", "30100280",
+    "75400100", "30101260", "30101010", "30100280", "21500400",
+    "45050010", "46020030", "46000110", "43511120", "43510040",
 })
 REMOVED_ENEMY_COLUMN_POSITIONS = frozenset({20, 21, 22, 23, 25})
 REMOVED_ENEMY_FIELD_KEYS = frozenset({
@@ -87,6 +88,8 @@ def build() -> list[dict[str, Any]]:
     # to the effective damage multiplier used by the site's enemy viewer.
     enemy_data = load_public("enemy-data.json")
     enemy_columns = enemy_data.get("columns", [])
+    extra_locations = enemy_data.get("extraLocations", {})
+    entity_locations = enemy_data.get("entityLocationsBySourceId", {})
     enemy_id_counts: dict[str, int] = {}
     for row in enemy_data.get("rows", []):
         values = {col.get("k", ""): row[i] for i, col in enumerate(enemy_columns) if i < len(row)}
@@ -96,6 +99,12 @@ def build() -> list[dict[str, Any]]:
         enemy_id_counts[enemy_id] = enemy_id_counts.get(enemy_id, 0) + 1
         record_id = f"enemy:{enemy_id}" if enemy_id_counts[enemy_id] == 1 else f"enemy:{enemy_id}:{enemy_id_counts[enemy_id]}"
         fields: list[str] = []
+        locations = extra_locations.get(enemy_id, [])
+        if locations:
+            fields.append("出现地点：" + "、".join(locations))
+        family_locations = [name for name in entity_locations.get(enemy_id, []) if name not in locations]
+        if family_locations:
+            fields.append("同种怪物的其他出现地点：" + "、".join(family_locations))
         damage_values: list[tuple[str, float]] = []
         for index, col in enumerate(enemy_columns):
             key = col.get("k", "")

@@ -15,8 +15,17 @@ class EnemyCorpusCleanupTests(unittest.TestCase):
         records = build_knowledge_base.build()
         enemy_rows = [row for row in records if row["category"] == "enemy"]
         image_rows = [row for row in records if row["category"] == "enemy_image"]
-        self.assertEqual(len(enemy_rows), 1658)
-        self.assertEqual(len(image_rows), 371)
+        atlas = build_knowledge_base.load_public("enemy-data.json")
+        self.assertEqual(len(enemy_rows), len(atlas["rows"]))
+        by_id = {row["id"]: row for row in enemy_rows}
+        self.assertIn("沼泽", by_id["enemy:44203010"]["content"])
+        self.assertFalse(any(key.startswith("enemy:encounter-") for key in by_id))
+        for member_id in ("43520030", "43521030"):
+            self.assertIn("杜鹃骑士", by_id[f"enemy:{member_id}"]["title"])
+        self.assertEqual(len(image_rows), 307)
+        knights = [row for row in enemy_rows if row["title"].startswith("敌人图鉴｜失乡骑士")]
+        self.assertEqual({row["id"] for row in knights}, {"enemy:30100000", "enemy:30100100"})
+        self.assertFalse(any("白金之子弓手的狼" in row["title"] for row in enemy_rows))
         for row in enemy_rows:
             self.assertFalse(any(label in row["content"] for label in build_knowledge_base.REMOVED_ENEMY_FIELD_LABELS))
         for field in ("第一日生命值", "增益率", "等效韧性值"):

@@ -10,7 +10,7 @@
 
 ## 数据范围
 
-- 敌人：1,725 条参数记录；生命值、伤害倍率、异常状态抗性等来自 [夜之数据 Wiki](https://yanweiyuan3.github.io/nightreign-wiki/#/overview)。同名 Boss 表能匹配时显示遭遇类别。原资料没有逐只怪物的完整掉落和位置清单；本站将缺失值明确标成“未收录”。
+- 怪物图鉴可按本体及 DLC 的地点查找怪物、具名遭遇及成员。基础属性沿用[夜之数据 Wiki](https://yanweiyuan3.github.io/nightreign-wiki/#/overview)，新增记录按游戏参数、场景和简中事件文本补充。[数据来源与覆盖范围](docs/DATA.md)
 - 存档：解析功能与推荐算法基于 [ERN_RelicForge](https://github.com/cetusk/ERN_RelicForge) 的 MIT 开源实现。所有解析与计算在访客浏览器中完成；本站没有接收存档的后端接口。
 - 中文词条：优先参考夜之数据 Wiki，缺失项参考 [NightreignQuickRef](https://xxiixi.github.io/NightreignQuickRef/) 的公开资料。未映射的词条仍显示原文和 ID。
 - 遗物中文名与图标：对照 [Biligame 遗物总览](https://wiki.biligame.com/nightreign/%E9%81%97%E7%89%A9%E6%80%BB%E8%A7%88)，以 `item.key` 建立 67 种遗物的一一对应。总览未列出 `oldPocketwatch` 与 `fellOmenFetish`；这两件的中文名及图标分别补充自 [5gamers 老旧怀表](https://5gamers.com/zh-CN/elden-ring-nightreign/item/old-pocketwatch) 与 [5gamers 恶兆妖鬼的诅咒物](https://5gamers.com/zh-CN/elden-ring-nightreign/item/fell-omen-fetish)，共对应 69 种遗物。图标素材来源链接保存在 `public/relic_catalog_zh.json` 中。

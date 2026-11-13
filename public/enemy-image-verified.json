@@ -3,13 +3,15 @@
   "updatedAt": "2026-11-09",
   "images": {
     "34700000": {
-      "path": "enemy-images/34700020.jpg",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B734700020",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/9/92/fujzfj09wmb03qoha7l1polhp0lwau0.jpg",
-      "assetOrigin": "legacy-repository",
+      "path": "enemy-images/34700000-studio.png",
+      "assetOrigin": "local-game-model-render",
+      "imageKind": "model-render",
+      "model": "c3470",
+      "renderNpcId": "34700000",
+      "atlasSourceId": "34700000",
       "matchStatus": "verified",
       "licenseStatus": "unverified",
-      "checkedAt": "2026-10-30"
+      "sha256": "7b866932018d5d3ef59b044ed3ecd48d3909ce153bdf52bfe730865cc5513d33"
     },
     "30100000": {
       "path": "enemy-images/30100014.jpg",
@@ -550,6 +552,28 @@
       },
       "sourceName": "弗格尔",
       "matchNotes": "用于识别本首领的游戏出击菜单头像。普通色与紫色菜单图按本条ID显式对应；不是该NPC阶段的实景或模型形态图，不向分身、其他阶段或同名记录自动继承。"
+    },
+    "34700200": {
+      "path": "enemy-images/34700230-studio.png",
+      "assetOrigin": "local-game-model-render",
+      "imageKind": "model-render",
+      "model": "c3470",
+      "renderNpcId": "34700230",
+      "atlasSourceId": "34700200",
+      "matchStatus": "verified",
+      "licenseStatus": "unverified",
+      "sha256": "0fafb5e86bec85c5196c8cd2b14fdaab3f7faf4b606902553a784ae5fc4bdd12"
+    },
+    "34700300": {
+      "path": "enemy-images/34700300-studio.png",
+      "assetOrigin": "local-game-model-render",
+      "imageKind": "model-render",
+      "model": "c3470",
+      "renderNpcId": "34700300",
+      "atlasSourceId": "34700300",
+      "matchStatus": "verified",
+      "licenseStatus": "unverified",
+      "sha256": "c98c538389ecdde4ca0a71a41e27d5522a3dfa282f43b3f2e17f5d6abb7d55bb"
     }
   }
 }

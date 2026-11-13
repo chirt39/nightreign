@@ -1,0 +1,200 @@
+{
+  "m53_50_00_00": {
+    "building": "西部地下要塞",
+    "definitionId": "1107",
+    "anchorScene": "m53_50_00_00",
+    "anchor": {
+      "building": "西部地下要塞",
+      "npcId": "32510040",
+      "part": "c3251_9000",
+      "alias": "Tree Sentinel (Western Underground Fort Variant)"
+    }
+  },
+  "m53_51_00_00": {
+    "building": "西部地下要塞",
+    "definitionId": "1107",
+    "anchorScene": "m53_50_00_00",
+    "anchor": {
+      "building": "西部地下要塞",
+      "npcId": "32510040",
+      "part": "c3251_9000",
+      "alias": "Tree Sentinel (Western Underground Fort Variant)"
+    }
+  },
+  "m53_64_00_00": {
+    "building": "西部地下要塞",
+    "definitionId": "1114",
+    "anchorScene": "m53_64_00_00",
+    "anchor": {
+      "building": "西部地下要塞",
+      "npcId": "48200020",
+      "part": "c4820_9000",
+      "alias": "Omenkiller (Western Underground Fort Elite)"
+    }
+  },
+  "m53_49_00_00": {
+    "building": "西部地下要塞",
+    "definitionId": "1114",
+    "anchorScene": "m53_64_00_00",
+    "anchor": {
+      "building": "西部地下要塞",
+      "npcId": "48200020",
+      "part": "c4820_9000",
+      "alias": "Omenkiller (Western Underground Fort Elite)"
+    }
+  },
+  "m53_52_00_00": {
+    "building": "西部地下要塞",
+    "definitionId": "1115",
+    "anchorScene": "m53_52_00_00",
+    "anchor": {
+      "building": "西部地下要塞",
+      "npcId": "48200020",
+      "part": "c4820_9000",
+      "alias": "Omenkiller (Western Underground Fort Elite)"
+    }
+  },
+  "m53_53_00_00": {
+    "building": "西部地下要塞",
+    "definitionId": "1115",
+    "anchorScene": "m53_52_00_00",
+    "anchor": {
+      "building": "西部地下要塞",
+      "npcId": "48200020",
+      "part": "c4820_9000",
+      "alias": "Omenkiller (Western Underground Fort Elite)"
+    }
+  },
+  "m53_55_00_00": {
+    "building": "西部地下要塞",
+    "definitionId": "1116",
+    "anchorScene": "m53_55_00_00",
+    "anchor": {
+      "building": "西部地下要塞",
+      "npcId": "37300210",
+      "part": "c3730_9000",
+      "alias": "Graven Mass (Western Underground Fort Elite)"
+    }
+  },
+  "m53_56_00_00": {
+    "building": "西部地下要塞",
+    "definitionId": "1116",
+    "anchorScene": "m53_55_00_00",
+    "anchor": {
+      "building": "西部地下要塞",
+      "npcId": "37300210",
+      "part": "c3730_9000",
+      "alias": "Graven Mass (Western Underground Fort Elite)"
+    }
+  },
+  "m53_67_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1208",
+    "anchorScene": "m53_67_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "46400110",
+      "part": "c4640_9000",
+      "alias": "Ulcerated Tree Spirit (Eastern Underground Fort Variant)"
+    }
+  },
+  "m53_68_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1208",
+    "anchorScene": "m53_67_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "46400110",
+      "part": "c4640_9000",
+      "alias": "Ulcerated Tree Spirit (Eastern Underground Fort Variant)"
+    }
+  },
+  "m53_81_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1210",
+    "anchorScene": "m53_83_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "52500110",
+      "part": "c5250_9001",
+      "alias": "Divine Bird Warrior (Eastern Underground Fort Elite)"
+    }
+  },
+  "m53_83_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1210",
+    "anchorScene": "m53_83_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "52500110",
+      "part": "c5250_9001",
+      "alias": "Divine Bird Warrior (Eastern Underground Fort Elite)"
+    }
+  },
+  "m53_70_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1211",
+    "anchorScene": "m53_71_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "50400010",
+      "part": "c5040_9000",
+      "alias": "Curseblade (Eastern Underground Fort Elite)"
+    }
+  },
+  "m53_71_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1211",
+    "anchorScene": "m53_71_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "50400010",
+      "part": "c5040_9000",
+      "alias": "Curseblade (Eastern Underground Fort Elite)"
+    }
+  },
+  "m53_72_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1211",
+    "anchorScene": "m53_71_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "50400010",
+      "part": "c5040_9000",
+      "alias": "Curseblade (Eastern Underground Fort Elite)"
+    }
+  },
+  "m53_87_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1213",
+    "anchorScene": "m53_89_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "50400010",
+      "part": "c5040_9000",
+      "alias": "Curseblade (Eastern Underground Fort Elite)"
+    }
+  },
+  "m53_89_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1213",
+    "anchorScene": "m53_89_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "50400010",
+      "part": "c5040_9000",
+      "alias": "Curseblade (Eastern Underground Fort Elite)"
+    }
+  },
+  "m53_91_00_00": {
+    "building": "东部地下要塞",
+    "definitionId": "1213",
+    "anchorScene": "m53_89_00_00",
+    "anchor": {
+      "building": "东部地下要塞",
+      "npcId": "50400010",
+      "part": "c5040_9000",
+      "alias": "Curseblade (Eastern Underground Fort Elite)"
+    }
+  }
+}

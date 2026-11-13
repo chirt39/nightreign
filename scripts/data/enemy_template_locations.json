@@ -1,0 +1,4365 @@
+{
+  "m20_00_00_00": {
+    "template": "2000",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0"
+    ],
+    "pointCount": 1,
+    "seedExamples": {
+      "0": {
+        "patternId": "1140",
+        "attachId": "2101"
+      }
+    }
+  },
+  "m20_10_00_00": {
+    "template": "2010",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "2"
+    ],
+    "pointCount": 1,
+    "seedExamples": {
+      "2": {
+        "patternId": "29",
+        "attachId": "100"
+      }
+    }
+  },
+  "m20_30_00_00": {
+    "template": "2030",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0"
+    ],
+    "pointCount": 1,
+    "seedExamples": {
+      "0": {
+        "patternId": "128",
+        "attachId": "103"
+      }
+    }
+  },
+  "m20_40_00_00": {
+    "template": "2040",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "3"
+    ],
+    "pointCount": 4,
+    "seedExamples": {
+      "1": {
+        "patternId": "61",
+        "attachId": "104"
+      },
+      "3": {
+        "patternId": "72",
+        "attachId": "104"
+      },
+      "0": {
+        "patternId": "174",
+        "attachId": "104"
+      }
+    }
+  },
+  "m20_50_00_00": {
+    "template": "2050",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "3"
+    ],
+    "pointCount": 2,
+    "seedExamples": {
+      "0": {
+        "patternId": "1093",
+        "attachId": "2106"
+      },
+      "3": {
+        "patternId": "1114",
+        "attachId": "2106"
+      }
+    }
+  },
+  "m20_60_00_00": {
+    "template": "2060",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "3"
+    ],
+    "pointCount": 2,
+    "seedExamples": {
+      "0": {
+        "patternId": "18",
+        "attachId": "107"
+      },
+      "3": {
+        "patternId": "152",
+        "attachId": "107"
+      }
+    }
+  },
+  "m20_80_00_00": {
+    "template": "2080",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "2"
+    ],
+    "pointCount": 4,
+    "seedExamples": {
+      "0": {
+        "patternId": "11",
+        "attachId": "109"
+      },
+      "2": {
+        "patternId": "1106",
+        "attachId": "2109"
+      }
+    }
+  },
+  "m20_90_00_00": {
+    "template": "2090",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "1",
+      "3"
+    ],
+    "pointCount": 2,
+    "seedExamples": {
+      "1": {
+        "patternId": "21",
+        "attachId": "111"
+      },
+      "3": {
+        "patternId": "273",
+        "attachId": "111"
+      }
+    }
+  },
+  "m21_00_00_00": {
+    "template": "2100",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0"
+    ],
+    "pointCount": 1,
+    "seedExamples": {
+      "0": {
+        "patternId": "16",
+        "attachId": "110"
+      }
+    }
+  },
+  "m21_10_00_00": {
+    "template": "2110",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0"
+    ],
+    "pointCount": 3,
+    "seedExamples": {
+      "0": {
+        "patternId": "52",
+        "attachId": "112"
+      }
+    }
+  },
+  "m21_20_00_00": {
+    "template": "2120",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0"
+    ],
+    "pointCount": 2,
+    "seedExamples": {
+      "0": {
+        "patternId": "55",
+        "attachId": "113"
+      }
+    }
+  },
+  "m21_30_00_00": {
+    "template": "2130",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "5"
+    ],
+    "pointCount": 2,
+    "seedExamples": {
+      "5": {
+        "patternId": "37",
+        "attachId": "114"
+      },
+      "0": {
+        "patternId": "55",
+        "attachId": "114"
+      }
+    }
+  },
+  "m21_40_00_00": {
+    "template": "2140",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "2",
+      "5"
+    ],
+    "pointCount": 3,
+    "seedExamples": {
+      "2": {
+        "patternId": "147",
+        "attachId": "116"
+      },
+      "5": {
+        "patternId": "278",
+        "attachId": "116"
+      }
+    }
+  },
+  "m21_50_00_00": {
+    "template": "2150",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "3"
+    ],
+    "pointCount": 5,
+    "seedExamples": {
+      "3": {
+        "patternId": "32",
+        "attachId": "117"
+      },
+      "0": {
+        "patternId": "134",
+        "attachId": "117"
+      }
+    }
+  },
+  "m30_00_00_00": {
+    "template": "3000",
+    "building": "小型要塞",
+    "buildingKeys": [
+      "fort"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 488,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "106"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "100"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "101"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "123"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "107"
+      }
+    }
+  },
+  "m30_30_00_00": {
+    "template": "3030",
+    "building": "小型要塞",
+    "buildingKeys": [
+      "fort"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 506,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "103"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "104"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "125"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "104"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "109"
+      }
+    }
+  },
+  "m32_00_00_00": {
+    "template": "3200",
+    "building": "大型营地",
+    "buildingKeys": [
+      "mainencampment"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 460,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "111"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "112"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "100"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "112"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "114"
+      }
+    }
+  },
+  "m32_10_00_00": {
+    "template": "3210",
+    "building": "大型营地",
+    "buildingKeys": [
+      "mainencampment"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 601,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "112"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "108"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "113"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "101"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "116"
+      }
+    }
+  },
+  "m32_20_00_00": {
+    "template": "3220",
+    "building": "大型营地",
+    "buildingKeys": [
+      "mainencampment"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 427,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "120"
+      },
+      "3": {
+        "patternId": "32",
+        "attachId": "112"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "106"
+      },
+      "1": {
+        "patternId": "60",
+        "attachId": "113"
+      },
+      "2": {
+        "patternId": "69",
+        "attachId": "109"
+      }
+    }
+  },
+  "m34_00_00_00": {
+    "template": "3400",
+    "building": "遗迹",
+    "buildingKeys": [
+      "ruins"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 599,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "116"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "109"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "103"
+      },
+      "3": {
+        "patternId": "32",
+        "attachId": "103"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "110"
+      }
+    }
+  },
+  "m34_10_00_00": {
+    "template": "3410",
+    "building": "遗迹",
+    "buildingKeys": [
+      "ruins"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 825,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "100"
+      },
+      "1": {
+        "patternId": "24",
+        "attachId": "114"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "104"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "116"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "107"
+      }
+    }
+  },
+  "m34_20_00_00": {
+    "template": "3420",
+    "building": "遗迹",
+    "buildingKeys": [
+      "ruins"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 180,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "110"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "101"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "120"
+      },
+      "5": {
+        "patternId": "38",
+        "attachId": "109"
+      },
+      "3": {
+        "patternId": "70",
+        "attachId": "101"
+      }
+    }
+  },
+  "m34_30_00_00": {
+    "template": "3430",
+    "building": "遗迹",
+    "buildingKeys": [
+      "ruins"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 177,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "111"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "110"
+      },
+      "2": {
+        "patternId": "29",
+        "attachId": "116"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "100"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "109"
+      }
+    }
+  },
+  "m37_90_00_00": {
+    "template": "3790",
+    "building": "聚落",
+    "buildingKeys": [
+      "township"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 187,
+    "seedExamples": {
+      "0": {
+        "patternId": "3",
+        "attachId": "308"
+      },
+      "1": {
+        "patternId": "23",
+        "attachId": "310"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "301"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "314"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "314"
+      }
+    }
+  },
+  "m38_00_00_00": {
+    "template": "3800",
+    "building": "大教堂",
+    "buildingKeys": [
+      "greatchurch"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 507,
+    "seedExamples": {
+      "0": {
+        "patternId": "2",
+        "attachId": "112"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "109"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "103"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "103"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "117"
+      }
+    }
+  },
+  "m38_10_00_00": {
+    "template": "3810",
+    "building": "大教堂",
+    "buildingKeys": [
+      "greatchurch"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 493,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "107"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "100"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "100"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "106"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "103"
+      }
+    }
+  },
+  "m40_00_00_00": {
+    "template": "4000",
+    "building": "魔法师塔",
+    "buildingKeys": [
+      "sorcerers"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 749,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "305"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "305"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "314"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "301"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "310"
+      }
+    }
+  },
+  "m40_90_00_00": {
+    "template": "4090",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 7,
+    "seedExamples": {
+      "0": {
+        "patternId": "90",
+        "attachId": "307"
+      },
+      "3": {
+        "patternId": "112",
+        "attachId": "302"
+      },
+      "2": {
+        "patternId": "188",
+        "attachId": "313"
+      },
+      "5": {
+        "patternId": "1139",
+        "attachId": "2310"
+      }
+    }
+  },
+  "m41_00_00_00": {
+    "template": "4100",
+    "building": "教堂",
+    "buildingKeys": [
+      "church"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 1320,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "300"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "301"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "305"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "305"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "302"
+      }
+    }
+  },
+  "m41_01_00_00": {
+    "template": "4101",
+    "building": "教堂",
+    "buildingKeys": [
+      "church"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 65,
+    "seedExamples": {
+      "0": {
+        "patternId": "8",
+        "attachId": "350"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "364"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "352"
+      },
+      "5": {
+        "patternId": "75",
+        "attachId": "360"
+      },
+      "2": {
+        "patternId": "186",
+        "attachId": "357"
+      }
+    }
+  },
+  "m41_30_00_00": {
+    "template": "4130",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "3"
+    ],
+    "pointCount": 50,
+    "seedExamples": {
+      "3": {
+        "patternId": "30",
+        "attachId": "321"
+      }
+    }
+  },
+  "m43_00_00_00": {
+    "template": "4300",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 466,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "301"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "310"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "302"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "300"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "308"
+      }
+    }
+  },
+  "m43_01_00_00": {
+    "template": "4301",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 103,
+    "seedExamples": {
+      "0": {
+        "patternId": "2",
+        "attachId": "351"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "357"
+      },
+      "2": {
+        "patternId": "29",
+        "attachId": "352"
+      },
+      "5": {
+        "patternId": "38",
+        "attachId": "362"
+      },
+      "3": {
+        "patternId": "72",
+        "attachId": "351"
+      }
+    }
+  },
+  "m43_02_00_00": {
+    "template": "4302",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 58,
+    "seedExamples": {
+      "0": {
+        "patternId": "3",
+        "attachId": "364"
+      },
+      "1": {
+        "patternId": "22",
+        "attachId": "351"
+      },
+      "2": {
+        "patternId": "26",
+        "attachId": "350"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "364"
+      },
+      "5": {
+        "patternId": "78",
+        "attachId": "362"
+      }
+    }
+  },
+  "m43_30_00_00": {
+    "template": "4330",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "3"
+    ],
+    "pointCount": 100,
+    "seedExamples": {
+      "3": {
+        "patternId": "30",
+        "attachId": "316"
+      }
+    }
+  },
+  "m43_40_00_00": {
+    "template": "4340",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 482,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "314"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "313"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "312"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "301"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "312"
+      }
+    }
+  },
+  "m43_41_00_00": {
+    "template": "4341",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 106,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "358"
+      },
+      "3": {
+        "patternId": "32",
+        "attachId": "364"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "356"
+      },
+      "1": {
+        "patternId": "61",
+        "attachId": "350"
+      },
+      "2": {
+        "patternId": "66",
+        "attachId": "357"
+      }
+    }
+  },
+  "m43_50_00_00": {
+    "template": "4350",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 238,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "301"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "300"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "301"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "301"
+      },
+      "5": {
+        "patternId": "117",
+        "attachId": "313"
+      }
+    }
+  },
+  "m44_01_00_00": {
+    "template": "4401",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 59,
+    "seedExamples": {
+      "1": {
+        "patternId": "23",
+        "attachId": "364"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "364"
+      },
+      "0": {
+        "patternId": "46",
+        "attachId": "357"
+      },
+      "2": {
+        "patternId": "65",
+        "attachId": "358"
+      },
+      "5": {
+        "patternId": "76",
+        "attachId": "360"
+      }
+    }
+  },
+  "m45_00_00_00": {
+    "template": "4500",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 449,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "306"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "312"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "300"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "313"
+      },
+      "5": {
+        "patternId": "76",
+        "attachId": "306"
+      }
+    }
+  },
+  "m45_01_00_00": {
+    "template": "4501",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 49,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "356"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "357"
+      },
+      "3": {
+        "patternId": "34",
+        "attachId": "351"
+      },
+      "1": {
+        "patternId": "62",
+        "attachId": "364"
+      },
+      "5": {
+        "patternId": "316",
+        "attachId": "362"
+      }
+    }
+  },
+  "m45_51_00_00": {
+    "template": "4551",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 258,
+    "seedExamples": {
+      "0": {
+        "patternId": "3",
+        "attachId": "760"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "763"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "750"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "760"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "758"
+      },
+      "4": {
+        "patternId": "1007",
+        "attachId": "1163"
+      }
+    }
+  },
+  "m45_52_00_00": {
+    "template": "4552",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "4",
+      "5"
+    ],
+    "pointCount": 172,
+    "seedExamples": {
+      "0": {
+        "patternId": "82",
+        "attachId": "560"
+      },
+      "1": {
+        "patternId": "104",
+        "attachId": "560"
+      },
+      "2": {
+        "patternId": "106",
+        "attachId": "560"
+      },
+      "5": {
+        "patternId": "115",
+        "attachId": "561"
+      },
+      "4": {
+        "patternId": "1029",
+        "attachId": "1200"
+      }
+    }
+  },
+  "m45_53_00_00": {
+    "template": "4553",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 185,
+    "seedExamples": {
+      "0": {
+        "patternId": "121",
+        "attachId": "523"
+      },
+      "1": {
+        "patternId": "143",
+        "attachId": "523"
+      },
+      "2": {
+        "patternId": "148",
+        "attachId": "520"
+      },
+      "3": {
+        "patternId": "150",
+        "attachId": "520"
+      },
+      "5": {
+        "patternId": "158",
+        "attachId": "521"
+      },
+      "4": {
+        "patternId": "1037",
+        "attachId": "1200"
+      }
+    }
+  },
+  "m45_55_00_00": {
+    "template": "4555",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 164,
+    "seedExamples": {
+      "0": {
+        "patternId": "201",
+        "attachId": "580"
+      },
+      "1": {
+        "patternId": "224",
+        "attachId": "580"
+      },
+      "2": {
+        "patternId": "225",
+        "attachId": "580"
+      },
+      "3": {
+        "patternId": "231",
+        "attachId": "580"
+      },
+      "5": {
+        "patternId": "239",
+        "attachId": "581"
+      },
+      "4": {
+        "patternId": "1055",
+        "attachId": "1200"
+      }
+    }
+  },
+  "m46_00_00_00": {
+    "template": "4600",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 92,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "618"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "639"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "622"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "623"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "639"
+      }
+    }
+  },
+  "m46_01_00_00": {
+    "template": "4601",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 89,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "622"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "628"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "630"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "626"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "622"
+      }
+    }
+  },
+  "m46_02_00_00": {
+    "template": "4602",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 97,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "640"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "618"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "625"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "618"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "626"
+      }
+    }
+  },
+  "m46_03_00_00": {
+    "template": "4603",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 91,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "617"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "620"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "616"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "616"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "640"
+      }
+    }
+  },
+  "m46_04_00_00": {
+    "template": "4604",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 102,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "616"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "615"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "615"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "617"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "633"
+      }
+    }
+  },
+  "m46_05_00_00": {
+    "template": "4605",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 89,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "615"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "643"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "619"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "615"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "641"
+      }
+    }
+  },
+  "m46_06_00_00": {
+    "template": "4606",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 100,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "625"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "617"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "617"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "629"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "623"
+      }
+    }
+  },
+  "m46_50_00_00": {
+    "template": "4650",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 754,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "601"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "602"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "601"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "607"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "606"
+      }
+    }
+  },
+  "m46_51_00_00": {
+    "template": "4651",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 243,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "753"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "762"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "753"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "753"
+      },
+      "1": {
+        "patternId": "61",
+        "attachId": "761"
+      },
+      "4": {
+        "patternId": "1006",
+        "attachId": "1158"
+      }
+    }
+  },
+  "m46_52_00_00": {
+    "template": "4652",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 233,
+    "seedExamples": {
+      "0": {
+        "patternId": "2",
+        "attachId": "760"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "761"
+      },
+      "2": {
+        "patternId": "26",
+        "attachId": "750"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "316"
+      },
+      "5": {
+        "patternId": "38",
+        "attachId": "753"
+      },
+      "4": {
+        "patternId": "1008",
+        "attachId": "1159"
+      }
+    }
+  },
+  "m46_53_00_00": {
+    "template": "4653",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 237,
+    "seedExamples": {
+      "0": {
+        "patternId": "3",
+        "attachId": "761"
+      },
+      "1": {
+        "patternId": "23",
+        "attachId": "761"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "755"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "322"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "753"
+      },
+      "4": {
+        "patternId": "1015",
+        "attachId": "1103"
+      }
+    }
+  },
+  "m46_54_00_00": {
+    "template": "4654",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 276,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "758"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "756"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "756"
+      },
+      "2": {
+        "patternId": "65",
+        "attachId": "756"
+      },
+      "5": {
+        "patternId": "76",
+        "attachId": "763"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1103"
+      }
+    }
+  },
+  "m46_55_00_00": {
+    "template": "4655",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 230,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "750"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "753"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "761"
+      },
+      "5": {
+        "patternId": "39",
+        "attachId": "753"
+      },
+      "1": {
+        "patternId": "60",
+        "attachId": "750"
+      },
+      "4": {
+        "patternId": "1006",
+        "attachId": "1161"
+      }
+    }
+  },
+  "m46_56_00_00": {
+    "template": "4656",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 206,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "755"
+      },
+      "1": {
+        "patternId": "24",
+        "attachId": "755"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "763"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "318"
+      },
+      "5": {
+        "patternId": "38",
+        "attachId": "759"
+      },
+      "4": {
+        "patternId": "1009",
+        "attachId": "1103"
+      }
+    }
+  },
+  "m46_57_00_00": {
+    "template": "4657",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 296,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "759"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "750"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "754"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "750"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "759"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1156"
+      }
+    }
+  },
+  "m46_58_00_00": {
+    "template": "4658",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 159,
+    "seedExamples": {
+      "0": {
+        "patternId": "2",
+        "attachId": "754"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "762"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "762"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "754"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "754"
+      }
+    }
+  },
+  "m46_59_00_00": {
+    "template": "4659",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 233,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "760"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "760"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "763"
+      },
+      "3": {
+        "patternId": "34",
+        "attachId": "760"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "754"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1160"
+      }
+    }
+  },
+  "m46_60_00_00": {
+    "template": "4660",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 1045,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "602"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "605"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "602"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "604"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "601"
+      }
+    }
+  },
+  "m46_62_00_00": {
+    "template": "4662",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 260,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "754"
+      },
+      "1": {
+        "patternId": "22",
+        "attachId": "750"
+      },
+      "2": {
+        "patternId": "26",
+        "attachId": "754"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "759"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "760"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1155"
+      }
+    }
+  },
+  "m46_63_00_00": {
+    "template": "4663",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 252,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "763"
+      },
+      "1": {
+        "patternId": "23",
+        "attachId": "756"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "753"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "317"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "763"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1165"
+      }
+    }
+  },
+  "m46_64_00_00": {
+    "template": "4664",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 252,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "756"
+      },
+      "1": {
+        "patternId": "22",
+        "attachId": "763"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "755"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "309"
+      },
+      "5": {
+        "patternId": "37",
+        "attachId": "758"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1157"
+      }
+    }
+  },
+  "m46_65_00_00": {
+    "template": "4665",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 259,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "758"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "760"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "755"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "750"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "763"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1158"
+      }
+    }
+  },
+  "m46_66_00_00": {
+    "template": "4666",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 236,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "753"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "755"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "756"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "760"
+      },
+      "5": {
+        "patternId": "115",
+        "attachId": "758"
+      },
+      "4": {
+        "patternId": "1006",
+        "attachId": "1156"
+      }
+    }
+  },
+  "m46_67_00_00": {
+    "template": "4667",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 267,
+    "seedExamples": {
+      "0": {
+        "patternId": "4",
+        "attachId": "750"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "755"
+      },
+      "2": {
+        "patternId": "26",
+        "attachId": "763"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "320"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "760"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1163"
+      }
+    }
+  },
+  "m46_68_00_00": {
+    "template": "4668",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 253,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "763"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "762"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "315"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "762"
+      },
+      "2": {
+        "patternId": "106",
+        "attachId": "754"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1159"
+      }
+    }
+  },
+  "m46_69_00_00": {
+    "template": "4669",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 242,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "759"
+      },
+      "1": {
+        "patternId": "23",
+        "attachId": "763"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "754"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "758"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "762"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1162"
+      }
+    }
+  },
+  "m46_70_00_00": {
+    "template": "4670",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 780,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "606"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "607"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "607"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "601"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "603"
+      }
+    }
+  },
+  "m46_71_00_00": {
+    "template": "4671",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 302,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "754"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "750"
+      },
+      "2": {
+        "patternId": "26",
+        "attachId": "762"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "755"
+      },
+      "5": {
+        "patternId": "37",
+        "attachId": "754"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1161"
+      }
+    }
+  },
+  "m46_72_00_00": {
+    "template": "4672",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 288,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "762"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "761"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "758"
+      },
+      "5": {
+        "patternId": "35",
+        "attachId": "761"
+      },
+      "2": {
+        "patternId": "66",
+        "attachId": "755"
+      },
+      "4": {
+        "patternId": "1006",
+        "attachId": "1155"
+      }
+    }
+  },
+  "m46_74_00_00": {
+    "template": "4674",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 229,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "761"
+      },
+      "1": {
+        "patternId": "22",
+        "attachId": "755"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "753"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "756"
+      },
+      "5": {
+        "patternId": "37",
+        "attachId": "753"
+      },
+      "4": {
+        "patternId": "1008",
+        "attachId": "1103"
+      }
+    }
+  },
+  "m46_77_00_00": {
+    "template": "4677",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 239,
+    "seedExamples": {
+      "0": {
+        "patternId": "2",
+        "attachId": "759"
+      },
+      "1": {
+        "patternId": "60",
+        "attachId": "763"
+      },
+      "2": {
+        "patternId": "65",
+        "attachId": "750"
+      },
+      "3": {
+        "patternId": "71",
+        "attachId": "750"
+      },
+      "5": {
+        "patternId": "75",
+        "attachId": "761"
+      },
+      "4": {
+        "patternId": "1005",
+        "attachId": "1164"
+      }
+    }
+  },
+  "m46_78_00_00": {
+    "template": "4678",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 168,
+    "seedExamples": {
+      "0": {
+        "patternId": "43",
+        "attachId": "541"
+      },
+      "1": {
+        "patternId": "63",
+        "attachId": "540"
+      },
+      "2": {
+        "patternId": "67",
+        "attachId": "540"
+      },
+      "3": {
+        "patternId": "71",
+        "attachId": "540"
+      },
+      "5": {
+        "patternId": "78",
+        "attachId": "541"
+      }
+    }
+  },
+  "m46_80_00_00": {
+    "template": "4680",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 101,
+    "seedExamples": {
+      "0": {
+        "patternId": "6",
+        "attachId": "607"
+      },
+      "1": {
+        "patternId": "23",
+        "attachId": "606"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "607"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "603"
+      },
+      "5": {
+        "patternId": "37",
+        "attachId": "606"
+      }
+    }
+  },
+  "m46_81_00_00": {
+    "template": "4681",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 53,
+    "seedExamples": {
+      "0": {
+        "patternId": "6",
+        "attachId": "757"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "757"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "757"
+      },
+      "1": {
+        "patternId": "61",
+        "attachId": "757"
+      }
+    }
+  },
+  "m46_82_00_00": {
+    "template": "4682",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 65,
+    "seedExamples": {
+      "0": {
+        "patternId": "3",
+        "attachId": "757"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "757"
+      },
+      "3": {
+        "patternId": "33",
+        "attachId": "757"
+      },
+      "2": {
+        "patternId": "268",
+        "attachId": "757"
+      }
+    }
+  },
+  "m46_86_00_00": {
+    "template": "4686",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 59,
+    "seedExamples": {
+      "1": {
+        "patternId": "22",
+        "attachId": "757"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "757"
+      },
+      "3": {
+        "patternId": "31",
+        "attachId": "757"
+      },
+      "0": {
+        "patternId": "43",
+        "attachId": "757"
+      }
+    }
+  },
+  "m46_87_00_00": {
+    "template": "4687",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 56,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "757"
+      },
+      "1": {
+        "patternId": "64",
+        "attachId": "757"
+      },
+      "3": {
+        "patternId": "110",
+        "attachId": "757"
+      },
+      "2": {
+        "patternId": "189",
+        "attachId": "757"
+      }
+    }
+  },
+  "m46_88_00_00": {
+    "template": "4688",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 48,
+    "seedExamples": {
+      "0": {
+        "patternId": "2",
+        "attachId": "757"
+      },
+      "2": {
+        "patternId": "26",
+        "attachId": "757"
+      },
+      "1": {
+        "patternId": "62",
+        "attachId": "757"
+      },
+      "3": {
+        "patternId": "113",
+        "attachId": "757"
+      }
+    }
+  },
+  "m46_91_00_00": {
+    "template": "4691",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 50,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "757"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "757"
+      },
+      "1": {
+        "patternId": "104",
+        "attachId": "757"
+      },
+      "3": {
+        "patternId": "234",
+        "attachId": "757"
+      }
+    }
+  },
+  "m46_95_00_00": {
+    "template": "4695",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 59,
+    "seedExamples": {
+      "0": {
+        "patternId": "4",
+        "attachId": "757"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "757"
+      },
+      "3": {
+        "patternId": "34",
+        "attachId": "757"
+      },
+      "2": {
+        "patternId": "67",
+        "attachId": "757"
+      }
+    }
+  },
+  "m47_80_00_00": {
+    "template": "4780",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 6,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1112"
+      }
+    }
+  },
+  "m47_90_00_00": {
+    "template": "4790",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 8,
+    "seedExamples": {
+      "4": {
+        "patternId": "1027",
+        "attachId": "1111"
+      }
+    }
+  },
+  "m48_00_00_00": {
+    "template": "4800",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 5,
+    "seedExamples": {
+      "4": {
+        "patternId": "1036",
+        "attachId": "1111"
+      }
+    }
+  },
+  "m48_10_00_00": {
+    "template": "4810",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 10,
+    "seedExamples": {
+      "4": {
+        "patternId": "1028",
+        "attachId": "1112"
+      }
+    }
+  },
+  "m48_30_00_00": {
+    "template": "4830",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 19,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1113"
+      }
+    }
+  },
+  "m48_40_00_00": {
+    "template": "4840",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 25,
+    "seedExamples": {
+      "4": {
+        "patternId": "1009",
+        "attachId": "1115"
+      }
+    }
+  },
+  "m48_50_00_00": {
+    "template": "4850",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 23,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1115"
+      }
+    }
+  },
+  "m48_60_00_00": {
+    "template": "4860",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 19,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1116"
+      }
+    }
+  },
+  "m48_80_00_00": {
+    "template": "4880",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 18,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1113"
+      }
+    }
+  },
+  "m49_10_00_00": {
+    "template": "4910",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 28,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1114"
+      }
+    }
+  },
+  "m49_17_00_00": {
+    "template": "4917",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 29,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1111"
+      }
+    }
+  },
+  "m49_18_00_00": {
+    "template": "4918",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 26,
+    "seedExamples": {
+      "4": {
+        "patternId": "1008",
+        "attachId": "1115"
+      }
+    }
+  },
+  "m49_20_00_00": {
+    "template": "4920",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 26,
+    "seedExamples": {
+      "4": {
+        "patternId": "1018",
+        "attachId": "1115"
+      }
+    }
+  },
+  "m49_21_00_00": {
+    "template": "4921",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 23,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1113"
+      }
+    }
+  },
+  "m49_23_00_00": {
+    "template": "4923",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 25,
+    "seedExamples": {
+      "4": {
+        "patternId": "1015",
+        "attachId": "1115"
+      }
+    }
+  },
+  "m49_24_00_00": {
+    "template": "4924",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 17,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1116"
+      }
+    }
+  },
+  "m49_25_00_00": {
+    "template": "4925",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 15,
+    "seedExamples": {
+      "4": {
+        "patternId": "1008",
+        "attachId": "1116"
+      }
+    }
+  },
+  "m49_26_00_00": {
+    "template": "4926",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 24,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1116"
+      }
+    }
+  },
+  "m49_27_00_00": {
+    "template": "4927",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 31,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1114"
+      }
+    }
+  },
+  "m49_28_00_00": {
+    "template": "4928",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 24,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1112"
+      }
+    }
+  },
+  "m49_29_00_00": {
+    "template": "4929",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 29,
+    "seedExamples": {
+      "4": {
+        "patternId": "1025",
+        "attachId": "1111"
+      }
+    }
+  },
+  "m49_30_00_00": {
+    "template": "4930",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 24,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1114"
+      }
+    }
+  },
+  "m49_40_00_00": {
+    "template": "4940",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 128,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "712"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "718"
+      },
+      "2": {
+        "patternId": "26",
+        "attachId": "718"
+      },
+      "3": {
+        "patternId": "34",
+        "attachId": "711"
+      },
+      "5": {
+        "patternId": "36",
+        "attachId": "717"
+      },
+      "4": {
+        "patternId": "1015",
+        "attachId": "1174"
+      }
+    }
+  },
+  "m49_41_00_00": {
+    "template": "4941",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 131,
+    "seedExamples": {
+      "0": {
+        "patternId": "2",
+        "attachId": "190"
+      },
+      "1": {
+        "patternId": "20",
+        "attachId": "190"
+      },
+      "2": {
+        "patternId": "27",
+        "attachId": "190"
+      },
+      "3": {
+        "patternId": "32",
+        "attachId": "190"
+      }
+    }
+  },
+  "m49_42_00_00": {
+    "template": "4942",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 129,
+    "seedExamples": {
+      "0": {
+        "patternId": "0",
+        "attachId": "190"
+      },
+      "1": {
+        "patternId": "21",
+        "attachId": "190"
+      },
+      "2": {
+        "patternId": "25",
+        "attachId": "190"
+      },
+      "3": {
+        "patternId": "70",
+        "attachId": "190"
+      }
+    }
+  },
+  "m49_43_00_00": {
+    "template": "4943",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3"
+    ],
+    "pointCount": 130,
+    "seedExamples": {
+      "0": {
+        "patternId": "1",
+        "attachId": "190"
+      },
+      "2": {
+        "patternId": "28",
+        "attachId": "190"
+      },
+      "3": {
+        "patternId": "30",
+        "attachId": "190"
+      },
+      "1": {
+        "patternId": "62",
+        "attachId": "190"
+      }
+    }
+  },
+  "m49_90_00_00": {
+    "template": "4990",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 26,
+    "seedExamples": {
+      "4": {
+        "patternId": "1008",
+        "attachId": "1112"
+      }
+    }
+  },
+  "m50_00_00_00": {
+    "template": "5000",
+    "building": "沼泽",
+    "buildingKeys": [
+      "marsh"
+    ],
+    "terrainCodes": [
+      "0",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 70,
+    "seedExamples": {
+      "0": {
+        "patternId": "1001",
+        "attachId": "2108"
+      },
+      "2": {
+        "patternId": "1106",
+        "attachId": "2101"
+      },
+      "3": {
+        "patternId": "1113",
+        "attachId": "2116"
+      },
+      "5": {
+        "patternId": "1135",
+        "attachId": "2109"
+      }
+    }
+  },
+  "m50_01_00_00": {
+    "template": "5001",
+    "building": "沼泽",
+    "buildingKeys": [
+      "marsh"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 80,
+    "seedExamples": {
+      "0": {
+        "patternId": "1003",
+        "attachId": "2106"
+      },
+      "1": {
+        "patternId": "1101",
+        "attachId": "2109"
+      },
+      "2": {
+        "patternId": "1106",
+        "attachId": "2104"
+      },
+      "3": {
+        "patternId": "1110",
+        "attachId": "2110"
+      },
+      "5": {
+        "patternId": "1137",
+        "attachId": "2109"
+      }
+    }
+  },
+  "m50_02_00_00": {
+    "template": "5002",
+    "building": "沼泽",
+    "buildingKeys": [
+      "marsh"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 55,
+    "seedExamples": {
+      "0": {
+        "patternId": "1000",
+        "attachId": "2103"
+      },
+      "1": {
+        "patternId": "1104",
+        "attachId": "2104"
+      },
+      "2": {
+        "patternId": "1108",
+        "attachId": "2101"
+      },
+      "3": {
+        "patternId": "1111",
+        "attachId": "2104"
+      },
+      "5": {
+        "patternId": "1136",
+        "attachId": "2113"
+      }
+    }
+  },
+  "m50_03_00_00": {
+    "template": "5003",
+    "building": "沼泽",
+    "buildingKeys": [
+      "marsh"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 60,
+    "seedExamples": {
+      "0": {
+        "patternId": "1000",
+        "attachId": "2104"
+      },
+      "1": {
+        "patternId": "1100",
+        "attachId": "2117"
+      },
+      "2": {
+        "patternId": "1105",
+        "attachId": "2109"
+      },
+      "3": {
+        "patternId": "1112",
+        "attachId": "2106"
+      },
+      "5": {
+        "patternId": "1139",
+        "attachId": "2117"
+      }
+    }
+  },
+  "m50_04_00_00": {
+    "template": "5004",
+    "building": "沼泽",
+    "buildingKeys": [
+      "marsh"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 46,
+    "seedExamples": {
+      "0": {
+        "patternId": "1004",
+        "attachId": "2104"
+      },
+      "2": {
+        "patternId": "1105",
+        "attachId": "2100"
+      },
+      "1": {
+        "patternId": "1161",
+        "attachId": "2112"
+      },
+      "3": {
+        "patternId": "1171",
+        "attachId": "2100"
+      },
+      "5": {
+        "patternId": "1196",
+        "attachId": "2109"
+      }
+    }
+  },
+  "m50_05_00_00": {
+    "template": "5005",
+    "building": "沼泽",
+    "buildingKeys": [
+      "marsh"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 56,
+    "seedExamples": {
+      "0": {
+        "patternId": "1001",
+        "attachId": "2101"
+      },
+      "1": {
+        "patternId": "1102",
+        "attachId": "2109"
+      },
+      "2": {
+        "patternId": "1107",
+        "attachId": "2100"
+      },
+      "3": {
+        "patternId": "1111",
+        "attachId": "2101"
+      },
+      "5": {
+        "patternId": "1138",
+        "attachId": "2103"
+      }
+    }
+  },
+  "m50_06_00_00": {
+    "template": "5006",
+    "building": "沼泽",
+    "buildingKeys": [
+      "marsh"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 60,
+    "seedExamples": {
+      "0": {
+        "patternId": "1010",
+        "attachId": "2106"
+      },
+      "1": {
+        "patternId": "1100",
+        "attachId": "2108"
+      },
+      "3": {
+        "patternId": "1110",
+        "attachId": "2103"
+      },
+      "5": {
+        "patternId": "1135",
+        "attachId": "2103"
+      },
+      "2": {
+        "patternId": "1168",
+        "attachId": "2104"
+      }
+    }
+  },
+  "m50_10_00_00": {
+    "template": "5010",
+    "building": "锻造村",
+    "buildingKeys": [
+      "forge"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 286,
+    "seedExamples": {
+      "0": {
+        "patternId": "1000",
+        "attachId": "2101"
+      },
+      "1": {
+        "patternId": "1100",
+        "attachId": "2104"
+      },
+      "2": {
+        "patternId": "1105",
+        "attachId": "2104"
+      },
+      "3": {
+        "patternId": "1110",
+        "attachId": "2101"
+      },
+      "5": {
+        "patternId": "1136",
+        "attachId": "2103"
+      }
+    }
+  },
+  "m50_11_00_00": {
+    "template": "5011",
+    "building": "锻造村",
+    "buildingKeys": [
+      "forge"
+    ],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "pointCount": 238,
+    "seedExamples": {
+      "0": {
+        "patternId": "1000",
+        "attachId": "2107"
+      },
+      "1": {
+        "patternId": "1101",
+        "attachId": "2100"
+      },
+      "2": {
+        "patternId": "1105",
+        "attachId": "2114"
+      },
+      "3": {
+        "patternId": "1111",
+        "attachId": "2117"
+      },
+      "5": {
+        "patternId": "1135",
+        "attachId": "2106"
+      }
+    }
+  },
+  "m51_00_00_00": {
+    "template": "5100",
+    "building": "教堂",
+    "buildingKeys": [
+      "church"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 160,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1150"
+      }
+    }
+  },
+  "m51_05_00_00": {
+    "template": "5105",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 35,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1151"
+      }
+    }
+  },
+  "m51_10_00_00": {
+    "template": "5110",
+    "building": "魔法师塔",
+    "buildingKeys": [
+      "sorcerers"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 87,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1152"
+      }
+    }
+  },
+  "m51_15_00_00": {
+    "template": "5115",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 38,
+    "seedExamples": {
+      "4": {
+        "patternId": "1008",
+        "attachId": "1150"
+      }
+    }
+  },
+  "m52_40_00_00": {
+    "template": "5240",
+    "building": "大教堂",
+    "buildingKeys": [
+      "greatchurch"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1107"
+      }
+    }
+  },
+  "m52_42_00_00": {
+    "template": "5242",
+    "building": "大教堂",
+    "buildingKeys": [
+      "greatchurch"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1107"
+      }
+    }
+  },
+  "m52_45_00_00": {
+    "template": "5245",
+    "building": "大教堂",
+    "buildingKeys": [
+      "greatchurch"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 32,
+    "seedExamples": {
+      "4": {
+        "patternId": "1008",
+        "attachId": "1108"
+      }
+    }
+  },
+  "m52_46_00_00": {
+    "template": "5246",
+    "building": "大教堂",
+    "buildingKeys": [
+      "greatchurch"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 48,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1108"
+      }
+    }
+  },
+  "m52_50_00_00": {
+    "template": "5250",
+    "building": "遗迹",
+    "buildingKeys": [
+      "ruins"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 29,
+    "seedExamples": {
+      "4": {
+        "patternId": "1026",
+        "attachId": "1109"
+      }
+    }
+  },
+  "m52_52_00_00": {
+    "template": "5252",
+    "building": "遗迹",
+    "buildingKeys": [
+      "ruins"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 51,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1109"
+      }
+    }
+  },
+  "m52_55_00_00": {
+    "template": "5255",
+    "building": "遗迹",
+    "buildingKeys": [
+      "ruins"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 36,
+    "seedExamples": {
+      "4": {
+        "patternId": "1009",
+        "attachId": "1110"
+      }
+    }
+  },
+  "m52_57_00_00": {
+    "template": "5257",
+    "building": "遗迹",
+    "buildingKeys": [
+      "ruins"
+    ],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 44,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1110"
+      }
+    }
+  },
+  "m53_00_00_00": {
+    "template": "5300",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 221,
+    "seedExamples": {
+      "0": {
+        "patternId": "1011",
+        "attachId": "2520"
+      },
+      "4": {
+        "patternId": "1015",
+        "attachId": "1200"
+      },
+      "1": {
+        "patternId": "1101",
+        "attachId": "2520"
+      },
+      "2": {
+        "patternId": "1105",
+        "attachId": "2520"
+      },
+      "3": {
+        "patternId": "1111",
+        "attachId": "2520"
+      },
+      "5": {
+        "patternId": "1135",
+        "attachId": "2521"
+      }
+    }
+  },
+  "m53_05_00_00": {
+    "template": "5305",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "0",
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "pointCount": 203,
+    "seedExamples": {
+      "0": {
+        "patternId": "1000",
+        "attachId": "2520"
+      },
+      "4": {
+        "patternId": "1006",
+        "attachId": "1200"
+      },
+      "2": {
+        "patternId": "1107",
+        "attachId": "2520"
+      },
+      "3": {
+        "patternId": "1110",
+        "attachId": "2520"
+      },
+      "5": {
+        "patternId": "1138",
+        "attachId": "2521"
+      }
+    }
+  },
+  "m53_49_00_00": {
+    "template": "5349",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1146"
+      }
+    }
+  },
+  "m53_50_00_00": {
+    "template": "5350",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1144"
+      }
+    }
+  },
+  "m53_51_00_00": {
+    "template": "5351",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1144"
+      }
+    }
+  },
+  "m53_52_00_00": {
+    "template": "5352",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1147"
+      }
+    }
+  },
+  "m53_53_00_00": {
+    "template": "5353",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1147"
+      }
+    }
+  },
+  "m53_54_00_00": {
+    "template": "5354",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1142"
+      }
+    }
+  },
+  "m53_55_00_00": {
+    "template": "5355",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1148"
+      }
+    }
+  },
+  "m53_56_00_00": {
+    "template": "5356",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1148"
+      }
+    }
+  },
+  "m53_57_00_00": {
+    "template": "5357",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1142"
+      }
+    }
+  },
+  "m53_58_00_00": {
+    "template": "5358",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1141"
+      }
+    }
+  },
+  "m53_59_00_00": {
+    "template": "5359",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1141"
+      }
+    }
+  },
+  "m53_60_00_00": {
+    "template": "5360",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1145"
+      }
+    }
+  },
+  "m53_61_00_00": {
+    "template": "5361",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1145"
+      }
+    }
+  },
+  "m53_62_00_00": {
+    "template": "5362",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1143"
+      }
+    }
+  },
+  "m53_63_00_00": {
+    "template": "5363",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1143"
+      }
+    }
+  },
+  "m53_64_00_00": {
+    "template": "5364",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1146"
+      }
+    }
+  },
+  "m53_67_00_00": {
+    "template": "5367",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1135"
+      }
+    }
+  },
+  "m53_68_00_00": {
+    "template": "5368",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1135"
+      }
+    }
+  },
+  "m53_70_00_00": {
+    "template": "5370",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 26,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1138"
+      }
+    }
+  },
+  "m53_71_00_00": {
+    "template": "5371",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 27,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1138"
+      }
+    }
+  },
+  "m53_72_00_00": {
+    "template": "5372",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 27,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1138"
+      }
+    }
+  },
+  "m53_80_00_00": {
+    "template": "5380",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1136"
+      }
+    }
+  },
+  "m53_81_00_00": {
+    "template": "5381",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1137"
+      }
+    }
+  },
+  "m53_82_00_00": {
+    "template": "5382",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1136"
+      }
+    }
+  },
+  "m53_83_00_00": {
+    "template": "5383",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 40,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1137"
+      }
+    }
+  },
+  "m53_86_00_00": {
+    "template": "5386",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 26,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1139"
+      }
+    }
+  },
+  "m53_87_00_00": {
+    "template": "5387",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 26,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1140"
+      }
+    }
+  },
+  "m53_88_00_00": {
+    "template": "5388",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 27,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1139"
+      }
+    }
+  },
+  "m53_89_00_00": {
+    "template": "5389",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 27,
+    "seedExamples": {
+      "4": {
+        "patternId": "1006",
+        "attachId": "1140"
+      }
+    }
+  },
+  "m53_90_00_00": {
+    "template": "5390",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 27,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1139"
+      }
+    }
+  },
+  "m53_91_00_00": {
+    "template": "5391",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 27,
+    "seedExamples": {
+      "4": {
+        "patternId": "1007",
+        "attachId": "1140"
+      }
+    }
+  },
+  "m53_99_00_00": {
+    "template": "5399",
+    "building": null,
+    "buildingKeys": [],
+    "terrainCodes": [
+      "4"
+    ],
+    "pointCount": 44,
+    "seedExamples": {
+      "4": {
+        "patternId": "1005",
+        "attachId": "1210"
+      }
+    }
+  }
+}

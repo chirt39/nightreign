@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import { relicSearchPlugin } from './scripts/relic-search-pages.mjs';
 
 const classicScriptFiles = [
   'crypto-js.min.js',
@@ -28,6 +29,13 @@ const catalogJsonFiles = [
   'weapon-catalog.json',
   'weapon-image-manifest.json',
   'skill-image-manifest.json',
+  'arts-catalog.json',
+  'spells-catalog.json',
+  'damage-panel.json',
+  'damage-actions.json',
+  'damage-effects.json',
+  'damage-weapon-traits.json',
+  'damage-targets.json',
   'map-catalog.json',
   'map-asset-manifest.json',
 ];
@@ -73,7 +81,7 @@ const stylesheetCacheKeyPlugin = {
 };
 
 export default defineConfig({
-  plugins: [vue(), stylesheetCacheKeyPlugin],
+  plugins: [vue(), stylesheetCacheKeyPlugin, relicSearchPlugin()],
   publicDir: 'public',
   define: {
     __CLASSIC_SCRIPT_VERSIONS__: JSON.stringify(classicScriptVersions),
