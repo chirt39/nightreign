@@ -41,7 +41,7 @@ export function validPosition(position) {
 export function referenceMapGroups(points = [], terrainId, visibility) {
   return points.filter(point => point.filterable === false && point.terrainId === terrainId && point.displayCategory === 'fieldElite' && visibility[point.displayCategory] && validPosition(point.normalized)).map(point => ({
     key: `reference:${point.key}`, terrainId: point.terrainId, normalized: point.normalized, reference: point,
-    entries: [{ name: point.nameZh, displayCategory: point.displayCategory }],
+    entries: [{ name: point.nameZh, displayCategory: point.displayCategory, worldMapPointIconId: point.worldMapPointIconId ?? null }],
   }));
 }
 export function safeMapAsset(entry) {

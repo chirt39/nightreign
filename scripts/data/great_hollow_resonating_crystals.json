@@ -1,0 +1,1242 @@
+{
+  "schemaVersion": 1,
+  "name": "大空洞共鸣结晶（小型可触发结晶）",
+  "sourceVersion": {
+    "game": "1.3.3.0",
+    "regulation": "10350000"
+  },
+  "coverage": {
+    "status": "native-candidates-and-random-groups-complete-pattern-join-unresolved",
+    "candidateCount": 21,
+    "nativeInteractionCount": 28,
+    "perSelectedGroupCount": 8,
+    "patternIdsStatus": "unresolved",
+    "patternIdsMeaning": "Empty arrays mean unknown map-pattern membership, not no occurrence. Do not render all candidates as simultaneously present.",
+    "selection": "Event 1037402210 randomly enables one flag in 1037400211..1037400214; each flag enables eight crystals. No map pattern ID correspondence is established.",
+    "excluded": "Central giant crystal; seven native interaction assets never enabled by the four normal random groups; debug groups 1037400215..1037400219.",
+    "runtimeVerified": false
+  },
+  "coordinateTransform": {
+    "terrain": "4",
+    "imageSize": [
+      1536,
+      1536
+    ],
+    "tileSize": 256,
+    "x": "((gridXNo - 41) * 256 + posX + 128) / 1536",
+    "y": "((40 - gridZNo) * 256 - posZ + 128) / 1536",
+    "verification": "Native icon enable flags join to common-event calls and same-map MSB AEG355_112 entities. Icon positions and asset positions are both preserved, including their offsets. Static map calibration only."
+  },
+  "provenance": {
+    "method": "WorldMapPointParam icon 71 / alternate 72 -> enable flag -> EMEVD common event 90015440 -> ActionButtonParam 107800 (text 9200 触发共鸣) -> MSB AEG355_112; random groups from event 1037402210.",
+    "inputSha256": {
+      "WorldMapPointParam.param.xml": "81b2e962dd4c45a946c5a901e659d1b973ac5855cd8677dc968c41da83d6feaf",
+      "ActionButtonParam.param.xml": "ab2e3d4c820979dbac016b5813b4024bf817a816919cd539d155659d6ea67fb3",
+      "events.jsonl": "5cb0bc754e84eaa05edc6e7b5bb3ffd6751b6cb0302b83ea44b59397450d3673",
+      "native-map-details.jsonl": "ab0a63a4e3eff28c656eb75b939a058f4bf6c077978f899a1505b72daa0d9be9",
+      "instruction-signatures.json": "2c82d448b1ae836bca7555ab640d440dd084628ece9dbf7d0e7942a6e5455225"
+    },
+    "rebuild": "python scripts/extract_great_hollow_resonating_crystals.py --param-dir <strict/regulation-bin> --audit-dir <enemy-full-audit/native>",
+    "excludedNativeAssets": [
+      {
+        "map": "m60_42_37_40",
+        "eventId": 0,
+        "instructionIndex": 8,
+        "entityId": 1027401202,
+        "enabledFlag": 1037400252,
+        "usedFlag": 1037400312,
+        "revealedFlag": 1037400282
+      },
+      {
+        "map": "m60_43_37_40",
+        "eventId": 0,
+        "instructionIndex": 15,
+        "entityId": 1037401201,
+        "enabledFlag": 1037400254,
+        "usedFlag": 1037400314,
+        "revealedFlag": 1037400284
+      },
+      {
+        "map": "m60_44_36_40",
+        "eventId": 0,
+        "instructionIndex": 13,
+        "entityId": 1046401201,
+        "enabledFlag": 1037400257,
+        "usedFlag": 1037400317,
+        "revealedFlag": 1037400287
+      },
+      {
+        "map": "m60_45_38_40",
+        "eventId": 0,
+        "instructionIndex": 2,
+        "entityId": 1058401200,
+        "enabledFlag": 1037400263,
+        "usedFlag": 1037400323,
+        "revealedFlag": 1037400293
+      },
+      {
+        "map": "m60_43_36_40",
+        "eventId": 0,
+        "instructionIndex": 16,
+        "entityId": 1036401510,
+        "enabledFlag": 1037400265,
+        "usedFlag": 1037400325,
+        "revealedFlag": 1037400295
+      },
+      {
+        "map": "m60_43_39_40",
+        "eventId": 0,
+        "instructionIndex": 16,
+        "entityId": 1039401520,
+        "enabledFlag": 1037400268,
+        "usedFlag": 1037400328,
+        "revealedFlag": 1037400298
+      },
+      {
+        "map": "m60_44_38_40",
+        "eventId": 0,
+        "instructionIndex": 14,
+        "entityId": 1048401510,
+        "enabledFlag": 1037400269,
+        "usedFlag": 1037400329,
+        "revealedFlag": 1037400299
+      }
+    ]
+  },
+  "randomGroups": [
+    {
+      "selectionFlag": 1037400211,
+      "enabledFlags": [
+        1037400250,
+        1037400253,
+        1037400256,
+        1037400261,
+        1037400264,
+        1037400266,
+        1037400267,
+        1037400271
+      ],
+      "pointKeys": [
+        "great-hollow-resonating-crystal-164274020",
+        "great-hollow-resonating-crystal-164364021",
+        "great-hollow-resonating-crystal-164374020",
+        "great-hollow-resonating-crystal-164384021",
+        "great-hollow-resonating-crystal-164464020",
+        "great-hollow-resonating-crystal-164564020",
+        "great-hollow-resonating-crystal-164574021",
+        "great-hollow-resonating-crystal-164594020"
+      ]
+    },
+    {
+      "selectionFlag": 1037400212,
+      "enabledFlags": [
+        1037400250,
+        1037400255,
+        1037400262,
+        1037400270,
+        1037400272,
+        1037400275,
+        1037400276,
+        1037400278
+      ],
+      "pointKeys": [
+        "great-hollow-resonating-crystal-164274020",
+        "great-hollow-resonating-crystal-164364022",
+        "great-hollow-resonating-crystal-164374022",
+        "great-hollow-resonating-crystal-164374023",
+        "great-hollow-resonating-crystal-164374024",
+        "great-hollow-resonating-crystal-164464022",
+        "great-hollow-resonating-crystal-164484022",
+        "great-hollow-resonating-crystal-164574020"
+      ]
+    },
+    {
+      "selectionFlag": 1037400213,
+      "enabledFlags": [
+        1037400251,
+        1037400259,
+        1037400266,
+        1037400267,
+        1037400270,
+        1037400272,
+        1037400277,
+        1037400278
+      ],
+      "pointKeys": [
+        "great-hollow-resonating-crystal-164274021",
+        "great-hollow-resonating-crystal-164364021",
+        "great-hollow-resonating-crystal-164374023",
+        "great-hollow-resonating-crystal-164384021",
+        "great-hollow-resonating-crystal-164394022",
+        "great-hollow-resonating-crystal-164464022",
+        "great-hollow-resonating-crystal-164474021",
+        "great-hollow-resonating-crystal-164484022"
+      ]
+    },
+    {
+      "selectionFlag": 1037400214,
+      "enabledFlags": [
+        1037400253,
+        1037400256,
+        1037400261,
+        1037400262,
+        1037400273,
+        1037400274,
+        1037400276,
+        1037400279
+      ],
+      "pointKeys": [
+        "great-hollow-resonating-crystal-164274023",
+        "great-hollow-resonating-crystal-164374020",
+        "great-hollow-resonating-crystal-164374024",
+        "great-hollow-resonating-crystal-164464020",
+        "great-hollow-resonating-crystal-164484023",
+        "great-hollow-resonating-crystal-164564020",
+        "great-hollow-resonating-crystal-164574020",
+        "great-hollow-resonating-crystal-164584021"
+      ]
+    }
+  ],
+  "points": [
+    {
+      "key": "great-hollow-resonating-crystal-164274020",
+      "normalized": {
+        "x": 0.249628906,
+        "y": 0.474596354
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400211,
+        1037400212
+      ],
+      "source": {
+        "worldMapPointId": 164274020,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 42,
+          "z": 37
+        },
+        "position": {
+          "X": -0.57,
+          "Y": -763.78,
+          "Z": 167.02
+        },
+        "asset": {
+          "map": "m60_42_37_40",
+          "name": "AEG355_112_9000",
+          "model": "AEG355_112",
+          "position": {
+            "X": -0.571,
+            "Y": -763.776,
+            "Z": 167.015
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.001,
+          "Y": -0.004,
+          "Z": 0.005
+        },
+        "interaction": {
+          "map": "m60_42_37_40",
+          "eventId": 0,
+          "instructionIndex": 6,
+          "entityId": 1027401200,
+          "enabledFlag": 1037400250,
+          "usedFlag": 1037400310,
+          "revealedFlag": 1037400280
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164274021",
+      "normalized": {
+        "x": 0.271842448,
+        "y": 0.60014974
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400213
+      ],
+      "source": {
+        "worldMapPointId": 164274021,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 42,
+          "z": 37
+        },
+        "position": {
+          "X": 33.55,
+          "Y": -692.61,
+          "Z": -25.83
+        },
+        "asset": {
+          "map": "m60_42_37_40",
+          "name": "AEG355_112_9001",
+          "model": "AEG355_112",
+          "position": {
+            "X": 33.55,
+            "Y": -692.608,
+            "Z": -25.832
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.0,
+          "Y": -0.002,
+          "Z": 0.002
+        },
+        "interaction": {
+          "map": "m60_42_37_40",
+          "eventId": 0,
+          "instructionIndex": 7,
+          "entityId": 1027401201,
+          "enabledFlag": 1037400251,
+          "usedFlag": 1037400311,
+          "revealedFlag": 1037400281
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164274023",
+      "normalized": {
+        "x": 0.218346354,
+        "y": 0.635989583
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400214
+      ],
+      "source": {
+        "worldMapPointId": 164274023,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 42,
+          "z": 37
+        },
+        "position": {
+          "X": -48.62,
+          "Y": -736.53,
+          "Z": -80.88
+        },
+        "asset": {
+          "map": "m60_42_37_40",
+          "name": "AEG355_112_9003",
+          "model": "AEG355_112",
+          "position": {
+            "X": -48.625,
+            "Y": -736.527,
+            "Z": -80.884
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.005,
+          "Y": -0.003,
+          "Z": 0.004
+        },
+        "interaction": {
+          "map": "m60_42_37_40",
+          "eventId": 0,
+          "instructionIndex": 9,
+          "entityId": 1027401203,
+          "enabledFlag": 1037400274,
+          "usedFlag": 1037400334,
+          "revealedFlag": 1037400304
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164364021",
+      "normalized": {
+        "x": 0.328157552,
+        "y": 0.756471354
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400211,
+        1037400213
+      ],
+      "source": {
+        "worldMapPointId": 164364021,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 43,
+          "z": 36
+        },
+        "position": {
+          "X": -135.95,
+          "Y": -609.82,
+          "Z": -9.94
+        },
+        "asset": {
+          "map": "m60_43_36_40",
+          "name": "AEG355_112_9001",
+          "model": "AEG355_112",
+          "position": {
+            "X": -131.248,
+            "Y": -609.82,
+            "Z": -11.234
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": -4.702,
+          "Y": 0.0,
+          "Z": 1.294
+        },
+        "interaction": {
+          "map": "m60_43_36_40",
+          "eventId": 0,
+          "instructionIndex": 17,
+          "entityId": 1036401511,
+          "enabledFlag": 1037400266,
+          "usedFlag": 1037400326,
+          "revealedFlag": 1037400296
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164364022",
+      "normalized": {
+        "x": 0.421393229,
+        "y": 0.785436198
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400212
+      ],
+      "source": {
+        "worldMapPointId": 164364022,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 43,
+          "z": 36
+        },
+        "position": {
+          "X": 7.26,
+          "Y": -565.9,
+          "Z": -54.43
+        },
+        "asset": {
+          "map": "m60_43_36_40",
+          "name": "AEG355_112_9002",
+          "model": "AEG355_112",
+          "position": {
+            "X": 10.01,
+            "Y": -566.356,
+            "Z": -55.104
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": -2.75,
+          "Y": 0.456,
+          "Z": 0.674
+        },
+        "interaction": {
+          "map": "m60_43_36_40",
+          "eventId": 0,
+          "instructionIndex": 18,
+          "entityId": 1036401512,
+          "enabledFlag": 1037400275,
+          "usedFlag": 1037400335,
+          "revealedFlag": 1037400305
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164374020",
+      "normalized": {
+        "x": 0.437395833,
+        "y": 0.585970052
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400211,
+        1037400214
+      ],
+      "source": {
+        "worldMapPointId": 164374020,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 43,
+          "z": 37
+        },
+        "position": {
+          "X": 31.84,
+          "Y": -762.72,
+          "Z": -4.05
+        },
+        "asset": {
+          "map": "m60_43_37_40",
+          "name": "AEG355_112_1000",
+          "model": "AEG355_112",
+          "position": {
+            "X": 31.842514,
+            "Y": -766.4491,
+            "Z": 3.204511
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": -0.002514,
+          "Y": 3.7291,
+          "Z": -7.254511
+        },
+        "interaction": {
+          "map": "m60_43_37_40",
+          "eventId": 0,
+          "instructionIndex": 14,
+          "entityId": 1037401200,
+          "enabledFlag": 1037400253,
+          "usedFlag": 1037400313,
+          "revealedFlag": 1037400283
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164374022",
+      "normalized": {
+        "x": 0.488046875,
+        "y": 0.665540365
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400212
+      ],
+      "source": {
+        "worldMapPointId": 164374022,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 43,
+          "z": 37
+        },
+        "position": {
+          "X": 109.64,
+          "Y": -767.65,
+          "Z": -126.27
+        },
+        "asset": {
+          "map": "m60_43_37_40",
+          "name": "AEG355_112_9001",
+          "model": "AEG355_112",
+          "position": {
+            "X": 109.64,
+            "Y": -767.652,
+            "Z": -126.272
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.0,
+          "Y": 0.002,
+          "Z": 0.002
+        },
+        "interaction": {
+          "map": "m60_43_37_40",
+          "eventId": 0,
+          "instructionIndex": 16,
+          "entityId": 1037401202,
+          "enabledFlag": 1037400255,
+          "usedFlag": 1037400315,
+          "revealedFlag": 1037400285
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164374023",
+      "normalized": {
+        "x": 0.377246094,
+        "y": 0.622460937
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400212,
+        1037400213
+      ],
+      "source": {
+        "worldMapPointId": 164374023,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 43,
+          "z": 37
+        },
+        "position": {
+          "X": -60.55,
+          "Y": -794.66,
+          "Z": -60.1
+        },
+        "asset": {
+          "map": "m60_43_37_40",
+          "name": "AEG355_112_9002",
+          "model": "AEG355_112",
+          "position": {
+            "X": -57.874,
+            "Y": -795.413,
+            "Z": -57.624
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": -2.676,
+          "Y": 0.753,
+          "Z": -2.476
+        },
+        "interaction": {
+          "map": "m60_43_37_40",
+          "eventId": 0,
+          "instructionIndex": 17,
+          "entityId": 1037401203,
+          "enabledFlag": 1037400272,
+          "usedFlag": 1037400332,
+          "revealedFlag": 1037400302
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164374024",
+      "normalized": {
+        "x": 0.401614583,
+        "y": 0.48264974
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400212,
+        1037400214
+      ],
+      "source": {
+        "worldMapPointId": 164374024,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 43,
+          "z": 37
+        },
+        "position": {
+          "X": -23.12,
+          "Y": -769.79,
+          "Z": 154.65
+        },
+        "asset": {
+          "map": "m60_43_37_40",
+          "name": "AEG355_112_9003",
+          "model": "AEG355_112",
+          "position": {
+            "X": -23.979,
+            "Y": -769.792,
+            "Z": 152.657
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.859,
+          "Y": 0.002,
+          "Z": 1.993
+        },
+        "interaction": {
+          "map": "m60_43_37_40",
+          "eventId": 0,
+          "instructionIndex": 18,
+          "entityId": 1037401204,
+          "enabledFlag": 1037400276,
+          "usedFlag": 1037400336,
+          "revealedFlag": 1037400306
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164384021",
+      "normalized": {
+        "x": 0.365332031,
+        "y": 0.440898438
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400211,
+        1037400213
+      ],
+      "source": {
+        "worldMapPointId": 164384021,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 43,
+          "z": 38
+        },
+        "position": {
+          "X": -78.85,
+          "Y": -727.61,
+          "Z": -37.22
+        },
+        "asset": {
+          "map": "m60_43_38_40",
+          "name": "AEG355_112_9000",
+          "model": "AEG355_112",
+          "position": {
+            "X": -79.264,
+            "Y": -728.017,
+            "Z": -39.317
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.414,
+          "Y": 0.407,
+          "Z": 2.097
+        },
+        "interaction": {
+          "map": "m60_43_38_40",
+          "eventId": 0,
+          "instructionIndex": 18,
+          "entityId": 1038401500,
+          "enabledFlag": 1037400267,
+          "usedFlag": 1037400327,
+          "revealedFlag": 1037400297
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164394022",
+      "normalized": {
+        "x": 0.455097656,
+        "y": 0.320957031
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400213
+      ],
+      "source": {
+        "worldMapPointId": 164394022,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 43,
+          "z": 39
+        },
+        "position": {
+          "X": 59.03,
+          "Y": -702.59,
+          "Z": -108.99
+        },
+        "asset": {
+          "map": "m60_43_39_40",
+          "name": "AEG355_112_9001",
+          "model": "AEG355_112",
+          "position": {
+            "X": 59.025,
+            "Y": -702.595,
+            "Z": -108.988
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.005,
+          "Y": 0.005,
+          "Z": -0.002
+        },
+        "interaction": {
+          "map": "m60_43_39_40",
+          "eventId": 0,
+          "instructionIndex": 17,
+          "entityId": 1039401521,
+          "enabledFlag": 1037400277,
+          "usedFlag": 1037400337,
+          "revealedFlag": 1037400307
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164464020",
+      "normalized": {
+        "x": 0.624602865,
+        "y": 0.745084635
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400211,
+        1037400214
+      ],
+      "source": {
+        "worldMapPointId": 164464020,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 44,
+          "z": 36
+        },
+        "position": {
+          "X": 63.39,
+          "Y": -749.83,
+          "Z": 7.55
+        },
+        "asset": {
+          "map": "m60_44_36_40",
+          "name": "AEG355_112_9000",
+          "model": "AEG355_112",
+          "position": {
+            "X": 63.389,
+            "Y": -749.827,
+            "Z": 7.546
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.001,
+          "Y": -0.003,
+          "Z": 0.004
+        },
+        "interaction": {
+          "map": "m60_44_36_40",
+          "eventId": 0,
+          "instructionIndex": 12,
+          "entityId": 1046401200,
+          "enabledFlag": 1037400256,
+          "usedFlag": 1037400316,
+          "revealedFlag": 1037400286
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164464022",
+      "normalized": {
+        "x": 0.629876302,
+        "y": 0.656210938
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400212,
+        1037400213
+      ],
+      "source": {
+        "worldMapPointId": 164464022,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 44,
+          "z": 36
+        },
+        "position": {
+          "X": 71.49,
+          "Y": -760.16,
+          "Z": 144.06
+        },
+        "asset": {
+          "map": "m60_44_36_40",
+          "name": "AEG355_112_9002",
+          "model": "AEG355_112",
+          "position": {
+            "X": 71.485,
+            "Y": -760.157,
+            "Z": 144.064
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.005,
+          "Y": -0.003,
+          "Z": -0.004
+        },
+        "interaction": {
+          "map": "m60_44_36_40",
+          "eventId": 0,
+          "instructionIndex": 14,
+          "entityId": 1046401202,
+          "enabledFlag": 1037400278,
+          "usedFlag": 1037400338,
+          "revealedFlag": 1037400308
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164474021",
+      "normalized": {
+        "x": 0.665592448,
+        "y": 0.599622396
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400213
+      ],
+      "source": {
+        "worldMapPointId": 164474021,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 44,
+          "z": 37
+        },
+        "position": {
+          "X": 126.35,
+          "Y": -794.4,
+          "Z": -25.02
+        },
+        "asset": {
+          "map": "m60_44_37_40",
+          "name": "AEG355_112_9001",
+          "model": "AEG355_112",
+          "position": {
+            "X": 126.353,
+            "Y": -794.402,
+            "Z": -25.024
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": -0.003,
+          "Y": 0.002,
+          "Z": 0.004
+        },
+        "interaction": {
+          "map": "m60_44_37_40",
+          "eventId": 0,
+          "instructionIndex": 8,
+          "entityId": 1047401201,
+          "enabledFlag": 1037400259,
+          "usedFlag": 1037400319,
+          "revealedFlag": 1037400289
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164484022",
+      "normalized": {
+        "x": 0.642369792,
+        "y": 0.476308594
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400212,
+        1037400213
+      ],
+      "source": {
+        "worldMapPointId": 164484022,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 44,
+          "z": 38
+        },
+        "position": {
+          "X": 90.68,
+          "Y": -698.64,
+          "Z": -91.61
+        },
+        "asset": {
+          "map": "m60_44_38_40",
+          "name": "AEG355_112_9001",
+          "model": "AEG355_112",
+          "position": {
+            "X": 90.68,
+            "Y": -698.638,
+            "Z": -91.615
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.0,
+          "Y": -0.002,
+          "Z": 0.005
+        },
+        "interaction": {
+          "map": "m60_44_38_40",
+          "eventId": 0,
+          "instructionIndex": 8,
+          "entityId": 1048401511,
+          "enabledFlag": 1037400270,
+          "usedFlag": 1037400330,
+          "revealedFlag": 1037400300
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164484023",
+      "normalized": {
+        "x": 0.523554688,
+        "y": 0.4353125
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400214
+      ],
+      "source": {
+        "worldMapPointId": 164484023,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 44,
+          "z": 38
+        },
+        "position": {
+          "X": -91.82,
+          "Y": -715.91,
+          "Z": -28.64
+        },
+        "asset": {
+          "map": "m60_44_38_40",
+          "name": "AEG355_112_9002",
+          "model": "AEG355_112",
+          "position": {
+            "X": -89.276,
+            "Y": -715.578,
+            "Z": -27.297
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": -2.544,
+          "Y": -0.332,
+          "Z": -1.343
+        },
+        "interaction": {
+          "map": "m60_44_38_40",
+          "eventId": 0,
+          "instructionIndex": 9,
+          "entityId": 1048401512,
+          "enabledFlag": 1037400273,
+          "usedFlag": 1037400333,
+          "revealedFlag": 1037400303
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164564020",
+      "normalized": {
+        "x": 0.789863281,
+        "y": 0.760182292
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400211,
+        1037400214
+      ],
+      "source": {
+        "worldMapPointId": 164564020,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 45,
+          "z": 36
+        },
+        "position": {
+          "X": 61.23,
+          "Y": -844.97,
+          "Z": -15.64
+        },
+        "asset": {
+          "map": "m60_45_36_40",
+          "name": "AEG355_112_9000",
+          "model": "AEG355_112",
+          "position": {
+            "X": 59.224,
+            "Y": -844.968,
+            "Z": -13.532
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 2.006,
+          "Y": -0.002,
+          "Z": -2.108
+        },
+        "interaction": {
+          "map": "m60_45_36_40",
+          "eventId": 0,
+          "instructionIndex": 41,
+          "entityId": 1056401210,
+          "enabledFlag": 1037400261,
+          "usedFlag": 1037400321,
+          "revealedFlag": 1037400291
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164574020",
+      "normalized": {
+        "x": 0.776334635,
+        "y": 0.611067708
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400212,
+        1037400214
+      ],
+      "source": {
+        "worldMapPointId": 164574020,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 45,
+          "z": 37
+        },
+        "position": {
+          "X": 40.45,
+          "Y": -765.16,
+          "Z": -42.6
+        },
+        "asset": {
+          "map": "m60_45_37_40",
+          "name": "AEG355_112_9000",
+          "model": "AEG355_112",
+          "position": {
+            "X": 40.448,
+            "Y": -765.162,
+            "Z": -42.685
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.002,
+          "Y": 0.002,
+          "Z": 0.085
+        },
+        "interaction": {
+          "map": "m60_45_37_40",
+          "eventId": 0,
+          "instructionIndex": 17,
+          "entityId": 1057401200,
+          "enabledFlag": 1037400262,
+          "usedFlag": 1037400322,
+          "revealedFlag": 1037400292
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164574021",
+      "normalized": {
+        "x": 0.70640625,
+        "y": 0.514010417
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400211
+      ],
+      "source": {
+        "worldMapPointId": 164574021,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 45,
+          "z": 37
+        },
+        "position": {
+          "X": -66.96,
+          "Y": -726.2,
+          "Z": 106.48
+        },
+        "asset": {
+          "map": "m60_45_37_40",
+          "name": "AEG355_112_9001",
+          "model": "AEG355_112",
+          "position": {
+            "X": -66.531,
+            "Y": -726.5,
+            "Z": 103.004
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": -0.429,
+          "Y": 0.3,
+          "Z": 3.476
+        },
+        "interaction": {
+          "map": "m60_45_37_40",
+          "eventId": 0,
+          "instructionIndex": 18,
+          "entityId": 1057401201,
+          "enabledFlag": 1037400271,
+          "usedFlag": 1037400331,
+          "revealedFlag": 1037400301
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164584021",
+      "normalized": {
+        "x": 0.729622396,
+        "y": 0.482688802
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400214
+      ],
+      "source": {
+        "worldMapPointId": 164584021,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 45,
+          "z": 38
+        },
+        "position": {
+          "X": -31.3,
+          "Y": -649.75,
+          "Z": -101.41
+        },
+        "asset": {
+          "map": "m60_45_38_40",
+          "name": "AEG355_112_9001",
+          "model": "AEG355_112",
+          "position": {
+            "X": -33.434,
+            "Y": -649.668,
+            "Z": -99.802
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 2.134,
+          "Y": -0.082,
+          "Z": -1.608
+        },
+        "interaction": {
+          "map": "m60_45_38_40",
+          "eventId": 0,
+          "instructionIndex": 3,
+          "entityId": 1058401201,
+          "enabledFlag": 1037400279,
+          "usedFlag": 1037400339,
+          "revealedFlag": 1037400309
+        }
+      }
+    },
+    {
+      "key": "great-hollow-resonating-crystal-164594020",
+      "normalized": {
+        "x": 0.69563151,
+        "y": 0.317207031
+      },
+      "patternIds": [],
+      "selectionFlags": [
+        1037400211
+      ],
+      "source": {
+        "worldMapPointId": 164594020,
+        "iconId": 71,
+        "alternateIconId": 72,
+        "grid": {
+          "x": 45,
+          "z": 39
+        },
+        "position": {
+          "X": -83.51,
+          "Y": -681.62,
+          "Z": -103.23
+        },
+        "asset": {
+          "map": "m60_45_39_40",
+          "name": "AEG355_112_9000",
+          "model": "AEG355_112",
+          "position": {
+            "X": -83.514,
+            "Y": -681.624,
+            "Z": -103.226
+          }
+        },
+        "iconMinusAssetPosition": {
+          "X": 0.004,
+          "Y": 0.004,
+          "Z": -0.004
+        },
+        "interaction": {
+          "map": "m60_45_39_40",
+          "eventId": 0,
+          "instructionIndex": 2,
+          "entityId": 1059401200,
+          "enabledFlag": 1037400264,
+          "usedFlag": 1037400324,
+          "revealedFlag": 1037400294
+        }
+      }
+    }
+  ]
+}

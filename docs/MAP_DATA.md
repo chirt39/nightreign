@@ -14,7 +14,7 @@
 | 方案事件 | `LotResultMapPatternFlag.eventFlag` 或对应 `modifierSet=0` 的 modifier；有突袭日次时用原生 7705/7725 标志 | 251 个方案有一项事件、269 个方案已确认无这些事件，按显式方案 ID 与参考事件家族／日次 520/520 一致；事件位置未知，不绘制到任何点位 |
 | 据点首领 | 17 个 `smallBaseMapId` 与参考首领键在 520 个方案中的出现集合逐项完全一致，位置仍取原生 attachId | 348 个点位（主要是大空洞）有已核对首领 ID；其他据点模板仍待核 |
 | 野外精英怪 | `SmallBaseAndSpotDefine` 图标 16 与 28 对应的 22 个模板；按显式方案 ID 与参照资料的具名首领槽核对身份，位置取原生 attachId，经已验证地形系数转换 | 22 个模板、5,060 个方案点位标为 `displayCategory: fieldElite`；图标 28 模板位于城堡地下室的 390 个原始点仍保留，但不作野外精英展示或筛选。3,770 个具名野外槽可直接交叉核对且无冲突。通用 Red Wolf 用“红狼”作参考标签译名，并非官方中文名 |
-| 特殊地形固定怪物参考点 | 用户提供的无名-Eisregen 标注图，与本地 1536×1536 底图用特征点配准后换算坐标；独立 `referencePoints`，含来源和 `positionAccuracy: reference` | 山顶 12 处、火山口 10 处、隐城 13 处，共 35 处，仅供显示，`filterable: false`。其中营地骑士、废墟双白金之子归 `baseBoss`，其余 33 处归 `fieldElite`。同种怪物的候选刷新位置不表示同局全部出现；腐败森林 buff、宝箱／宝藏楼及基础地图城堡 8、9 号没有加入怪物点 |
+| 特殊地形固定怪物参考点 | 用户标注图用于核名；有色精英坐标取原版 `WorldMapPointParam`，无色独立精英坐标取原版场景实体 | 山顶 12 处、火山口 10 处、隐城 14 处，共 36 处，仅供显示，`filterable: false`。其中 27 处精英有原版蓝红图标，7 处精英无专属蓝红图标，另 2 处是山顶据点首领参考点。同种怪物的候选刷新位置不表示同局全部出现；腐败森林 buff、宝箱／宝藏楼及基础地图城堡 8、9 号没有加入怪物点 |
 
 外部参照仅用于静态核对数字身份与含义：Artimuz 的 [Nightreign Seed Finder](https://nightreign-seed-finder.com/) 数据版本 `1.03.2`，经公开 [nightreign-seed-observer](https://github.com/stockholm754-source/nightreign-seed-observer) 项目安全读取为 JSON。以显式 `seed_id = patternId` 连接，而非数组顺序。没有将外部 36 槽布局、坐标、图片或整表复制到公开目录。原作者资料未声明可再分发本项目所需的授权；公开目录的事实映射保留来源、版本和核对状态，地图图片另按资产专项处理。本地游戏版本更新后须重新比对；此处的 520 条吻合不代表游戏运行时已实测。
 
@@ -23,9 +23,19 @@
 - `patternId` 是方案主键。`nightlord.menuRowId` 与 `definitions.nightlords` 用于已知夜王正向筛图；`dayBosses.day1/day2.sourceId`、`terrain.value`、`events.values[].sourceId` 和点位 `features[].sourceId` 用同一组方案反向筛选。所有 ID 在前端按字符串比较。
 - `known` 是已确认值；`known_absent` 是已确认不存在；`unknown` 是资料未覆盖。点位 `coverage[kind]` 仅在相应类别完整核对时为 `known`，其余不能据缺席排除。`features` 可同时包含原始建筑 ID、通用建筑类别、野外精英怪、据点首领，以及未知的其他怪物／事件；通用类别适用于“教堂”等用户选项。未出现的整个 attachId 目前仍按未知处理。
 - 22 类野外精英怪标为 `role: fieldElite`、`displayCategory: fieldElite`，对应点位 `coverage.fieldElite=known`；城堡屋顶 `757/2757` 和地下室 `756/2756` 不纳入该角色，覆盖状态仍为 `unknown`。原有 17 类据点主首领保留 `role: primarySmallBaseBoss`、`displayCategory: baseBoss`；仅已核验的 17 个模板点位标 `coverage.primarySmallBaseBoss=known`。每个 `(patternId, attachId)` 在原生 `LotResultSmallBaseAndSpot` 中至多一个 `smallBaseMapId`。相同角色中两个已核验且不同的模板可以互斥；未知模板和缺少点位行不能据缺席排除。`coverage.monster` 始终为 `unknown`，不能据此排除同点普通怪、召唤物或事件刷怪。`referencePoints` 只有参考位置，不属于方案原生线索，不能用于排除候选。
-- 原生野外精英的 `definitions.features[fieldElite:*].worldMapPointIconId` 直接取 `SmallBaseAndSpotDefine`：11 类为 `16`，11 类为 `28`。蓝／红图标由图标资产核验后按此 ID 映射。35 个截图参考点的 `worldMapPointIconId` 均为 `null`；其中 33 个野外精英参考点没有唯一的原版图标证据，不由截图编号颜色或怪物名称猜测强弱。未确定清单见仓库外 `E:\海斗\outputs\map-nightlord-20261110\data\field-elite-icon-classification.json`。
+- 原生野外精英的 `definitions.features[fieldElite:*].worldMapPointIconId` 直接取 `SmallBaseAndSpotDefine`：11 类为 `16`，11 类为 `28`。蓝／红图标由图标资产核验后按此 ID 映射。三个特殊地形的显示参考点中，27 处有原版 `WorldMapPointParam` 图标行（蓝 16 处、红 11 处），行号保存在 `nativeWorldMapPointRowIds`，显示坐标直接取原版图标位置，验收误差小于 1 像素。这些点按 `90015017` 事件旗标与原生实体参数核对；隐城另补一处原版有色王室幽魂点。7 处独立原生精英只有实体位置，没有专属蓝红地图图标，继续使用中性标识；山顶另有 2 处据点首领参考点。不能单凭截图编号颜色、怪物名称或近邻位置猜测强弱。
 - `nightlord.form` 全部为 `unknown`；夜王菜单普通色头像不能证明深夜实战形态。`eligibility.depths` 全部为 `unknown`，没有将 `NightBossMenuParam` 的抽选权重当成地图方案适用深度。`allPlayersHaveDlc.required=true` 仅用于 DLC 夜王、稀有地形 4 与安定者突袭事件；依据[官方 1.03.1 更新说明](https://en.bandainamcoent.eu/elden-ring/news/elden-ring-nightreign-patch-notes-version-1031)和[热修说明](https://en.bandainamcoent.eu/elden-ring/news/elden-ring-nightreign-hotfix-notes-version-1031)。未提供任何概率。
 - `definitions.bosses` 的组合名称由多条本机 FMG 成员名拼接，不能当作 NPC 阶段 ID。首领、野外首领、召唤物、强化体、突袭事件分属不同来源 ID；只按中文同名不能归并。
+
+## 山顶、火山口与隐城的精英图标
+
+这三种地形共收录 34 个地形专属野外精英点。27 个点使用原生地图标记的坐标与颜色（`WorldMapPointParam` 图标 16 为蓝色，28 为红色）。同地形的事件旗标、敌人实体或组与怪物配置共同确定标记身份。其余七个点从场景摆放与精英奖励记录确认位置，使用灰色标记：山顶一处雪巨人、火山口两处火焰主教、隐城四处灵庙骑士。灰色表示游戏未给该实体单列蓝红图标。双雪巨人和火焰主教群各使用一个群体标记。
+
+## 大空洞的共鸣结晶
+
+[共鸣结晶点位和随机组](../scripts/data/great_hollow_resonating_crystals.json)记录了 21 个游戏地图标记。通过地图图标参数 71、启用旗标、交互事件 90015440 和模型 AEG355_112 对应到可触发共鸣的小结晶。事件 1037402210 随机选择四组中的一组，每组启用八个位置。未标记时显示四组的并集。每标记一个结晶，就排除不含该点的组；剩余组的并集是可见点位，交集中尚未手动标记的点是红框。结晶分组不与夜王或地图配置绑定。横纵坐标来自原版地图图标的位置，按大空洞底图的坐标变换投影。
+
+[提取脚本](../scripts/extract_great_hollow_resonating_crystals.py)读取原生参数 XML 和场景、事件导出文件。彩色图标取自 DLC 高分辨率图集 `SB_MapIcon_DLC01_0` 的 `MENU_MAP_42041_071.png`（原图裁切框为 x=496、y=0、宽高各 200 像素）。
 
 ## 实际筛选链与局限
 

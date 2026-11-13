@@ -23,6 +23,26 @@ ASSET_MANIFEST = REPO / "public/map-asset-manifest.json"
 CASTLE_BOSS_ATTACH_IDS = {"756", "757", "2756", "2757"}
 
 
+def add_native_elite_placements(points: list[dict]) -> list[dict]:
+    """Replace the remaining sketch positions for these mobs with their MSB placements."""
+    data = json.loads((REPO / "scripts/data/special_terrain_elite_entities.json").read_text(encoding="utf-8"))
+    # Within each family only unmapped sketch markers are superseded. The native
+    # map icon for the double snow giants / prelate group is a separate encounter.
+    previous = {"1:1", "1:9", "2:5", "2:6", "2:7", "5:1", "5:4", "5:6", "5:11"}
+    result = [p for p in points if p["key"] not in previous or p.get("worldMapPointIconId") is not None]
+    for placement in data["points"]:
+        if placement["eliteEvidence"]["kind"] != "native_placement_with_elite_reward":
+            continue
+        source = placement["source"]
+        result.append({
+            "key": placement["key"], "nameZh": placement["nameZh"], "terrainId": placement["terrainId"],
+            "displayCategory": "fieldElite", "normalized": placement["normalized"], "filterable": False,
+            "positionAccuracy": "native_entity_placement", "worldMapPointIconId": None,
+            "source": {"mapId": source["mapId"], "part": source["partName"], "npcParamId": source["npcParamId"]},
+        })
+    return result
+
+
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -81,6 +101,8 @@ def main() -> None:
     _, attach_rows = param(source, "SmallBaseAndSpotAttachPoint")
     _, define_rows = param(source, "SmallBaseAndSpotDefine")
     _, menu_rows = param(source, "NightBossMenuParam")
+    _, world_map_rows = param(source, "WorldMapPointParam")
+    world_map_by_id = {row["id"]: row for row in world_map_rows}
 
     by_pattern: dict[str, list[dict[str, str]]] = defaultdict(list)
     for row in flag_rows:
@@ -388,10 +410,54 @@ def main() -> None:
         "patterns": patterns,
         "referencePoints": overrides["referencePoints"],
     }
+    for key, native in overrides["nativeReferenceElitePoints"].items():
+        row = world_map_by_id[native["worldMapPointRowId"]]
+        transform = calibrated_terrains[native["terrainId"]]
+        if int(row["eventFlagId0"]) != native["eventFlagId"] or row["worldMapPointIconId"] not in {"16", "28"} or int(row["areaNo"]) != transform["areaNo"]:
+            raise ValueError(f"Invalid native reference point {key}")
+        px = (int(row["gridXNo"]) * transform["pixelX"]["gridXNo"] + float(row["posX"]) * transform["pixelX"]["posX"] + transform["pixelX"]["constant"]) / transform["width"]
+        py = (int(row["gridZNo"]) * transform["pixelY"]["gridZNo"] + float(row["posZ"]) * transform["pixelY"]["posZ"] + transform["pixelY"]["constant"]) / transform["height"]
+        catalog["referencePoints"].append({
+            "key": key, "terrainId": native["terrainId"], "nameZh": native["nameZh"],
+            "normalized": {"x": round(px, 7), "y": round(py, 7)}, "displayCategory": "fieldElite",
+            "locationNote": "原版地图标记位置", "source": {"author": "FromSoftware", "label": f"WorldMapPointParam {row['id']} / event {native['eventFlagId']} / NpcParam {native['npcParamId']}"},
+            "positionAccuracy": "native", "filterable": False, "worldMapPointIconId": int(row["worldMapPointIconId"]),
+            "nativeWorldMapPointRowIds": [row["id"]],
+        })
+    icon_rows_by_point = overrides["verifiedReferencePointIconRows"]
+    if set(icon_rows_by_point) - {point["key"] for point in catalog["referencePoints"]}:
+        raise ValueError("Native icon mapping has an unknown reference point")
     for point in catalog["referencePoints"]:
         xy = point["normalized"]
-        if point["filterable"] is not False or point["positionAccuracy"] != "reference" or point["displayCategory"] not in {"fieldElite", "baseBoss"} or not (0 <= xy["x"] <= 1 and 0 <= xy["y"] <= 1):
+        if point["filterable"] is not False or point["positionAccuracy"] not in {"reference", "native"} or point["displayCategory"] not in {"fieldElite", "baseBoss"} or not (0 <= xy["x"] <= 1 and 0 <= xy["y"] <= 1):
             raise ValueError(f"Invalid display-only reference point {point['key']}")
+        row_ids = icon_rows_by_point.get(point["key"], [])
+        if row_ids:
+            icons = set()
+            native_positions = []
+            event_flags = []
+            transform = calibrated_terrains[point["terrainId"]]
+            for row_id in row_ids:
+                row = world_map_by_id[row_id]
+                px = (int(row["gridXNo"]) * transform["pixelX"]["gridXNo"] + float(row["posX"]) * transform["pixelX"]["posX"] + transform["pixelX"]["constant"]) / transform["width"]
+                py = (int(row["gridZNo"]) * transform["pixelY"]["gridZNo"] + float(row["posZ"]) * transform["pixelY"]["posZ"] + transform["pixelY"]["constant"]) / transform["height"]
+                distance = ((px - xy["x"]) ** 2 + (py - xy["y"]) ** 2) ** .5 * transform["width"]
+                if point["displayCategory"] != "fieldElite" or row["worldMapPointIconId"] not in {"16", "28"} or int(row["eventFlagId0"]) == 0 or int(row["areaNo"]) != transform["areaNo"] or distance > 96:
+                    raise ValueError(f"Unverified native icon row {row_id} for {point['key']}")
+                icons.add(int(row["worldMapPointIconId"]))
+                native_positions.append((px, py))
+                event_flags.append(int(row["eventFlagId0"]))
+            if len(icons) != 1:
+                raise ValueError(f"Conflicting native icon rows for {point['key']}")
+            if any(((px - native_positions[0][0]) ** 2 + (py - native_positions[0][1]) ** 2) ** .5 * transform["width"] > 1 for px, py in native_positions):
+                raise ValueError(f"Conflicting native icon positions for {point['key']}")
+            point["worldMapPointIconId"] = icons.pop()
+            point["nativeWorldMapPointRowIds"] = row_ids
+            point["normalized"] = {"x": round(native_positions[0][0], 7), "y": round(native_positions[0][1], 7)}
+            point["positionAccuracy"] = "native"
+            point["locationNote"] = "原版地图标记位置"
+            point["source"] = {"author": "FromSoftware", "label": f"WorldMapPointParam {', '.join(row_ids)}", "eventFlagIds": event_flags}
+    catalog["referencePoints"] = add_native_elite_placements(catalog["referencePoints"])
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(catalog, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
     print(f"{args.output}: {len(patterns)} patterns, {sum(len(p['points']) for p in patterns)} raw points")

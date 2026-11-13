@@ -126,15 +126,19 @@ function buildEnemyDisplayIndex(){
   state.enemyRowsById=new Map();
   state.enemyOrdinarySignatures=new Set();
   state.enemySearchRows=[];
+  const hiddenFormIds = new Set(state.enemyData.albinauricForms?.find(form => form.statId === '34700000')?.sourceIds);
+  const visibleRecords = [];
   state.enemyData.rows.forEach((row,index)=>{
     const id=String(row[1]);
+    if(hiddenFormIds.has(id))return;
+    visibleRecords.push({row,index});
     if(!state.enemyRowsById.has(id))state.enemyRowsById.set(id,row);
     const displayName=enemyDisplayName(row),groupName=enemyGroupName(row);
     state.enemyRowInfo.set(row,{row,index,displayName,groupName});
     if(!enemyName(row).includes('[灾域]'))state.enemyOrdinarySignatures.add(JSON.stringify([groupName,enemyClassificationSignature(row)]));
   });
   const entities=new Map();
-  state.enemyData.rows.forEach((row,index)=>{
+  visibleRecords.forEach(({row,index})=>{
     const key=enemyEntityKey(row);
     if(!entities.has(key))entities.set(key,{key,name:enemyDisplayName(row),records:[],pairedDisaster:[],sourceOnly:[],statGroups:[]});
     const entity=entities.get(key),record={row,index};
@@ -171,7 +175,7 @@ function buildEnemyDisplayIndex(){
     entity.locations=displayEnemyLocations([...entity.records,...entity.pairedDisaster,...entity.sourceOnly].flatMap(({row})=>enemyRowDisplayLocations(row)));
   }
   state.enemyEntities=entities;
-  state.enemySearchRows=state.enemyData.rows.map(row=>{
+  state.enemySearchRows=visibleRecords.map(({row})=>{
     const info=state.enemyRowInfo.get(row),entity=entities.get(enemyEntityKey(row));
     info.searchText=enemySearchText(row).toLocaleLowerCase();
     info.locations=enemyRowDisplayLocations(row);
@@ -197,9 +201,9 @@ function enemySourceNote(row){
   const independent=isIndependentDisaster(row);
   return {sourceName,locations:displayEnemyLocations([...locations]),variant:enemyName(row).includes('[灾域]')?(independent?'独立记录':'灾域版'):'普通版'};
 }
-function enemyLocationSummary(group, form){
+function enemyLocationSummary(group){
   const locations=group.locations||[];
-  return locations.length?locations.map(loc=>loc==='锻造村'&&form?.forgeEncounter?`锻造村（${form.forgeEncounter}）`:loc).join('、'):'出现地点未收录';
+  return locations.length?locations.join('、'):'出现地点未收录';
 }
 function enemyDisplayLocations(row){
   const entity=state.enemyEntities.get(enemyEntityKey(row));
@@ -314,7 +318,9 @@ function resolveEnemyUrlMatch(filteredRows,allRows,recordIndex,enemyId){
     if(indexedRow&&(!enemyId||String(indexedRow[1])===enemyId)){selectedRecord={row:indexedRow,index:recordIndex};const exact=filteredRows.find(({index})=>index===recordIndex);if(exact)return exact}
   }
   if(!selectedRecord&&enemyId){const index=allRows.findIndex(row=>String(row[1])===enemyId);if(index>=0){selectedRecord={row:allRows[index],index};const exact=filteredRows.find(({index:filteredIndex})=>filteredIndex===index);if(exact)return exact}}
-  return selectedRecord&&filteredRows.some(({row})=>enemyEntityKey(row)===enemyEntityKey(selectedRecord.row))?selectedRecord:null;
+  const sibling=selectedRecord&&filteredRows.find(({row})=>enemyEntityKey(row)===enemyEntityKey(selectedRecord.row));
+  if(!sibling)return null;
+  return state.enemyRowInfo.has(selectedRecord.row)?selectedRecord:sibling;
 }
 function filterEnemies(resetPage=true){
   if(!state.enemyData)return;
@@ -532,13 +538,14 @@ function enemyFormView(entity, form){
 }
 function enemyFormControls(active){
   if (!active) return '';
-  return `<div class="enemy-form-options" role="group" aria-label="白金之子类型">${state.enemyData.albinauricForms.map(form => `<button type="button" data-enemy-form="${esc(form.statId)}" aria-pressed="${form===active}">${esc(form.label)}</button>`).join('')}</div>`;
+  const forms = state.enemyData.albinauricForms.filter(form => state.enemyRowsById.has(form.statId));
+  return `<div class="enemy-form-options" role="group" aria-label="白金之子类型">${forms.map(form => `<button type="button" data-enemy-form="${esc(form.statId)}" aria-pressed="${form===active}">${esc(form.label)}</button>`).join('')}</div>`;
 }
 function renderEnemyDetail(r){
   if(!r){$('#enemy-detail').innerHTML=`<div class="enemy-detail-actions enemy-detail-actions-empty">${enemyDetailNavigationMarkup(-1)}</div><div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>`;$('#enemy-detail').scrollTop=0;return}
   const fullEntity=state.enemyEntities.get(enemyEntityKey(r)),form=albinauricForm(r[1]);
   const entity=form?enemyFormView(fullEntity,form):fullEntity,selectedGroup=entity?.statGroups[0];
-  const dataRow=form?r:(selectedGroup?.anchor.row||r),c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity,form):'出现地点未收录',locationDifferences=entity?.name==='祖灵'?new Map():enemyLocationDifferences(entity),selectedIndex=state.enemyData.rows.indexOf(dataRow),enemyId=String(dataRow[1]??'');
+  const dataRow=form?r:(selectedGroup?.anchor.row||r),c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录',locationDifferences=entity?.name==='祖灵'?new Map():enemyLocationDifferences(entity),selectedIndex=state.enemyData.rows.indexOf(dataRow),enemyId=String(dataRow[1]??'');
   const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',resist=title==='异常状态抗性'||indexes.length>8,grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=enemyMetricLabel(c[i].label,i);return `<div class="${resist?'resist':'kv'} ${tone}"><span class="enemy-metric-label">${enemyMetricIconMarkup(i)}${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${core?indexes.length+1:indexes.length} 项</small></summary>${core?'':extra}<div class="${resist?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
   const combatSections=`<div class="enemy-combat-grid">${section('伤害倍率',[5,6,7,8,9,10,11,12],true)}${section('异常状态抗性',[13,14,15,16,17,18,19],true)}</div>`;
   const detailValues=selectedGroup?`${section('核心属性',[24,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${enemyLocationDifferencesMarkup(locationDifferences,c)}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
@@ -916,16 +923,51 @@ function safeRelicImageUrl(value){
 function relicName(r){return relicEntry(r)?.name_zh||r.itemNameEn||r.itemNameJa||r.itemKey||`遗物 #${r.itemId}`}
 function relicCategory(r){return relicEntry(r)?.category||'未匹配图鉴'}
 function relicImage(r){const entry=relicEntry(r),imageUrl=safeRelicImageUrl(entry?.image);return imageUrl?`<img class="relic-thumb" src="${esc(imageUrl)}" alt="${esc(entry.name_zh)}图标" loading="lazy" draggable="false" width="58" height="58">`:'<span class="relic-thumb relic-thumb-fallback" aria-hidden="true">◇</span>'}
-function setSaveStatus(s,error=false){$('#save-status').textContent=s;$('#save-status').classList.toggle('error',error)}
+function setSaveStatus(s,error=false){
+  $('#save-status').textContent=s;$('#save-status').classList.toggle('error',error);
+  $('#battle-save-status').textContent=error?s:(s.startsWith('正在')?'正在读取…':
+    state.save && !state.save.loadReplay ? '重新选择存档可读取本局回放。' : '');
+}
 function setSaveFailureStatus(message){
   const retainedDataNote=state.save?'本次没有替换当前数据；仍保留上次成功读取的遗物与装配。':'当前没有可用存档数据。';
   setSaveStatus(`${message} ${retainedDataNote}`,true);
 }
+let battleHistoryView;
+function setAggregateView(show) {
+  $('#records-panel').hidden = !show;
+  $('#battle-history').hidden = show;
+}
+$('#battle-list-back').addEventListener('click', () => {
+  setAggregateView(false);
+  $('#battle-history button')?.focus({ preventScroll: true });
+});
 function renderBattleRecords(){
   const records=state.save?.battleRecords;
   $('#records-empty').hidden=!!state.save;
-  $('#records-panel').hidden=!state.save;
+  battleHistoryView?.destroy();
+  battleHistoryView=null;
+  $('#records-panel').hidden=true;
+  $('#battle-history').hidden=!state.save;
+  $('#battle-import').textContent=state.save?'更换存档':'选择存档';
   if(!state.save)return;
+  const save=state.save;
+  const historyHost=$('#battle-history');
+  historyHost.replaceChildren();
+  async function mountHistory() {
+    try {
+      await window.BattleEquipment.loadCatalog();
+    } catch {
+      // The save remains readable when the optional equipment lookup cannot load.
+    }
+    if(state.save!==save)return;
+    battleHistoryView=window.NightreignBattleHistory.mount(historyHost,{
+      records: save.expeditions || [],
+      loadReplay: save.loadReplay || (() => null),
+      loadRelics: save.loadRelics || (() => null),
+      onAggregate: () => setAggregateView(true),
+    });
+  }
+  mountHistory();
   const labels={
     specialTerrain:'前往特异地形的次数',ambushEvents:'突袭事件的完成次数',endingsReached:'抵达结局的人数',
     runesEarned:'卢恩获得量',runesSpent:'卢恩花费量',runesLost:'失去的卢恩量',darksignsEarned:'暗痕获得量',lordProofs:'为王之证获得数',
@@ -949,26 +991,29 @@ function setSteamCloudRecordNote(){
   const method=$('#record-method');
   if(method)method.textContent='Steam 云存档经项目后端临时转发，并在当前设备解析；云端文件未修改。';
 }
+let currentSaveRead=0;
 async function readSave(file){
   if(!file)return;
+  const readId=++currentSaveRead;
   if(!/\.sl2$/i.test(file.name)){setSaveFailureStatus('请选择 .sl2 存档文件。');return}
   if(!state.items||!state.effects){setSaveFailureStatus('资料尚未载入，请稍后再试。');return}
   try{
     setSaveStatus(`正在本地解析 ${file.name}…`);
     await validateSaveFileHeader(file);
     const buffer=await file.arrayBuffer();
+    if(readId!==currentSaveRead)return;
     const parsed=parseSaveFile(buffer,state.items,state.effects);
     const steamCloudSource=file.source==='steam-cloud';
     try{state.saveEditor=createSaveEditor(buffer);state.saveFileName=file.name}catch(editError){state.saveEditor=null;state.saveFileName=null;console.info('此存档暂不支持编辑：',editError.message)}
     invalidateBuildResults();
     showSave(parsed);
     if(steamCloudSource)setSteamCloudRecordNote();
-    try{sessionStorage.setItem('nightreign-parsed-save-v2',JSON.stringify(parsed))}catch(_){/* 存储不可用时仍保留本页数据 */}
+    try{sessionStorage.setItem('nightreign-parsed-save-v2',JSON.stringify(parsed))}catch(_){try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(_){}}
     try{if(steamCloudSource)sessionStorage.setItem('nightreign-parsed-save-source-v1','steam-cloud');else sessionStorage.removeItem('nightreign-parsed-save-source-v1')}catch(_){/* 来源说明不可用时不影响解析 */}
     state.equipped={normal:[null,null,null],deep:[null,null,null]};state.selectedRelicIndex=null;renderBuildWorkspace();
     const transferNote=steamCloudSource?'Steam 云文件由项目后端临时转发，并在本设备解析。':'未发送到服务器。';
     setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改；${transferNote}${state.saveEditor?'当前为只读模式；存档写回尚未验收。':'此存档版式暂不支持编辑。'}`);
-  }catch(err){setSaveFailureStatus('无法解析此存档：'+(err?.message||String(err)))}
+  }catch(err){if(readId===currentSaveRead)setSaveFailureStatus('无法解析此存档：'+(err?.message||String(err)))}
 }
 window.NightreignRelicCollection = () => state.save?.relics || [];
 window.NightreignLegalityNames = {
@@ -1004,6 +1049,11 @@ function restoreSave(){
   catch(_){try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(e){}}
 }
 $('#save-file').addEventListener('change',e=>readSave(e.target.files[0]));
+$('#battle-import').addEventListener('click',()=>$('#battle-save-file').click());
+$('#battle-save-file').addEventListener('change',e=>{
+  const file=e.target.files[0];e.target.value='';readSave(file);
+});
+$('#clear-save').addEventListener('click',()=>{currentSaveRead++});
 const zone=$('#drop-zone');
 ['dragenter','dragover'].forEach(x=>zone.addEventListener(x,e=>{e.preventDefault();zone.classList.add('drag')}));
 ['dragleave','drop'].forEach(x=>zone.addEventListener(x,e=>{e.preventDefault();zone.classList.remove('drag')}));
