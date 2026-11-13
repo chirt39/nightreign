@@ -31,7 +31,9 @@
 
 以上图片路径及武器数组仅示意结构，具体集合读生成文件。每个武器引用是 `weapon-catalog.json.weapons[].id` 的来源组 ID，名称也是该组原文。组内各参数变体和定制配置都可能贡献关联，所以同一来源组可以同时出现在固定和候选列表；这不是声称该组所有武器实例都固定或都随机。
 
-法术条目为 `{id,name,description,image,type,fp}`。`type` 为 `sorcery` 或 `incantation`；`fp` 为 `Magic.mp` 的基础施放消耗，负值才记 null。当前 158 条均有非负基础值。蓄力、持续引导和追加施放可能另用 `mp_charge`、`consumeLoopMP_forMenu` 等字段；不把单个 fp 数值宣称为整段引导或全部追加攻击的总消耗。相关原值完整留在仓库外证据中。
+法术保留基础字段 `{id,name,description,image,type,fp}`。`type` 为 `sorcery` 或 `incantation`，`fp` 取自本作 `Magic.mp`。当前 158 个法术均有基础消耗。每个有效施放引用通过 `refId1～10` 对应到同槽的 `consumeType1～10`。类型 0 扣基础消耗，1 扣 `mp_charge`，2 跳过扣费。
+
+菜单有 `consumeLoopMP_forMenu` 且能对应同值扣费引用时，图鉴显示起手 `fp` 和每次续放 `fpPerRepeat`。例如彗星亚兹勒为起手 40、每次续放 10，持续释放的总消耗取决于实际扣费次数。菜单无循环费用、使用蓄力引用且消耗与普通不同的条目另列 `fpCharged`，如创星雨普通 27、蓄力 32。其余条目只显示基础消耗。
 
 ## 可复现的纳入与关联规则
 

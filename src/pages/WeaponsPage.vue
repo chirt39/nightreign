@@ -141,6 +141,23 @@ function openArt(event, id) {
     detail: { view: 'arts', source, cardNavigation: { kind: 'art', id } },
   }));
 }
+function damageUrl() {
+  const url = new URL(location.href);
+  url.searchParams.set('damageWeapon', selected.value.id);
+  url.searchParams.set('damageVariant', variant.value.id);
+  url.searchParams.delete('damageArt'); url.searchParams.delete('damageAction');
+  url.hash = 'damage';
+  return url.pathname + url.search + url.hash;
+}
+function openDamage(event) {
+  if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  window.dispatchEvent(new CustomEvent('nightreign:navigate', { detail: {
+    view: 'damage',
+    source: { kind: 'weapon', query: query.value, category: category.value, weaponId: weaponId.value, variantId: variant.value.id, page: page.value, listScroll: listRoot.value?.scrollTop || 0, detailScroll: detailRoot.value?.scrollTop || 0, scrollY: window.scrollY, returnFocus: 'damage' },
+    cardNavigation: { kind: 'damage', weaponId: selected.value.id, variantId: variant.value.id },
+  } }));
+}
 async function restoreNavigation(snapshot) {
   await loadCatalog();
   query.value = snapshot.query;
@@ -150,8 +167,7 @@ async function restoreNavigation(snapshot) {
   page.value = Math.min(pageCount.value, Math.max(1, snapshot.page));
   await nextTick();
   requestAnimationFrame(() => {
-    const link = [...(detailRoot.value?.querySelectorAll('[data-art-id]') || [])]
-      .find(element => element.dataset.artId === snapshot.artId);
+    const link = snapshot.returnFocus === 'damage' ? detailRoot.value?.querySelector('[data-damage-entry]') : [...(detailRoot.value?.querySelectorAll('[data-art-id]') || [])].find(element => element.dataset.artId === snapshot.artId);
     link?.focus({ preventScroll: true });
     if (listRoot.value) listRoot.value.scrollTop = snapshot.listScroll;
     if (detailRoot.value) detailRoot.value.scrollTop = snapshot.detailScroll;
@@ -195,6 +211,7 @@ watch(() => props.active, active => { if (active) { readUrl(); loadCatalog(); } 
             <label v-if="selected.variants?.length" class="weapon-variant">参数变体<select :value="variant?.id" @change="variantId = $event.target.value; selectVariant()"><option v-for="item in selected.variants" :key="item.id" :value="item.id">{{ item.label || item.name || '待核对变体' }}</option></select></label>
             <p v-if="unknownVariant" class="weapon-note" role="status">链接中的参数变体不存在，当前展示默认变体。请重新选择。</p>
             <template v-if="variant">
+              <a class="button ghost" data-damage-entry :href="damageUrl()" @click="openDamage">计算此变体伤害</a>
               <section class="weapon-section"><h3>基础攻击</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in attackLabels" :key="key"><dt class="weapon-attack-label"><img v-if="attackIcon(key)" :src="attackIcon(key)" class="weapon-attack-icon" width="18" height="18" alt="" @error="imageFailed"><span v-else class="weapon-attack-icon weapon-icon-placeholder" aria-hidden="true"></span><span>{{ label }}</span></dt><dd>{{ displayValue(variant.attack?.[key]) }}</dd></div></dl><p v-if="variant.attackTypes?.length" class="weapon-note">攻击类型：{{ variant.attackTypes.join('、') }}</p></section>
               <section class="weapon-section"><h3>能力补正</h3><dl class="weapon-stat-grid"><div v-for="(label, key) in abilityLabels" :key="key"><dt>{{ label }}</dt><dd>{{ displayScalingGrade(variant.scalingGrades?.[key]) }}</dd></div></dl></section>
               <section class="weapon-section"><h3>{{ variant.skill?.kind === 'fixed' ? '固定战技' : variant.skill?.kind === 'pool' ? '战技候选池' : '战技' }}</h3><ul v-if="variant.skill?.names?.length" class="weapon-skill-list"><li v-for="(name, index) in variant.skill.names" :key="`${index}-${name}`"><span class="weapon-skill-icon"><img v-if="skillImageFor(index, name)" :src="skillImageFor(index, name)" width="30" height="30" alt="" loading="lazy" @error="imageFailed"><span v-else class="weapon-icon-placeholder" aria-hidden="true"></span></span><a v-if="artIdFor(index, name)" class="weapon-skill-name weapon-art-link" :href="artUrl(artIdFor(index, name))" :data-art-id="artIdFor(index, name)" @click="openArt($event, artIdFor(index, name))">{{ name }}</a><span v-else class="weapon-skill-name">{{ name }}</span></li></ul><p v-else>待核对</p><p v-if="variant.skill?.kind !== 'pool' && variant.skill?.note" class="weapon-note">{{ variant.skill.note }}</p></section>

@@ -1,0 +1,9 @@
+// Weapon and art images follow the verified catalog IDs. Status icons denote innate buildup.
+export const damageShowcase = [
+  {"weaponId": "19020000", "variantId": "19020000", "artId": "1051", "name": "光环镰刀", "artName": "米凯拉的光环", "weaponImage": "/weapon-images/10722-6178e2e3cb26.webp", "artImage": "/skill-images/8551-6090236ef770.webp", "statuses": [{"name": "出血", "icon": "/enemy-attribute-icons/status-bleed.png", "spEffectId": 105000}]},
+  {"weaponId": "9040000", "variantId": "9040000", "artId": "1177", "name": "尸山血海", "artName": "尸横遍野", "weaponImage": "/weapon-images/10324-06128c9108a9.webp", "artImage": "/skill-images/8568-421753067b6a.webp", "statuses": [{"name": "出血", "icon": "/enemy-attribute-icons/status-bleed.png", "spEffectId": 105010}]},
+  {"weaponId": "9080000", "variantId": "9080000", "artId": "112", "name": "蛇骨刀", "artName": "二连斩", "weaponImage": "/weapon-images/10328-d04b90bd63da.webp", "artImage": "/skill-images/8311-a9db4a4c3368.webp", "statuses": [{"name": "中毒", "icon": "/enemy-attribute-icons/status-poison.png", "spEffectId": 106010}]},
+  {"weaponId": "9010000", "variantId": "9010500", "artId": "214", "name": "火焰长牙", "artName": "炎击", "weaponImage": "/weapon-images/10321-86732aa23ccc.webp", "artImage": "/skill-images/8342-b3cf1c602d8d.webp", "statuses": [{"name": "出血", "icon": "/enemy-attribute-icons/status-bleed.png", "spEffectId": 105000}]},
+  {"weaponId": "1070000", "variantId": "1070000", "artId": "1017", "name": "辉石克力士", "artName": "辉石彗砾", "weaponImage": "/weapon-images/10007-169671d82582.webp", "artImage": "/skill-images/8517-d1c8ba80d3c4.webp", "statuses": []},
+  {"weaponId": "1160000", "variantId": "1160000", "artId": "1037", "name": "使命短刀", "artName": "黄金刀刃", "weaponImage": "/weapon-images/10016-43020d4fe3b2.webp", "artImage": "/skill-images/8537-224f91c547f9.webp", "statuses": []},
+];

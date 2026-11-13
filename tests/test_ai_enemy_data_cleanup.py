@@ -16,10 +16,12 @@ class EnemyCorpusCleanupTests(unittest.TestCase):
         enemy_rows = [row for row in records if row["category"] == "enemy"]
         image_rows = [row for row in records if row["category"] == "enemy_image"]
         atlas = build_knowledge_base.load_public("enemy-data.json")
-        self.assertEqual(len(enemy_rows), len(atlas["rows"]) + len(atlas["encounters"]))
+        self.assertEqual(len(enemy_rows), len(atlas["rows"]))
         by_id = {row["id"]: row for row in enemy_rows}
         self.assertIn("沼泽", by_id["enemy:44203010"]["content"])
-        self.assertIn("流浪民族", by_id["enemy:encounter-903201600"]["content"])
+        self.assertFalse(any(key.startswith("enemy:encounter-") for key in by_id))
+        for member_id in ("43520030", "43521030"):
+            self.assertIn("杜鹃骑士", by_id[f"enemy:{member_id}"]["title"])
         self.assertEqual(len(image_rows), 307)
         knights = [row for row in enemy_rows if row["title"].startswith("敌人图鉴｜失乡骑士")]
         self.assertEqual({row["id"] for row in knights}, {"enemy:30100000", "enemy:30100100"})

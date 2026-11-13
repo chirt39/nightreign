@@ -286,12 +286,56 @@
         ]
       },
       "identityScope": "native category icon mapping; does not extend building identity coverage"
+    },
+    "buildingCategory:castle": {
+      "src": "/map-icons/castle-42010-02b19cca87e3.png",
+      "nameZh": "中央主城",
+      "width": 240,
+      "height": 244,
+      "status": "verified",
+      "worldMapPointIconId": 11,
+      "iconId": 42010,
+      "sha256": "02b19cca87e3846383e6c50b17d901f3aa72d2d6941a602177528a9125903568",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42010.png",
+        "rectangle": [
+          1488,
+          1568,
+          240,
+          244
+        ],
+        "pointParam": "WorldMapPointParam",
+        "pointParamRowId": 64433700,
+        "pointParamXmlSha256": "81b2e962dd4c45a946c5a901e659d1b973ac5855cd8677dc968c41da83d6feaf",
+        "pointPosition": {
+          "areaNo": "60",
+          "gridXNo": "43",
+          "gridZNo": "37",
+          "posX": "55.92",
+          "posY": "132.3",
+          "posZ": "63.88"
+        }
+      },
+      "identityScope": "Fixed central castle icon for atlas castle/rooftop/basement areas; not the random small fort icon 42006. Does not extend map predictor identity coverage.",
+      "rights": "Derived from local game UI resources; original rights remain with the game rights holders. Redistribution permission not independently verified."
     }
   },
   "coverage": {
     "mappedBuildingCategories": 9,
     "unmappedRawBuildingDefinitions": 167,
-    "unmappedPolicy": "raw_id_only definitions are not inferred or assigned placeholder game art"
+    "unmappedPolicy": "raw_id_only definitions are not inferred or assigned placeholder game art",
+    "mappedAtlasOnlyBuildingIcons": 1
   },
   "missing": [],
   "pointIcons": {

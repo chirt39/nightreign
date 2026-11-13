@@ -29,7 +29,6 @@ ALIAS_LOCATION_PREFIXES = {
     "Fort": "小型要塞", "Camp": "大型营地", "Castle": "要塞",
     "Small Camp": "小型营地", "Night Horde": "夜晚Boss前哨战",
     "Church": "教堂", "Sorcerer's Rise": "魔法师塔", "Township": "聚落",
-    "Limveld": "宁姆韦德",
     "Ruins": "遗迹", "Great Church": "大教堂",
     "Evergaol": "封印监牢", "Field Boss": "原野Boss",
     "Basement Boss": "要塞底层Boss", "Night Boss": "夜晚Boss",
@@ -46,9 +45,67 @@ def entity_name(value: object) -> str:
     return re.split(r"\s*[（(]", name, maxsplit=1)[0].strip()
 
 
+def public_location(value: str) -> str | None:
+    aliases = {"锻造设施": "锻造村", "永夜Boss": "夜王", "第三夜Boss": "夜王",
+               "原野Boss - 恐怖强敌": "原野Boss"}
+    if value in ("宁姆韦德", "魔法师塔", "魔法师塔（大空洞）", "小型营地", "教堂"):
+        return None
+    return aliases.get(value, value)
+
+
+def ordered_public_locations(values: list[str]) -> list[str]:
+    output = []
+    for value in values:
+        normalized = public_location(value)
+        if normalized and normalized not in output:
+            output.append(normalized)
+    if any(value.endswith("（大空洞）") for value in output):
+        output = [value for value in output if value != "大空洞"]
+    return output
+
+
 def number(value: str) -> int | float:
     n = float(value)
     return int(n) if n.is_integer() else round(n, 4)
+
+
+def albinauric_forms(native, rows, placements, encounters):
+    npcs = {r["row_id"]: r for r in native}
+    def appearance(npc_id):
+        r = npcs[npc_id]
+        return tuple(r[k] for k in ("modelDispMask13", "modelDispMask16", "residentMaterialExParamId00"))
+
+    forms = {}
+    for stat_id, label in [("34700000", "普通"), ("34700200", "红色长角"), ("34700300", "银白")]:
+        forms[appearance(stat_id)] = {"label": label, "statId": stat_id, "sourceIds": [], "locations": []}
+    for row in rows:
+        if entity_name(row[0]) == "白金之子":
+            forms[appearance(native_id(row[1]))]["sourceIds"].append(str(row[1]))
+    forge = next((e for e in encounters if e["scene"] == "m50_10_00_00" and e["encounterNameId"] == 905081000), None)
+    forge_boss = next((p for p in placements if forge and p["scene"] == forge["scene"]
+                       and p["entityId"] == forge["healthBarEntityOrGroupId"] and p["kind"] == "enemies"), None)
+    forge_parts = [p for p in placements if forge_boss and p["kind"] == "enemies"
+                   and p["scene"] == forge_boss["scene"] and p["variation"] == forge_boss["variation"]
+                   and p["model"] in ("c3470", "c3471")]
+    forge_keys = {(p["scene"], p["part"]) for p in forge_parts}
+    for part in placements:
+        if part["kind"] != "enemies" or part["model"] != "c3470" or not part["location"]:
+            continue
+        form = forms[appearance(part["npcId"])]
+        if part["location"] == "锻造村" and (part["scene"], part["part"]) not in forge_keys:
+            continue
+        if part["location"] not in form["locations"]:
+            form["locations"].append(part["location"])
+    if forge_parts:
+        for part in forge_parts:
+            if part["model"] == "c3470":
+                forms[appearance(part["npcId"])]["forgeEncounter"] = forge["encounterName"]
+        evidence = {"scene": forge["scene"], "variation": forge_boss["variation"], "boss": forge["encounterName"],
+                    "nameId": forge["encounterNameId"], "bossEntity": forge_boss["entityId"],
+                    "placements": [{k: p[k] for k in ("model", "part", "npcId")} for p in forge_parts]}
+    else:
+        evidence = {}
+    return list(forms.values()), evidence
 
 
 def first_party_row(npc: dict[str, str], name: str, width: int) -> list[object]:
@@ -91,8 +148,10 @@ def scene_records(paths: list[Path], aliases: dict[str, str],
             template = templates.get(basename)
             if template and template.get("building"):
                 location = template["building"]
+                if template.get("terrainCodes") == ["4"]:
+                    location += "（大空洞）"
             if basename in forts:
-                location = forts[basename]["building"]
+                location = forts[basename]["building"] + "（大空洞）"
             for kind in ("enemies", "dummyEnemies"):
                 for enemy in scene.get(kind, []):
                     raw_id = str(enemy.get("NpcParamId", ""))
@@ -100,8 +159,10 @@ def scene_records(paths: list[Path], aliases: dict[str, str],
                         continue
                     record = {
                         "npcId": raw_id, "scene": basename,
+                        "entityId": enemy.get("entityId"),
                         "part": enemy.get("Name"), "kind": kind,
                         "model": enemy.get("ModelName"),
+                        "variation": enemy.get("native", {}).get("data", {}).get("EntityData", {}).get("Variation"),
                         "placeholderModel": enemy.get("ModelName") in ("c0100", "c1000"),
                         "location": location,
                         "communityMapAlias": alias,
@@ -128,6 +189,7 @@ def main() -> None:
     parser.add_argument("--entity-location-candidates", type=Path, default=Path("scripts/data/enemy_entity_location_candidates.json"))
     parser.add_argument("--underground-forts", type=Path, default=Path("scripts/data/enemy_underground_fort_locations.json"))
     parser.add_argument("--curated-extra-locations", type=Path, default=Path("scripts/data/enemy_curated_extra_locations.json"))
+    parser.add_argument("--legacy-scale-locations", type=Path, default=Path("scripts/data/enemy_legacy_scale_locations.json"))
     parser.add_argument("--curation", type=Path, default=Path("scripts/data/enemy_atlas_curation.json"))
     parser.add_argument("--retired-ids", type=Path, default=Path("scripts/data/enemy_retired_source_ids.json"))
     parser.add_argument("--bilingual-candidates", type=Path, default=Path("scripts/data/enemy_bilingual_name_candidates.json"))
@@ -142,6 +204,7 @@ def main() -> None:
     retired_prefixes = tuple(curation["retiredPrefixes"])
     retired_ids = set(curation["retiredIds"])
     excluded_generated_ids = curation["excludedGeneratedIds"]
+    excluded_public_source_ids = set(curation["excludedPublicSourceIds"])
     retired_source_ids = set(json.loads(args.retired_ids.read_text(encoding="utf-8")))
     bilingual_candidates = json.loads(args.bilingual_candidates.read_text(encoding="utf-8"))
     model_family_names = json.loads(args.model_family_names.read_text(encoding="utf-8"))
@@ -153,9 +216,13 @@ def main() -> None:
     # Rebuild script-owned cards from source every run so source corrections or
     # withdrawals cannot leave stale generated values in the curated file.
     generated_ids.update(atlas.get("generatedNativeIds", []))
-    atlas["rows"] = [row for row in atlas["rows"] if str(row[1]) not in generated_ids]
+    atlas["rows"] = [row for row in atlas["rows"]
+                     if str(row[1]) not in generated_ids and str(row[1]) not in excluded_public_source_ids]
     curated_rows = list(atlas["rows"])
-    for row_id in generated_ids:
+    ordinary_troll_ids = {str(row[1]) for row in curated_rows if str(row[0]).strip() == "山妖"}
+    atlas["scale"]["rows"] = [row for row in atlas["scale"]["rows"]
+                               if not (row[0] == "山妖" and row[1] == "山顶" and row[2] == "boss")]
+    for row_id in generated_ids | excluded_public_source_ids:
         atlas.get("extraLocations", {}).pop(row_id, None)
     if len(atlas["columns"]) != 58 or any(len(row) != 58 for row in atlas["rows"]):
         raise ValueError("Expected 58-column curated enemy atlas")
@@ -172,6 +239,30 @@ def main() -> None:
     templates = json.loads(args.template_locations.read_text(encoding="utf-8"))
     forts = json.loads(args.underground_forts.read_text(encoding="utf-8"))
     scene_rows, exact_locations = scene_records(args.scene, aliases, templates, forts)
+    encounters = json.loads(args.encounters.read_text(encoding="utf-8"))["encounters"] if args.encounters else []
+    forms, forge_evidence = albinauric_forms(native, curated_rows, scene_rows, encounters)
+    atlas["albinauricForms"] = forms
+    # A night battle template identifies the arena, not a second overworld placement.
+    hollow_evidence = json.loads((args.curation.parent / "enemy_dlc_location_evidence.json").read_text(encoding="utf-8"))
+    night_templates = {int(t["template"]) for scene, t in templates.items()
+                       if aliases.get(scene, "").startswith("Night Boss -")}
+    hollow_night_ids = {k for k, v in hollow_evidence["locations"]["大空洞"].items() if v[0] in night_templates}
+    for row in curated_rows:
+        sid = str(row[1])
+        if "前哨战" not in str(row[0]):
+            continue
+        exact = exact_locations.get(sid, set())
+        if "夜晚Boss" in exact:
+            exact.remove("夜晚Boss")
+            exact.add("夜晚Boss前哨战")
+        if sid in hollow_night_ids and "大空洞" not in exact:
+            prior = atlas["extraLocations"].get(sid, [])
+            if "大空洞" in prior:
+                atlas["extraLocations"][sid] = [loc for loc in prior if loc != "大空洞"]
+    for locations in exact_locations.values():
+        locations.difference_update({"魔法师塔", "魔法师塔（大空洞）"})
+    for npc_id, excluded_locations in curation["displayLocationExclusionsById"].items():
+        exact_locations.get(npc_id, set()).difference_update(excluded_locations)
     scene_counts = Counter(record["npcId"] for record in scene_rows)
     scene_enemy_ids = {record["npcId"] for record in scene_rows
                        if record["kind"] == "enemies" and not record["placeholderModel"]}
@@ -212,7 +303,9 @@ def main() -> None:
         bilingual = bilingual_candidates.get(row_id)
         if not candidate and bilingual:
             candidate = bilingual["nameZh"]
-        if row_id in excluded_generated_ids:
+        if row_id in excluded_public_source_ids:
+            state = "intentionally_removed_from_public_atlas"
+        elif row_id in excluded_generated_ids:
             state = "excluded_unreliable_or_out_of_scope"
         elif (row_id in retired_source_ids or row_id in retired_ids
                 or (row_id.startswith(retired_prefixes) and row_id not in existing)):
@@ -321,7 +414,7 @@ def main() -> None:
 
     extras = atlas.setdefault("extraLocations", {})
     for source_id, names in list(extras.items()):
-        extras[source_id] = sorted({"锻造村" if name == "锻造设施" else name for name in names})
+        extras[source_id] = sorted(set(ordered_public_locations(names)))
     for source_id, rows in existing.items():
         names = exact_locations.get(source_id)
         if names:
@@ -330,7 +423,10 @@ def main() -> None:
                 if str(row[1]) != source_id:
                     continue
                 key = str(row[1])
-                extras[key] = sorted(set(extras.get(key, [])) | names)
+                extras[key] = sorted(set(extras.get(key, [])) | set(ordered_public_locations(names)))
+    for source_id in ordinary_troll_ids:
+        if source_id in extras:
+            extras[source_id] = [name for name in extras[source_id] if name != "山顶"]
 
     for row in atlas["rows"]:
         for index in REMOVED_COLUMNS:
@@ -362,6 +458,8 @@ def main() -> None:
     entity_location_rows = []
     entity_sources: dict[tuple[str, str, str], dict] = {}
     for npc_id, candidate in entity_candidates.items():
+        if candidate["entityName"] == "白金之子":
+            continue  # Matched by native appearance and placement above.
         if (not exact_locations.get(npc_id) or npc_id not in scene_enemy_ids
                 or npc_id in retired_source_ids or npc_id in excluded_generated_ids
                 or candidate["model"] in ("c0100", "c1000")
@@ -391,11 +489,15 @@ def main() -> None:
             return (source_id.endswith("b"), bool(re.search(r"[（(]", str(row[0]))),
                     source_id.endswith("a"), source_id)
         representative = min(family["rows"], key=priority)
-        locations = sorted(family["locations"])
+        locations = sorted(set(ordered_public_locations(family["locations"])))
+        if representative in ordinary_troll_ids:
+            locations = [name for name in locations if name != "山顶"]
         entity_location_by_source[representative] = sorted(set(entity_location_by_source.get(representative, [])) | set(locations))
         entity_assignments.append({"sourceId": representative, "entityName": name,
                                    "model": model, "behaviorVariationId": behavior,
                                    "locations": locations, "scope": "entity-only"})
+    for form in forms:
+        entity_location_by_source[form["statId"]] = sorted(form["locations"])
     atlas["entityLocationsBySourceId"] = entity_location_by_source
     (audit / "entity-location-candidates.json").write_text(json.dumps(entity_location_rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (audit / "entity-location-assignments.json").write_text(json.dumps(entity_assignments, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -405,8 +507,7 @@ def main() -> None:
     encounter_links = []
     public_encounters: dict[str, dict] = {}
     if args.encounters:
-        raw_encounters = json.loads(args.encounters.read_text(encoding="utf-8"))
-        for encounter in raw_encounters["encounters"]:
+        for encounter in encounters:
             members = []
             public_members: dict[str, dict] = {}
             for member in encounter["members"]:
@@ -529,7 +630,48 @@ def main() -> None:
                     prior["name"] = member["name"]
             else:
                 card["members"].append(member)
-    atlas["encounters"] = sorted(public_encounters.values(), key=lambda card: card["id"])
+    atlas["encounters"] = (sorted(public_encounters.values(), key=lambda card: card["id"])
+                           if curation["publishEncounters"] else [])
+    legacy_locations = json.loads(args.legacy_scale_locations.read_text(encoding="utf-8"))
+    if legacy_locations["sourceCommit"] != curation["legacyScaleSourceCommit"]:
+        raise ValueError("Unexpected legacy scale location source commit")
+    scale_by_source = legacy_locations["locationsBySourceId"]
+    display_locations: dict[str, list[str]] = {}
+    stat_locations: dict[str, list[str]] = {}
+    public_location_evidence: dict[str, dict] = {}
+    for row in atlas["rows"]:
+        source_id = str(row[1])
+        curated_scale_locations = list(scale_by_source.get(source_id, []))
+        locations = list(curated_scale_locations)
+        exact_source_locations = atlas["extraLocations"].get(source_id, [])
+        entity_only_locations = atlas["entityLocationsBySourceId"].get(source_id, [])
+        locations.extend(exact_source_locations)
+        locations.extend(curation["displayLocationOverridesById"].get(source_id, []))
+        excluded = set(curation["displayLocationExclusionsById"].get(native_id(source_id), []))
+        if source_id in ordinary_troll_ids:
+            excluded.add("山顶")
+        if entity_name(row[0]) == "祖灵":
+            excluded.add("要塞底层Boss")
+        stat_locations[source_id] = ordered_public_locations([item for item in locations if item not in excluded])
+        display_locations[source_id] = ordered_public_locations(
+            stat_locations[source_id] + entity_only_locations)
+        public_location_evidence[source_id] = {
+            "curatedScale": ordered_public_locations(curated_scale_locations),
+            "exactSource": ordered_public_locations(exact_source_locations),
+            "entityOnly": ordered_public_locations(entity_only_locations),
+            "stat": stat_locations[source_id], "display": display_locations[source_id],
+        }
+    for encounter in atlas["encounters"]:
+        display_locations[encounter["id"]] = ordered_public_locations(encounter["locations"])
+        public_location_evidence[encounter["id"]] = {
+            "encounter": ordered_public_locations(encounter["locations"]),
+            "display": display_locations[encounter["id"]],
+        }
+    atlas["displayLocationsBySourceId"] = display_locations
+    atlas["statLocationsBySourceId"] = stat_locations
+    (audit / "albinauric-forge.json").write_text(json.dumps(forge_evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (audit / "display-location-evidence.json").write_text(
+        json.dumps(public_location_evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (audit / "encounter-links.json").write_text(json.dumps(encounter_links, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (audit / "native-event-dispositions.json").write_text(json.dumps(native_event_audit, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     summary = {

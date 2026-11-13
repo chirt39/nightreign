@@ -31,6 +31,23 @@ def unique(texts, key):
     return next(iter(values)) if len(values) == 1 else None
 
 
+def spell_fp_costs(row):
+    base = int(row['mp'])
+    charged = int(row['mp_charge'])
+    loop = int(row['consumeLoopMP_forMenu'])
+    costs = {'fp': base if base >= 0 else None}
+    consumption_types = {row[f'consumeType{i}'] for i in range(1, 11)
+                         if int(row[f'refId{i}']) >= 0}
+    if base >= 0 and loop >= 0:
+        # Match the menu's repeat cost to an actual spending reference. Repeated
+        # casts such as Thops's Barrier use the normal reference on each loop.
+        if (loop == base and '0' in consumption_types) or (loop == charged and '1' in consumption_types):
+            costs['fpPerRepeat'] = loop
+    elif base >= 0 and charged > 0 and charged != base and '1' in consumption_types:
+        costs['fpCharged'] = charged
+    return costs
+
+
 def extract_icons(source, repo, wanted, folder, evidence):
     """Only decode existing common/DLC caches; never opens the game archives."""
     if not wanted:
@@ -200,9 +217,12 @@ def main():
         mp = int(row['mp'])
         spell_entries.append({'id': sid, 'name': name, 'description': desc, 'image': None,
             'type': 'sorcery' if row['ezStateBehaviorType'] == '0' else 'incantation',
-            'fp': mp if mp >= 0 else None})
+            **spell_fp_costs(row)})
         spell_evidence[sid] = {'iconId': int(row['iconId']), 'mp': mp, 'mpCharge': int(row['mp_charge']),
-            'consumeLoopMPForMenu': int(row['consumeLoopMP_forMenu']), 'references': spell_refs[sid],
+            'consumeLoopMPForMenu': int(row['consumeLoopMP_forMenu']),
+            'consumptionRefs': [{'slot': i, 'refId': row[f'refId{i}'], 'consumeType': row[f'consumeType{i}']}
+                                for i in range(1, 11) if int(row[f'refId{i}']) >= 0],
+            'references': spell_refs[sid],
             'nameSources': spell_names[sid], 'descriptionSources': spell_descriptions[sid]}
     spell_images, spell_image_evidence = extract_icons(args.source_root, repo,
         {spell_evidence[e['id']]['iconId'] for e in spell_entries}, 'spell-images', audit)

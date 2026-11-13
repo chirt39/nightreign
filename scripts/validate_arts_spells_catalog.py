@@ -92,6 +92,20 @@ def main():
         assert e['name'] == sn[e['id']] and e['description'] == sd[e['id']]
         assert e['type'] == {'0': 'sorcery', '1': 'incantation'}[row['ezStateBehaviorType']]
         assert e['fp'] == (int(row['mp']) if int(row['mp']) >= 0 else None)
+        loop = int(row['consumeLoopMP_forMenu'])
+        if loop >= 0:
+            assert e['fpPerRepeat'] == loop and 'fpCharged' not in e
+            assert any(int(row[f'refId{i}']) >= 0 and (
+                (row[f'consumeType{i}'] == '0' and e['fp'] == loop) or
+                (row[f'consumeType{i}'] == '1' and int(row['mp_charge']) == loop)
+            ) for i in range(1, 11))
+        else:
+            assert 'fpPerRepeat' not in e
+            if 0 < int(row['mp_charge']) != e['fp']:
+                assert e['fpCharged'] == int(row['mp_charge'])
+                assert any(int(row[f'refId{i}']) >= 0 and row[f'consumeType{i}'] == '1' for i in range(1, 11))
+            else:
+                assert 'fpCharged' not in e
     evidence = json.loads((args.audit_dir / 'catalog-evidence.json').read_text(encoding='utf-8'))
     for image in evidence['spellImages'] + evidence['extraArtImages']:
         data = (repo / 'public' / image['src'].lstrip('/')).read_bytes()
@@ -107,7 +121,7 @@ def main():
         'verifiedNewImageCrops': len(evidence['spellImages']) + len(evidence['extraArtImages']),
         'checks': ['exact native eligible reference sets', 'positive weights only',
             'exact fixed/possible source-group edge sets', 'exact zhocn name and description',
-            'native Magic category and base mp', 'safe existing images and new image hashes', 'input provenance hashes'],
+            'native Magic category, base FP, charged casts and per-repeat FP', 'safe existing images and new image hashes', 'input provenance hashes'],
         'outputSha256': {name: hashlib.sha256((repo / 'public' / name).read_bytes()).hexdigest()
                          for name in ('arts-catalog.json', 'spells-catalog.json')}}
     args.audit_dir.mkdir(parents=True, exist_ok=True)

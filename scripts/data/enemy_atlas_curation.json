@@ -1,6 +1,7 @@
 {
   "sourceGameVersion": "1.3.3.0",
   "sourceRegulation": "10350000",
+  "legacyScaleSourceCommit": "1a1f6e6",
   "hostilePrefixes": ["600030", "610030"],
   "generatedIds": [
     "600030000", "600030010", "600030100", "600030110",
@@ -12,6 +13,15 @@
   ],
   "retiredPrefixes": ["3010", "3180"],
   "retiredIds": ["75400100", "75700000", "75700010", "75700020", "75700030"],
+  "excludedPublicSourceIds": {
+    "21500400": "Remove only this lightning orb atlas source; retain the other seven",
+    "45050010": "Remove the small flying dragon surprise-event card",
+    "46020030": "Remove the snowfield boss troll card; keep snowfield variants and 46020050",
+    "46000110": "Remove the mine troll card",
+    "43511120": "Remove this Godrick knight card",
+    "43510040": "Remove this Godrick knight card"
+  },
+  "publishEncounters": false,
   "excludedGeneratedIds": {
     "10000020": "Group healthbar proxy, not an individual enemy card",
     "21500600": "Shared three-girls healthbar; individual form unresolved",
@@ -25,5 +35,11 @@
     "75003110": "One member of a shared three-beasts healthbar; individual name unresolved"
   },
   "nonEnemyPrefixes": ["500010", "5210", "5211", "5230", "5231"],
+  "displayLocationExclusionsById": {
+    "46700020": ["要塞底层Boss"]
+  },
+  "displayLocationOverridesById": {
+    "49000040": ["第三夜Boss"]
+  },
   "notes": "Retired IDs follow approved atlas removals; a native NPC row alone does not authorize reinstatement. Only exact game-text-named hostile prefixes create cards."
 }

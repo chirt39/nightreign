@@ -21,7 +21,8 @@ REMOVED_ENEMY_IDS = frozenset({
     "43738030", "43738130", "43530130", "43134030", "75600010",
     "75600110", "75600130", "75700030", "75700020", "75700010",
     "43630400", "75400010", "21300010", "40001020", "46004080",
-    "75400100", "30101260", "30101010", "30100280",
+    "75400100", "30101260", "30101010", "30100280", "21500400",
+    "45050010", "46020030", "46000110", "43511120", "43510040",
 })
 REMOVED_ENEMY_COLUMN_POSITIONS = frozenset({20, 21, 22, 23, 25})
 REMOVED_ENEMY_FIELD_KEYS = frozenset({
@@ -133,21 +134,6 @@ def build() -> list[dict[str, Any]]:
         title = f"敌人图鉴｜{name}｜ID {enemy_id}"
         add(records, "enemy", title, title + "｜" + "；".join(fields), "public/enemy-data.json",
             [name, enemy_id, "敌人 怪物 Boss 首领 弱点 伤害倍率 抗性 属性"], record_id)
-
-    for encounter in enemy_data.get("encounters", []):
-        name = encounter["name"]
-        locations = encounter.get("locations", [])
-        members = [
-            f"{member.get('name', '')}（{member['enemyId']}）" if member.get("name") else str(member["enemyId"])
-            for member in encounter["members"] if str(member["enemyId"]) not in REMOVED_ENEMY_IDS
-        ]
-        fields = [f"遭遇：{name}"]
-        if locations:
-            fields.append("出现地点：" + "、".join(locations))
-        if members:
-            fields.append("配置中出现的成员：" + "、".join(members))
-        add(records, "enemy", f"敌人遭遇｜{name}", "｜".join(fields), "public/enemy-data.json",
-            [name, *locations], f"enemy:{encounter['id']}")
 
     # Boss/field scaling table, including HP, poise and status multipliers.
     scale = enemy_data.get("scale", {})

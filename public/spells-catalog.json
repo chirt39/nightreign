@@ -75,7 +75,8 @@
       "description": "魔法学院雷亚卢卡利亚的\n其中一种辉石魔法。\n\n能连续释放辉石结晶碎片。\n借由蓄力能提升威力。\n\n称作结晶派的魔法师们拥有的招式。\n他们是石中智慧的探索者，\n专门研究结晶人集团的细微思绪。",
       "image": "/spell-images/6009-358b6a307865.webp",
       "type": "sorcery",
-      "fp": 14
+      "fp": 14,
+      "fpPerRepeat": 2
     },
     {
       "id": "4070",
@@ -115,7 +116,8 @@
       "description": "魔法学院雷亚卢卡利亚的\n其中一种辉石魔法。\n\n将魔力灌入手杖尾端，刺入地面，\n在周围引发大幅度的魔力冲击波。\n\n持续施展不会将手杖刺入地面，\n可以走动，用灌注魔力的手杖尾端刺向敌人。\n\n结晶坑道的辉石矿工们使用的高阶挖石魔法。",
       "image": "/spell-images/6019-90a77d4f5031.webp",
       "type": "sorcery",
-      "fp": 22
+      "fp": 22,
+      "fpPerRepeat": 5
     },
     {
       "id": "4120",
@@ -139,7 +141,8 @@
       "description": "起源魔法师的其中一人，亚兹勒的魔法。\n“传说中的魔法”之一。\n\n据说辉石的故乡位在遥远的星空。\n能释放星空激流──极大型彗星。\n持续施展能一直释放。\n\n亚兹勒窥见的起源是黑暗──\n据说那黑暗的深渊除了夺去他的心神，\n也让他感受到了恐惧。",
       "image": "/spell-images/6012-0c6d58e95784.webp",
       "type": "sorcery",
-      "fp": 40
+      "fp": 40,
+      "fpPerRepeat": 10
     },
     {
       "id": "4210",
@@ -147,7 +150,8 @@
       "description": "过去古老观星者发现的，最悠久的起源魔法。\n“传说中的魔法”之一。\n\n在空中召唤出黑暗星云，\n一定时间内，降下磅礡的星雨。\n可以走动施展，借由蓄力能提升威力。\n\n据说此为辉石魔法的起点──\n观星者窥见的起源化虚为实，\n在这块土地降下了星星琥珀。",
       "image": "/spell-images/6021-88f39c499a6d.webp",
       "type": "sorcery",
-      "fp": 27
+      "fp": 27,
+      "fpCharged": 32
     },
     {
       "id": "4220",
@@ -315,7 +319,8 @@
       "description": "神秘结晶人集团的魔法。\n\n能形成结晶块，粉碎后朝前方释放。\n借由蓄力能提升威力。\n\n同为无机物与生物的存在──\n结晶人的生存型态接近起源的理想。\n他们是魔法师们的座上宾。",
       "image": "/spell-images/6033-b5cd2fbdd9e0.webp",
       "type": "sorcery",
-      "fp": 27
+      "fp": 27,
+      "fpCharged": 38
     },
     {
       "id": "4510",
@@ -331,7 +336,8 @@
       "description": "神秘结晶人集团的魔法。\n\n能形成结晶块，连续释放结晶碎片。\n持续施展的期间会继续释放。\n\n被称为结晶人之怒的魔法。\n那结晶碎片各个都巨大，十分危险。",
       "image": "/spell-images/6035-072753caeb60.webp",
       "type": "sorcery",
-      "fp": 20
+      "fp": 20,
+      "fpPerRepeat": 5
     },
     {
       "id": "4600",
@@ -363,7 +369,8 @@
       "description": "人称废石的托普斯，\n赌上人生探索而来的魔法。\n\n能形成魔力力场，拨开魔法与祷告。\n持续施展的期间会接连形成力场。\n\n后世的人们肯定明白──\n那受人嘲讽的理论，\n其实是足以成立新教室的发现。",
       "image": "/spell-images/6039-5f54204a9936.webp",
       "type": "sorcery",
-      "fp": 7
+      "fp": 7,
+      "fpPerRepeat": 7
     },
     {
       "id": "4640",
@@ -387,7 +394,8 @@
       "description": "其中一种控制重力的辉石魔法。\n\n能从虚无空间召唤小颗陨石，引发坠落。\n持续施展的期间，陨石会不停坠落。\n\n此为拥有石质皮肤的诸位黑王，\n受人畏惧，尊称为王的破坏力量。",
       "image": "/spell-images/6070-c6eaafbf3236.webp",
       "type": "sorcery",
-      "fp": 30
+      "fp": 30,
+      "fpPerRepeat": 10
     },
     {
       "id": "4701",
@@ -395,7 +403,8 @@
       "description": "其中一种控制重力的辉石魔法。\n\n能从虚无空间召唤大量小颗陨石，引发坠落。\n持续施展的期间，陨石会不停坠落。\n\n此为在过去，艾丝缇将永恒之城破坏殆尽时，\n所展现的力量。",
       "image": "/spell-images/6042-7e3048ee80d1.webp",
       "type": "sorcery",
-      "fp": 60
+      "fp": 60,
+      "fpPerRepeat": 12
     },
     {
       "id": "4710",
@@ -435,7 +444,8 @@
       "description": "格密尔的其中一种熔岩魔法。\n\n能从地面引起熔岩喷发，洒向四周。\n借由蓄力能延长喷发时间。\n\n据说此魔法代表着火山之怒。\n那么，意图施展它的这种想法，\n可以说是人类的，或是蛇的傲慢。",
       "image": "/spell-images/6212-fe170f3c42bb.webp",
       "type": "sorcery",
-      "fp": 16
+      "fp": 16,
+      "fpPerRepeat": 3
     },
     {
       "id": "4820",
@@ -483,7 +493,8 @@
       "description": "侍奉死亡的人物施展的魔法。\n\n能召唤大量穷追不舍的怨魂群。\n借由蓄力能强化威力。\n\n据说是死之鸟从灵火掏出的古老死亡余烬。",
       "image": "/spell-images/6049-c160d88bac43.webp",
       "type": "sorcery",
-      "fp": 21
+      "fp": 21,
+      "fpCharged": 24
     },
     {
       "id": "5010",
@@ -603,7 +614,8 @@
       "description": "直接展现火焰巨人力量的其中一种祷告。\n\n能在自身周围燃起接连形成的火焰柱。\n借由蓄力能增加火焰柱的数量。\n\n火焰巨人借助恶神的力量，但依然败北──\n随后化为火焰的永恒看守者，得以续命，\n也迎来孤独诅咒的终点。",
       "image": "/spell-images/6211-fcfdd5d4419a.webp",
       "type": "incantation",
-      "fp": 26
+      "fp": 26,
+      "fpCharged": 30
     },
     {
       "id": "6210",
@@ -619,7 +631,8 @@
       "description": "火焰习武修士们的其中一种祷告。\n属于高阶祷告。\n\n能朝前方喷出持续并剧烈燃烧的火焰。\n可以走动执行，持续执行能继续喷火。\n\n巨人火焰是燃烧黄金树的灰灭火焰。\n因此在巨人战争后，火焰受到封印，\n诸位监视者随之诞生。",
       "image": "/spell-images/6208-37b991df83ba.webp",
       "type": "incantation",
-      "fp": 1
+      "fp": 1,
+      "fpPerRepeat": 1
     },
     {
       "id": "6230",
@@ -1043,7 +1056,8 @@
       "description": "其中一种龙飨祷告。\n\n能将自身化为龙，喷出火焰吐息。\n借由蓄力能延长喷出吐息的时间。\n\n狩猎龙，献上、吞噬龙心脏的人们拥有的招式。\n那是既纯粹，又压倒性强大的力量。",
       "image": "/spell-images/6080-71edb8e0be27.webp",
       "type": "incantation",
-      "fp": 28
+      "fp": 28,
+      "fpPerRepeat": 4
     },
     {
       "id": "7001",
@@ -1051,7 +1065,8 @@
       "description": "其中一种龙飨祷告。属于高阶祷告。\n能展现“飞龙”亚基尔的力量。\n\n能将自身化为龙，从空中喷出火焰吐息。\n借由蓄力能延长喷出吐息的时间。\n在跳跃期间也能使用。\n\n在宁姆格福的湖泊，长生者们望向天空，\n祈祷龙的吐息能够烧死自己。",
       "image": "/spell-images/6081-8ab1678ad899.webp",
       "type": "incantation",
-      "fp": 36
+      "fp": 36,
+      "fpPerRepeat": 6
     },
     {
       "id": "7010",
@@ -1075,7 +1090,8 @@
       "description": "其中一种龙飨祷告。\n\n能将自身化为龙，喷出寒冰吐息。\n借由蓄力能延长喷出吐息的时间。\n\n不断执行龙飨，超越凡人的人物，\n才能得到“龙心者”的称呼。",
       "image": "/spell-images/6083-7ca7c637d754.webp",
       "type": "incantation",
-      "fp": 36
+      "fp": 36,
+      "fpPerRepeat": 4
     },
     {
       "id": "7021",
@@ -1083,7 +1099,8 @@
       "description": "其中一种龙飨祷告。属于高阶祷告。\n能展现“冻结冰雾”玻列琉斯的力量。\n\n能将自身化为龙，从空中喷出寒冰吐息。\n借由蓄力能延长喷出吐息的时间。\n在跳跃期间也能使用。\n\n许久以前，冰龙曾是山顶的主人，\n然而在败给火焰巨人们之后，被赶离了山顶。",
       "image": "/spell-images/6084-df5d89c523f9.webp",
       "type": "incantation",
-      "fp": 48
+      "fp": 48,
+      "fpPerRepeat": 6
     },
     {
       "id": "7030",
@@ -1091,7 +1108,8 @@
       "description": "其中一种龙飨祷告。\n\n能将自身化为龙，喷出猩红腐败吐息。\n借由蓄力能延长喷出吐息的时间。\n\n不断执行龙飨，超越凡人的人物，\n才能得到“龙心者”的称呼。",
       "image": "/spell-images/6085-99d8c4d3d399.webp",
       "type": "incantation",
-      "fp": 36
+      "fp": 36,
+      "fpPerRepeat": 4
     },
     {
       "id": "7031",
@@ -1099,7 +1117,8 @@
       "description": "其中一种龙飨祷告。属于高阶祷告。\n能展现“步入腐败”艾格基斯的力量。\n\n能将自身化为龙，从空中喷出猩红腐败吐息。\n借由蓄力能延长喷出吐息的时间。\n在跳跃期间也能使用。\n\n“龙飨复仇者”艾格基斯\n即使受猩红腐败侵蚀，也不忘心中的仇恨。",
       "image": "/spell-images/6086-463abd5bd56c.webp",
       "type": "incantation",
-      "fp": 48
+      "fp": 48,
+      "fpPerRepeat": 6
     },
     {
       "id": "7040",
@@ -1107,7 +1126,8 @@
       "description": "其中一种龙飨祷告。\n\n能将自身化为龙，喷出魔力吐息。\n借由蓄力能延长喷出吐息的时间。\n\n不断执行龙飨，超越凡人的人物，\n才能得到“龙心者”的称呼。",
       "image": "/spell-images/6087-60a9d68893af.webp",
       "type": "incantation",
-      "fp": 28
+      "fp": 28,
+      "fpPerRepeat": 4
     },
     {
       "id": "7041",
@@ -1115,7 +1135,8 @@
       "description": "其中一种龙飨祷告。属于高阶祷告。\n能展现“辉石龙”史玛拉格的力量。\n\n能将自身化为龙，从空中喷出魔力吐息。\n借由蓄力能延长喷出吐息的时间。\n在跳跃期间也能使用。\n\n“吞噬魔法师”史玛拉格，\n最后受到那辉石的侵蚀。",
       "image": "/spell-images/6088-d2fcdf0e2ccc.webp",
       "type": "incantation",
-      "fp": 36
+      "fp": 36,
+      "fpPerRepeat": 6
     },
     {
       "id": "7050",
@@ -1203,7 +1224,8 @@
       "description": "源自癫狂叁指的祷告。\n\n能从眼睛迸发剧烈黄色癫火。\n持续执行的期间会继续迸发癫火。\n可以走动执行。\n\n受癫火影响，眼珠因此烧烂的罹病者，\n症状伴随令人抓狂的剧痛，\n此为难以忍受所流下的泪水。",
       "image": "/spell-images/6096-20a5a6e8bdf9.webp",
       "type": "incantation",
-      "fp": 22
+      "fp": 22,
+      "fpPerRepeat": 6
     },
     {
       "id": "7320",
@@ -1243,7 +1265,8 @@
       "description": "远古黄金树的其中一种祷告。\n\n能形成巨大喉囊，一边走动一边喷出火焰吐息。\n借由蓄力能延长喷出吐息的时间。\n\n此为黄金树的初始生命力量，\n熔炉的百相之一。\n在过去，生命是相互混合，不分彼此。",
       "image": "/spell-images/6615-9f127b0c16d0.webp",
       "type": "incantation",
-      "fp": 28
+      "fp": 28,
+      "fpPerRepeat": 4
     },
     {
       "id": "7530",
@@ -1360,7 +1383,7 @@
         "sha256": "e09b031da8bc63076477cf85f5baa29819a39bf68de94e2216a7edf105efbf88"
       }
     ],
-    "generatorSha256": "d75a7d14a3f1b16eb4207274c4b9cd2fe4ddb57c74547feb7b1ea8f630f25744",
+    "generatorSha256": "5b35a4b19c9310e5d869fde6c3132cf59beef713f7b6db8cc4e9aa7eba09908c",
     "magicCategoryRule": {
       "source": "NR/Meta/Magic.xml",
       "sha256": "85d9796b5bd73cf400fa06d2f0c02514fbdae9692a7a427618cc00fd281865b6",
