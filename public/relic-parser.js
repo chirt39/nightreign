@@ -614,11 +614,24 @@ function parseSaveFile(arrayBuffer, itemsData, effectsData) {
     });
   }
 
-  return {
+  const profile = entries.find(entry => entry.index === 10)?.cleanData;
+  const resultData = entries.find(entry => entry.index === 12)?.cleanData;
+  const parsed = {
     file: 'uploaded',
     characterName: characterName,
     totalRelics: relicsOutput.length,
     relics: relicsOutput,
     battleRecords: parseBattleRecords(entries),
+    expeditions: profile ? globalThis.NightreignBattleSummaries?.parse(profile) || [] : [],
   };
+  if (resultData) {
+    // Keep compressed records in this tab. Only index/decode when a row opens.
+    let replayIndex;
+    const index = () => replayIndex ??= globalThis.BattleReplay.open(resultData);
+    Object.defineProperties(parsed, {
+      loadReplay: { value: async record => (await index()).get(record.id, record) },
+      loadRelics: { value: async record => (await index()).getRelics(record.id, record) },
+    });
+  }
+  return parsed;
 }

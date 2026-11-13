@@ -16,6 +16,13 @@ from pathlib import Path
 
 
 REPO = Path(__file__).resolve().parents[1]
+# Existing public target IDs contain the original atlas index for these duplicate NPC IDs.
+DUPLICATE_TARGET_IDS = {
+    ("37010030", "调香师 (遗迹Boss)"): "37010030#row1114",
+    ("37010030", "调香师 [灾域] (遗迹Boss)"): "37010030#row1116",
+    ("35003110", "法姆亚兹拉的骷髅兽人 - 骑士 (遗迹)"): "35003110#row1359",
+    ("35003110", "法姆亚兹拉的骷髅兽人 - 骑士 [灾域] (遗迹)"): "35003110#row1361",
+}
 TAKEN_FIELDS = {
     "normal": "neutralDamageCutRate",
     "slash": "slashDamageCutRate",
@@ -55,7 +62,7 @@ def main() -> None:
         atlas_percent = row[5:13]
         agrees = all(isinstance(value, (int, float)) and abs((1 - native_taken[key]) * 100 - value) < .01
                      for (key, _), value in zip(TAKEN_FIELDS.items(), atlas_percent))
-        target_id = source_id if source_ids[source_id] == 1 else f"{source_id}#row{index}"
+        target_id = DUPLICATE_TARGET_IDS.get((source_id, row[0]), source_id if source_ids[source_id] == 1 else f"{source_id}#row{index}")
         targets.append({
             "id": target_id,
             "name": row[0],

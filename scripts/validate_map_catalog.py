@@ -11,6 +11,8 @@ from pathlib import Path
 
 from build_map_catalog import ASSET_MANIFEST, CASTLE_BOSS_ATTACH_IDS, OVERRIDES, OUTPUT, SOURCE, param, sha256
 
+NATIVE_AUDIT = Path(r"E:\海斗\outputs\enemy-full-audit\native")
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -136,12 +138,50 @@ def main() -> None:
     )
     assert castle_basement_raw == 390
     reference_points = catalog["referencePoints"]
-    assert len(reference_points) == 35 and len({p["key"] for p in reference_points}) == 35
-    assert Counter(p["terrainId"] for p in reference_points) == {"1": 12, "2": 10, "5": 13}
-    assert all(p["filterable"] is False and p["positionAccuracy"] == "reference" for p in reference_points)
-    assert Counter(p["displayCategory"] for p in reference_points) == {"fieldElite": 33, "baseBoss": 2}
+    assert len(reference_points) == len(overrides["referencePoints"]) + len(overrides["nativeReferenceElitePoints"])
+    assert len({p["key"] for p in reference_points}) == len(reference_points)
+    assert Counter(p["terrainId"] for p in reference_points) == {"1": 12, "2": 10, "5": 14}
+    assert all(p["filterable"] is False and p["positionAccuracy"] in {"reference", "native", "native_entity_placement"} for p in reference_points)
+    assert Counter(p["displayCategory"] for p in reference_points) == {"fieldElite": 34, "baseBoss": 2}
     assert {p["key"] for p in reference_points if p["displayCategory"] == "baseBoss"} == {"1:2", "1:3"}
-    assert all(p["worldMapPointIconId"] is None for p in reference_points)
+    icon_rows = overrides["verifiedReferencePointIconRows"]
+    native_points = overrides["nativeReferenceElitePoints"]
+    assert {p["key"] for p in reference_points if p["worldMapPointIconId"] is not None} == set(icon_rows) | set(native_points)
+    assert all(p["worldMapPointIconId"] in {16, 28} and p["nativeWorldMapPointRowIds"] == icon_rows[p["key"]] for p in reference_points if p["key"] in icon_rows)
+    assert all(p["worldMapPointIconId"] is None for p in reference_points if p["key"] not in icon_rows and p["key"] not in native_points)
+    _, world_map_rows = param(args.source, "WorldMapPointParam")
+    world_map_by_id = {row["id"]: row for row in world_map_rows}
+    for point in reference_points:
+        for row_id in point.get("nativeWorldMapPointRowIds", []):
+            row = world_map_by_id[row_id]
+            transform = asset_manifest["terrains"][point["terrainId"]]["coordinateTransform"]
+            x = (int(row["gridXNo"]) * transform["pixelX"]["gridXNo"] + float(row["posX"]) * transform["pixelX"]["posX"] + transform["pixelX"]["constant"]) / transform["width"]
+            y = (int(row["gridZNo"]) * transform["pixelY"]["gridZNo"] + float(row["posZ"]) * transform["pixelY"]["posZ"] + transform["pixelY"]["constant"]) / transform["height"]
+            assert math.hypot(x - point["normalized"]["x"], y - point["normalized"]["y"]) * transform["width"] < 1
+            assert point["worldMapPointIconId"] == int(row["worldMapPointIconId"])
+    npc_evidence = overrides["verifiedReferencePointNpcParamIds"]
+    assert len(npc_evidence) == 23
+    flag_to_point = {int(world_map_by_id[(icon_rows.get(key) or [native_points[key]["worldMapPointRowId"]])[0]]["eventFlagId0"]): key for key in npc_evidence}
+    flag_entities = defaultdict(list)
+    with (NATIVE_AUDIT / "events.jsonl").open(encoding="utf-8") as stream:
+        for line in stream:
+            for event in json.loads(line)["events"]:
+                for instruction in event["instructions"]:
+                    args32 = instruction.get("int32") or []
+                    if len(args32) > 6 and args32[1] == 90015017 and args32[6] in flag_to_point:
+                        flag_entities[args32[6]].append(args32[2])
+    assert set(flag_entities) == set(flag_to_point)
+    assert all(len(entities) == 1 for entities in flag_entities.values())
+    entity_npcs = defaultdict(set)
+    target_entities = {entities[0] for entities in flag_entities.values()}
+    with (NATIVE_AUDIT / "placements.jsonl").open(encoding="utf-8") as stream:
+        for line in stream:
+            placement = json.loads(line)
+            for entity in target_entities & {placement["entityId"], *placement["entityGroups"]}:
+                entity_npcs[entity].add(placement["NpcParamId"])
+    for flag, key in flag_to_point.items():
+        assert entity_npcs[flag_entities[flag][0]] == set(npc_evidence[key]), key
+    assert Counter(p["worldMapPointIconId"] for p in reference_points if p["displayCategory"] == "fieldElite") == {16: 16, 28: 11, None: 7}
     native_elite_icons = Counter()
     for map_id, elite in overrides["verifiedFieldEliteMapIds"].items():
         icon_id = catalog["definitions"]["features"][f"fieldElite:{map_id}"]["worldMapPointIconId"]
@@ -172,7 +212,9 @@ def main() -> None:
         "excludedCastleBasementRawPoints": castle_basement_raw,
         "displayOnlyReferencePoints": len(reference_points),
         "nativeFieldEliteIconTemplates": dict(native_elite_icons),
-        "unresolvedReferenceFieldEliteIcons": 33,
+        "nativeReferenceIconPoints": sum(p["worldMapPointIconId"] in {16, 28} for p in reference_points),
+        "verifiedReferencePointEventEntityLinks": len(npc_evidence),
+        "unresolvedReferenceFieldEliteIcons": sum(p["displayCategory"] == "fieldElite" and p["worldMapPointIconId"] is None for p in reference_points),
         "eventPatterns": event_count,
         "terrainCounts": dict(sorted(Counter(p["terrain"]["value"] for p in patterns).items())),
         "calibratedTerrains": sorted(calibrated_terrains),

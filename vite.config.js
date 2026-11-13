@@ -7,6 +7,10 @@ import { relicSearchPlugin } from './scripts/relic-search-pages.mjs';
 
 const classicScriptFiles = [
   'crypto-js.min.js',
+  'battle-equipment.js',
+  'battle-summaries.js',
+  'battle-replay.js',
+  'battle-history-ui.js',
   'relic-parser.js',
   'save-editor.js',
   'ai-config.js',
@@ -19,6 +23,7 @@ const catalogJsonFiles = [
   'effects_data.json',
   'quickref_effects_zh.json',
   'effect_names_zh.json',
+  'battle-equipment-catalog.json',
   'vessels_data.json',
   'relic_catalog_zh.json',
   'relic_rule_effects.json',
@@ -39,7 +44,7 @@ const catalogJsonFiles = [
   'map-catalog.json',
   'map-asset-manifest.json',
 ];
-const stylesheetFiles = ['style.css', 'game-ui.css'];
+const stylesheetFiles = ['style.css', 'game-ui.css', 'battle-history.css'];
 const classicScriptVersions = Object.fromEntries(classicScriptFiles.map((file) => {
   const path = fileURLToPath(new URL(`./public/${file}`, import.meta.url));
   if (!existsSync(path)) {
@@ -74,7 +79,7 @@ const stylesheetCacheKeyPlugin = {
   name: 'stylesheet-content-cache-keys',
   transformIndexHtml(html) {
     return html.replace(
-      /(<link\b[^>]*\bhref=["'])\/(style\.css|game-ui\.css)(?:\?[^"']*)?(["'][^>]*>)/gi,
+      /(<link\b[^>]*\bhref=["'])\/(style\.css|game-ui\.css|battle-history\.css)(?:\?[^"']*)?(["'][^>]*>)/gi,
       (_match, prefix, file, suffix) => `${prefix}/${file}?v=${stylesheetVersions[file]}${suffix}`,
     );
   },

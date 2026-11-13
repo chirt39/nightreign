@@ -676,7 +676,7 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
 
 /* Searchable relic effect glossary. */
 .weapon-nav-placeholder{background:#152332}
-.nav-link .map-nav-icon{display:grid;place-items:center;background:#172638;color:#d9c28d;font-size:25px}
+
 #view-weapons{font-size:14px;line-height:1.6}
 #view-weapons .weapon-toolbar{display:flex;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:14px;border:1px solid #3c5065;background:#152332;border-radius:4px}
 #view-weapons label{display:grid;gap:5px;min-width:0;color:#c8d1d7;font-size:14px}
@@ -932,8 +932,8 @@ html{scrollbar-color:#8d7a56 #121d2b;scrollbar-width:thin}
   .app-shell.enemies-fullscreen #view-enemies .enemy-detail{height:auto;min-height:0;max-height:none;overflow:auto}
 }
 
-.side-license-link{display:block;margin:9px 0 0 16px;color:#b7c3cd;font-size:10px;line-height:1.5;text-decoration:underline;text-underline-offset:2px}
-.side-license-link:hover{color:#f0d494}
+.home-filing{text-align:center;padding:16px;color:#b7c3cd;font-size:12px}.home-filing a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.home-filing a:hover{color:#f0d494}
 
 /* 图鉴与地图共享页面尺寸，保留各页功能布局。 */
 .reference-pages{--reference-gap:12px;--reference-line:#3e566e;--reference-panel:#132131}

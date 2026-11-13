@@ -256,7 +256,7 @@ test('nightlord portraits use verified menu identity and DLC has an honest fallb
 });
 
 
-test('native blue and red elite icons follow explicit definition metadata; references remain neutral', () => {
+test('native elite icons and verified reference rows use explicit blue or red metadata', () => {
   const catalog = JSON.parse(readFileSync(new URL('../public/map-catalog.json', import.meta.url), 'utf8'));
   const manifest = JSON.parse(readFileSync(new URL('../public/map-icon-manifest.json', import.meta.url), 'utf8'));
   assert.match(pointIconPath(manifest, 16), /elite-normal-/);
@@ -270,7 +270,8 @@ test('native blue and red elite icons follow explicit definition metadata; refer
   }
   const references = referenceMapGroups(catalog.referencePoints, '1', { fieldElite: true });
   assert.ok(references.length > 0);
-  for (const group of references) assert.equal(pointIconPath(manifest, group.entries[0].worldMapPointIconId), null);
+  assert.equal(references.filter(group => pointIconPath(manifest, group.entries[0].worldMapPointIconId)).length, 9);
+  for (const group of references) assert.equal(group.entries[0].worldMapPointIconId, group.reference.worldMapPointIconId);
 });
 
 test('both DLC nightlord portraits use verified native menu assets', () => {

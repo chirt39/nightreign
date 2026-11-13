@@ -498,6 +498,10 @@ def main() -> None:
                                    "locations": locations, "scope": "entity-only"})
     for form in forms:
         entity_location_by_source[form["statId"]] = sorted(form["locations"])
+    # Display on the shared card when a placement cannot identify a stat branch.
+    for source_id, locations in curation["entityLocationOverridesById"].items():
+        entity_location_by_source[source_id] = ordered_public_locations(
+            entity_location_by_source.get(source_id, []) + locations)
     atlas["entityLocationsBySourceId"] = entity_location_by_source
     (audit / "entity-location-candidates.json").write_text(json.dumps(entity_location_rows, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (audit / "entity-location-assignments.json").write_text(json.dumps(entity_assignments, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -21,7 +21,8 @@ test('channel estimate requires a real defense and leaves rounding to the caller
 });
 
 test('targets preserve exact source variants and flag unresolved defenses', () => {
-  assert.equal(data.targets.length, 1673);
+  const atlas = JSON.parse(readFileSync(new URL('../public/enemy-data.json', import.meta.url), 'utf8'));
+  assert.deepEqual(data.targets.map(t => t.source.atlasSourceId), atlas.rows.map(row => String(row[1])));
   assert.equal(data.defaultMode, 'pre_defense');
   assert.equal(data.estimateRequiresOptIn, true);
   assert.equal(new Set(data.targets.map(target => target.id)).size, data.targets.length);

@@ -1,7 +1,15 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 import { buildingChoicesAtPosition, pointChoiceContext, possiblePointChoices, coincidentMarkers, confirmedBuildingKeys, confirmedFieldEliteKeys, withoutPointObservations, MAP_DISPLAY_CATEGORIES, buildingIconPath, pointIconPath, nightlordPortrait, calibratedPointDirectory, collectLayers, definitionOptions, eventOptions, findCandidates, layoutMapMarkers, nearbyPoints, phaseBossOptions, referenceMapGroups, safeMapAsset, validPosition } from '../lib/map-predictor.js';
+import { inferCrystalPoints } from '../lib/crystal-inference.js';
 
+import { points as hollowCrystalPoints, randomGroups as hollowCrystalGroups } from '../../scripts/data/great_hollow_resonating_crystals.json';
+import crystalIcon from '../assets/resonating-crystal-42041.png';
+
+const showCrystals = ref(true);
+const observedCrystalKeys = ref([]);
+const crystalInference = computed(() => inferCrystalPoints(hollowCrystalGroups, observedCrystalKeys.value));
+const visibleCrystalPoints = computed(() => hollowCrystalPoints.filter(point => observedCrystalKeys.value.includes(point.key) || crystalInference.value.possible.has(point.key)));
 const props = defineProps({ active: Boolean, catalogVersions: Object });
 const catalog = shallowRef(null), manifest = shallowRef(null), iconManifest = shallowRef(null), enemyImages = shallowRef(null), loading = ref(false), error = ref('');
 const emptyFilters = () => ({ nightlord: '', firstNight: '', secondNight: '', depth: '', terrain: '', event: '', eventDay: '' });
@@ -97,7 +105,19 @@ const candidateNightlords = computed(() => {
 const selectedNightlord = computed(() => options.value.nightlord.find(option => option.value === filters.nightlord));
 function portrait(value) { const path = nightlordPortrait(definitions.value.nightlords?.[value], enemyImages.value, iconManifest.value); return path && !failedAssets.value.has(path) ? path : null; }
 function buildingIcon(entry) { const path = entry?.displayCategory === 'building' ? buildingIconPath(iconManifest.value, entry.sourceId) : null; return path && !failedAssets.value.has(path) ? path : null; }
-function markerIcon(entry) { const path = entry?.displayCategory === 'fieldElite' ? pointIconPath(iconManifest.value, entry.worldMapPointIconId) : buildingIcon(entry); return path && !failedAssets.value.has(path) ? path : null; }
+function uncoloredElite(point) { return point?.positionAccuracy === 'native_entity_placement' && point.worldMapPointIconId == null; }
+function nativeElite(point) { return uncoloredElite(point) || Boolean(point?.nativeWorldMapPointRowIds?.length); }
+function eliteIconLabel(point) {
+  if (uncoloredElite(point)) return '游戏未单独标色';
+  if (point?.worldMapPointIconId === 28) return '强力野外精英';
+  if (point?.worldMapPointIconId === 16) return '普通野外精英';
+  return '参考位置';
+}
+function markerIcon(entry, point) {
+  const iconId = uncoloredElite(point) ? 16 : entry?.worldMapPointIconId;
+  const path = entry?.displayCategory === 'fieldElite' ? pointIconPath(iconManifest.value, iconId) : buildingIcon(entry);
+  return path && !failedAssets.value.has(path) ? path : null;
+}
 function setNightlord(value) { setFilter('nightlord', value); controlDialog.value?.close(); }
 async function openControls(panel) { closeDialog(); controlPanel.value = panel; await nextTick(); if (!controlDialog.value?.open) controlDialog.value?.showModal(); }
 const filterTags = computed(() => moreFields.filter(field => filters[field.key]).map(field => ({ key: field.key, text: `${field.label}：${options.value[field.key].find(option => option.value === filters[field.key])?.label || '待核对'}${field.key === 'event' && filters.eventDay ? ` · 第${filters.eventDay === '1' ? '一' : '二'}日` : ''}` })));
@@ -126,22 +146,54 @@ function stopDrag() { dragStart = null; dragging.value = false; }
 function pointNumber(point) { return pointDirectory.value.get(JSON.stringify([point.terrainId, String(point.attachId)]))?.number || '?'; }
 function pointLabel(point) { return `位置 ${pointNumber(point)}`; }
 function groupName(group) { return group.reference?.nameZh || (group.entries.length === 1 ? group.entries[0].name : `${pointLabel(group)} · ${group.entries.length} 项已知对象`); }
-function groupCategory(group) { return group.reference ? '参考位置' : group.entries[0]?.kind === 'building' ? '建筑位置' : '野外精英位置'; }
+function groupCategory(group) { return group.crystal ? observedCrystalKeys.value.includes(group.crystal.key) ? '取消标注' : '标注结晶' : group.reference ? eliteIconLabel(group.reference) : group.entries[0]?.kind === 'building' ? '建筑位置' : '野外精英位置'; }
 function terrainName(value) { return definitions.value.terrains?.[String(value)]?.nameZh || '地形待核对'; }
 function isObserved(group) { return observations.value.some(entry => entry.attachId === group.attachId && entry.terrainId === group.terrainId); }
 function isSelected(entry) { return observations.value.some(item => item.attachId === entry.attachId && item.terrainId === entry.terrainId && item.sourceId === entry.sourceId && (item.role || null) === (entry.role || null)); }
-function remember() { undoStack.value.push(JSON.stringify({ filters: { ...filters }, observations: observations.value })); if (undoStack.value.length > 50) undoStack.value.shift(); }
+function remember() { undoStack.value.push(JSON.stringify({ filters: { ...filters }, observations: observations.value, observedCrystalKeys: observedCrystalKeys.value })); if (undoStack.value.length > 50) undoStack.value.shift(); }
 function setFilter(key, value) { if (filters[key] === value) return; remember(); filters[key] = value; if (key === 'event' && !value) filters.eventDay = ''; }
-function clearClues() { remember(); Object.assign(filters, emptyFilters()); observations.value = []; closeDialog(); resetMap(); }
-function undo() { const previous = undoStack.value.pop(); if (!previous) return; const state = JSON.parse(previous); Object.assign(filters, state.filters); observations.value = state.observations; closeDialog(); }
+function clearClues() { remember(); Object.assign(filters, emptyFilters()); observations.value = []; observedCrystalKeys.value = []; closeDialog(); resetMap(); }
+function undo() { const previous = undoStack.value.pop(); if (!previous) return; const state = JSON.parse(previous); Object.assign(filters, state.filters); observations.value = state.observations; observedCrystalKeys.value = state.observedCrystalKeys || []; closeDialog(); }
 function removePoint(group) { remember(); observations.value = withoutPointObservations(observations.value, group).filter(item => !(item.kind === 'building' && group.entries[0].kind === 'building' && sameBuildingPosition(allGroups.value.find(p => p.terrainId === item.terrainId && p.attachId === item.attachId) || {}, group))); }
-function clearObservations() { remember(); observations.value = []; }
+function clearObservations() { remember(); observations.value = []; observedCrystalKeys.value = []; }
+function crystalPointLabel(point) { return `共鸣结晶 ${hollowCrystalPoints.findIndex(item => item.key === point.key) + 1}`; }
+function toggleCrystal(point) {
+  remember();
+  observedCrystalKeys.value = observedCrystalKeys.value.includes(point.key) ? observedCrystalKeys.value.filter(key => key !== point.key) : [...observedCrystalKeys.value, point.key];
+}
+function crystalClicked(point, event) {
+  if (event.detail > 0 && suppressMapClick) { suppressMapClick = false; return; }
+  const target = { key: point.key, crystal: point, normalized: point.normalized };
+  openMapMatches(mapChoicesAtClick(markerClickPosition(event, point.normalized), [target]));
+}
+function markerClickPosition(event, fallback) {
+  const stage = event.currentTarget?.closest('.map-stage');
+  if (!stage || !event.detail) return fallback;
+  const rect = stage.getBoundingClientRect();
+  return { x: (event.clientX - rect.left) / rect.width, y: (event.clientY - rect.top) / rect.height };
+}
+function mapChoicesAtClick(click, initial = []) {
+  if (terrainView.value !== '4' || !showCrystals.value) return initial;
+  const { width, height } = stageSize.value;
+  if (!(width > 0 && height > 0)) return initial;
+  const hit = (normalized, halfSize) => Math.abs((normalized.x - click.x) * width) <= halfSize && Math.abs((normalized.y - click.y) * height) <= halfSize;
+  const crystals = visibleCrystalPoints.value.filter(point => hit(point.normalized, 19)).map(point => ({ key: point.key, crystal: point, normalized: point.normalized }));
+  if (!crystals.length) return initial;
+  const markers = displayedMarkers.value.filter(group => hit(group.normalized, group.entries[0].kind === 'building' ? group.dense ? 22 : 26 : group.dense ? 18 : 22));
+  return [...new Map([...initial, ...markers, ...crystals].map(choice => [choice.key, choice])).values()];
+}
+function overlapChoiceIcon(group) { return group.crystal ? crystalIcon : markerIcon(group.entries[0], group.reference); }
+function removeCrystal(point) {
+  remember();
+  observedCrystalKeys.value = observedCrystalKeys.value.filter(key => key !== point.key);
+  nextTick(() => mapViewport.value?.focus({ preventScroll: true }));
+}
 async function showPointDialog() { await nextTick(); if (pointDialog.value && !pointDialog.value.open) pointDialog.value.showModal(); }
 function chooseGroup(group) { if (!group) return; overlapChoices.value = []; selectedReference.value = null; selectedGroupKey.value = group.key; controlDialog.value?.close(); showPointDialog(); }
-function openMarker(group) { controlDialog.value?.close(); if (group.reference) { overlapChoices.value = []; selectedGroupKey.value = ''; selectedReference.value = group.reference; showPointDialog(); } else chooseGroup(allGroups.value.find(item => item.key === group.key)); }
+function openMarker(group) { controlDialog.value?.close(); if (group.crystal) { toggleCrystal(group.crystal); closeDialog(); nextTick(() => mapViewport.value?.focus({ preventScroll: true })); } else if (group.reference) { overlapChoices.value = []; selectedGroupKey.value = ''; selectedReference.value = group.reference; showPointDialog(); } else chooseGroup(allGroups.value.find(item => item.key === group.key)); }
 function openMapMatches(found) { if (!found.length) return; if (found.length === 1) openMarker(found[0]); else { selectedGroupKey.value = ''; selectedReference.value = null; overlapChoices.value = found; showPointDialog(); } }
-function mapClicked(event) { if (suppressMapClick) { suppressMapClick = false; return; } const rect = event.currentTarget.getBoundingClientRect(); openMapMatches(nearbyPoints(displayedMarkers.value, { x: (event.clientX - rect.left) / rect.width, y: (event.clientY - rect.top) / rect.height }, rect.width, rect.height, 16)); }
-function markerClicked(group, event) { if (event.detail > 0 && suppressMapClick) { suppressMapClick = false; return; } openMapMatches(coincidentMarkers(displayedMarkers.value, group, stageSize.value.width, stageSize.value.height)); }
+function mapClicked(event) { if (suppressMapClick) { suppressMapClick = false; return; } const rect = event.currentTarget.getBoundingClientRect(), click = { x: (event.clientX - rect.left) / rect.width, y: (event.clientY - rect.top) / rect.height }; openMapMatches(mapChoicesAtClick(click, nearbyPoints(displayedMarkers.value, click, rect.width, rect.height, 16))); }
+function markerClicked(group, event) { if (event.detail > 0 && suppressMapClick) { suppressMapClick = false; return; } openMapMatches(mapChoicesAtClick(markerClickPosition(event, group.normalized), coincidentMarkers(displayedMarkers.value, group, stageSize.value.width, stageSize.value.height))); }
 function selectFeature(feature) {
   const group = selectedGroup.value;
   if (!group) return;
@@ -200,7 +252,7 @@ onBeforeUnmount(() => { controller?.abort(); viewportObserver?.disconnect(); if 
     <template v-else-if="catalog">
       <div class="map-workspace">
         <aside class="map-conditions" aria-label="地图推算条件">
-          <header class="map-heading reference-heading"><h1>地图与夜王推算</h1></header>
+          <header class="map-heading reference-heading"><h1>地图</h1></header>
           <div class="map-mobile-summary"><strong role="status">剩余 {{ candidates.length }} 张地图</strong><button type="button" @click="openControls('conditions')">条件与结果</button></div>
           <div class="map-desktop-conditions">
             <div class="map-toolbar">
@@ -219,15 +271,24 @@ onBeforeUnmount(() => { controller?.abort(); viewportObserver?.disconnect(); if 
         </aside>
         <div class="map-canvas-panel">
           <div class="map-canvas-tools">
-            <div v-if="!candidates.length" class="map-conflict" role="alert">线索冲突或超出资料范围，请取消标注或修改条件。<button v-if="observations.length" type="button" @click="clearObservations">清除全部标注</button></div>
-            <div class="map-layer-switches" aria-label="地图图层"><label v-for="(label, category) in layerLabels" :key="category"><input v-model="layerVisibility[category]" type="checkbox">{{ label }}</label></div>
+            <div v-if="!candidates.length" class="map-conflict" role="alert">线索冲突或超出资料范围，请取消标注或修改条件。<button v-if="observations.length || observedCrystalKeys.length" type="button" @click="clearObservations">清除全部标注</button></div>
+            <div class="map-layer-switches" aria-label="地图图层">
+              <label v-for="(label, category) in layerLabels" :key="category"><input v-model="layerVisibility[category]" type="checkbox">{{ label }}</label>
+              <label v-if="terrainView === '4'" class="map-crystal-switch"><input v-model="showCrystals" type="checkbox"><img :src="crystalIcon" alt="">共鸣结晶（可能位置）</label>
+            </div>
             <div class="map-zoom"><button type="button" :disabled="!asset || zoom <= 1" aria-label="缩小地图" @click="zoom = Math.max(1, zoom - .25)">−</button><button type="button" :disabled="!asset || zoom >= 3" aria-label="放大地图" @click="zoom = Math.min(3, zoom + .25)">＋</button><button type="button" :disabled="!asset" @click="resetMap(true)">全图适配</button></div>
           </div>
           <div v-if="asset" ref="mapViewport" class="map-viewport" :class="{ dragging }" @pointerdown="startDrag" @pointermove="moveDrag" @pointerup="stopDrag" @pointercancel="stopDrag" tabindex="0" aria-label="地图，点击图标标记，拖动平移">
             <div class="map-surface" :style="{ width: `${stageSize.width}px`, height: `${stageSize.height}px` }"><div v-if="stageSize.width > 0" class="map-stage" :style="{ width: `${stageSize.width}px`, height: `${stageSize.height}px` }" @click="mapClicked">
               <img :src="asset.src" :alt="`${terrainName(terrainView)}底图`" draggable="false" @error="imageFailed">
+              <div v-if="terrainView === '4' && showCrystals" class="map-crystal-layer" role="group" :aria-label="'共鸣结晶的 ' + visibleCrystalPoints.length + ' 个可能位置'">
+                <div v-for="point in visibleCrystalPoints" :key="point.key" class="map-crystal-anchor" :style="{ left: point.normalized.x * 100 + '%', top: point.normalized.y * 100 + '%' }">
+                  <button type="button" class="map-crystal-marker" :class="{ observed: observedCrystalKeys.includes(point.key), certain: crystalInference.certain.has(point.key) }" :aria-pressed="observedCrystalKeys.includes(point.key)" :aria-label="`${crystalPointLabel(point)}，${observedCrystalKeys.includes(point.key) ? '已标注' : crystalInference.certain.has(point.key) ? '剩余候选一致' : '可能位置'}`" :title="crystalPointLabel(point)" @click.stop="crystalClicked(point, $event)"><span><img :src="crystalIcon" alt="" draggable="false"></span></button>
+                  <button v-if="observedCrystalKeys.includes(point.key)" type="button" class="map-marker-remove map-crystal-remove" :aria-label="`取消${crystalPointLabel(point)}的标注`" title="取消该点标注" @pointerdown.stop @click.stop="removeCrystal(point)">×</button>
+                </div>
+              </div>
               <div v-for="group in displayedMarkers" :key="group.key" class="map-marker-anchor" :style="{ left: `${group.markerX}px`, top: `${group.markerY}px` }">
-                <button class="map-marker" :class="{ observed: isObserved(group), certain: isCertain(group), reference: group.reference, dense: group.dense, 'game-icon': markerIcon(group.entries[0]), building: group.entries[0].displayCategory === 'building', elite: group.entries[0].displayCategory === 'fieldElite' }" type="button" :aria-label="group.reference ? `${groupName(group)}，参考位置` : `${pointLabel(group)}，${groupName(group)}，${isObserved(group) ? '已标注' : '推算点位'}`" @click.stop="markerClicked(group, $event)" :title="groupName(group)"><span aria-hidden="true"><img v-if="markerIcon(group.entries[0])" :src="markerIcon(group.entries[0])" alt="" draggable="false" @error="imageFailed"><svg v-else viewBox="0 0 24 24"><path :d="iconPath(group.entries[0].displayCategory)" /></svg></span><small>{{ groupName(group) }}<em v-if="group.reference">参考</em></small></button>
+                <button class="map-marker" :class="{ observed: isObserved(group), certain: isCertain(group), reference: group.reference, 'uncolored-elite': uncoloredElite(group.reference), dense: group.dense, 'game-icon': markerIcon(group.entries[0], group.reference), building: group.entries[0].displayCategory === 'building', elite: group.entries[0].displayCategory === 'fieldElite' }" type="button" :aria-label="group.reference ? `${groupName(group)}，${eliteIconLabel(group.reference)}` : `${pointLabel(group)}，${groupName(group)}，${isObserved(group) ? '已标注' : '推算点位'}`" @click.stop="markerClicked(group, $event)" :title="groupName(group)"><span aria-hidden="true"><img v-if="markerIcon(group.entries[0], group.reference)" :src="markerIcon(group.entries[0], group.reference)" alt="" draggable="false" @error="imageFailed"><svg v-else viewBox="0 0 24 24"><path :d="iconPath(group.entries[0].displayCategory)" /></svg></span><small>{{ groupName(group) }}<em v-if="group.reference && !nativeElite(group.reference)">参考</em></small></button>
                 <button v-if="isObserved(group)" type="button" class="map-marker-remove" :aria-label="`取消${pointLabel(group)}的全部标注`" title="取消该点全部标注" @pointerdown.stop @click.stop="removePoint(group)">×</button>
               </div>
             </div></div>
@@ -243,12 +304,23 @@ onBeforeUnmount(() => { controller?.abort(); viewportObserver?.disconnect(); if 
           <template v-if="controlPanel === 'conditions'"><label>地形<select :value="filters.terrain" @change="setFilter('terrain', $event.target.value)"><option value="">全部地形</option><option v-for="option in options.terrain" :key="option.value" :value="option.value">{{ option.label }}</option></select></label><button class="map-nightlord-choice" type="button" @click="openControls('nightlords')">已知夜王：{{ selectedNightlord?.label || '不选' }}</button><p>剩余 {{ candidates.length }} 张地图 · {{ terrainName(terrainView) }}</p><div class="map-candidate-switch"><button type="button" :disabled="candidatePage <= 1" @click="turnCandidate(-1)">上一张</button><span>{{ candidates.length ? candidatePage : 0 }} / {{ candidates.length }}</span><button type="button" :disabled="candidatePage >= candidates.length" @click="turnCandidate(1)">下一张</button></div><button type="button" @click="openControls('results')">可能夜王 · {{ candidateNightlords.length }} 位</button></template>
           <div class="map-more-fields"><label v-for="field in moreFields" :key="field.key">{{ field.label }}<select :value="filters[field.key]" @change="setFilter(field.key, $event.target.value)"><option value="">不选</option><option v-for="option in options[field.key]" :key="option.value" :value="option.value">{{ option.label }}</option></select></label><label>事件发生日<select :value="filters.eventDay" :disabled="!filters.event" @change="setFilter('eventDay', $event.target.value)"><option value="">不选</option><option value="1">第一日</option><option value="2">第二日</option></select></label></div>
           <div class="map-condition-actions"><button type="button" :disabled="!undoStack.length" @click="undo">撤销上一步</button><button type="button" @click="clearClues">重置条件</button></div>
-          <details class="map-name-picker"><summary>按名称标记位置</summary><label>地点或首领<input v-model="search" type="search" placeholder="搜索名称或位置编号"></label><ul><li v-for="group in nameGroups" :key="group.key"><button type="button" @click="chooseGroup(group)">{{ pointLabel(group) }} · {{ groupCategory(group) }}</button></li></ul><p v-if="!nameGroups.length">没有匹配位置。</p><nav v-if="nameResultPages > 1" class="map-name-pagination" aria-label="位置名称分页"><button type="button" :disabled="namePage === 1" @click="namePage--">上一页</button><span>{{ namePage }} / {{ nameResultPages }}</span><button type="button" :disabled="namePage === nameResultPages" @click="namePage++">下一页</button></nav></details>
+          <details class="map-name-picker">
+            <summary>按名称标记位置</summary>
+            <label>地点或首领<input v-model="search" type="search" placeholder="搜索名称或位置编号"></label>
+            <div class="map-name-results">
+              <ul v-if="nameGroups.length"><li v-for="group in nameGroups" :key="group.key"><button type="button" @click="chooseGroup(group)">{{ pointLabel(group) }} · {{ groupCategory(group) }}</button></li></ul>
+              <p v-else>没有匹配位置。</p>
+              <nav v-if="nameResultPages > 1" class="map-name-pagination" aria-label="位置名称分页"><button type="button" :disabled="namePage === 1" @click="namePage--">上一页</button><span>{{ namePage }} / {{ nameResultPages }}</span><button type="button" :disabled="namePage >= nameResultPages" @click="namePage++">下一页</button></nav>
+            </div>
+          </details>
         </template>
       </dialog>
       <dialog ref="pointDialog" class="map-point-dialog" aria-labelledby="map-point-title" @close="selectedGroupKey = ''; selectedReference = null; overlapChoices = []">
-        <header><h2 id="map-point-title">{{ overlapChoices.length ? '选择重合位置' : selectedReference ? `${selectedReference.nameZh} · 参考位置` : selectedGroup ? (selectedGroup.entries[0].kind === 'building' ? '建筑位置' : pointLabel(selectedGroup)) : '选择已见对象' }}</h2><button type="button" aria-label="关闭选择" @click="closeDialog">×</button></header>
-        <div v-if="overlapChoices.length" class="map-feature-choices map-overlap-choices"><button v-for="group in overlapChoices" :key="group.key" type="button" @click="openMarker(group)"><img v-if="markerIcon(group.entries[0])" :src="markerIcon(group.entries[0])" alt="" @error="imageFailed"><svg v-else viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(group.entries[0].displayCategory)" /></svg><span>{{ group.reference ? groupName(group) : pointLabel(group) }}<small>{{ groupCategory(group) }}</small></span></button></div>
+        <header><h2 id="map-point-title">{{ overlapChoices.length ? '选择重合位置' : selectedReference ? `${selectedReference.nameZh} · ${eliteIconLabel(selectedReference)}` : selectedGroup ? (selectedGroup.entries[0].kind === 'building' ? '建筑位置' : pointLabel(selectedGroup)) : '选择已见对象' }}</h2><button type="button" aria-label="关闭选择" @click="closeDialog">×</button></header>
+        <div v-if="overlapChoices.length" class="map-feature-choices map-overlap-choices"><button v-for="group in overlapChoices" :key="group.key" type="button" :aria-pressed="group.crystal ? observedCrystalKeys.includes(group.crystal.key) : undefined" :class="{'uncolored-elite': uncoloredElite(group.reference)}" @click="openMarker(group)"><img v-if="overlapChoiceIcon(group)" :src="overlapChoiceIcon(group)" alt="" @error="imageFailed"><svg v-else viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(group.entries[0].displayCategory)" /></svg><span>{{ group.crystal ? crystalPointLabel(group.crystal) : group.reference ? groupName(group) : pointLabel(group) }}<small>{{ groupCategory(group) }}</small></span></button></div>
+        <div v-else-if="nativeElite(selectedReference)" class="map-reference-info">
+          <p>{{ uncoloredElite(selectedReference) ? '位置取自游戏内的敌人坐标。' : '位置与标色取自游戏地图。' }}</p>
+        </div>
         <div v-else-if="selectedReference" class="map-reference-info"><p>{{ selectedReference.locationNote }}</p><p class="map-reference-note">参考位置，仅供查看，不参与地图筛选。</p><p class="map-reference-source">来源：{{ selectedReference.source?.author }} · <a v-if="referenceSourceUrl" :href="referenceSourceUrl" target="_blank" rel="noopener noreferrer">{{ selectedReference.source?.label }}</a><span v-else>{{ selectedReference.source?.label }}</span></p></div>
         <template v-else-if="selectedGroup"><template v-for="(label, category) in layerLabels" :key="category"><h3 v-if="selectedChoices.some(entry => entry.displayCategory === category)">{{ label }}</h3><div class="map-feature-choices"><button v-for="entry in selectedChoices.filter(item => item.displayCategory === category)" :key="entry.key" type="button" :aria-pressed="isSelected(entry)" :class="{ selected: isSelected(entry) }" @click="selectFeature(entry)"><img v-if="markerIcon(entry)" :src="markerIcon(entry)" alt="" @error="imageFailed"><svg v-else viewBox="0 0 24 24" aria-hidden="true"><path :d="iconPath(entry.displayCategory)" /></svg><span>{{ entry.name }}</span><span v-if="isSelected(entry)" class="map-selected-check" aria-hidden="true">✓</span></button></div></template></template>
       </dialog>
@@ -257,12 +329,25 @@ onBeforeUnmount(() => { controller?.abort(); viewportObserver?.disconnect(); if 
 </template>
 
 <style scoped>
+.map-marker.reference.game-icon > span { background: transparent; border: 0; }
+.uncolored-elite img { filter: grayscale(1) brightness(1.18); }
+.map-crystal-switch img { width: 18px; height: 18px; }
+.map-crystal-layer{position:absolute;inset:0;z-index:1;pointer-events:none}
+.map-crystal-anchor{position:absolute;width:0;height:0}
+.map-crystal-marker{position:absolute;display:grid;place-items:center;width:38px;height:38px;min-height:38px;padding:0;border:0;border-radius:3px;background:transparent;transform:translate(-50%,-50%);pointer-events:auto}
+.map-crystal-marker>span{display:grid;place-items:center;width:clamp(22px,2.2vw,30px);border-radius:2px}
+.map-crystal-marker img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 1px #d5edff) drop-shadow(0 1px 2px #081020)}
+.map-crystal-marker.observed>span{outline:3px solid #8de0ae;outline-offset:2px}
+.map-crystal-marker.certain:not(.observed)>span{outline:3px solid #ec7771;outline-offset:2px}
+.map-crystal-remove{pointer-events:auto}
+
 .map-workspace,.map-conditions{min-width:0}.map-conditions{margin-bottom:12px}
 #view-map{font-size:14px;line-height:1.5;min-width:0}.map-heading{display:flex;align-items:center;gap:20px;margin-bottom:10px}.map-heading h1{margin:0;color:#ecd7a7;font:600 25px/1.35 'Noto Serif SC',serif;white-space:nowrap}.map-heading p{margin:0;color:#b6c7d2;font-size:12px}
 button,select,input{font:inherit}button,summary{cursor:pointer}button{min-height:38px;padding:6px 12px;border:1px solid #536c82;border-radius:4px;background:#1b2d40;color:#e7d5ac}button:disabled{opacity:.4;cursor:default}button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #ecd39a;outline-offset:2px}
 label{display:grid;gap:4px;min-width:0;color:#c7d3da}select,input{width:100%;min-width:0;min-height:40px;padding:7px 10px;border:1px solid #4c657b;border-radius:4px;background:#101d2a;color:#e0e7e9}
 .map-toolbar{display:flex;align-items:flex-end;gap:12px;margin-bottom:10px}.map-toolbar label,.map-nightlord-field{width:220px}.map-toolbar>button{min-height:40px}
-.map-result-bar{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px;margin:0 0 7px}.map-result-bar>strong{font-size:17px;color:#f0dab0}.map-candidate-switch{display:flex;align-items:center;gap:10px}.map-candidate-switch>span{min-width:64px;text-align:center;font-variant-numeric:tabular-nums}.map-more{margin-left:auto}.map-more>summary{padding:8px 12px;border:1px solid #536c82;border-radius:4px;color:#d7c496;list-style:none}.map-more[open]>summary{border-color:#d0b477;background:#29394a}.map-more-content{position:static;z-index:5;top:calc(100% + 7px);right:0;width:min(650px,100%);max-height:none;overflow:visible;padding:12px 0 0;border:0;background:none}.map-more-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.map-more-actions{margin-top:12px}.map-name-picker{margin-top:12px;border-top:1px solid #3a5065;padding-top:12px}.map-name-picker>summary{color:#d8c28f}.map-name-picker label{margin-top:10px}.map-name-picker ul{list-style:none;padding:0;max-height:none;overflow:visible}.map-name-picker li+li{margin-top:5px}.map-name-picker li button{width:100%;text-align:left;overflow-wrap:anywhere}.map-name-pagination{display:flex;align-items:center;gap:10px}
+.map-result-bar{position:relative;display:flex;align-items:center;flex-wrap:wrap;gap:10px 20px;margin:0 0 7px}.map-result-bar>strong{font-size:17px;color:#f0dab0}.map-candidate-switch{display:flex;align-items:center;gap:10px}.map-candidate-switch>span{min-width:64px;text-align:center;font-variant-numeric:tabular-nums}.map-more{margin-left:auto}.map-more>summary{padding:8px 12px;border:1px solid #536c82;border-radius:4px;color:#d7c496;list-style:none}.map-more[open]>summary{border-color:#d0b477;background:#29394a}.map-more-content{position:static;z-index:5;top:calc(100% + 7px);right:0;width:min(650px,100%);max-height:none;overflow:visible;padding:12px 0 0;border:0;background:none}.map-more-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.map-more-actions{margin-top:12px}.map-name-picker{margin-top:12px;border-top:1px solid #3a5065;padding-top:12px}.map-name-picker>summary{color:#d8c28f}.map-name-picker label{margin-top:10px}.map-name-results{display:flex;flex-direction:column;height:min(30dvh,260px);margin-top:8px}
+.map-name-results ul{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;list-style:none;margin:0;padding:0}.map-name-picker li+li{margin-top:5px}.map-name-picker li button{width:100%;text-align:left;overflow-wrap:anywhere}.map-name-pagination{display:flex;align-items:center;gap:10px}
 .map-clue-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.map-clue-tag{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:2px 4px 2px 9px;border:1px solid #708a6f;border-radius:4px;background:#243d36;color:#ddeddd}.map-clue-tag>span{overflow-wrap:anywhere}.map-tag-name{min-height:32px;padding:2px 0;border:0;background:none;color:inherit;overflow-wrap:anywhere;text-align:left}.map-tag-remove{min-height:32px;width:32px;padding:0;border:0;background:none;color:inherit;font-size:21px;flex-shrink:0}
 .map-nightlords{margin:0 0 10px;color:#b8c9d4;font-size:14px}.map-conflict{margin:0 0 10px;padding:8px 12px;border-left:2px solid #d08b78;background:#392b2b;color:#f0c6b9}
 .map-canvas-panel{display:flex;flex-direction:column;min-width:0;min-height:0;padding:10px;border:1px solid #3e566e;border-radius:5px;background:#132131}.map-canvas-tools{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.map-canvas-tools>div{display:flex;gap:6px}.map-legend{display:flex;align-items:center;gap:6px;color:#b4c5d1;font-size:13px}.map-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:#446e9c;border:1px solid #b4d2ed}.map-legend i.observed{background:#528e70;border-color:#a5e5bc;margin-right:0}.map-legend i:not(.observed){margin-left:8px}

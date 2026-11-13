@@ -19,7 +19,7 @@ const labels = {
   weapons: '武器图鉴',
   arts: '战技',
   spells: '魔法与祷告',
-  map: '地图与夜王推算',
+  map: '地图',
   relics: '遗物仪式',
   records: '日志',
   builds: '遗物装配',
@@ -101,6 +101,7 @@ function setView(view, updateUrl = true, restoreScrollY = null, cardNavigation =
     targetUrl.searchParams.delete('effectId');
     targetUrl.searchParams.delete('artId');
     targetUrl.searchParams.delete('spellId');
+    if (nextView !== 'records') targetUrl.searchParams.delete('battleRecord');
     for (const key of ['damageWeapon', 'damageVariant', 'damageArt', 'damageAction']) targetUrl.searchParams.delete(key);
     if (cardNavigation?.kind === 'art') targetUrl.searchParams.set('artId', cardNavigation.id);
     if (cardNavigation?.kind === 'damage') {
@@ -287,13 +288,12 @@ onUnmounted(() => {
       <nav class="nav-list">
         <button class="nav-link" :class="{ active: currentView === 'overview' }" :aria-current="currentView === 'overview' ? 'page' : null" data-view="overview"><img class="nav-icon" src="/nav-icons/roundtable.webp" alt="" />圆桌厅堂</button>
         <button class="nav-link" :class="{ active: isAtlas }" :aria-current="isAtlas ? 'page' : null" data-view="enemies"><img class="nav-icon" src="/nav-icons/bestiary.webp" alt="" />图鉴</button>
-        <button class="nav-link" :class="{ active: currentView === 'map' }" :aria-current="currentView === 'map' ? 'page' : null" data-view="map"><span class="nav-icon map-nav-icon" aria-hidden="true">◇</span>地图与夜王推算</button>
+        <button class="nav-link" :class="{ active: currentView === 'map' }" :aria-current="currentView === 'map' ? 'page' : null" data-view="map"><img class="nav-icon" src="/nav-icons/map-40212.png" alt="" />地图</button>
         <button class="nav-link" :class="{ active: currentView === 'relics' }" :aria-current="currentView === 'relics' ? 'page' : null" data-view="relics"><img class="nav-icon" src="/nav-icons/relic-rite.png" alt="" />遗物仪式</button>
         <button class="nav-link" :class="{ active: currentView === 'records' }" :aria-current="currentView === 'records' ? 'page' : null" data-view="records"><img class="nav-icon" src="/nav-icons/journal.png" alt="" />日志</button>
         <button class="nav-link" :class="{ active: currentView === 'builds' }" :aria-current="currentView === 'builds' ? 'page' : null" data-view="builds"><img class="nav-icon" src="/nav-icons/relic-equip.png" alt="" />遗物装配</button>
         <button class="nav-link" :class="{ active: currentView === 'sources' }" :aria-current="currentView === 'sources' ? 'page' : null" data-view="sources"><img class="nav-icon" src="/nav-icons/sources.png" alt="" />资料说明</button>
       </nav>
-      <div class="side-bottom"><a class="side-license-link" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a></div>
     </aside>
 
     <main id="main-content" class="main" tabindex="-1">
@@ -325,6 +325,7 @@ onUnmounted(() => {
         <EffectsPage :active="currentView === 'effects'" />
         <SourcesPage :active="currentView === 'sources'" />
       </div>
+      <footer v-if="currentView === 'overview'" class="home-filing"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">浙ICP备2026092550号-1</a></footer>
       <div id="feedback-background-status" class="feedback-background-status" role="status" aria-live="polite" aria-relevant="additions text"></div>
     </main>
   </div>
