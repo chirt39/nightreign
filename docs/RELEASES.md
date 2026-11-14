@@ -2,6 +2,18 @@
 
 每次正式发布都要记录 Sites 版本与对应的 Git SHA。只记录已经成功保存并部署的版本；本地构建和未部署改动不能标记为线上版本。具体发布由工程与发布流程执行，GitHub push 不会自动更新 Sites。
 
+## nightreign.cn 遗物异常原因（2026-11-15）
+
+正式代码版本为 `24dcc6e2a91b78c0fe6a21c9c810fb63e605981f`，已合并 [PR #51](https://github.com/chirt39/nightreign/pull/51)。遗物卡、组合检测和异常遗物列表可点击「异常」查看具体词条、槽位及规则原因；关闭后保留原位置。项目要求和规则边界已同步记录。
+
+服务器校验全部 1,548 个构建文件后，将 `/var/www/nightreign/current` 原子切换到 `/var/www/nightreign/releases/24dcc6e2a91b78c0fe6a21c9c810fb63e605981f`。本次只有 5 个前端文件变化，旧版散列资源保留。上一版 `7c71eeda48146223f1fb19a54d9ccf1e59c21c76` 完整保留，回退时原子替换 current 符号链接即可。
+
+本地与公网均用合成收藏验收桌面 1440px、手机 390px：第 2 页的深夜与颜色筛选、正负词条异常、异常列表及组合互斥入口、关闭按钮和 Esc、原卡片/页码/焦点/滚动恢复、长内容内部滚动，均通过且无页面脚本错误。11 项合法性测试、全部 168 项 Node 测试及生产构建通过。
+
+公网校验首页、app.js、game-ui.css、新 JS/CSS bundle、BingSiteAuth.xml、ai-config.js 共 7 项 SHA-256 一致；www 域名的 Bing 文件校验通过。API health 为 ok，知识源和 Chroma 均为 5,216 条。此次未修改后端、环境变量、数据库或知识索引。
+
+服务器发布与验收记录：release 根目录的 `static-deployment.json`，以及 `/home/admin/release-24dcc6e/public-verification.json`。本地截图和验收脚本位于 `E:/海斗/outputs/relic-anomaly-20261115`。
+
 ## nightreign.cn 遗物仪式与词条检测（2026-11-12）
 
 正式版本为 `e65b4d5e047ecbe32f545b6017f9dcc163b2c279`。[发布 PR #46](https://github.com/chirt39/nightreign/pull/46) 包含 13 个开发提交，涵盖遗物与词条卡片布局、从遗物直达词条并返回、深夜词条补全、两种精力露滴修正、手动按槽位检测和收藏异常标记。
