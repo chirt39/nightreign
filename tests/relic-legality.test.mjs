@@ -112,3 +112,35 @@ test('manual fixed preset exceptions require a direct match', () => {
   const randomCatalog = prepareLegalityCatalog({...rules, items: {2: rules.items[2]}});
   assert.equal(checkCombination(randomCatalog, [pair(1), pair(2)]).status, 'anomaly');
 });
+
+test('combination reasons identify wrong roles, conflicts and reordered pairs', () => {
+  const role = checkCombination(catalog, [pair(6820000)]);
+  assert.match(role.reasons.join(''), /第 1 槽.*是负面词条.*正面词条位置/);
+  const duplicate = checkCombination(catalog, [pair(7003500), pair(), pair(7003500)]);
+  assert.match(duplicate.reasons.join(''), /第 1 槽.*第 3 槽.*重复/);
+  const exclusive = checkCombination(catalog, [pair(7000000), pair(7000001)]);
+  assert.match(exclusive.reasons.join(''), /同一互斥组/);
+  const reordered = checkCombination(catalog, [pair(7001402), pair(6002600, 6820000), pair(6630000)]);
+  assert.match(reordered.reasons.join(''), /当前词条顺序不符合生成配置/);
+  assert.match(reordered.reasons.join(''), /负面词条随同移动/);
+  assert.equal(checkCombination(catalog, [pair(6002600), pair(7001402), pair(6630000)]).reasons, undefined);
+  assert.equal(checkCombination(catalog, [pair(99999999)]).reasons, undefined);
+});
+
+test('combination reasons distinguish unsupported slots, pairings and joint templates', () => {
+  const rules = {
+    items: {
+      1: {generation: 'random', positive: [10, 11, null], negative: [20, null, null]},
+      2: {generation: 'random', positive: [12, 13, null], negative: [21, null, null]},
+    },
+    pools: {10: [1], 11: [2], 12: [3], 13: [4], 20: [5], 21: [6]},
+    effects: Object.fromEntries([1,2,3,4,5,6,7].map(id => [id,
+      {name: `测试词条${id}`, negative: id === 5 || id === 6, compatibilityId: id}])),
+  };
+  const c = prepareLegalityCatalog(rules);
+  assert.match(checkCombination(c, [pair(7)]).reasons.join(''), /第 1 槽.*测试词条7.*不在任何已收录配置/);
+  assert.match(checkCombination(c, [pair(1, 6)]).reasons.join(''), /测试词条1.*测试词条6.*当前配对/);
+  assert.match(checkCombination(c, [pair(1), pair(4)]).reasons.join(''), /分别能出现在各自位置.*同时出现在同一份/);
+  // Partial input does not invent a missing-negative anomaly.
+  assert.deepEqual(checkCombination(c, [pair(1)]), {status: 'clear', message: '未发现异常'});
+});

@@ -792,7 +792,8 @@ function renderEffectRows(relic, showId = false, linkEffects = false) {
         const related = issues.filter(issue => issue.slot === rawIndex + 1 && (issue.role === role ||
           (role === 'positive' && issue.role === 'negative' && pair?.negative == null)));
         if (pair && Number(pair[role]) === Number(effect.id) && related.length) {
-          mark = `<small class="relic-effect-anomaly" title="${esc(related.map(issue => issue.message).join('；'))}">异常</small>`;
+          const reasons = related.map(issue => `第 ${issue.slot} 槽${issue.role === 'negative' ? '负面' : '正面'}词条：${issue.message}`);
+          mark = `<button type="button" class="relic-effect-anomaly" aria-haspopup="dialog" aria-label="查看异常原因：${esc(effectName(effect))}" data-anomaly-title="${esc(effectName(effect))}" data-anomaly-reasons="${esc(JSON.stringify(reasons))}">异常</button>`;
         }
       }
       return `<span${index ? ' class="game-effect-negative"' : ''}>${name}${mark}${id}</span>`;
@@ -889,6 +890,13 @@ function damageRelicSelection(relic) {
 }
 
 $('#relic-list').addEventListener('click', event => {
+  const anomaly = event.target.closest('.relic-effect-anomaly');
+  if (anomaly) {
+    window.dispatchEvent(new CustomEvent('nightreign:explain-relic-anomaly', {
+      detail: { title: anomaly.dataset.anomalyTitle, reasons: JSON.parse(anomaly.dataset.anomalyReasons) },
+    }));
+    return;
+  }
   const pick = event.target.closest('[data-damage-relic]');
   if (pick && pick.closest('#view-relics[data-damage-picker]')) {
     const relic = state.relicFiltered[Number(pick.dataset.damageRelic)];
