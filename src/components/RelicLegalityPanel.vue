@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import { getLegalityCatalog, checkRelic, checkCombination } from '../relic-legality.js';
 import RelicLegalityPicker from './RelicLegalityPicker.vue';
+import RelicAnomalyDialog from './RelicAnomalyDialog.vue';
 
 const catalog = shallowRef(null);
 const loading = ref(false);
@@ -16,6 +17,7 @@ const checked = shallowRef(null);
 const showAnomalies = ref(false);
 const anomalyButton = ref(null);
 const anomaliesHeading = ref(null);
+const anomalyDialog = ref(null);
 const effects = computed(() => catalog.value?.effects || []);
 const positiveEffects = computed(() => effects.value.filter(effect => !effect.negative));
 const negativeEffects = computed(() => effects.value.filter(effect => effect.negative));
@@ -83,9 +85,18 @@ function confirmedIssues(entry) {
     .map(issue => {
       const pair = issue.slot == null ? null : entry.relic.rawEffectSlots?.[issue.slot - 1];
       const id = pair?.[issue.role] ?? pair?.positive ?? pair?.negative;
-      return { name: id == null || id === 0xffffffff ? '' : effectName(id), message: issue.message };
+      const position = issue.slot == null ? '' : `第 ${issue.slot} 槽${issue.role === 'negative' ? '负面' : issue.role === 'positive' ? '正面' : ''}词条：`;
+      return { name: id == null || id === 0xffffffff ? '' : effectName(id), message: position + issue.message };
     });
 }
+function explainEntry(entry) {
+  anomalyDialog.value.open(itemName(entry.relic), confirmedIssues(entry).map(issue =>
+    (issue.name ? `${issue.name}：` : '') + issue.message));
+}
+function explainCard({ detail }) {
+  anomalyDialog.value.open(detail.title, detail.reasons);
+}
+function closeExplanation() { anomalyDialog.value?.close(); }
 async function openAnomalies() {
   showAnomalies.value = true;
   await nextTick();
@@ -99,8 +110,14 @@ async function returnToCollection() {
 onMounted(() => {
   refreshCollection();
   window.addEventListener('nightreign:collection-changed', refreshCollection);
+  window.addEventListener('nightreign:explain-relic-anomaly', explainCard);
+  window.addEventListener('hashchange', closeExplanation);
 });
-onBeforeUnmount(() => window.removeEventListener('nightreign:collection-changed', refreshCollection));
+onBeforeUnmount(() => {
+  window.removeEventListener('nightreign:collection-changed', refreshCollection);
+  window.removeEventListener('nightreign:explain-relic-anomaly', explainCard);
+  window.removeEventListener('hashchange', closeExplanation);
+});
 watch(opened, value => {
   if (!value) return;
   tab.value = 'combination';
@@ -129,7 +146,7 @@ watch(opened, value => {
             </div>
           </div>
           <div class="combination-actions"><button type="button" class="action" @click="checkSelectedCombination">检测组合</button></div>
-          <p v-if="combinationResult" class="combination-result" role="status" :data-status="combinationResult.status">{{ combinationMessage }}</p>
+          <p v-if="combinationResult" class="combination-result" role="status" :data-status="combinationResult.status"><button v-if="combinationResult.status === 'anomaly'" type="button" class="anomaly-label" aria-haspopup="dialog" @click="anomalyDialog.open('词条组合', combinationResult.reasons)">异常</button><template v-else>{{ combinationMessage }}</template></p>
         </div>
         <div v-else class="collection-workspace">
           <template v-if="showAnomalies">
@@ -139,7 +156,7 @@ watch(opened, value => {
             </div>
             <div class="checked-grid">
               <article v-for="(entry, index) in anomalies" :key="`${entry.relic.id}:${index}`" class="checked-card" data-status="anomaly">
-                <h3>{{ itemName(entry.relic) }}</h3>
+                <h3>{{ itemName(entry.relic) }} <button type="button" class="anomaly-label" aria-haspopup="dialog" @click="explainEntry(entry)">异常</button></h3>
                 <p class="identity">实例 #{{ entry.relic.id }} · 道具 #{{ entry.relic.itemId }}</p>
                 <ul class="issues"><li v-for="(issue, issueIndex) in confirmedIssues(entry)" :key="issueIndex"><strong v-if="issue.name">{{ issue.name }}：</strong>{{ issue.message }}</li></ul>
               </article>
@@ -157,8 +174,10 @@ watch(opened, value => {
       </template>
     </div>
   </section>
+  <RelicAnomalyDialog ref="anomalyDialog" />
 </template>
 
 <style scoped>
+.anomaly-label{padding:2px 4px;border:0;background:transparent;color:#ffada5;font:600 14px/1.6 'Noto Sans SC',sans-serif;cursor:pointer}
 .legality-panel{margin:10px 0 14px;border:1px solid #3e566e;border-radius:5px;background:#132131;color:#dce6e9;min-width:0}.panel-toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:42px;padding:9px 12px;border:0;border-radius:4px;background:#1b2d40;color:#e7d5ac;font:600 14px/1.5 'Noto Sans SC',sans-serif;text-align:left;cursor:pointer}.panel-body{padding:14px;min-width:0}.hint{margin:0 0 12px;color:#afc1ce;font-size:13px;line-height:1.65}.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}.tabs button,.action{min-height:38px;padding:7px 12px;border:1px solid #536c82;border-radius:4px;background:#1b2d40;color:#e7d5ac;font:inherit;font-size:13px;cursor:pointer}.tabs button[aria-pressed=true]{border-color:#d3b77b;background:#2b3b45}.combination-actions{margin-top:14px}.combination-result{margin:14px 0 0;padding:12px;border:1px solid #536c82;border-radius:4px;background:#172638;font-size:14px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}.slot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}.slot-card{display:grid;align-content:start;gap:10px;min-width:0}.issues{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.7;overflow-wrap:anywhere}.inspection-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}.inspection-summary{color:#afc1ce;font-size:13px}.anomaly-entry{margin-top:12px}.anomaly-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.anomaly-heading h3{margin:0;color:#e7d5ac;font-size:15px}.checked-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}.checked-card{padding:12px;border:1px solid #425a70;border-radius:4px;background:#172638;min-width:0;overflow-wrap:anywhere}.checked-card[data-status=anomaly]{border-left:3px solid #c58a7f}.checked-card h3{margin:0;font:600 15px/1.6 'Noto Sans SC',sans-serif}.identity{margin:5px 0 10px;color:#a5b8c8;font-size:11px}button:focus-visible,select:focus-visible{outline:1px solid #91a5ba;outline-offset:2px}@media(max-width:600px){.panel-body{padding:10px}.slot-grid,.checked-grid{grid-template-columns:minmax(0,1fr)}}
 </style>
