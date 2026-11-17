@@ -175,6 +175,8 @@ def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES, icons_dir=DEFA
     attached = extraction.param("AttachEffectTableParam")
     effect_definitions = extraction.param("AttachEffectParam")
     effect_names = extraction.texts("AttachEffectName")
+    effect_info = extraction.texts("AttachEffectInfo")
+    effects_by_id = {row["id"]: row for row in effect_definitions}
     weapon_names, art_names = extraction.texts("WeaponName"), extraction.texts("ArtsName")
     by_id = {r["id"]: r for r in weapons}
     if len(by_id) != len(weapons):
@@ -192,6 +194,19 @@ def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES, icons_dir=DEFA
         text_id = row["textId"] if row else None
         return {"id": art_id, "textId": text_id, "name": name_for(art_names, text_id)}
 
+    def blessing(row):
+        effect = effects_by_id.get(row["attachEffectId"])
+        if effect is None:
+            return None
+        text_id = effect["attachTextId"]
+        name = name_for(effect_names, text_id)
+        if not name or "庇佑" not in name:
+            return None
+        description = name_for(effect_info, text_id)
+        if not description:
+            raise ValueError(f"Blessing description missing or ambiguous: {row['id']} / {text_id}")
+        return {"id": effect["id"], "textId": text_id, "name": name, "description": description}
+
     skill_pools = {}
     def skill(row):
         fixed = art(row["swordArtsParamId"])
@@ -208,7 +223,7 @@ def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES, icons_dir=DEFA
                     "note": "可能出现的战技候选；实际战技随配置而定。" + (f"{unknown} 条候选中文名待核对。" if unknown else "") + ("可用战技待核对。" if not active else ""),
                     "tableId": table_id, "default": fixed}
         return {"kind": "fixed" if fixed["name"] else "unknown", "names": [fixed["name"]] if fixed["name"] else [],
-                "note": "参数默认固定战技；定制配置可另行覆盖。" if fixed["name"] else "战技名称或引用待核对。", "default": fixed}
+                "note": "" if fixed["name"] else "战技名称或引用待核对。", "default": fixed}
 
     exclusions, conflicts, groups = [], [], defaultdict(list)
 
@@ -275,6 +290,9 @@ def build(source, paramdex, audit_dir, grades_dir=DEFAULT_GRADES, icons_dir=DEFA
                 "scalingGrades": {k: scaling_grade(number(row, "correct" + v), thresholds) for k, v in STAT_FIELDS.items()},
                 "scalingNote": "基础变体补正等级；保留原始系数，不包含运行时效果或强化模拟。",
                 "skill": skill(row), "notes": notes, "sourceIds": [row["id"]]})
+            weapon_blessing = blessing(row)
+            if weapon_blessing:
+                variants[-1]["blessing"] = weapon_blessing
         dlc = True if any(x["dlcText"] for x in weapon_names[root_id]) else None
         result.append({"id": root_id, "name": name, "categoryId": root["wepType"], "categoryLabel": CATEGORIES[root["wepType"]],
                        "dlc": dlc, "iconId": int(root["iconId"]), "aliases": [], "representativeVariantId": root_id,

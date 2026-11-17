@@ -33,8 +33,8 @@
     "21500400": "Remove only this lightning orb atlas source; retain the other seven",
     "45050010": "Remove the small flying dragon surprise-event card",
     "46020030": "Remove the snowfield boss troll card; keep snowfield variants and 46020050",
-    "46000110": "Remove the mine troll card",
-    "43511120": "Remove this Godrick knight card",
+    "46000110": "Merge the mine troll occurrence into existing Troll 46000000; retain mine location",
+    "43511120": "Merge the mine knight occurrence into existing Godrick Knight 43510000; retain mine location",
     "43510040": "Remove this Godrick knight card"
   },
   "publishEncounters": false,
@@ -76,6 +76,8 @@
     "40700020": ["山顶"]
   },
   "entityLocationOverridesById": {
+    "46000000": ["矿洞"],
+    "43510000": ["矿洞"],
     "33700000": ["锻造村", "遗迹（大空洞）"],
     "38500010a": ["遗迹"],
     "38501010a": ["遗迹"],

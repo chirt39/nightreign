@@ -223,6 +223,12 @@ function buildEnemyMetadata(){
   for(const values of Object.values(state.enemyData.extraLocations||{})){
     if(Array.isArray(values))for(const location of values)if(typeof location==='string'&&location.trim())locations.add(location.trim());
   }
+  // Final per-record locations also define occurrence suffixes (for example 矿洞).
+  for(const field of ['displayLocationsBySourceId','statLocationsBySourceId','entityLocationsBySourceId']){
+    for(const values of Object.values(state.enemyData[field]||{})){
+      if(Array.isArray(values))for(const location of values)if(typeof location==='string'&&location.trim())locations.add(location.trim());
+    }
+  }
   for(const area of enemyRequiredAreas)locations.add(area);
   state.enemyMeta=map;state.enemyMetaLocations=locations;state.enemyMetaCategories=categories;
 }
