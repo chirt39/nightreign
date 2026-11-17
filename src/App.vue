@@ -276,7 +276,7 @@ onUnmounted(() => {
     <h1>页面未能完整加载</h1>
     <p>必要功能暂时无法启动，请刷新页面重试。</p>
   </main>
-  <div v-else class="app-shell" :class="{ 'reference-pages': currentView !== 'sources', 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map', 'ability-fullscreen': currentView === 'arts' || currentView === 'spells' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
+  <div v-else class="app-shell reference-pages" :class="{ 'enemies-fullscreen': currentView === 'enemies', 'weapons-fullscreen': currentView === 'weapons', 'map-fullscreen': currentView === 'map', 'ability-fullscreen': currentView === 'arts' || currentView === 'spells' }" :inert="!scriptsReady" :aria-busy="!scriptsReady" @click="handleShellClick">
     <a class="skip-link" href="#main-content">跳转到主要内容</a>
     <aside id="mobile-navigation" class="sidebar" :class="{ open: sidebarOpen }" aria-label="主导航">
       <a class="brand" href="#overview" aria-label="渡夜图鉴首页">
