@@ -2,6 +2,14 @@
 
 每次正式发布都要记录 Sites 版本与对应的 Git SHA。只记录已经成功保存并部署的版本；本地构建和未部署改动不能标记为线上版本。具体发布由工程与发布流程执行，GitHub push 不会自动更新 Sites。
 
+## nightreign.cn 资料说明重做（2026-11-17）
+
+正式代码版本 `fbd94a5b5bb9a5965f6417201d40e9666dc16a33`，已合并 [PR #57](https://github.com/chirt39/nightreign/pull/57)。资料说明沿用图鉴全宽布局，六类导航筛选十二张来源卡片，区分游戏数据、社区资料、图片参考、存档解析和开源许可。AGENTS.md 已加入用户指定的询问偏好，来源台账和页面要求同步更新。
+
+从干净提交快照构建，合并树与测试树一致。本地与公网在 1440、1280、390、320px 验收分类、卡片数量、工具栏稳定、无横向溢出、许可文件、键盘焦点及图鉴往返。桌面三列、手机单列，截图与脚本保存在 `E:/海斗/outputs/sources-20261117`。
+
+服务器校验 1,548 个文件后原子切换 current；本次仅首页和新 JS/CSS bundle 共三个构建文件变化。上一版 `2aefe6efab74c97dceb6e2f059bf6ec67e05b326` 与旧散列资源保留，可原子切回。五项公网文件哈希、www Bing 验证文件及 API 健康检查通过。发布记录为 release 根目录的 `static-deployment.json` 和 `/home/admin/release-fbd94a5/public-verification.json`。其他对话未提交的改动保留在工作区，未纳入发布。
+
 ## nightreign.cn 遗物检测紧凑工具栏（2026-11-17）
 
 正式代码版本 `2aefe6efab74c97dceb6e2f059bf6ec67e05b326`，已合并 [PR #55](https://github.com/chirt39/nightreign/pull/55)。检测方式、检测按钮、异常数量和筛选切换在桌面同排，手机自然换行；检测后始终显示异常总数，有异常时显示小字「点击异常查看原因」。未检测不显示为零，待核对不计入异常数。
