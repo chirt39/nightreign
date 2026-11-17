@@ -2,14 +2,22 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 const props = defineProps({
   kind: {type:String, required:true}, choices: {type:Array, required:true},
-  customChoices: {type:Array, default:()=>[]}, editingRelic: Object, customLimit: {type:Number, required:true}
+  customChoices: {type:Array, default:()=>[]}, editingRelic: Object, customLimit: {type:Number, default:3}
 });
 const emit = defineEmits(['close','pick','custom','ritual']);
 const dialog = ref(null), query = ref(''), tab = ref(props.kind === 'relic' ? 'custom' : '');
+const effectCategory = ref('field');
+const effectCategories = [
+  { value: 'field', label: '局内词条' },
+  { value: 'goods', label: '道具增益' },
+  { value: 'art', label: '战技／祷告' },
+  { value: 'event', label: '事件增益' },
+];
 const draft = ref(props.editingRelic?.rows.map(row => ({ ...row })) || []);
 const custom = computed(() => props.kind === 'relic' && tab.value === 'custom');
-const titles = {weapon:'选择武器',trait:'添加武器词条',effect:'添加局内词条或临时增益',relic:'添加遗物'};
+const titles = {weapon:'选择武器',trait:'添加武器词条',effect:'选择局内增益',relic:'添加遗物'};
 const options = computed(() => (custom.value ? props.customChoices : props.choices).filter(item =>
+  (props.kind !== 'effect' || item.category === effectCategory.value) &&
   `${item.name} ${item.detail || ''} ${item.id}`.toLocaleLowerCase().includes(query.value.trim().toLocaleLowerCase())));
 watch(tab,()=>{query.value='';});
 onMounted(() => dialog.value.showModal());
@@ -32,6 +40,10 @@ function chosen(id) { return draft.value.some(item=>item.id===id); }
           <button type="button" :aria-pressed="custom" @click="tab='custom'">自定义遗物</button>
           <button type="button" :aria-pressed="!custom" @click="tab='official'">官方遗物</button>
         </div>
+        <div v-if="kind==='effect'" class="picker-effect-categories" role="group" aria-label="局内增益分类">
+          <button v-for="category in effectCategories" :key="category.value" type="button"
+            :aria-pressed="effectCategory === category.value" @click="effectCategory = category.value">{{ category.label }}</button>
+        </div>
         <input v-model="query" type="search" aria-label="搜索选项" :placeholder="custom ? '搜索遗物正面词条' : '搜索名称或效果'" autofocus>
         <div v-if="custom && draft.length" class="picker-chips"><button v-for="item in draft" :key="item.id" type="button" :aria-label="'移除'+item.name" @click="pick(item)">{{ item.name }} ×</button></div>
         <div class="picker-results">
@@ -52,4 +64,8 @@ function chosen(id) { return draft.value.some(item=>item.id===id); }
 .illustrated img { grid-row: 1 / span 2; object-fit: contain; }
 .illustrated small { grid-column: 2; }
 .picker-chips { max-height: min(24dvh, 125px); overflow-y: auto; }
+.picker-effect-categories { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; flex-shrink: 0; }
+.picker-effect-categories button { min-width: 0; padding-inline: 4px; white-space: nowrap; }
+.picker-frame header, .picker-frame > input { flex-shrink: 0; }
+@media (max-width: 480px) { .picker-effect-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>

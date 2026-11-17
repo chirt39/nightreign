@@ -202,3 +202,50 @@ test('character conditional bonuses use native recipients and hit restrictions',
   close(calculate([counter], [], {characterId: '3', conditions: counter.conditions}).total, 40);
   assert.ok(!data.effects.some(effect => effect.nativeEffectId === 7036300));
 });
+
+
+test('independent enemy rewards preserve real acquisition routes and per-hit domains', () => {
+  const rewards = data.effects.filter(effect => effect.kind === 'reward');
+  assert.equal(rewards.length, 7);
+  for (const effect of rewards) {
+    assert.equal(effect.buffId, `reward:${effect.permanentBuffId}`);
+    assert.ok(effect.source.includes('ItemLotParam_enemy#'));
+    assert.ok(effect.source.includes('ItemTableParam#'));
+    assert.ok(effect.source.includes('vagrantItemLotId -> PermanentBuffParam#'));
+    assert.equal(effect.stackRule, 'multiply');
+    assert.equal(effect.exclusiveGroup, undefined);
+    assert.equal(effect.nativeEffectId, undefined);
+    assert.equal(effect.goodsId, undefined);
+  }
+  const physical = buff('reward:8100000');
+  const elemental = buff('reward:8100500');
+  const spell = buff('reward:8330103');
+  close(calculate(physical).total, 40 * 1.06);
+  close(calculate(elemental).total, 40);
+  close(calculate(spell, ['weaponAttack', 'art']).total, 40);
+  close(calculate(spell, ['sorcery']).total, 40 * 1.07);
+  close(calculate(spell, ['incantation']).total, 40 * 1.07);
+  close(calculate(buff('reward:8430000')).total, 40);
+  close(calculate(buff('reward:8430000'), ['piercingCounter']).total, 40 * 1.2);
+  close(calculate([...physical, ...buff('reward:8100001')]).total, 40 * 1.06 * 1.09);
+  close(calculate([...physical, rule(8100000)]).total, 40 * 1.06 * rule(8100000).rate);
+  assert.equal(buff('reward:8100001')[0].nameFmgId, 8100000);
+});
+
+test('mountaintop reward only adds its verified active frostbite proc and refreshes duplicates', () => {
+  const effects = buff('event:4');
+  assert.equal(effects.length, 1);
+  const effect = effects[0];
+  assert.equal(effect.kind, 'event');
+  assert.equal(effect.spEffectId, 6999333);
+  assert.equal(effect.durationSeconds, 20);
+  assert.equal(effect.rate, 1.15);
+  assert.equal(effect.stackRule, 'highest');
+  assert.deepEqual(effect.channels, channels);
+  assert.ok(effect.source.includes('invocationConditionsStateChange1=2280'));
+  close(calculate(effects).total, 40);
+  const conditions = Object.fromEntries(effect.conditions.map(name => [name, true]));
+  close(calculate(effects, [], {conditions}).total, 46);
+  close(calculate([...effects, ...effects], [], {conditions}).total, 46);
+  assert.ok(!data.effects.some(row => row.kind === 'event' && [8970000, 8970030, 8970065].includes(row.spEffectId)));
+});

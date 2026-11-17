@@ -345,6 +345,65 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
         from_attach(eid, "field", tags=["piercingCounter"])
     from_attach(8810050, "field", conditions=["低血量攻击效果已触发（原生阈值84.99%）"])
 
+    # Independent enemy rewards are Goods -> PermanentBuff, not weapon AttachEffect.
+    permanent = {int(r["id"]): r for r in table("PermanentBuffParam")}
+    permanent_names = text("PermanentBuffName")
+    npcs = {int(r["id"]): r for r in table("NpcParam")}
+    enemy_lots = {int(r["id"]): r for r in table("ItemLotParam_enemy")}
+    item_tables = table("ItemTableParam")  # Repeated IDs are weighted alternatives.
+    reward_routes = [
+        (8100000, 8100000, 10000410, 6300100, 6300100, 4200100),
+        (8100001, 8100000, 21300510, 6210000, 6210000, 4200300),
+        (8100500, 8100500, 10000410, 6300100, 6300100, 4200100),
+        (8100501, 8100500, 21300510, 6210000, 6210000, 4200300),
+        (8330103, 8330103, 10000410, 6300100, 6300100, 4200100),
+        (8330104, 8330103, 21300510, 6210000, 6210000, 4200300),
+        (8430000, 8430000, 21000030, 6110000, 6110002, 4200200),
+    ]
+    for pid, name_id, npc_id, lot_base, lot_id, table_id in reward_routes:
+        assert int(npcs[npc_id]["rewardItemLot_2"]) == lot_base
+        assert all(rid in enemy_lots for rid in range(lot_base, lot_id + 1))
+        lot = enemy_lots[lot_id]
+        assert int(lot["lotItemId01"]) == table_id and lot["lotItemCategory01"] == "7"
+        assert int(lot["lotItemBasePoint01"]) > 0 and int(lot["lotItemNum01"]) > 0
+        assert any(int(r["id"]) == table_id and r["itemCategory"] == "1"
+                   and int(r["itemId"]) == pid and int(r["chanceWeight"]) > 0
+                   and int(r["quantity"]) > 0 for r in item_tables)
+        assert goods[pid]["goodsType"] == "11" and int(goods[pid]["vagrantItemLotId"]) == pid
+        sid = int(permanent[pid]["spEffectId"])
+        assert sid == pid and sp[sid]["spCategory"] == "10" and sp[sid]["saveCategory"] == "10"
+        name = permanent_names[name_id] + "（+" + permanent[pid]["numericValue"] + "%）"
+        chain = (f"NpcParam#{npc_id}.rewardItemLot_2={lot_base} -> ItemLotParam_enemy#{lot_id}.lotItemId01"
+                 f" (category7) -> ItemTableParam#{table_id} (category1,item={pid},positive weight)"
+                 f" -> EquipParamGoods#{pid}.vagrantItemLotId -> PermanentBuffParam#{pid}.spEffectId")
+        emit(f"reward:{pid}", name, "reward", sid, chain, buff_id=f"reward:{pid}",
+             tags=["piercingCounter"] if pid == 8430000 else [],
+             stack_scope="independently acquired reward; weapon AttachEffect is a separate source")
+        effects[-1]["permanentBuffId"] = pid
+        effects[-1]["rewardGoodsId"] = pid  # Not a consumable goods picker item.
+        effects[-1]["nameFmgId"] = name_id
+        if name_id != pid:
+            effects[-1]["nameNote"] = "display alias from the same lower-tier family; tier value separately verified"
+
+    # Native map event reward: the permanent grant and the conditional active buff
+    # are different rows. Selecting the reward never makes its proc unconditional.
+    assert int(permanent[4]["spEffectId"]) == 6999300
+    assert int(sp[6999300]["cycleOccurrenceSpEffectId"]) == 6999332
+    assert int(sp[6999332]["invocationConditionsStateChange1"]) == 2280
+    assert int(sp[6999332]["cycleOccurrenceSpEffectId"]) == 6999333
+    assert sp[6999333]["spCategory"] == "20" and float(sp[6999333]["effectEndurance"]) == 20
+    assert all(float(sp[6999333][field]) == 1.15 for field in RATE_FIELDS["final"])
+    assert "周围人物陷入异常状态冻伤时" in text("PermanentBuffInfo")[9990030]
+    emit("event:4", permanent_names[9990030], "event", 6999333,
+         "common.emevd event0 instruction410 -> common_func.emevd#90015003 (7601/9193)"
+         " -> PermanentBuffParam#4.spEffectId=6999300 -> SpEffectParam#6999300.cycleOccurrenceSpEffectId"
+         " -> #6999332.invocationConditionsStateChange1=2280/cycleOccurrenceSpEffectId",
+         buff_id="event:4", conditions=["山顶恩惠的周围冻伤攻击增益生效中"],
+         stack_scope="reward already acquired; nearby frostbite proc active; same effect refreshes")
+    effects[-1]["permanentBuffId"] = 4
+    effects[-1]["eventId"] = "mountaintop-blessing"
+    effects[-1]["description"] = "周围人物冻伤后，20秒内五属性伤害+15%"
+
     # Direct Goods -> SpEffect references only; Bullet-based buffs need a decoded chain.
     for gid in [1210, 11014, 11028, 11029, 11030, 11031]:
         row = goods[gid]

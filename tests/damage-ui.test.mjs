@@ -84,6 +84,22 @@ test('selected effect rules are atomic, preserve selection order and replace exc
   assert.equal(get('result').value.total, withPanelRules, 'handwritten final panel does not apply panel buffs twice');
 });
 
+test('in-run categories follow their actual sources while override groups still work across categories', async t => {
+  const { context, get } = await createCalculator(t);
+  get('picker').value = 'effect';
+  const choices = get('pickerChoices').value;
+  assert.equal(choices.find(item => item.id === 'buff:reward:8100001').category, 'field');
+  assert.ok(!choices.some(item => item.id.startsWith('native:')), 'weapon AttachEffect rows are not independent rewards');
+  assert.equal(choices.find(item => item.id === 'buff:goods:1210').category, 'goods');
+  assert.equal(choices.find(item => item.id === 'buff:magic:6050').category, 'art');
+  assert.equal(choices.find(item => item.id === 'buff:art:1010').category, 'art');
+  assert.equal(context.effectCategory({kind:'event',buffId:'event:example'}), 'event');
+  context.toggleEffect('effect', 'buff:goods:1210', true);
+  context.toggleEffect('effect', 'buff:magic:6050', true);
+  assert.equal(get('selectionOrder').value.length, 1);
+  assert.equal(get('selectionOrder').value[0].id, 'buff:magic:6050');
+});
+
 test('target picker uses each atlas form’s defense and susceptibility, with pre-defense fallback for missing data', async t => {
   const { context, get } = await createCalculator(t, true);
   const atlas = get('catalogs').value;
@@ -368,7 +384,7 @@ test('victory points and positive trait stat gains affect inferred AR once while
   assert.equal(get('conditions')['低血量攻击效果已触发（原生阈值84.99%）'], false);
 });
 
-test('a weapon trait also visible in temporary effects is applied only once; non-damage traits are not damage gaps', async t => {
+test('legacy duplicate weapon effects count once and are no longer offered as independent rewards', async t => {
   const { context, get } = await createCalculator(t);
   const trait = context.traitOptions().find(item => item.calculationStatus === 'supported' && item.effectIds.length);
   assert.ok(trait);
@@ -378,6 +394,8 @@ test('a weapon trait also visible in temporary effects is applied only once; non
   context.addWeaponTrait(trait.id);
   for (const id of trait.effectIds) assert.equal(get('selectedEffects').value.filter(item => item.id === id).length, 1);
   assert.equal(context.providedByWeapon(choice), true);
+  get('picker').value = 'effect';
+  assert.ok(!get('pickerChoices').value.some(item => item.id === choice.id));
   const hidden = get('traits').value.filter(item => ['missing-rule', 'non-damage'].includes(item.calculationStatus) || item.name.includes('致命一击'));
   assert.ok(hidden.some(item => item.name.includes('致命一击')));
   assert.ok(hidden.some(item => item.name.includes('附加异常状态')));
@@ -385,6 +403,57 @@ test('a weapon trait also visible in temporary effects is applied only once; non
   assert.ok(hidden.every(item => !available.has(item.id)));
   context.addWeaponTrait(hidden[0].id);
   assert.equal(get('weaponTraitSlots').value.length, 1);
+});
+
+test('independent physical rewards remain selectable with a weapon trait and apply their own native multiplier', async t => {
+  const { context, get } = await createCalculator(t);
+  get('targetId').value = '75100020';
+  const trait = context.traitOptions().find(item => item.effectIds.some(id => {
+    const rule = get('effectById').value.get(id);
+    return rule.channels?.includes('physical') && !rule.conditions?.length;
+  }));
+  assert.ok(trait);
+  context.addWeaponTrait(trait.id);
+  get('picker').value = 'effect';
+  const rewardId = 'buff:reward:8100000';
+  assert.equal(get('pickerChoices').value.find(item => item.id === rewardId).disabled, false);
+  const baseline = get('result').value.total;
+  context.pickItem(rewardId);
+  assert.equal(get('weaponTraitSlots').value.length, 1);
+  assert.ok(context.checked('effect', rewardId));
+  assert.ok(Math.abs(get('result').value.total / baseline - 1.06) < 1e-10);
+  get('picker').value = 'effect';
+  assert.equal(get('pickerChoices').value.find(item => item.id === rewardId).disabled, true);
+  assert.equal(get('pickerChoices').value.find(item => item.id === 'buff:reward:8100001').disabled, false);
+  context.toggleEffect('effect', rewardId, false);
+  assert.equal(get('result').value.total, baseline);
+  // Reverse selection order must also preserve the independent reward.
+  context.removeWeaponTrait(trait.id);
+  context.toggleEffect('effect', rewardId, true);
+  context.addWeaponTrait(trait.id);
+  assert.equal(get('weaponTraitSlots').value.length, 1);
+  assert.ok(context.checked('effect', rewardId));
+  assert.ok(Math.abs(get('result').value.total / baseline - 1.06) < 1e-10);
+});
+
+test('verified event reward is categorized separately and applies only while its native trigger is active', async t => {
+  const { context, get } = await createCalculator(t);
+  get('targetId').value = '75100020';
+  get('picker').value = 'effect';
+  const eventChoice = get('pickerChoices').value.find(item => item.id === 'buff:event:4');
+  assert.ok(eventChoice);
+  assert.equal(eventChoice.category, 'event');
+  const baseline = get('result').value.total;
+  context.pickItem(eventChoice.id);
+  assert.equal(get('result').value.total, baseline, 'selecting a reward does not claim its trigger has occurred');
+  const rules = get('selectedEffects').value;
+  assert.ok(rules.every(rule => rule.durationSeconds === 20));
+  const conditions = [...new Set(rules.flatMap(rule => rule.conditions || []))];
+  assert.ok(conditions.length);
+  for (const condition of conditions) context.toggleCondition(condition, true);
+  assert.ok(Math.abs(get('result').value.total / baseline - 1.15) < 1e-10);
+  context.toggleCondition(conditions.at(-1), false);
+  assert.equal(get('result').value.total, baseline);
 });
 
 

@@ -150,6 +150,21 @@ const effectChoices = computed(() => {
   return [...groups.values()];
 });
 const effectChoiceById = computed(() => new Map(effectChoices.value.map(item => [item.id, item])));
+function effectCategory(effect) {
+  if (effect.kind === 'event' || effect.eventId != null) return 'event';
+  if (effect.kind === 'reward') return 'field';
+  if (effect.goodsId != null) return 'goods';
+  return effect.buffId ? 'art' : 'field';
+}
+function effectDetail(item) {
+  const effect = item.effects[0];
+  if (effect.kind === 'reward') return item.effects.map(rule => {
+    const names = rule.channels?.length === 5 ? '全属性' : (rule.channels || []).map(key => channelLabels[key]).join('／');
+    return `${names}伤害 +${Math.round((rule.rate - 1) * 10000) / 100}%`;
+  }).join('；');
+  if (effect.kind === 'event') return effect.description || '';
+  return effect.durationSeconds ? `持续 ${effect.durationSeconds} 秒` : '';
+}
 const compatibleActions = computed(() => actions.value.filter(item => {
   if (!showcaseSelection.value) return false;
   if (item.scope?.heroId != null && String(item.scope.heroId) !== characterId.value) return false;
@@ -279,11 +294,9 @@ const pickerChoices = computed(()=>{
   if (picker.value==='trait') return availableWeaponTraits.value.map(trait => ({
     id: String(trait.id), name: trait.name, detail: traitDetail(trait)
   }));
-  if (picker.value==='effect') return effectChoices.value.filter(item=>item.effects.some(effect=>effect.kind!=='relic')).map(item=>({
-    id:item.id, name:item.name, disabled:checked('effect',item.id) || providedByWeapon(item),
-    detail:item.effects[0].buffId && item.effects[0].durationSeconds ? `持续 ${item.effects[0].durationSeconds} 秒` :
-      item.effects[0].anyTags?.includes('atkSubCategory:124') ? '仅对带双手共持标记的武器命中生效' :
-      item.effects[0].anyTags?.includes('atkSubCategory:125') ? '仅对带双持标记的武器命中生效' : ''
+  if (picker.value==='effect') return effectChoices.value.filter(item=>item.effects.some(effect=>['reward','buff','event'].includes(effect.kind))).map(item=>({
+    id:item.id, name:item.name, category:effectCategory(item.effects[0]), disabled:checked('effect',item.id),
+    detail:effectDetail(item)
   }));
   return [];
 });

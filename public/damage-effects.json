@@ -5045,6 +5045,202 @@
       "nativeEffectId": 8810050
     },
     {
+      "id": "reward:8100000:final:physical",
+      "name": "提升物理攻击力（+6%）",
+      "kind": "reward",
+      "phase": "final",
+      "rate": 1.06,
+      "channels": [
+        "physical"
+      ],
+      "stackGroup": "speffect:8100000:final:physical",
+      "stackRule": "multiply",
+      "source": "NpcParam#10000410.rewardItemLot_2=6300100 -> ItemLotParam_enemy#6300100.lotItemId01 (category7) -> ItemTableParam#4200100 (category1,item=8100000,positive weight) -> EquipParamGoods#8100000.vagrantItemLotId -> PermanentBuffParam#8100000.spEffectId -> SpEffectParam#8100000.physicsAttackRate",
+      "spEffectId": 8100000,
+      "stackSource": "SpEffectParam.spCategory=10 (Stack Self)",
+      "buffId": "reward:8100000",
+      "scopeNote": "independently acquired reward; weapon AttachEffect is a separate source",
+      "permanentBuffId": 8100000,
+      "rewardGoodsId": 8100000,
+      "nameFmgId": 8100000
+    },
+    {
+      "id": "reward:8100001:final:physical",
+      "name": "提升物理攻击力（+9%）",
+      "kind": "reward",
+      "phase": "final",
+      "rate": 1.09,
+      "channels": [
+        "physical"
+      ],
+      "stackGroup": "speffect:8100001:final:physical",
+      "stackRule": "multiply",
+      "source": "NpcParam#21300510.rewardItemLot_2=6210000 -> ItemLotParam_enemy#6210000.lotItemId01 (category7) -> ItemTableParam#4200300 (category1,item=8100001,positive weight) -> EquipParamGoods#8100001.vagrantItemLotId -> PermanentBuffParam#8100001.spEffectId -> SpEffectParam#8100001.physicsAttackRate",
+      "spEffectId": 8100001,
+      "stackSource": "SpEffectParam.spCategory=10 (Stack Self)",
+      "buffId": "reward:8100001",
+      "scopeNote": "independently acquired reward; weapon AttachEffect is a separate source",
+      "permanentBuffId": 8100001,
+      "rewardGoodsId": 8100001,
+      "nameFmgId": 8100000,
+      "nameNote": "display alias from the same lower-tier family; tier value separately verified"
+    },
+    {
+      "id": "reward:8100500:final:magic,fire,lightning,holy",
+      "name": "提升属性攻击力（+5%）",
+      "kind": "reward",
+      "phase": "final",
+      "rate": 1.05,
+      "channels": [
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:8100500:final:magic,fire,lightning,holy",
+      "stackRule": "multiply",
+      "source": "NpcParam#10000410.rewardItemLot_2=6300100 -> ItemLotParam_enemy#6300100.lotItemId01 (category7) -> ItemTableParam#4200100 (category1,item=8100500,positive weight) -> EquipParamGoods#8100500.vagrantItemLotId -> PermanentBuffParam#8100500.spEffectId -> SpEffectParam#8100500.magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 8100500,
+      "stackSource": "SpEffectParam.spCategory=10 (Stack Self)",
+      "buffId": "reward:8100500",
+      "scopeNote": "independently acquired reward; weapon AttachEffect is a separate source",
+      "permanentBuffId": 8100500,
+      "rewardGoodsId": 8100500,
+      "nameFmgId": 8100500
+    },
+    {
+      "id": "reward:8100501:final:magic,fire,lightning,holy",
+      "name": "提升属性攻击力（+8%）",
+      "kind": "reward",
+      "phase": "final",
+      "rate": 1.08,
+      "channels": [
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:8100501:final:magic,fire,lightning,holy",
+      "stackRule": "multiply",
+      "source": "NpcParam#21300510.rewardItemLot_2=6210000 -> ItemLotParam_enemy#6210000.lotItemId01 (category7) -> ItemTableParam#4200300 (category1,item=8100501,positive weight) -> EquipParamGoods#8100501.vagrantItemLotId -> PermanentBuffParam#8100501.spEffectId -> SpEffectParam#8100501.magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 8100501,
+      "stackSource": "SpEffectParam.spCategory=10 (Stack Self)",
+      "buffId": "reward:8100501",
+      "scopeNote": "independently acquired reward; weapon AttachEffect is a separate source",
+      "permanentBuffId": 8100501,
+      "rewardGoodsId": 8100501,
+      "nameFmgId": 8100500,
+      "nameNote": "display alias from the same lower-tier family; tier value separately verified"
+    },
+    {
+      "id": "reward:8330103:final:physical,magic,fire,lightning,holy",
+      "name": "强化魔法、祷告（+7%）",
+      "kind": "reward",
+      "phase": "final",
+      "rate": 1.07,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:8330103:final:physical,magic,fire,lightning,holy",
+      "stackRule": "multiply",
+      "source": "NpcParam#10000410.rewardItemLot_2=6300100 -> ItemLotParam_enemy#6300100.lotItemId01 (category7) -> ItemTableParam#4200100 (category1,item=8330103,positive weight) -> EquipParamGoods#8330103.vagrantItemLotId -> PermanentBuffParam#8330103.spEffectId -> SpEffectParam#8330103.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 8330103,
+      "stackSource": "SpEffectParam.spCategory=10 (Stack Self)",
+      "anyTags": [
+        "sorcery",
+        "incantation"
+      ],
+      "buffId": "reward:8330103",
+      "scopeNote": "independently acquired reward; weapon AttachEffect is a separate source",
+      "permanentBuffId": 8330103,
+      "rewardGoodsId": 8330103,
+      "nameFmgId": 8330103
+    },
+    {
+      "id": "reward:8330104:final:physical,magic,fire,lightning,holy",
+      "name": "强化魔法、祷告（+11%）",
+      "kind": "reward",
+      "phase": "final",
+      "rate": 1.11,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:8330104:final:physical,magic,fire,lightning,holy",
+      "stackRule": "multiply",
+      "source": "NpcParam#21300510.rewardItemLot_2=6210000 -> ItemLotParam_enemy#6210000.lotItemId01 (category7) -> ItemTableParam#4200300 (category1,item=8330104,positive weight) -> EquipParamGoods#8330104.vagrantItemLotId -> PermanentBuffParam#8330104.spEffectId -> SpEffectParam#8330104.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 8330104,
+      "stackSource": "SpEffectParam.spCategory=10 (Stack Self)",
+      "anyTags": [
+        "sorcery",
+        "incantation"
+      ],
+      "buffId": "reward:8330104",
+      "scopeNote": "independently acquired reward; weapon AttachEffect is a separate source",
+      "permanentBuffId": 8330104,
+      "rewardGoodsId": 8330104,
+      "nameFmgId": 8330103,
+      "nameNote": "display alias from the same lower-tier family; tier value separately verified"
+    },
+    {
+      "id": "reward:8430000:final:physical",
+      "name": "强化突刺反击（+20%）",
+      "kind": "reward",
+      "phase": "final",
+      "rate": 1.2,
+      "channels": [
+        "physical"
+      ],
+      "stackGroup": "speffect:8430000:final:physical",
+      "stackRule": "multiply",
+      "source": "NpcParam#21000030.rewardItemLot_2=6110000 -> ItemLotParam_enemy#6110002.lotItemId01 (category7) -> ItemTableParam#4200200 (category1,item=8430000,positive weight) -> EquipParamGoods#8430000.vagrantItemLotId -> PermanentBuffParam#8430000.spEffectId -> SpEffectParam#8430000.physicsAttackRate",
+      "spEffectId": 8430000,
+      "stackSource": "SpEffectParam.spCategory=10 (Stack Self)",
+      "tags": [
+        "piercingCounter"
+      ],
+      "buffId": "reward:8430000",
+      "scopeNote": "independently acquired reward; weapon AttachEffect is a separate source",
+      "permanentBuffId": 8430000,
+      "rewardGoodsId": 8430000,
+      "nameFmgId": 8430000
+    },
+    {
+      "id": "event:4:final:physical,magic,fire,lightning,holy",
+      "name": "山顶的恩惠",
+      "kind": "event",
+      "phase": "final",
+      "rate": 1.15,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:6999333:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "common.emevd event0 instruction410 -> common_func.emevd#90015003 (7601/9193) -> PermanentBuffParam#4.spEffectId=6999300 -> SpEffectParam#6999300.cycleOccurrenceSpEffectId -> #6999332.invocationConditionsStateChange1=2280/cycleOccurrenceSpEffectId -> SpEffectParam#6999333.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 6999333,
+      "stackSource": "same active SpEffect refresh; exclusiveGroup handles whole-buff replacement",
+      "conditions": [
+        "山顶恩惠的周围冻伤攻击增益生效中"
+      ],
+      "buffId": "event:4",
+      "durationSeconds": 20.0,
+      "scopeNote": "reward already acquired; nearby frostbite proc active; same effect refreshes",
+      "permanentBuffId": 4,
+      "eventId": "mountaintop-blessing",
+      "description": "周围人物冻伤后，20秒内五属性伤害+15%"
+    },
+    {
       "id": "buff:goods:1210:final:physical",
       "name": "勇者肉块",
       "kind": "buff",
@@ -6974,6 +7170,22 @@
         "sha256": "8dfa926528d361c99bedb134c02fbc35027ebd03c3565d948d91bec055e781e4"
       },
       {
+        "file": "localized/text-bundles/data0/msg/zhocn/item_dlc01-msgbnd-dcx/PermanentBuffInfo.fmg.xml",
+        "sha256": "bd37a3e6bc33872ff7888843819b0fd5bffcff8572f1740cb86d2a1d39e42b38"
+      },
+      {
+        "file": "localized/text-bundles/data0/msg/zhocn/item_dlc01-msgbnd-dcx/PermanentBuffInfo_dlc01.fmg.xml",
+        "sha256": "2f1153ca6efc83cd08153346ca4e54a203402bd56b70ca269ef05c44094db2ef"
+      },
+      {
+        "file": "localized/text-bundles/data0/msg/zhocn/item_dlc01-msgbnd-dcx/PermanentBuffName.fmg.xml",
+        "sha256": "7d63fde73d4ae948b06f6676fe333e4a8dc13f13b317287f797eb1b677db0bb0"
+      },
+      {
+        "file": "localized/text-bundles/data0/msg/zhocn/item_dlc01-msgbnd-dcx/PermanentBuffName_dlc01.fmg.xml",
+        "sha256": "ec7bfada2e0685b23f7ba192c3f31f863cb27dcb93b397bbe4e971a3bf719e0c"
+      },
+      {
         "file": "localized/text-bundles/data0/msg/zhocn/item_dlc01-msgbnd-dcx/WeaponName.fmg.xml",
         "sha256": "63c7524be43fe8639d20641d595dcb5a158d3a72460d11f0c6354c4edbb3bc52"
       },
@@ -7014,8 +7226,24 @@
         "sha256": "80bc52d6fcb2e6881383a715e5e3685c4626c3e812ac4550b01581eee6a60f54"
       },
       {
+        "file": "strict/regulation-bin/ItemLotParam_enemy.param.xml",
+        "sha256": "dd6b2f2f586c12c66ec318a9d8fd6b677354073350c9f996160f59e8adbf2e9a"
+      },
+      {
+        "file": "strict/regulation-bin/ItemTableParam.param.xml",
+        "sha256": "15466b7257667c1bf04904529e4d6bf04e1a6b37b5b65f389fb7a0cb91729320"
+      },
+      {
         "file": "strict/regulation-bin/Magic.param.xml",
         "sha256": "dca5395772d47986e88d379a7c243be1946bd15753c847420293ec51cdd6a656"
+      },
+      {
+        "file": "strict/regulation-bin/NpcParam.param.xml",
+        "sha256": "10eff52734f5f6382dcb31cb72c1ae991dcfa714721f221e91d465051af658c5"
+      },
+      {
+        "file": "strict/regulation-bin/PermanentBuffParam.param.xml",
+        "sha256": "86e0a79ed0c1d18b9f62d3358d501613ca5c6e23a0d972a2a84e3ef443c5676f"
       },
       {
         "file": "strict/regulation-bin/SpEffectParam.param.xml",
@@ -7062,14 +7290,16 @@
     ],
     "rights": "Game data rights remain with original owners; stacking snapshot retains GPL-3.0 attribution",
     "counts": {
-      "effects": 227,
+      "effects": 235,
       "kinds": {
         "relic": 138,
         "field": 76,
+        "reward": 7,
+        "event": 1,
         "buff": 13
       },
       "phases": {
-        "final": 227
+        "final": 235
       },
       "officialRelics": 45
     }
