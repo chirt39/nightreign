@@ -103,9 +103,19 @@ watch(opened, value => {
       <p v-if="loading" role="status">正在加载检查资料…</p>
       <div v-else-if="loadError" role="alert"><p>{{ loadError }}</p><button type="button" class="action" @click="loadCatalog">重试</button></div>
       <template v-else-if="catalog">
-        <div class="tabs" role="group" aria-label="检查方式">
-          <button type="button" :aria-pressed="tab === 'combination'" @click="tab = 'combination'">词条组合</button>
-          <button type="button" :aria-pressed="tab === 'collection'" @click="tab = 'collection'">检测收藏<span v-if="collection.length"> · {{ collection.length }}</span></button>
+        <div class="inspection-toolbar" :class="{ 'collection-toolbar': tab === 'collection' && collection.length }">
+          <div class="tabs" role="group" aria-label="检查方式">
+            <button type="button" :aria-pressed="tab === 'combination'" @click="tab = 'combination'">词条组合</button>
+            <button type="button" :aria-pressed="tab === 'collection'" @click="tab = 'collection'">检测收藏<span v-if="collection.length"> · {{ collection.length }}</span></button>
+          </div>
+          <div v-if="tab === 'collection' && collection.length" class="inspection-actions">
+            <button type="button" class="action inspection-run" @click="checkCollection">检测当前 {{ collection.length }} 件遗物</button>
+            <div v-if="checked" class="inspection-result" role="status">
+              <span class="anomaly-count" :class="{ 'has-anomalies': anomalies.length }">异常遗物：<strong>{{ anomalies.length }}</strong> 件</span>
+              <span v-if="resultCount('unknown') || !anomalies.length" class="inspection-summary">{{ resultCount('unknown') ? `${resultCount('unknown')} 件待核对` : '未发现异常' }}</span>
+            </div>
+            <button v-if="anomalies.length || showAnomalies" type="button" class="action anomaly-entry" :aria-pressed="showAnomalies" @click="toggleAnomalies">{{ showAnomalies ? '显示全部遗物' : `查看异常遗物（${anomalies.length}）` }}</button>
+          </div>
         </div>
         <div v-if="tab === 'combination'" class="combination-workspace">
           <div class="slot-grid">
@@ -119,11 +129,7 @@ watch(opened, value => {
         </div>
         <div v-else class="collection-workspace">
           <p v-if="!collection.length" class="hint">尚无可检测的收藏，请先在上方读取存档，或使用“词条组合”。</p>
-          <div v-else class="inspection-actions">
-            <button type="button" class="action" @click="checkCollection">检测当前 {{ collection.length }} 件遗物</button>
-            <span v-if="checked && (resultCount('unknown') || !anomalies.length)" class="inspection-summary" role="status">{{ resultCount('unknown') ? `${resultCount('unknown')} 件待核对` : '未发现异常' }}</span>
-            </div>
-            <button v-if="anomalies.length || showAnomalies" type="button" class="action anomaly-entry" :aria-pressed="showAnomalies" @click="toggleAnomalies">{{ showAnomalies ? '显示全部遗物' : `查看异常遗物（${anomalies.length}）` }}</button>
+          <p v-else-if="anomalies.length" class="inspection-help">点击异常查看原因</p>
         </div>
       </template>
     </div>
@@ -133,5 +139,5 @@ watch(opened, value => {
 
 <style scoped>
 .anomaly-label{padding:2px 4px;border:0;background:transparent;color:#ffada5;font:600 14px/1.6 'Noto Sans SC',sans-serif;cursor:pointer}
-.legality-panel{margin:10px 0 14px;border:1px solid #3e566e;border-radius:5px;background:#132131;color:#dce6e9;min-width:0}.panel-toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:42px;padding:9px 12px;border:0;border-radius:4px;background:#1b2d40;color:#e7d5ac;font:600 14px/1.5 'Noto Sans SC',sans-serif;text-align:left;cursor:pointer}.panel-body{padding:14px;min-width:0}.hint{margin:0 0 12px;color:#afc1ce;font-size:13px;line-height:1.65}.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}.tabs button,.action{min-height:38px;padding:7px 12px;border:1px solid #536c82;border-radius:4px;background:#1b2d40;color:#e7d5ac;font:inherit;font-size:13px;cursor:pointer}.tabs button[aria-pressed=true]{border-color:#d3b77b;background:#2b3b45}.combination-actions{margin-top:14px}.combination-result{margin:14px 0 0;padding:12px;border:1px solid #536c82;border-radius:4px;background:#172638;font-size:14px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}.slot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}.slot-card{display:grid;align-content:start;gap:10px;min-width:0}.inspection-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px}.inspection-summary{color:#afc1ce;font-size:13px}.anomaly-entry{margin-top:12px}button:focus-visible,select:focus-visible{outline:1px solid #91a5ba;outline-offset:2px}@media(max-width:600px){.panel-body{padding:10px}.slot-grid{grid-template-columns:minmax(0,1fr)}}
+.legality-panel{margin:10px 0 14px;border:1px solid #3e566e;border-radius:5px;background:#132131;color:#dce6e9;min-width:0}.panel-toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:42px;padding:9px 12px;border:0;border-radius:4px;background:#1b2d40;color:#e7d5ac;font:600 14px/1.5 'Noto Sans SC',sans-serif;text-align:left;cursor:pointer}.panel-body{padding:14px;min-width:0}.hint{margin:0 0 12px;color:#afc1ce;font-size:13px;line-height:1.65}.inspection-toolbar{margin-bottom:12px}.collection-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;grid-template-areas:"tabs check result filter";align-items:center;gap:8px 12px;margin-bottom:0}.tabs{grid-area:tabs;display:flex;flex-wrap:wrap;gap:8px;min-width:0}.tabs button,.action{min-height:38px;padding:7px 12px;border:1px solid #536c82;border-radius:4px;background:#1b2d40;color:#e7d5ac;font:inherit;font-size:13px;cursor:pointer}.tabs button[aria-pressed=true]{border-color:#d3b77b;background:#2b3b45}.combination-actions{margin-top:14px}.combination-result{margin:14px 0 0;padding:12px;border:1px solid #536c82;border-radius:4px;background:#172638;font-size:14px;line-height:1.7;white-space:pre-line;overflow-wrap:anywhere}.slot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}.slot-card{display:grid;align-content:start;gap:10px;min-width:0}.inspection-actions{display:contents}.inspection-run{grid-area:check}.inspection-result{grid-area:result;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:13px}.anomaly-count{white-space:nowrap;color:#afc1ce}.anomaly-count strong{font-variant-numeric:tabular-nums}.anomaly-count.has-anomalies{color:#ffada5}.inspection-summary{color:#afc1ce;font-size:12px;white-space:nowrap}.anomaly-entry{grid-area:filter}.inspection-help{margin:8px 0 0;color:#afc1ce;font-size:12px;line-height:1.5}.inspection-run,.anomaly-entry{white-space:nowrap}button:focus-visible,select:focus-visible{outline:1px solid #91a5ba;outline-offset:2px}@media(max-width:1000px){.collection-toolbar{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"tabs result" "check filter"}.inspection-result{justify-content:flex-end}.inspection-run{justify-self:start}.anomaly-entry{justify-self:end}}@media(max-width:600px){.panel-body{padding:10px}.slot-grid{grid-template-columns:minmax(0,1fr)}.collection-toolbar{gap:8px}.tabs{gap:6px}.tabs button,.action{padding:7px 8px;font-size:12px}.inspection-result{gap:2px;font-size:12px}.inspection-summary{font-size:11px}}@media(max-width:360px){.collection-toolbar{grid-template-columns:minmax(0,1fr);grid-template-areas:"tabs" "result" "check" "filter"}.inspection-result,.anomaly-entry{justify-self:start}.inspection-result{justify-content:flex-start}}
 </style>
