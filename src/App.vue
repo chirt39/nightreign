@@ -287,7 +287,7 @@ onUnmounted(() => {
       <nav class="nav-list">
         <button class="nav-link" :class="{ active: currentView === 'overview' }" :aria-current="currentView === 'overview' ? 'page' : null" data-view="overview"><img class="nav-icon" src="/nav-icons/roundtable.webp" alt="" />圆桌厅堂</button>
         <button class="nav-link" :class="{ active: isAtlas }" :aria-current="isAtlas ? 'page' : null" data-view="enemies"><img class="nav-icon" src="/nav-icons/bestiary.webp" alt="" />图鉴</button>
-        <button class="nav-link" :class="{ active: currentView === 'damage' }" :aria-current="currentView === 'damage' ? 'page' : null" data-view="damage"><img class="nav-icon" src="/nav-icons/weapons.webp" alt="" />伤害计算器</button>
+        <button class="nav-link" :class="{ active: currentView === 'damage' }" :aria-current="currentView === 'damage' ? 'page' : null" data-view="damage"><img class="nav-icon" src="/nav-icons/damage-40370.png" alt="" />伤害计算器</button>
         <button class="nav-link" :class="{ active: currentView === 'map' }" :aria-current="currentView === 'map' ? 'page' : null" data-view="map"><img class="nav-icon" src="/nav-icons/map-40212.png" alt="" />地图</button>
         <button class="nav-link" :class="{ active: currentView === 'relics' }" :aria-current="currentView === 'relics' ? 'page' : null" data-view="relics"><img class="nav-icon" src="/nav-icons/relic-rite.png" alt="" />遗物仪式</button>
         <button class="nav-link" :class="{ active: currentView === 'records' }" :aria-current="currentView === 'records' ? 'page' : null" data-view="records"><img class="nav-icon" src="/nav-icons/journal.png" alt="" />日志</button>

@@ -18,7 +18,14 @@ function resolveOverrides(effects) {
 function activeEffects(input, segment) {
   const conditions = new Set(Array.isArray(input.conditions) || input.conditions instanceof Set
     ? input.conditions : Object.keys(input.conditions ?? {}).filter(key => input.conditions[key]));
-  const eligible = (input.effects ?? []).filter(effect => {
+  const eligible = (input.effects ?? []).map(effect => {
+    if (effect.countScaling?.type !== 'native-tier') return effect;
+    const requested = Number(input.effectCounts?.[effect.countKey] ?? 0);
+    const count = Number.isInteger(requested) && requested >= 0 ? Math.min(requested, effect.countMax) : null;
+    const rate = count !== null
+      ? effect.countScaling.rates[count] : null;
+    return { ...effect, rate, name: `${effect.name}（${count} 次）` };
+  }).filter(effect => {
     if (!numeric(effect.rate) || effect.rate === 1) return false;
     if (input.manualPanel && effect.phase === 'panel') return false;
     if (effect.conditions?.some(condition => !conditions.has(condition))) return false;

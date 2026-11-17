@@ -151,12 +151,54 @@ test('verified Bullet recipient buffs keep their damage channels and missing ref
   close(calculate([...aromatic, ...vow], [], extra).total, 92);
 });
 
-test('unrepresentable counts, flat conversions and missing Bullet effect definitions are not guessed', () => {
-  for (const id of [7060000, 7060200, 7120000, 7150000, 7031200]) {
+test('unmodelled active-stack counts, flat conversions and missing Bullet definitions are not guessed', () => {
+  for (const id of [7032700, 7120000, 7150000, 7031200, 7036300]) {
     assert.ok(!data.effects.some(effect => effect.nativeEffectId === id));
     assert.ok(data.unsupported.some(effect => effect.nativeEffectId === id));
   }
   assert.ok(!data.effects.some(effect => effect.spEffectId === 1660001));
   assert.ok(!data.effects.some(effect => effect.magicId === 6600 && effect.spEffectId === 7037001));
   assert.ok(data.unsupported.some(effect => effect.magicId === 6600 && effect.spEffectId === 1660001));
+});
+
+
+test('victory counts read exact native tiers and duplicate relics do not multiply', () => {
+  const gaol = rule(7060000), invasion = rule(7060200);
+  assert.equal(gaol.countKey, 'evergaolVictories');
+  assert.equal(invasion.countKey, 'invaderVictories');
+  assert.equal(gaol.countMax, 10);
+  assert.equal(gaol.countScaling.capBehavior, 'retain-last-tier');
+  assert.equal(data.metadata.permanentEffectControlFlow.status, 'static-native-verified');
+  assert.ok(data.metadata.permanentEffectControlFlow.anchors.some(anchor => anchor.rva === '0x3C8483'));
+  close(calculate([gaol], [], {effectCounts: {evergaolVictories: 11}}).total, 40 * 1.6289);
+  assert.equal(gaol.phase, 'final');
+  assert.deepEqual(gaol.countScaling.rates, [1, 1.05, 1.1025, 1.1577, 1.2155, 1.2763, 1.3401, 1.4072, 1.4775, 1.5514, 1.6289]);
+  assert.equal(gaol.countScaling.spEffectIds[3], 7069003);
+  assert.equal(invasion.countScaling.spEffectIds[10], 7069210);
+  close(calculate([gaol]).total, 40);
+  close(calculate([gaol], [], {effectCounts: {evergaolVictories: 3}}).total, 40 * 1.1577);
+  close(calculate([gaol, gaol], [], {effectCounts: {evergaolVictories: 3}}).total, 40 * 1.1577);
+  close(calculate([gaol, invasion], [], {effectCounts: {evergaolVictories: 3, invaderVictories: 2}}).total, 40 * 1.1577 * 1.1449);
+  close(calculate([gaol], [], {manualPanel: true, effectCounts: {evergaolVictories: 3}}).total, 40 * 1.1577);
+});
+
+test('character conditional bonuses use native recipients and hit restrictions', () => {
+  for (const [id, characterId, rate] of [[7031300, '5', 1.1], [7032900, '7', 1.16], [7036800, '10', 1.18], [7036900, '10', 1.16], [7037000, '10', 1.19]]) {
+    const effect = rule(id);
+    assert.deepEqual(effect.characterIds, [characterId]);
+    close(calculate([effect], [], {characterId, conditions: effect.conditions}).total, 40 * rate);
+    close(calculate([effect, effect], [], {characterId, conditions: effect.conditions}).total, 40 * rate);
+    close(calculate([effect], [], {characterId: '1', conditions: effect.conditions}).total, 40);
+    close(calculate([effect], [], {characterId}).total, 40);
+  }
+  const prayer = rule(7037000);
+  assert.deepEqual(prayer.channels, ['physical']);
+  assert.ok(prayer.triggerMagicIds.includes(6050) && prayer.triggerMagicIds.includes(6600));
+  assert.ok(!rule(7036900).anyTags); // Category 104 filters activation, not later buffed hits.
+  const sword = rule(7034400), counter = rule(7034700);
+  close(calculate([sword], ['weaponAttack', 'atkSubCategory:122'], {characterId: '8', conditions: sword.conditions}).total, 54);
+  close(calculate([sword], ['weaponAttack', 'atkSubCategory:111'], {characterId: '8', conditions: sword.conditions}).total, 40);
+  close(calculate([counter], ['piercingCounter'], {characterId: '3', conditions: counter.conditions}).total, 48);
+  close(calculate([counter], [], {characterId: '3', conditions: counter.conditions}).total, 40);
+  assert.ok(!data.effects.some(effect => effect.nativeEffectId === 7036300));
 });

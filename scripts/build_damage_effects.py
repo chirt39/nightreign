@@ -59,12 +59,21 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
     glossary = json.loads(glossary_path.read_text(encoding="utf-8"))
     stack_notes = {(r["category"], int(r["id"])): r["stackability"] for r in glossary["entries"]}
     effects, unsupported = [], []
+    character_flags = ["allowWylder", "allowGuardian", "allowIroneye", "allowDuchess",
+                       "allowRaider", "allowRevenant", "allowRecluse", "allowExecutor",
+                       "allowScholar", "allowUndertaker"]
+
+    def allowed_characters(eid):
+        ids = [str(index + 1) for index, flag in enumerate(character_flags) if attach[eid][flag] == "1"]
+        return ids if len(ids) < len(character_flags) else []
     effect_keys = defaultdict(list)
 
     def emit(key, name, kind, sid, source_chain, *, native_id=None, conditions=(), tags=(),
              native_goods=None, native_magic=None, character_ids=(), exclusive_group=None,
              buff_id=None, stack_note=None, stack_scope=None, check_hit_correction=False):
         row = sp[sid]
+        if native_id is not None and not character_ids:
+            character_ids = allowed_characters(native_id)
         categories = [int(row[k]) for k in ("magicSubCategoryChange1", "magicSubCategoryChange2",
                                            "magicSubCategoryChange3") if int(row[k]) != 0]
         required_tags = list(tags)
@@ -216,6 +225,92 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
          "relic", 7220001, "AttachEffectParam#7220000.passiveSpEffectId_2",
          native_id=7220000, character_ids=["6"], stack_note="不可叠加",
          conditions=["弗雷德利克在场且专属强化已生效"], stack_scope="only the player's damage; not family damage")
+
+    # Victory effects expose ten native permanent-effect tiers. Read the exact
+    # rounded native values; a mathematical power is close, but not identical.
+    for eid, first, count_key, label in [
+        (7060000, 7069001, "evergaolVictories", "打倒封印监牢囚犯次数"),
+        (7060200, 7069201, "invaderVictories", "打倒黑夜入侵者次数"),
+    ]:
+        assert int(attach[eid]["permanentSpEffectId"]) == first
+        assert int(sp[eid]["replaceSpEffectId"]) == first
+        assert first + 10 not in sp
+        assert attach[eid]["unknown_9d"] == "[1]"
+        tiers = [sp[first + index] for index in range(10)]
+        rates = [1.0] + [float(row["physicsAttackRate"]) for row in tiers]
+        for row, rate in zip(tiers, rates[1:]):
+            assert row["spCategory"] == "204" and row["saveCategory"] == "9"
+            assert all(float(row[field]) == rate for field in RATE_FIELDS["final"])
+        before = len(effects)
+        emit(f"relic:{eid}", names[int(attach[eid]["attachTextId"])], "relic", first,
+             f"AttachEffectParam#{eid}.permanentSpEffectId; SpEffectParam#{eid}.replaceSpEffectId",
+             native_id=eid, stack_note=stack_notes[("normal-outside", eid)],
+             stack_scope="one native permanent tier per effect; duplicate relic copies do not multiply")
+        for entry in effects[before:]:
+            entry.update(countKey=count_key, countLabel=label, countMax=10,
+                         countScaling={"type": "native-tier", "rates": rates,
+                                       "spEffectIds": [None] + [first + index for index in range(10)],
+                                       "formula": "rates[min(count, 10)]; count=0 means no active bonus",
+                                       "capBehavior": "retain-last-tier",
+                                       "scope": "native category204 increments existing effect ID; absent next row rejects incoming effect and retains current tier",
+                                       "evidence": "metadata.permanentEffectControlFlow"})
+
+    # Character-specific roots and active effects are deliberately separate:
+    # category filters on a trigger do not restrict every subsequent buffed hit.
+    for eid, transition, active, condition, tags in [
+        (7031300, 7031301, 7031302, "无赖技艺期间受击后的强化已生效", []),
+        (7034700, 7034701, 7034702, "铁之眼绝招后的突刺反击强化已生效", ["piercingCounter"]),
+    ]:
+        root = int(attach[eid]["passiveSpEffectId_1"])
+        assert sp[transition]["invocationConditionsStateChange1"] == sp[root]["stateInfo"]
+        assert int(sp[transition]["replaceSpEffectId"]) == active
+        emit(f"relic:{eid}", names[int(attach[eid]["attachTextId"])], "relic", active,
+             f"AttachEffectParam#{eid} -> SpEffectParam#{root}.stateInfo -> #{transition}.replaceSpEffectId",
+             native_id=eid, conditions=[condition], tags=tags)
+    assert sp[7034702]["stateInfo"] == "197"  # Physical counter-attack modifier.
+
+    assert int(attach[7032900]["passiveSpEffectId_1"]) == 7032900
+    assert sp[7032901]["invocationConditionsStateChange1"] == sp[7032900]["stateInfo"]
+    assert int(sp[7032901]["cycleOccurrenceSpEffectId"]) == 7032902
+    assert int(sp[7032902]["replaceSpEffectId"]) == 7032903
+    emit("relic:7032900", names[7032900], "relic", 7032903,
+         "AttachEffectParam#7032900 -> SpEffectParam#7032900.stateInfo -> #7032901.cycleOccurrenceSpEffectId -> #7032902.replaceSpEffectId",
+         native_id=7032900, conditions=["隐士绝招自出血后的强化已生效"],
+         stack_scope="one active proc; duplicate relic copies do not create extra activations")
+    effects[-1]["stackRule"] = "highest"
+    effects[-1]["stackSource"] = "single active proc selected; duplicate Attach copies are not extra casts"
+
+    assert int(attach[7034400]["passiveSpEffectId_1"]) == 7034400
+    assert sp[7034401]["invocationConditionsStateChange1"] == sp[7034400]["stateInfo"]
+    assert int(sp[7034401]["cycleOccurrenceSpEffectId"]) == 7034402
+    assert sp[7034402]["magicSubCategoryChange1"] == "122"
+    assert sp[7034402]["invocationConditionsStateChange1"] == "609"
+    emit("relic:7034400", names[7034400], "relic", 7034402,
+         "AttachEffectParam#7034400 -> SpEffectParam#7034400.stateInfo -> #7034401.cycleOccurrenceSpEffectId",
+         native_id=7034400, conditions=["执行者妖刀技艺强化已生效"],
+         stack_scope="native attack subcategory 122 only; not all equipped weapon skills")
+
+    for eid, active, condition in [
+        (7036800, 7036801, "送葬者绝招后的强化已生效"),
+        (7037000, 7037001, "送葬者给自己附加辅助祷告后的物理强化已生效"),
+    ]:
+        assert int(attach[eid]["passiveSpEffectId_1"]) == eid
+        assert sp[active]["invocationConditionsStateChange1"] == sp[eid]["stateInfo"]
+        emit(f"relic:{eid}", names[eid], "relic", active,
+             f"AttachEffectParam#{eid} -> SpEffectParam#{eid}.stateInfo -> conditional SpEffectParam#{active}",
+             native_id=eid, conditions=[condition])
+    prayer_ids = [mid for mid, row in magic.items()
+                  if row["refCategory10"] == "2" and int(row["refId10"]) == 7037001]
+    assert {6050, 6600} <= set(prayer_ids)
+    effects[-1]["triggerMagicIds"] = sorted(prayer_ids)
+    effects[-1]["source"] += "; Magic.refCategory10=2/refId10=7037001 (conditional self buff)"
+    assert int(attach[7036900]["passiveSpEffectId_1"]) == 7036900
+    assert int(sp[7036900]["atkOccurrenceSpEffectId"]) == 7036901
+    assert sp[7036900]["magicSubCategoryChange1"] == "104"
+    assert sp[7036901]["effectTargetAttacker"] == "1"
+    emit("relic:7036900", names[7036900], "relic", 7036901,
+         "AttachEffectParam#7036900 -> SpEffectParam#7036900.atkOccurrenceSpEffectId (trigger category 104; recipient attacker)",
+         native_id=7036900, conditions=["送葬者连击最后一击命中后的强化已生效"])
 
     field_families = [8100000, 8100100, 8100200, 8100300, 8100400, 8320000, 8320100,
                       8320300, 8330000, 8330100, 8330200, 8330300, 8340000, 8350000, 8420000]
@@ -399,8 +494,6 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
         raise ValueError(f"Missing game IDs for official relics: {sorted(official.keys() - included_keys)}")
 
     for eid, reason in {
-        7060000: "per-victory count and exponential scaling cannot be represented by a fixed scalar toggle",
-        7060200: "per-victory count and exponential scaling cannot be represented by a fixed scalar toggle",
         7032700: "independently expiring per-kill stack count", 7037600: "independently timed combo tiers",
         7037700: "time-evolving ailment tiers", 7150000: "adds damage from player HP, not a multiplier",
         6500200: "flat and target-max-HP damage in a specific skill proc",
@@ -409,7 +502,10 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
         7120200: "weapon-type-dependent flat AR conversion, not scalar",
         7120300: "weapon-type-dependent flat AR conversion, not scalar",
         7035700: "random-element flat AR addition, not scalar",
-        7031200: "recipient and proc chain not fully audited", 7290000: "changes copied damage fraction, not a generic multiplier",
+        7031200: "friendly-target buff excludes self; recipient chain not modelled as own relic damage",
+        7032800: "ground-area recipient and continued field occupancy not modelled",
+        7036300: "Scholar skill buffs a target ally; not an unconditional self damage bonus",
+        7290000: "changes copied damage fraction, not a generic multiplier",
     }.items():
         unsupported.append({"nativeEffectId": eid, "reason": reason})
     unsupported += [{"magicId": 6600, "spEffectId": 1660001, "reason": "Bullet10660000.spEffectId1 references a missing definition; never synthesise its effect"},
@@ -421,6 +517,9 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
     manifest_path = source / "source-manifest.json"
     inputs.add(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    # This evidence is bound to the locally checked executable; normal data
+    # generation requires the extraction manifest, not access to the game EXE.
+    assert manifest["exe_sha256"] == "9545e8732919bb6a63904cb73223641b3c4f9a67869be5722612acca413e8b3a"
     if len({r["id"] for r in effects}) != len(effects):
         raise ValueError("Duplicate calculation rule IDs")
     for item in relics:
@@ -429,6 +528,19 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
             "metadata": {"version": "native-" + manifest["regulation_version"] + "-v1",
                          "gameVersion": manifest["executable_version"],
                          "runtimeVerified": False,
+                         "permanentEffectControlFlow": {
+                             "status": "static-native-verified", "executableSha256": manifest["exe_sha256"],
+                             "method": "offline PE section mapping and x64 instruction inspection; game not executed",
+                             "anchors": [
+                                 {"rva": "0xE6E3D0", "bytes": "488b014885c074048b4040c3b8ffffffffc3", "meaning": "AttachEffectParam permanentSpEffectId getter at +0x40"},
+                                 {"rva": "0xE6E300", "bytes": "488b014885c074050fb64027c3", "meaning": "AttachEffectParam tier-count mode getter at +0x27 (unknown_9d=1)"},
+                                 {"rva": "0x501F00", "meaning": "mode1 counts category204: same floor(id/100), maximum id%100"},
+                                 {"rva": "0x50787D", "bytes": "8b5f0885db7e5e8d7b0148c7442430000000008bd7c7442438ffffffff488d4c2430c644243c0040b501e8349f990048837c243000740541893e", "meaning": "same category/priority: existingID+1, query next SpEffect, return it when defined"},
+                                 {"rva": "0x5078B9", "bytes": "488b4424204885c0741f0fb7883e01000066413bcd750941c706ffffffffeb0966413bcc750341891e", "meaning": "category204 missing next row outputs -1; existing list not modified"},
+                                 {"rva": "0x3C8108", "bytes": "e893f6130084c0440f45bdf8000000", "meaning": "caller adopts the revised incoming effect ID"},
+                                 {"rva": "0x3C8483", "bytes": "4585ff0f888a050000", "meaning": "negative incoming ID branches to false-return at 0x3C8A16, before apply/replace"},
+                             ],
+                         },
                          "scope": "audited scalar damage rules; not exhaustive, not a relic legality checker",
                          "phases": {"panel": "AttackPowerRate before defense, weapon component only",
                                     "final": "AttackRate after defense; limited to matching hit channels and categories"},

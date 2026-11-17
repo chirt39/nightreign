@@ -22,7 +22,7 @@ async function createCalculator(t, keepInitialSelection = false) {
   vm.createContext(context);
   scope.run(() => vm.runInContext(script, context));
   const get = name => vm.runInContext(name, context);
-  get('catalogs').value = { weapons: load('weapon-catalog'), panel: load('damage-panel'), actions: load('damage-actions'), effects: load('damage-effects'), targets: load('damage-targets'), arts: load('arts-catalog'), traits: load('damage-weapon-traits'), definitions:load('relic_rule_effects') };
+  get('catalogs').value = { weapons: load('weapon-catalog'), panel: load('damage-panel'), actions: load('damage-actions'), effects: load('damage-effects'), targets: load('damage-targets'), arts: load('arts-catalog'), traits: load('damage-weapon-traits'), definitions:load('relic_rule_effects'), crossMode:load('relic_effect_cross_mode') };
   context.normalizeSelection(); await nextTick();
   if (keepInitialSelection) return { context, get };
   get('targetId').value = '';
@@ -108,13 +108,14 @@ test('target picker uses each atlas form’s defense and susceptibility, with pr
   assert.equal(get('result').value.total, baseline);
 });
 
-test('unmodelled relic traits are marked beside partially modelled selections', async t => {
+test('unmodelled relic effects remain explicit and cannot fabricate a complete result', async t => {
   const { context, get } = await createCalculator(t);
-  get('catalogs').value.effects.relics = [{ id: 'unknown', name: '有缺失词条的遗物', effectIds: [], unmodelledEffectIds: [123] }];
-  context.toggleEffect('relic', 'unknown', true);
+  const choice = get('customChoices').value.find(item => item.modes.includes('普通') && !get('nativeRelicRules').value.has(item.id));
+  const draft = structuredClone(JSON.parse(JSON.stringify(get('relicSlots').value)));
+  draft[0].rows = [choice];
+  context.saveRelicSlots(draft);
   assert.equal(get('result').value.kind, 'partial');
   assert.equal(get('result').value.hasUnmodelledRelic, true);
-  assert.ok(get('result').value.missing.some(item => item.includes('有未计入的词条')));
   get('selectedSegmentIds').value = [];
   assert.equal(get('result').value.total, null);
 });
@@ -134,68 +135,93 @@ test('hero-specific actions remain restricted in manual mode, which can start fr
   assert.equal(get('compatibleActions').value[0].id, 'hero-8');
 });
 
-test('custom and imported relics resolve native relic IDs, retain unknown effects and respect instance identity', async t => {
+function draftSlots(get, assignments) {
+  return Array.from(get('relicSlots').value, slot => ({ ...slot, rows: (assignments[slot.id] ?? slot.rows.map(row => row.id)).map(id => ({ id })) }));
+}
+
+test('six fixed positions enforce normal/deep pools and three positive effects each', async t => {
   const { context, get } = await createCalculator(t);
-  const eligible = get('customChoices').value.find(item=>get('nativeRelicRules').value.has(item.id));
-  assert.ok(eligible);
-  context.addCustom([eligible]);
-  assert.equal(get('savedRelics').value.length,1);
-  assert.ok(get('selectedEffects').value.length);
-  const event = {detail:{kind:'relic',instanceId:'7',name:'测试遗物',effects:[{id:eligible.id,name:eligible.name},{id:'999999',name:'未知效果'}]}};
-  await context.acceptPicked(event); await context.acceptPicked(event);
-  assert.equal(get('savedRelics').value.length,2);
-  assert.deepEqual(Array.from(context.relicDetails(get('savedRelics').value[1]),item=>item.missing),[false,true]);
-  context.toggleEffect('relic','instance:7',false);
-  assert.equal(get('unmodelledRelics').value.length,0);
+  get('targetId').value = '75100020';
+  const baseline = get('result').value.total;
+  context.saveRelicSlots(draftSlots(get, { 'normal:1': ['7001402'], 'deep:1': ['7001402'] }));
+  assert.equal(get('relicCount').value, 2, 'native shared ordinary effects can occur in deep relics');
+  assert.ok(get('result').value.total > baseline);
+  const original = JSON.stringify(get('relicSlots').value);
+  for (const invalid of [
+    {'normal:1':['6001400']}, {'deep:1':['7001400']},
+    {'normal:1':['7001402','7001402']}, {'normal:1':['7001400','7001500','7001600','7001700']},
+    {'normal:1':['6820000']}, {'normal:1':['99999999']},
+  ]) {
+    context.saveRelicSlots(draftSlots(get, invalid));
+    assert.equal(JSON.stringify(get('relicSlots').value), original);
+  }
+  const slots = draftSlots(get, {});
+  slots.push({ id:'normal:4', mode:'normal', rows:[] });
+  context.saveRelicSlots(slots);
+  assert.equal(JSON.stringify(get('relicSlots').value), original);
 });
 
-test('editing a three-effect custom relic replaces its original rules in place', async t => {
-  const { context, get } = await createCalculator(t, true);
-  const byId = new Map(get('customChoices').value.map(item => [item.id,item]));
-  const ids = [...get('nativeRelicRules').value.keys()].filter(id => byId.has(id) && id !== '7001800').slice(0, 3);
-  context.addCustom(ids.map(id => byId.get(id)));
-  context.editRelic('custom:1');
-  context.closePicker();
-  assert.equal(get('savedRelics').value[0].rows.length, 3);
-  context.editRelic('custom:1');
-  context.addCustom([...ids, '7001800'].map(id => byId.get(id)));
-  assert.equal(get('editingRelicId').value, 'custom:1');
-  const before = get('result').value.total;
-  context.addCustom([...ids.slice(0,2), '7001800'].map(id => byId.get(id)));
-  assert.equal(get('savedRelics').value[0].rows[2].id, '7001800');
-  assert.equal(get('selectionOrder').value.length, 1);
-  assert.ok(get('result').value.total > before);
-  assert.equal(get('editingRelicId').value, null);
+test('all six positions can be edited and cleared without shifting other positions; cancel keeps state', async t => {
+  const { context, get } = await createCalculator(t);
+  const assignments = Object.fromEntries(get('relicSlots').value.map(slot => [slot.id, ['7001402']]));
+  context.saveRelicSlots(draftSlots(get, assignments));
+  assert.equal(get('normalRelicCount').value, 3);
+  assert.equal(get('deepRelicCount').value, 3);
+  const original = JSON.stringify(get('relicSlots').value);
+  context.editRelic('deep:2'); context.closePicker();
+  assert.equal(JSON.stringify(get('relicSlots').value), original);
+  context.saveRelicSlots(draftSlots(get, { 'normal:2':['7001600','7001700','7001800'], 'deep:3':[] }));
+  assert.equal(get('relicCount').value, 5);
+  assert.equal(get('relicSlots').value[1].rows.length, 3);
+  assert.equal(get('relicSlots').value[4].rows[0].id, '7001402');
+  assert.equal(get('selectionOrder').value.length, 5);
+  context.toggleEffect('relic','normal:1',false);
+  assert.equal(get('relicSlots').value[0].rows.length,0);
+  assert.equal(get('relicCount').value,4);
 });
 
-test('official, save and custom relics share six slots; edits at capacity keep their slot', async t => {
-  const { context, get } = await createCalculator(t, true);
-  const rule = get('customChoices').value[0];
-  const [first, second, third] = get('relics').value;
-  const equip = relic => context.toggleEffect('relic', relic.id, true);
-  const imported = id => context.acceptPicked({detail:{kind:'relic', instanceId:id, name:'存档样本', effects:[rule]}});
-  equip(first); await imported(4); equip(second);
-  for (let i = 0; i < 3; i++) context.addCustom([rule]);
-  const ids = () => Array.from(get('selectionOrder').value, row => row.id);
-  const full = ids();
-  assert.equal(get('relicCount').value, 6);
-  equip(third); await imported(5); context.addCustom([rule]);
-  context.editRelic('custom:1'); context.addCustom([get('customChoices').value[1]]);
-  assert.deepEqual(ids(), full);
-  assert.equal(get('savedRelics').value.length, 4);
-  context.toggleEffect('relic', first.id, false); await imported(5);
-  assert.deepEqual(ids(), [...full.slice(1), 'instance:5']);
-});
-
-test('the two Balancers relics apply their melee-weapon and skill rules to the Halo projectile', async t => {
+test('Balancers positive effects apply their melee-weapon and skill rules to the Halo projectile', async t => {
   const { context, get } = await createCalculator(t, true);
   const base = get('result').value.total;
-  for (const name of ['安定者的遗志', '安定的遗志']) {
-    const relic = get('relics').value.find(item => item.name === name);
-    context.toggleEffect('relic', relic.id, true);
-    assert.ok(Math.abs(get('result').value.total - base * 1.06 * 1.15) < 1e-8);
-    context.toggleEffect('relic', relic.id, false);
-  }
+  context.saveRelicSlots(draftSlots(get, {'normal:1':['7006600','7006700']}));
+  assert.ok(Math.abs(get('result').value.total - base * 1.06 * 1.15) < 1e-8);
+});
+
+test('victory counts share one value across relic copies and recalculate the displayed result', async t => {
+  const { context, get } = await createCalculator(t, true);
+  assert.match(get('customChoices').value.find(item => item.id === '7060000').detail, /最多 10 层/);
+  assert.doesNotMatch(get('customChoices').value.find(item => item.id === '7060000').detail, /无限/);
+  const base = get('result').value.total;
+  context.saveRelicSlots(draftSlots(get, {'normal:1':['7060000','7060200'], 'normal:2':['7060000']}));
+  assert.equal(get('result').value.total, base);
+  assert.equal(get('countOptions').value.length, 2);
+  const [gaol, invader] = get('countOptions').value;
+  context.setEffectCount(gaol, '3');
+  context.setEffectCount(invader, '2');
+  assert.ok(Math.abs(get('result').value.total / base - 1.1577 * 1.1449) < 1e-10);
+  context.setEffectCount(gaol, '99');
+  assert.equal(get('effectCounts')[gaol.id], 10);
+  context.setEffectCount(gaol, '-1');
+  context.setEffectCount(invader, '');
+  assert.equal(get('result').value.total, base);
+  context.toggleEffect('relic','normal:1',false);
+  assert.equal(get('countOptions').value.length, 1);
+});
+
+test('character relic conditions follow the selected character and never activate automatically', async t => {
+  const { context, get } = await createCalculator(t, true);
+  context.saveRelicSlots(draftSlots(get, {'normal:1':['7036800']}));
+  assert.equal(get('conditionOptions').value.length, 0);
+  get('characterId').value = '10'; await nextTick();
+  const base = get('result').value.total;
+  const condition = get('conditionOptions').value[0].id;
+  context.toggleCondition(condition, true);
+  assert.ok(Math.abs(get('result').value.total / base - 1.18) < 1e-10);
+  get('characterId').value = '1'; await nextTick();
+  assert.equal(get('conditionOptions').value.length, 0);
+  const other = get('result').value.total;
+  context.toggleEffect('relic','normal:1',false);
+  assert.equal(get('result').value.total, other);
 });
 
 test('row channels use their actual physical subtype and preserve zero from immunity without inventing unknown channels', async t => {

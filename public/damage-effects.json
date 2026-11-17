@@ -2911,6 +2911,344 @@
       "scopeNote": "only the player's damage; not family damage"
     },
     {
+      "id": "relic:7060000:final:physical,magic,fire,lightning,holy",
+      "name": "每次打倒封印监牢里的囚犯，能提升攻击力",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.05,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:7069001:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7060000.permanentSpEffectId; SpEffectParam#7060000.replaceSpEffectId -> SpEffectParam#7069001.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 7069001,
+      "stackSource": "public/effect_encyclopedia.json: 不可叠加",
+      "nativeEffectId": 7060000,
+      "scopeNote": "one native permanent tier per effect; duplicate relic copies do not multiply",
+      "countKey": "evergaolVictories",
+      "countLabel": "打倒封印监牢囚犯次数",
+      "countMax": 10,
+      "countScaling": {
+        "type": "native-tier",
+        "rates": [
+          1.0,
+          1.05,
+          1.1025,
+          1.1577,
+          1.2155,
+          1.2763,
+          1.3401,
+          1.4072,
+          1.4775,
+          1.5514,
+          1.6289
+        ],
+        "spEffectIds": [
+          null,
+          7069001,
+          7069002,
+          7069003,
+          7069004,
+          7069005,
+          7069006,
+          7069007,
+          7069008,
+          7069009,
+          7069010
+        ],
+        "formula": "rates[min(count, 10)]; count=0 means no active bonus",
+        "capBehavior": "retain-last-tier",
+        "scope": "native category204 increments existing effect ID; absent next row rejects incoming effect and retains current tier",
+        "evidence": "metadata.permanentEffectControlFlow"
+      }
+    },
+    {
+      "id": "relic:7060200:final:physical,magic,fire,lightning,holy",
+      "name": "每次打倒黑夜入侵者，能提升攻击力",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.07,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:7069201:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7060200.permanentSpEffectId; SpEffectParam#7060200.replaceSpEffectId -> SpEffectParam#7069201.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 7069201,
+      "stackSource": "public/effect_encyclopedia.json: 不可叠加",
+      "nativeEffectId": 7060200,
+      "scopeNote": "one native permanent tier per effect; duplicate relic copies do not multiply",
+      "countKey": "invaderVictories",
+      "countLabel": "打倒黑夜入侵者次数",
+      "countMax": 10,
+      "countScaling": {
+        "type": "native-tier",
+        "rates": [
+          1.0,
+          1.07,
+          1.1449,
+          1.2251,
+          1.3108,
+          1.4026,
+          1.5008,
+          1.6058,
+          1.7182,
+          1.8385,
+          1.9672
+        ],
+        "spEffectIds": [
+          null,
+          7069201,
+          7069202,
+          7069203,
+          7069204,
+          7069205,
+          7069206,
+          7069207,
+          7069208,
+          7069209,
+          7069210
+        ],
+        "formula": "rates[min(count, 10)]; count=0 means no active bonus",
+        "capBehavior": "retain-last-tier",
+        "scope": "native category204 increments existing effect ID; absent next row rejects incoming effect and retains current tier",
+        "evidence": "metadata.permanentEffectControlFlow"
+      }
+    },
+    {
+      "id": "relic:7031300:final:physical,magic,fire,lightning,holy",
+      "name": "【无赖】在技艺发动期间，受到攻击时\n　能提升攻击力与精力上限",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.1,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:7031302:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7031300 -> SpEffectParam#7031300.stateInfo -> #7031301.replaceSpEffectId -> SpEffectParam#7031302.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 7031302,
+      "stackSource": "same active SpEffect refresh; exclusiveGroup handles whole-buff replacement",
+      "conditions": [
+        "无赖技艺期间受击后的强化已生效"
+      ],
+      "characterIds": [
+        "5"
+      ],
+      "nativeEffectId": 7031300,
+      "durationSeconds": 20.0
+    },
+    {
+      "id": "relic:7034700:final:physical",
+      "name": "【铁之眼】发动绝招后，强化突刺反击",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.2,
+      "channels": [
+        "physical"
+      ],
+      "stackGroup": "speffect:7034702:final:physical",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7034700 -> SpEffectParam#7034700.stateInfo -> #7034701.replaceSpEffectId -> SpEffectParam#7034702.physicsAttackRate",
+      "spEffectId": 7034702,
+      "stackSource": "same active SpEffect refresh; exclusiveGroup handles whole-buff replacement",
+      "tags": [
+        "piercingCounter"
+      ],
+      "conditions": [
+        "铁之眼绝招后的突刺反击强化已生效"
+      ],
+      "characterIds": [
+        "3"
+      ],
+      "nativeEffectId": 7034700,
+      "durationSeconds": 30.0
+    },
+    {
+      "id": "relic:7032900:final:physical,magic,fire,lightning,holy",
+      "name": "【隐士】发动绝招时\n　自己陷入异常状态出血，提升攻击力",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.16,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:7032903:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7032900 -> SpEffectParam#7032900.stateInfo -> #7032901.cycleOccurrenceSpEffectId -> #7032902.replaceSpEffectId -> SpEffectParam#7032903.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 7032903,
+      "stackSource": "single active proc selected; duplicate Attach copies are not extra casts",
+      "conditions": [
+        "隐士绝招自出血后的强化已生效"
+      ],
+      "characterIds": [
+        "7"
+      ],
+      "nativeEffectId": 7032900,
+      "durationSeconds": 30.0,
+      "scopeNote": "one active proc; duplicate relic copies do not create extra activations"
+    },
+    {
+      "id": "relic:7034400:final:physical,magic,fire,lightning,holy",
+      "name": "【执行者】提升技艺发动期间的攻击力\n　但攻击时会降低减伤率",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.35,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:7034402:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7034400 -> SpEffectParam#7034400.stateInfo -> #7034401.cycleOccurrenceSpEffectId -> SpEffectParam#7034402.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 7034402,
+      "stackSource": "same active SpEffect refresh; exclusiveGroup handles whole-buff replacement",
+      "tags": [
+        "weaponAttack"
+      ],
+      "anyTags": [
+        "atkSubCategory:122"
+      ],
+      "conditions": [
+        "执行者妖刀技艺强化已生效"
+      ],
+      "characterIds": [
+        "8"
+      ],
+      "nativeEffectId": 7034400,
+      "durationSeconds": 6.0,
+      "scopeNote": "native attack subcategory 122 only; not all equipped weapon skills"
+    },
+    {
+      "id": "relic:7036800:final:physical,magic,fire,lightning,holy",
+      "name": "【送葬者】发动绝招时，提升攻击力",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.18,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:7036801:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7036800 -> SpEffectParam#7036800.stateInfo -> conditional SpEffectParam#7036801 -> SpEffectParam#7036801.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 7036801,
+      "stackSource": "same active SpEffect refresh; exclusiveGroup handles whole-buff replacement",
+      "conditions": [
+        "送葬者绝招后的强化已生效"
+      ],
+      "characterIds": [
+        "10"
+      ],
+      "nativeEffectId": 7036800,
+      "durationSeconds": 40.0
+    },
+    {
+      "id": "relic:7037000:final:physical",
+      "name": "【送葬者】使用祷告将辅助效果附加在自己身上时\n提升物理攻击力",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.19,
+      "channels": [
+        "physical"
+      ],
+      "stackGroup": "speffect:7037001:final:physical",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7037000 -> SpEffectParam#7037000.stateInfo -> conditional SpEffectParam#7037001 -> SpEffectParam#7037001.physicsAttackRate; Magic.refCategory10=2/refId10=7037001 (conditional self buff)",
+      "spEffectId": 7037001,
+      "stackSource": "same active SpEffect refresh; exclusiveGroup handles whole-buff replacement",
+      "conditions": [
+        "送葬者给自己附加辅助祷告后的物理强化已生效"
+      ],
+      "characterIds": [
+        "10"
+      ],
+      "nativeEffectId": 7037000,
+      "durationSeconds": 60.0,
+      "triggerMagicIds": [
+        6050,
+        6060,
+        6250,
+        6260,
+        6320,
+        6330,
+        6340,
+        6420,
+        6421,
+        6422,
+        6423,
+        6424,
+        6430,
+        6431,
+        6450,
+        6460,
+        6470,
+        6480,
+        6490,
+        6600,
+        6740,
+        6760,
+        6770,
+        6840,
+        6960,
+        6971,
+        7230,
+        7330,
+        7900,
+        7903
+      ]
+    },
+    {
+      "id": "relic:7036900:final:physical,magic,fire,lightning,holy",
+      "name": "【送葬者】连击的最后攻击命中时，提升攻击力",
+      "kind": "relic",
+      "phase": "final",
+      "rate": 1.16,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:7036901:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "AttachEffectParam#7036900 -> SpEffectParam#7036900.atkOccurrenceSpEffectId (trigger category 104; recipient attacker) -> SpEffectParam#7036901.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 7036901,
+      "stackSource": "same active SpEffect refresh; exclusiveGroup handles whole-buff replacement",
+      "conditions": [
+        "送葬者连击最后一击命中后的强化已生效"
+      ],
+      "characterIds": [
+        "10"
+      ],
+      "nativeEffectId": 7036900,
+      "durationSeconds": 20.0
+    },
+    {
       "id": "field:8100000:final:physical",
       "name": "提升物理攻击力（6%）",
       "kind": "field",
@@ -5980,6 +6318,7 @@
         }
       ],
       "effectIds": [
+        "relic:7034700:final:physical",
         "relic:7332400:final:physical,magic,fire,lightning,holy"
       ],
       "nativeEffectIds": [
@@ -5988,7 +6327,6 @@
         7332400
       ],
       "unmodelledEffectIds": [
-        7034700,
         7120300
       ],
       "source": "EquipParamAntique#13002 -> AttachEffectTableParam (singleton pools)"
@@ -6097,13 +6435,14 @@
           "name": "力气＋３"
         }
       ],
-      "effectIds": [],
+      "effectIds": [
+        "relic:7031300:final:physical,magic,fire,lightning,holy"
+      ],
       "nativeEffectIds": [
         7031300,
         7000302
       ],
       "unmodelledEffectIds": [
-        7031300,
         7000302
       ],
       "source": "EquipParamAntique#15000 -> AttachEffectTableParam (singleton pools)"
@@ -6410,6 +6749,7 @@
         }
       ],
       "effectIds": [
+        "relic:7037000:final:physical",
         "relic:7001402:final:physical"
       ],
       "nativeEffectIds": [
@@ -6418,7 +6758,6 @@
         7006400
       ],
       "unmodelledEffectIds": [
-        7037000,
         7006400
       ],
       "source": "EquipParamAntique#19050 -> AttachEffectTableParam (singleton pools)"
@@ -6443,14 +6782,15 @@
           "name": "连续攻击时，提升攻击力"
         }
       ],
-      "effectIds": [],
+      "effectIds": [
+        "relic:7036800:final:physical,magic,fire,lightning,holy"
+      ],
       "nativeEffectIds": [
         7036800,
         7000902,
         7037600
       ],
       "unmodelledEffectIds": [
-        7036800,
         7000902,
         7037600
       ],
@@ -6458,14 +6798,6 @@
     }
   ],
   "unsupported": [
-    {
-      "nativeEffectId": 7060000,
-      "reason": "per-victory count and exponential scaling cannot be represented by a fixed scalar toggle"
-    },
-    {
-      "nativeEffectId": 7060200,
-      "reason": "per-victory count and exponential scaling cannot be represented by a fixed scalar toggle"
-    },
     {
       "nativeEffectId": 7032700,
       "reason": "independently expiring per-kill stack count"
@@ -6508,7 +6840,15 @@
     },
     {
       "nativeEffectId": 7031200,
-      "reason": "recipient and proc chain not fully audited"
+      "reason": "friendly-target buff excludes self; recipient chain not modelled as own relic damage"
+    },
+    {
+      "nativeEffectId": 7032800,
+      "reason": "ground-area recipient and continued field occupancy not modelled"
+    },
+    {
+      "nativeEffectId": 7036300,
+      "reason": "Scholar skill buffs a target ally; not an unconditional self damage bonus"
     },
     {
       "nativeEffectId": 7290000,
@@ -6545,6 +6885,47 @@
     "version": "native-10350000-v1",
     "gameVersion": "1.3.3.0",
     "runtimeVerified": false,
+    "permanentEffectControlFlow": {
+      "status": "static-native-verified",
+      "executableSha256": "9545e8732919bb6a63904cb73223641b3c4f9a67869be5722612acca413e8b3a",
+      "method": "offline PE section mapping and x64 instruction inspection; game not executed",
+      "anchors": [
+        {
+          "rva": "0xE6E3D0",
+          "bytes": "488b014885c074048b4040c3b8ffffffffc3",
+          "meaning": "AttachEffectParam permanentSpEffectId getter at +0x40"
+        },
+        {
+          "rva": "0xE6E300",
+          "bytes": "488b014885c074050fb64027c3",
+          "meaning": "AttachEffectParam tier-count mode getter at +0x27 (unknown_9d=1)"
+        },
+        {
+          "rva": "0x501F00",
+          "meaning": "mode1 counts category204: same floor(id/100), maximum id%100"
+        },
+        {
+          "rva": "0x50787D",
+          "bytes": "8b5f0885db7e5e8d7b0148c7442430000000008bd7c7442438ffffffff488d4c2430c644243c0040b501e8349f990048837c243000740541893e",
+          "meaning": "same category/priority: existingID+1, query next SpEffect, return it when defined"
+        },
+        {
+          "rva": "0x5078B9",
+          "bytes": "488b4424204885c0741f0fb7883e01000066413bcd750941c706ffffffffeb0966413bcc750341891e",
+          "meaning": "category204 missing next row outputs -1; existing list not modified"
+        },
+        {
+          "rva": "0x3C8108",
+          "bytes": "e893f6130084c0440f45bdf8000000",
+          "meaning": "caller adopts the revised incoming effect ID"
+        },
+        {
+          "rva": "0x3C8483",
+          "bytes": "4585ff0f888a050000",
+          "meaning": "negative incoming ID branches to false-return at 0x3C8A16, before apply/replace"
+        }
+      ]
+    },
     "scope": "audited scalar damage rules; not exhaustive, not a relic legality checker",
     "phases": {
       "panel": "AttackPowerRate before defense, weapon component only",
@@ -6681,14 +7062,14 @@
     ],
     "rights": "Game data rights remain with original owners; stacking snapshot retains GPL-3.0 attribution",
     "counts": {
-      "effects": 218,
+      "effects": 227,
       "kinds": {
-        "relic": 129,
+        "relic": 138,
         "field": 76,
         "buff": 13
       },
       "phases": {
-        "final": 218
+        "final": 227
       },
       "officialRelics": 45
     }
