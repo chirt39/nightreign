@@ -283,17 +283,18 @@ test('red traits share one configured roll per pool and allow one extra corpse t
   const {context, get} = await createCalculator(t, true);
   get('quality').value = 'red'; await nextTick();
   const ids = () => get('availableWeaponTraits').value.map(item => item.id);
-  assert.ok(ids().includes(8810050) && ids().includes(8850650) && ids().includes(8850550));
+  assert.ok(!ids().includes(8810050) && ids().includes(8850650) && ids().includes(8850550));
   context.addWeaponTrait(8850650);
   assert.ok(!ids().includes(8850550), 'same special slot cannot grant physical and elemental bonuses');
   context.addWeaponTrait(8100402);
   assert.ok(!ids().includes(8350002), 'same standard slot cannot grant holy and skill bonuses');
   context.addWeaponTrait(8810050);
+  assert.equal(get('weaponTraitSlots').value.length, 2, 'removed trait does not occupy the third slot');
   get('picker').value = 'trait';
-  assert.ok(get('equipmentTraits').value.some(item => item.polarity === 'negative' && item.detail.includes('负面词条')));
+  assert.ok(!get('equipmentTraits').value.some(item => item.traitId === '8810050'));
   const corpse = get('availableWeaponTraits').value.find(item => item.polarity === 'corpse');
   context.addWeaponTrait(corpse.id);
-  assert.equal(get('weaponTraitSlots').value.length, 4);
+  assert.equal(get('weaponTraitSlots').value.length, 3);
   assert.equal(ids().length, 0);
   get('quality').value = 'native'; await nextTick();
   assert.deepEqual(Array.from(get('weaponTraitSlots').value, slot => slot.traitId), ['8100402', String(corpse.id)]);
@@ -411,4 +412,26 @@ test('catalog final defense takes precedence over base defense, including zero',
   assert.equal(get('target').value.useTakenEstimate, false);
   assert.equal(get('target').value.defense.holy, 0);
   assert.equal(get('target').value.defense.physical, 100);
+});
+
+
+test('removed low-health -7% trait cannot enter damage through either picker or an old loadout', async t => {
+  const { context, get } = await createCalculator(t, true);
+  get('quality').value = 'red'; await nextTick();
+  const baseline = get('result').value.total;
+  assert.ok(get('catalogs').value.traits.traits.some(item => item.id === 8810050), 'native source retained');
+  assert.ok(!get('traits').value.some(item => item.id === 8810050));
+  assert.ok(!get('effectChoices').value.some(item => item.id === 'native:8810050'));
+  context.addWeaponTrait(8810050);
+  assert.equal(get('weaponTraitSlots').value.length, 0);
+  get('conditions')['低血量攻击效果已触发（原生阈值84.99%）'] = true;
+  get('selectionOrder').value = [{kind:'trait',id:'8810050'}, {kind:'effect',id:'native:8810050'}];
+  get('weaponTraitSlots').value = [{id:'8810050',traitId:'8810050',polarity:'negative'}];
+  await nextTick();
+  assert.equal(get('weaponTraitSlots').value.length, 0);
+  assert.equal(get('selectionOrder').value.length, 0);
+  assert.equal(get('selectedEffects').value.length, 0);
+  assert.equal(get('equipmentTraits').value.length, 0);
+  assert.equal(get('result').value.total, baseline);
+  assert.ok(get('traits').value.some(item => item.id === 8810000), 'separate -5% trait retained');
 });

@@ -50,7 +50,9 @@ function selectUpgrade(value) {
     reinforcement.value = value;
   }
 }
-const traits = computed(() => catalogs.value?.traits?.traits || []);
+// 用户明确从计算器移除这一条；原生目录与其他词条保持不变。
+const removedWeaponTraitId = '8810050';
+const traits = computed(() => (catalogs.value?.traits?.traits || []).filter(item => String(item.id) !== removedWeaponTraitId));
 const traitById = computed(() => new Map(traits.value.map(item => [String(item.id), item])));
 const selectedWeaponTraits = computed(() => weaponTraitSlots.value.map(slot => ({ ...slot, trait: traitById.value.get(slot.traitId) })).filter(slot => slot.trait));
 const equipmentTraits = computed(() => weaponTraitSlots.value.map(slot => { const trait = traitById.value.get(slot.traitId); return { ...slot, polarity: trait?.polarity || slot.polarity, name: trait?.name || '', detail: trait ? traitDetail(trait) : '' }; }));
@@ -59,7 +61,7 @@ const statGains = computed(() => Object.fromEntries(Object.entries(statGainInput
 const baseStats = computed(() => panelCatalog.value?.characterStats?.[characterId.value]?.[String(level.value)] || {});
 const reinforcementOptions = computed(() => (panelCatalog.value?.reinforcements || []).filter(item => panelCatalog.value?.variants?.[variantId.value]?.reinforcements?.includes(Number(item.id))));
 const actions = computed(() => catalogs.value?.actions.actions || []);
-const effects = computed(() => catalogs.value?.effects.effects || []);
+const effects = computed(() => (catalogs.value?.effects.effects || []).filter(item => String(item.nativeEffectId) !== removedWeaponTraitId));
 const relics = computed(() => catalogs.value?.effects.relics || []);
 const targets = computed(() => catalogs.value?.targets.targets || []);
 const selectedTarget = computed(() => targets.value.find(item => String(item.id) === targetId.value));
@@ -474,6 +476,12 @@ function locationChanged() { if (props.active && location.hash === '#damage') { 
 watch([actionId, variantId, characterId, level, reinforcement, quality, statGains, mode, manualValues, enchantEnabled], () => { projectileInputs.value = {}; }, { deep: true });
 watch(actionId, () => { enchantEnabled.value = false; });
 watch(quality, value => { if (value === 'red') mode.value = 'auto'; });
+watch([weaponTraitSlots, selectionOrder], () => {
+  const removedSlots = weaponTraitSlots.value.filter(slot => String(slot.traitId) === removedWeaponTraitId);
+  const removedSelections = selectionOrder.value.filter(item => item.kind === 'trait' && (String(item.id) === removedWeaponTraitId || removedSlots.some(slot => slot.id === item.id)) || item.kind === 'effect' && (item.id === `native:${removedWeaponTraitId}` || item.id === `field:${removedWeaponTraitId}:final:physical,magic,fire,lightning,holy`));
+  if (removedSelections.length) selectionOrder.value = selectionOrder.value.filter(item => !removedSelections.includes(item));
+  if (removedSlots.length) weaponTraitSlots.value = weaponTraitSlots.value.filter(slot => !removedSlots.includes(slot));
+}, { deep: true, flush: 'sync' });
 watch([variantId, quality, reinforcement], () => { for (const key of Object.keys(manualValues)) manualValues[key] = ''; pruneWeaponTraits(); });
 watch(action, () => { selectedSegmentIds.value = defaultSegments(); });
 watch(characterId, chooseAction);
