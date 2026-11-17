@@ -6,6 +6,8 @@ import { ref, shallowRef, computed, reactive, watch, nextTick, effectScope } fro
 import { calculateDamage, calculatePanel } from '../src/lib/damage-calculator.js';
 import { damageShowcase } from '../src/lib/damage-showcase.js';
 import { hasAutomaticProjectile } from '../src/lib/damage-panel.js';
+import { relicChoiceMetadata } from '../src/lib/damage-relic-options.js';
+import { describeDamageBuff } from '../src/lib/damage-buff-details.js';
 
 const source = fs.readFileSync(new URL('../src/pages/DamageCalculatorPage.vue', import.meta.url), 'utf8');
 const script = source.match(/<script setup>([^]*?)<\/script>/)[1].replace(/^import .*;\r?\n/gm, '');
@@ -15,14 +17,14 @@ async function createCalculator(t, keepInitialSelection = false) {
   const scope = effectScope();
   t.after(() => scope.stop());
   const context = {
-    ref, shallowRef, computed, reactive, watch, nextTick, calculateDamage, calculatePanel, damageShowcase, hasAutomaticProjectile,
+    ref, shallowRef, computed, reactive, watch, nextTick, calculateDamage, calculatePanel, damageShowcase, hasAutomaticProjectile, relicChoiceMetadata, describeDamageBuff,
     defineProps: () => ({ active: false }), defineExpose() {}, onMounted() {}, onBeforeUnmount() {},
     URL, location: { href: 'http://localhost/#damage' }, history: { state: {}, replaceState() {} },
   };
   vm.createContext(context);
   scope.run(() => vm.runInContext(script, context));
   const get = name => vm.runInContext(name, context);
-  get('catalogs').value = { weapons: load('weapon-catalog'), panel: load('damage-panel'), actions: load('damage-actions'), effects: load('damage-effects'), targets: load('damage-targets'), arts: load('arts-catalog'), traits: load('damage-weapon-traits'), definitions:load('relic_rule_effects') };
+  get('catalogs').value = { weapons: load('weapon-catalog'), panel: load('damage-panel'), actions: load('damage-actions'), effects: load('damage-effects'), targets: load('damage-targets'), arts: load('arts-catalog'), traits: load('damage-weapon-traits'), definitions:load('relic_rule_effects'), crossMode:load('relic_effect_cross_mode') };
   context.normalizeSelection(); await nextTick();
   if (keepInitialSelection) return { context, get };
   get('targetId').value = '';
@@ -83,6 +85,22 @@ test('selected effect rules are atomic, preserve selection order and replace exc
   assert.equal(get('result').value.total, withPanelRules, 'handwritten final panel does not apply panel buffs twice');
 });
 
+test('in-run categories follow their actual sources while override groups still work across categories', async t => {
+  const { context, get } = await createCalculator(t);
+  get('picker').value = 'effect';
+  const choices = get('pickerChoices').value;
+  assert.equal(choices.find(item => item.id === 'buff:reward:8100001').category, 'field');
+  assert.ok(!choices.some(item => item.id.startsWith('native:')), 'weapon AttachEffect rows are not independent rewards');
+  assert.equal(choices.find(item => item.id === 'buff:goods:1210').category, 'goods');
+  assert.equal(choices.find(item => item.id === 'buff:magic:6050').category, 'art');
+  assert.equal(choices.find(item => item.id === 'buff:art:1010').category, 'art');
+  assert.equal(context.effectCategory({kind:'event',buffId:'event:example'}), 'event');
+  context.toggleEffect('effect', 'buff:goods:1210', true);
+  context.toggleEffect('effect', 'buff:magic:6050', true);
+  assert.equal(get('selectionOrder').value.length, 1);
+  assert.equal(get('selectionOrder').value[0].id, 'buff:magic:6050');
+});
+
 test('target picker uses each atlas form’s defense and susceptibility, with pre-defense fallback for missing data', async t => {
   const { context, get } = await createCalculator(t, true);
   const atlas = get('catalogs').value;
@@ -108,13 +126,14 @@ test('target picker uses each atlas form’s defense and susceptibility, with pr
   assert.equal(get('result').value.total, baseline);
 });
 
-test('unmodelled relic traits are marked beside partially modelled selections', async t => {
+test('unmodelled relic effects remain explicit and cannot fabricate a complete result', async t => {
   const { context, get } = await createCalculator(t);
-  get('catalogs').value.effects.relics = [{ id: 'unknown', name: '有缺失词条的遗物', effectIds: [], unmodelledEffectIds: [123] }];
-  context.toggleEffect('relic', 'unknown', true);
+  const choice = get('customChoices').value.find(item => item.modes.includes('普通') && !get('nativeRelicRules').value.has(item.id));
+  const draft = structuredClone(JSON.parse(JSON.stringify(get('relicSlots').value)));
+  draft[0].rows = [choice];
+  context.saveRelicSlots(draft);
   assert.equal(get('result').value.kind, 'partial');
   assert.equal(get('result').value.hasUnmodelledRelic, true);
-  assert.ok(get('result').value.missing.some(item => item.includes('有未计入的词条')));
   get('selectedSegmentIds').value = [];
   assert.equal(get('result').value.total, null);
 });
@@ -134,68 +153,111 @@ test('hero-specific actions remain restricted in manual mode, which can start fr
   assert.equal(get('compatibleActions').value[0].id, 'hero-8');
 });
 
-test('custom and imported relics resolve native relic IDs, retain unknown effects and respect instance identity', async t => {
+function draftSlots(get, assignments) {
+  return Array.from(get('relicSlots').value, slot => ({ ...slot, rows: (assignments[slot.id] ?? slot.rows.map(row => row.id)).map(id => ({ id })) }));
+}
+
+test('six fixed positions enforce normal/deep pools and three positive effects each', async t => {
   const { context, get } = await createCalculator(t);
-  const eligible = get('customChoices').value.find(item=>get('nativeRelicRules').value.has(item.id));
-  assert.ok(eligible);
-  context.addCustom([eligible]);
-  assert.equal(get('savedRelics').value.length,1);
-  assert.ok(get('selectedEffects').value.length);
-  const event = {detail:{kind:'relic',instanceId:'7',name:'测试遗物',effects:[{id:eligible.id,name:eligible.name},{id:'999999',name:'未知效果'}]}};
-  await context.acceptPicked(event); await context.acceptPicked(event);
-  assert.equal(get('savedRelics').value.length,2);
-  assert.deepEqual(Array.from(context.relicDetails(get('savedRelics').value[1]),item=>item.missing),[false,true]);
-  context.toggleEffect('relic','instance:7',false);
-  assert.equal(get('unmodelledRelics').value.length,0);
+  get('targetId').value = '75100020';
+  const baseline = get('result').value.total;
+  context.saveRelicSlots(draftSlots(get, { 'normal:1': ['7001402'], 'deep:1': ['7001402'] }));
+  assert.equal(get('relicCount').value, 2, 'native shared ordinary effects can occur in deep relics');
+  assert.ok(get('result').value.total > baseline);
+  const original = JSON.stringify(get('relicSlots').value);
+  for (const invalid of [
+    {'normal:1':['6001400']}, {'deep:1':['7001400']},
+    {'normal:1':['7001402','7001402']}, {'normal:1':['7001400','7001500','7001600','7001700']},
+    {'normal:1':['6820000']}, {'normal:1':['99999999']},
+  ]) {
+    context.saveRelicSlots(draftSlots(get, invalid));
+    assert.equal(JSON.stringify(get('relicSlots').value), original);
+  }
+  const slots = draftSlots(get, {});
+  slots.push({ id:'normal:4', mode:'normal', rows:[] });
+  context.saveRelicSlots(slots);
+  assert.equal(JSON.stringify(get('relicSlots').value), original);
 });
 
-test('editing a three-effect custom relic replaces its original rules in place', async t => {
-  const { context, get } = await createCalculator(t, true);
-  const byId = new Map(get('customChoices').value.map(item => [item.id,item]));
-  const ids = [...get('nativeRelicRules').value.keys()].filter(id => byId.has(id) && id !== '7001800').slice(0, 3);
-  context.addCustom(ids.map(id => byId.get(id)));
-  context.editRelic('custom:1');
-  context.closePicker();
-  assert.equal(get('savedRelics').value[0].rows.length, 3);
-  context.editRelic('custom:1');
-  context.addCustom([...ids, '7001800'].map(id => byId.get(id)));
-  assert.equal(get('editingRelicId').value, 'custom:1');
-  const before = get('result').value.total;
-  context.addCustom([...ids.slice(0,2), '7001800'].map(id => byId.get(id)));
-  assert.equal(get('savedRelics').value[0].rows[2].id, '7001800');
-  assert.equal(get('selectionOrder').value.length, 1);
-  assert.ok(get('result').value.total > before);
-  assert.equal(get('editingRelicId').value, null);
+test('all six positions can be edited and cleared without shifting other positions; cancel keeps state', async t => {
+  const { context, get } = await createCalculator(t);
+  const assignments = Object.fromEntries(get('relicSlots').value.map(slot => [slot.id, ['7001402']]));
+  context.saveRelicSlots(draftSlots(get, assignments));
+  assert.equal(get('normalRelicCount').value, 3);
+  assert.equal(get('deepRelicCount').value, 3);
+  const original = JSON.stringify(get('relicSlots').value);
+  context.editRelic('deep:2'); context.closePicker();
+  assert.equal(JSON.stringify(get('relicSlots').value), original);
+  context.saveRelicSlots(draftSlots(get, { 'normal:2':['7001600','7001700','7001800'], 'deep:3':[] }));
+  assert.equal(get('relicCount').value, 5);
+  assert.equal(get('relicSlots').value[1].rows.length, 3);
+  assert.equal(get('relicSlots').value[4].rows[0].id, '7001402');
+  assert.equal(get('selectionOrder').value.length, 5);
+  context.toggleEffect('relic','normal:1',false);
+  assert.equal(get('relicSlots').value[0].rows.length,0);
+  assert.equal(get('relicCount').value,4);
 });
 
-test('official, save and custom relics share six slots; edits at capacity keep their slot', async t => {
-  const { context, get } = await createCalculator(t, true);
-  const rule = get('customChoices').value[0];
-  const [first, second, third] = get('relics').value;
-  const equip = relic => context.toggleEffect('relic', relic.id, true);
-  const imported = id => context.acceptPicked({detail:{kind:'relic', instanceId:id, name:'存档样本', effects:[rule]}});
-  equip(first); await imported(4); equip(second);
-  for (let i = 0; i < 3; i++) context.addCustom([rule]);
-  const ids = () => Array.from(get('selectionOrder').value, row => row.id);
-  const full = ids();
-  assert.equal(get('relicCount').value, 6);
-  equip(third); await imported(5); context.addCustom([rule]);
-  context.editRelic('custom:1'); context.addCustom([get('customChoices').value[1]]);
-  assert.deepEqual(ids(), full);
-  assert.equal(get('savedRelics').value.length, 4);
-  context.toggleEffect('relic', first.id, false); await imported(5);
-  assert.deepEqual(ids(), [...full.slice(1), 'instance:5']);
-});
-
-test('the two Balancers relics apply their melee-weapon and skill rules to the Halo projectile', async t => {
+test('Balancers positive effects apply their melee-weapon and skill rules to the Halo projectile', async t => {
   const { context, get } = await createCalculator(t, true);
   const base = get('result').value.total;
-  for (const name of ['安定者的遗志', '安定的遗志']) {
-    const relic = get('relics').value.find(item => item.name === name);
-    context.toggleEffect('relic', relic.id, true);
-    assert.ok(Math.abs(get('result').value.total - base * 1.06 * 1.15) < 1e-8);
-    context.toggleEffect('relic', relic.id, false);
-  }
+  context.saveRelicSlots(draftSlots(get, {'normal:1':['7006600','7006700']}));
+  assert.ok(Math.abs(get('result').value.total - base * 1.06 * 1.15) < 1e-8);
+});
+
+test('victory counts share one value across relic copies and recalculate the displayed result', async t => {
+  const { context, get } = await createCalculator(t, true);
+  assert.match(get('customChoices').value.find(item => item.id === '7060000').detail, /最多 10 层/);
+  assert.doesNotMatch(get('customChoices').value.find(item => item.id === '7060000').detail, /无限/);
+  const base = get('result').value.total;
+  context.saveRelicSlots(draftSlots(get, {'normal:1':['7060000','7060200'], 'normal:2':['7060000']}));
+  assert.equal(get('result').value.total, base);
+  assert.equal(get('countOptions').value.length, 2);
+  const [gaol, invader] = get('countOptions').value;
+  context.setEffectCount(gaol, '3');
+  context.setEffectCount(invader, '2');
+  assert.ok(Math.abs(get('result').value.total / base - 1.1577 * 1.1449) < 1e-10);
+  context.setEffectCount(gaol, '99');
+  assert.equal(get('effectCounts')[gaol.id], 10);
+  context.setEffectCount(gaol, '-1');
+  context.setEffectCount(invader, '');
+  assert.equal(get('result').value.total, base);
+  context.toggleEffect('relic','normal:1',false);
+  assert.equal(get('countOptions').value.length, 1);
+});
+
+test('character relic conditions follow the selected character and never activate automatically', async t => {
+  const { context, get } = await createCalculator(t, true);
+  context.saveRelicSlots(draftSlots(get, {'normal:1':['7036800']}));
+  assert.equal(get('conditionOptions').value.length, 0);
+  get('characterId').value = '10'; await nextTick();
+  const base = get('result').value.total;
+  const condition = get('conditionOptions').value[0].id;
+  context.toggleCondition(condition, true);
+  assert.ok(Math.abs(get('result').value.total / base - 1.18) < 1e-10);
+  get('characterId').value = '1'; await nextTick();
+  assert.equal(get('conditionOptions').value.length, 0);
+  const other = get('result').value.total;
+  context.toggleEffect('relic','normal:1',false);
+  assert.equal(get('result').value.total, other);
+});
+
+test('relic picker metadata follows actual Halo contacts and selected character without deleting equipped effects', async t => {
+  const { context, get } = await createCalculator(t, true);
+  const choice = id => get('customChoices').value.find(item => item.id === id);
+  for (const id of ['7001402', '7001800', '7006600', '7006700', '7060000']) assert.equal(choice(id).applicable, true, id);
+  assert.equal(choice('7001500').applicable, false);
+  assert.equal(choice('7036800').applicable, false);
+  get('characterId').value = '10'; await nextTick();
+  assert.equal(choice('7036800').applicable, true);
+  context.saveRelicSlots(draftSlots(get, {'normal:1':['7036800']}));
+  get('characterId').value = '1'; await nextTick();
+  assert.equal(choice('7036800').applicable, false);
+  assert.equal(get('relicSlots').value[0].rows[0].id, '7036800');
+  get('mode').value = 'manual';
+  context.fillManualPanel();
+  get('manualValues').magic = 50;
+  assert.equal(choice('7001500').applicable, true, 'manual elemental AR must not be hidden by the weapon base channel');
 });
 
 test('row channels use their actual physical subtype and preserve zero from immunity without inventing unknown channels', async t => {
@@ -283,17 +345,18 @@ test('red traits share one configured roll per pool and allow one extra corpse t
   const {context, get} = await createCalculator(t, true);
   get('quality').value = 'red'; await nextTick();
   const ids = () => get('availableWeaponTraits').value.map(item => item.id);
-  assert.ok(ids().includes(8810050) && ids().includes(8850650) && ids().includes(8850550));
+  assert.ok(!ids().includes(8810050) && ids().includes(8850650) && ids().includes(8850550));
   context.addWeaponTrait(8850650);
   assert.ok(!ids().includes(8850550), 'same special slot cannot grant physical and elemental bonuses');
   context.addWeaponTrait(8100402);
   assert.ok(!ids().includes(8350002), 'same standard slot cannot grant holy and skill bonuses');
   context.addWeaponTrait(8810050);
+  assert.equal(get('weaponTraitSlots').value.length, 2, 'removed trait does not occupy the third slot');
   get('picker').value = 'trait';
-  assert.ok(get('equipmentTraits').value.some(item => item.polarity === 'negative' && item.detail.includes('负面词条')));
+  assert.ok(!get('equipmentTraits').value.some(item => item.traitId === '8810050'));
   const corpse = get('availableWeaponTraits').value.find(item => item.polarity === 'corpse');
   context.addWeaponTrait(corpse.id);
-  assert.equal(get('weaponTraitSlots').value.length, 4);
+  assert.equal(get('weaponTraitSlots').value.length, 3);
   assert.equal(ids().length, 0);
   get('quality').value = 'native'; await nextTick();
   assert.deepEqual(Array.from(get('weaponTraitSlots').value, slot => slot.traitId), ['8100402', String(corpse.id)]);
@@ -322,7 +385,7 @@ test('victory points and positive trait stat gains affect inferred AR once while
   assert.equal(get('conditions')['低血量攻击效果已触发（原生阈值84.99%）'], false);
 });
 
-test('a weapon trait also visible in temporary effects is applied only once; non-damage traits are not damage gaps', async t => {
+test('legacy duplicate weapon effects count once and are no longer offered as independent rewards', async t => {
   const { context, get } = await createCalculator(t);
   const trait = context.traitOptions().find(item => item.calculationStatus === 'supported' && item.effectIds.length);
   assert.ok(trait);
@@ -332,6 +395,8 @@ test('a weapon trait also visible in temporary effects is applied only once; non
   context.addWeaponTrait(trait.id);
   for (const id of trait.effectIds) assert.equal(get('selectedEffects').value.filter(item => item.id === id).length, 1);
   assert.equal(context.providedByWeapon(choice), true);
+  get('picker').value = 'effect';
+  assert.ok(!get('pickerChoices').value.some(item => item.id === choice.id));
   const hidden = get('traits').value.filter(item => ['missing-rule', 'non-damage'].includes(item.calculationStatus) || item.name.includes('致命一击'));
   assert.ok(hidden.some(item => item.name.includes('致命一击')));
   assert.ok(hidden.some(item => item.name.includes('附加异常状态')));
@@ -339,6 +404,80 @@ test('a weapon trait also visible in temporary effects is applied only once; non
   assert.ok(hidden.every(item => !available.has(item.id)));
   context.addWeaponTrait(hidden[0].id);
   assert.equal(get('weaponTraitSlots').value.length, 1);
+});
+
+test('independent physical rewards remain selectable with a weapon trait and apply their own native multiplier', async t => {
+  const { context, get } = await createCalculator(t);
+  get('targetId').value = '75100020';
+  const trait = context.traitOptions().find(item => item.effectIds.some(id => {
+    const rule = get('effectById').value.get(id);
+    return rule.channels?.includes('physical') && !rule.conditions?.length;
+  }));
+  assert.ok(trait);
+  context.addWeaponTrait(trait.id);
+  get('picker').value = 'effect';
+  const rewardId = 'buff:reward:8100000';
+  assert.equal(get('pickerChoices').value.find(item => item.id === rewardId).disabled, false);
+  const baseline = get('result').value.total;
+  context.pickItem(rewardId);
+  assert.equal(get('weaponTraitSlots').value.length, 1);
+  assert.ok(context.checked('effect', rewardId));
+  assert.ok(Math.abs(get('result').value.total / baseline - 1.06) < 1e-10);
+  get('picker').value = 'effect';
+  assert.equal(get('pickerChoices').value.find(item => item.id === rewardId).disabled, true);
+  assert.equal(get('pickerChoices').value.find(item => item.id === 'buff:reward:8100001').disabled, false);
+  context.toggleEffect('effect', rewardId, false);
+  assert.equal(get('result').value.total, baseline);
+  // Reverse selection order must also preserve the independent reward.
+  context.removeWeaponTrait(trait.id);
+  context.toggleEffect('effect', rewardId, true);
+  context.addWeaponTrait(trait.id);
+  assert.equal(get('weaponTraitSlots').value.length, 1);
+  assert.ok(context.checked('effect', rewardId));
+  assert.ok(Math.abs(get('result').value.total / baseline - 1.06) < 1e-10);
+});
+
+test('verified event reward is categorized separately and applies only while its native trigger is active', async t => {
+  const { context, get } = await createCalculator(t);
+  get('targetId').value = '75100020';
+  get('picker').value = 'effect';
+  const eventChoice = get('pickerChoices').value.find(item => item.id === 'buff:event:4');
+  assert.ok(eventChoice);
+  assert.equal(eventChoice.category, 'event');
+  const baseline = get('result').value.total;
+  context.pickItem(eventChoice.id);
+  assert.equal(get('result').value.total, baseline, 'selecting a reward does not claim its trigger has occurred');
+  const rules = get('selectedEffects').value;
+  assert.ok(rules.every(rule => rule.durationSeconds === 20));
+  const conditions = [...new Set(rules.flatMap(rule => rule.conditions || []))];
+  assert.ok(conditions.length);
+  for (const condition of conditions) context.toggleCondition(condition, true);
+  assert.ok(Math.abs(get('result').value.total / baseline - 1.15) < 1e-10);
+  context.toggleCondition(conditions.at(-1), false);
+  assert.equal(get('result').value.total, baseline);
+});
+
+test('Morgott reward uses cumulative team graces and float32 multiplication capped at ten layers', async t => {
+  const { context, get } = await createCalculator(t);
+  get('targetId').value = '75100020';
+  const baseline = get('result').value.total;
+  context.toggleEffect('effect', 'buff:event:8970000', true);
+  const count = get('countOptions').value.find(item => item.id === 'morgottGraces');
+  assert.ok(count);
+  assert.equal(count.max, 10);
+  assert.equal(get('result').value.total, baseline);
+  // Independent values from the native aggregation audit, not a duplicate of
+  // the engine's count loop.
+  for (const [n, expected] of [[1, 1.0199999809265137], [5, 1.1040806770324707], [10, 1.218994140625]]) {
+    context.setEffectCount(count, n);
+    assert.ok(Math.abs(get('result').value.total / baseline - expected) < 1e-10);
+  }
+  context.setEffectCount(count, 12);
+  assert.equal(get('effectCounts').morgottGraces, 10);
+  assert.ok(Math.abs(get('result').value.total / baseline - 1.218994140625) < 1e-10);
+  context.toggleEffect('effect', 'buff:event:8970000', false);
+  assert.equal(get('result').value.total, baseline);
+  assert.equal(get('countOptions').value.length, 0);
 });
 
 
@@ -411,4 +550,26 @@ test('catalog final defense takes precedence over base defense, including zero',
   assert.equal(get('target').value.useTakenEstimate, false);
   assert.equal(get('target').value.defense.holy, 0);
   assert.equal(get('target').value.defense.physical, 100);
+});
+
+
+test('removed low-health -7% trait cannot enter damage through either picker or an old loadout', async t => {
+  const { context, get } = await createCalculator(t, true);
+  get('quality').value = 'red'; await nextTick();
+  const baseline = get('result').value.total;
+  assert.ok(get('catalogs').value.traits.traits.some(item => item.id === 8810050), 'native source retained');
+  assert.ok(!get('traits').value.some(item => item.id === 8810050));
+  assert.ok(!get('effectChoices').value.some(item => item.id === 'native:8810050'));
+  context.addWeaponTrait(8810050);
+  assert.equal(get('weaponTraitSlots').value.length, 0);
+  get('conditions')['低血量攻击效果已触发（原生阈值84.99%）'] = true;
+  get('selectionOrder').value = [{kind:'trait',id:'8810050'}, {kind:'effect',id:'native:8810050'}];
+  get('weaponTraitSlots').value = [{id:'8810050',traitId:'8810050',polarity:'negative'}];
+  await nextTick();
+  assert.equal(get('weaponTraitSlots').value.length, 0);
+  assert.equal(get('selectionOrder').value.length, 0);
+  assert.equal(get('selectedEffects').value.length, 0);
+  assert.equal(get('equipmentTraits').value.length, 0);
+  assert.equal(get('result').value.total, baseline);
+  assert.ok(get('traits').value.some(item => item.id === 8810000), 'separate -5% trait retained');
 });

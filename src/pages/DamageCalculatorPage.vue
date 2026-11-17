@@ -3,20 +3,23 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowR
 import { calculateDamage, calculatePanel } from '../lib/damage-calculator.js';
 import { damageShowcase } from '../lib/damage-showcase.js';
 import { hasAutomaticProjectile } from '../lib/damage-panel.js';
+import DamageRelicPicker from '../components/DamageRelicPicker.vue';
+import { relicChoiceMetadata } from '../lib/damage-relic-options.js';
+import { describeDamageBuff } from '../lib/damage-buff-details.js';
 import DamagePicker from '../components/DamagePicker.vue';
 import DamageFormula from '../components/DamageFormula.vue';
 import DamageEquipmentCard from '../components/DamageEquipmentCard.vue';
 import DamageProjectileInputs from '../components/DamageProjectileInputs.vue';
 
 const props = defineProps({ active: Boolean, catalogVersions: Object });
-const files = ['weapon-catalog.json', 'damage-panel.json', 'damage-actions.json', 'damage-effects.json', 'damage-targets.json', 'arts-catalog.json', 'damage-weapon-traits.json', 'relic_rule_effects.json'];
+const files = ['weapon-catalog.json', 'damage-panel.json', 'damage-actions.json', 'damage-effects.json', 'damage-targets.json', 'arts-catalog.json', 'damage-weapon-traits.json', 'relic_rule_effects.json', 'relic_effect_cross_mode.json', 'damage-buff-icons.json'];
 const catalogs = shallowRef(null), loading = ref(false), error = ref('');
 const weaponId = ref(''), variantId = ref(''), artId = ref(''), actionId = ref('');
 const mode = ref('auto'), characterId = ref(''), level = ref(''), reinforcement = ref('');
 const quality = ref('native'), weaponTraitSlots = ref([]);
-const picker = ref(''), savedRelics = ref([]), editingRelicId = ref(null);
-const customLimit = 3, relicLimit = 6;
-let nextCustomId = 0;
+const picker = ref(''), editingRelicId = ref(null);
+const relicSlots = ref(['normal', 'deep'].flatMap(mode => Array.from({ length: 3 }, (_, index) => ({ id: `${mode}:${index + 1}`, mode, label: `${mode === 'normal' ? '普通' : '深夜'}遗物 ${index + 1}`, rows: [] }))));
+const effectCounts = reactive({});
 const portraitVersion = ref(0);
 function portraitsReady() { portraitVersion.value++; }
 const statLabels = { strength: '力气', dexterity: '灵巧', intelligence: '智力', faith: '信仰', arcane: '感应' };
@@ -50,7 +53,9 @@ function selectUpgrade(value) {
     reinforcement.value = value;
   }
 }
-const traits = computed(() => catalogs.value?.traits?.traits || []);
+// 用户明确从计算器移除这一条；原生目录与其他词条保持不变。
+const removedWeaponTraitId = '8810050';
+const traits = computed(() => (catalogs.value?.traits?.traits || []).filter(item => String(item.id) !== removedWeaponTraitId));
 const traitById = computed(() => new Map(traits.value.map(item => [String(item.id), item])));
 const selectedWeaponTraits = computed(() => weaponTraitSlots.value.map(slot => ({ ...slot, trait: traitById.value.get(slot.traitId) })).filter(slot => slot.trait));
 const equipmentTraits = computed(() => weaponTraitSlots.value.map(slot => { const trait = traitById.value.get(slot.traitId); return { ...slot, polarity: trait?.polarity || slot.polarity, name: trait?.name || '', detail: trait ? traitDetail(trait) : '' }; }));
@@ -59,8 +64,7 @@ const statGains = computed(() => Object.fromEntries(Object.entries(statGainInput
 const baseStats = computed(() => panelCatalog.value?.characterStats?.[characterId.value]?.[String(level.value)] || {});
 const reinforcementOptions = computed(() => (panelCatalog.value?.reinforcements || []).filter(item => panelCatalog.value?.variants?.[variantId.value]?.reinforcements?.includes(Number(item.id))));
 const actions = computed(() => catalogs.value?.actions.actions || []);
-const effects = computed(() => catalogs.value?.effects.effects || []);
-const relics = computed(() => catalogs.value?.effects.relics || []);
+const effects = computed(() => (catalogs.value?.effects.effects || []).filter(item => String(item.nativeEffectId) !== removedWeaponTraitId));
 const targets = computed(() => catalogs.value?.targets.targets || []);
 const selectedTarget = computed(() => targets.value.find(item => String(item.id) === targetId.value));
 const targetPortrait = computed(() => {
@@ -78,16 +82,16 @@ async function acceptPicked(event) {
   if (item.kind === 'enemy' && targets.value.some(entry=>String(entry.id)===String(item.targetId))) {
     targetId.value = String(item.targetId);
   }
-  if (item.kind === 'relic' && item.instanceId && Array.isArray(item.effects)) {
-    addPersonalRelic('instance:' + item.instanceId, item.name, item.effects);
-  }
 }
 const effectById = computed(() => new Map(effects.value.map(item => [String(item.id), item])));
-const relicCount = computed(() => selectionOrder.value.filter(item => item.kind === 'relic').length);
-function canAddRelic(id) {
-  return relicCount.value < relicLimit && !checked('relic', id);
-}
-const relicById = computed(() => new Map([...relics.value,...savedRelics.value].map(item => [String(item.id), item])));
+const relicCount = computed(() => relicSlots.value.filter(slot => slot.rows.length).length);
+const normalRelicCount = computed(() => relicSlots.value.filter(slot => slot.mode === 'normal' && slot.rows.length).length);
+const deepRelicCount = computed(() => relicSlots.value.filter(slot => slot.mode === 'deep' && slot.rows.length).length);
+const relicById = computed(() => new Map(relicSlots.value.map(slot => [slot.id, {
+  ...slot, name: slot.label,
+  effectIds: slot.rows.flatMap(row => (nativeRelicRules.value.get(row.id) || []).map(rule => rule.id)),
+  unmodelledEffectIds: slot.rows.filter(row => !nativeRelicRules.value.has(row.id)).map(row => row.id),
+}])));
 const definitions = computed(() => catalogs.value?.definitions?.definitions || {});
 const nativeRelicRules = computed(() => {
   const groups = new Map();
@@ -98,45 +102,44 @@ const nativeRelicRules = computed(() => {
   }
   return groups;
 });
-function addPersonalRelic(id, name, entries, edit = false) {
-  if (!entries.length || (edit ? !checked('relic', id) : !canAddRelic(id))) return;
-  const rows = entries.map(entry=>({id:String(entry.id),name:entry.name || definitions.value[entry.id]?.name || '#' + entry.id}));
-  const effectIds = rows.flatMap(entry=>(nativeRelicRules.value.get(entry.id) || []).map(rule=>rule.id));
-  const unmodelledEffectIds = rows.filter(entry=>!nativeRelicRules.value.has(entry.id)).map(entry=>entry.id);
-  savedRelics.value = [...savedRelics.value.filter(item=>item.id!==id), {id,name,rows,effectIds,unmodelledEffectIds}];
-  if (!edit) toggleEffect('relic',id,true);
-}
 function relicDetails(relic) {
-  if (!relic) return [];
-  const missing = new Set((relic.unmodelledEffectIds || []).map(String));
-  const rows = relic.rows || (relic.nativeEffectIds || []).map(id=>({id:String(id),name: definitions.value[id]?.name || nativeRelicRules.value.get(String(id))?.[0]?.name || '#' + id}));
-  return rows.map(entry=>({...entry,missing:missing.has(String(entry.id))}));
+  return (relic?.rows || []).map(row => ({ ...row, missing: !nativeRelicRules.value.has(row.id) }));
 }
-const customChoices = computed(()=>Object.values(definitions.value).filter(item=>!item.type?.startsWith('减益')).map(item=>({
-  id:String(item.id), name:item.name, detail:nativeRelicRules.value.has(String(item.id)) ? item.explanation : '未计入伤害'
-})));
-const editingRelic = computed(() => savedRelics.value.find(item => item.id === editingRelicId.value));
-function editRelic(id) {
-  editingRelicId.value = id;
-  picker.value = 'relic';
-}
-function closePicker() {
-  picker.value = '';
-  editingRelicId.value = null;
-}
-function addCustom(entries) {
-  const allowed = new Map(customChoices.value.map(item => [item.id, item]));
-  const ids = [...new Set(entries.map(item => item.id))];
-  if (!ids.length || ids.length > customLimit || ids.some(id => !allowed.has(id))) return;
-  const rows = ids.map(id => allowed.get(id));
-  if (editingRelic.value) {
-    addPersonalRelic(editingRelic.value.id, editingRelic.value.name, rows, true);
-  } else {
-    if (relicCount.value >= relicLimit) return;
-    nextCustomId++;
-    addPersonalRelic('custom:' + nextCustomId, '自定义遗物 ' + nextCustomId, rows);
+const customChoices = computed(() => {
+  const shared = new Set((catalogs.value?.crossMode?.positive || []).map(String));
+  const context = {
+    characterId: characterId.value, characterNames: (panelCatalog.value?.characters || []).map(item => item.name),
+    weaponId: weaponId.value, variantId: variantId.value, weaponType: weapon.value?.categoryId, artId: artId.value,
+    attack: panel.value || panelCatalog.value?.variants?.[variantId.value]?.attack,
+    segments: compatibleActions.value.flatMap(item => item.segments || []),
+  };
+  return Object.values(definitions.value).filter(item => !item.type?.startsWith('减益')).map(item => {
+    const rules = nativeRelicRules.value.get(String(item.id));
+    const counted = rules?.find(rule => rule.countKey);
+    return {
+      id: String(item.id), name: item.name,
+      ...relicChoiceMetadata(rules, context, item),
+      modes: [...new Set([...(item.modes || []), ...(shared.has(String(item.id)) ? ['深夜'] : [])])],
+      detail: counted ? `累计增益最多 ${counted.countMax} 层，按游戏逐档倍率计算` : rules ? item.explanation : '未计入伤害',
+    };
+  });
+});
+function editRelic(id) { editingRelicId.value = id; picker.value = 'relic'; }
+function closePicker() { picker.value = ''; editingRelicId.value = null; }
+function saveRelicSlots(draft) {
+  if (!Array.isArray(draft) || draft.length !== 6) return;
+  const choices = new Map(customChoices.value.map(item => [item.id, item]));
+  const next = [];
+  for (const original of relicSlots.value) {
+    const slot = draft.find(item => item.id === original.id);
+    if (!slot || slot.mode !== original.mode || !Array.isArray(slot.rows) || slot.rows.length > 3) return;
+    const ids = slot.rows.map(row => String(row.id));
+    const mode = original.mode === 'normal' ? '普通' : '深夜';
+    if (new Set(ids).size !== ids.length || ids.some(id => !choices.get(id)?.modes.includes(mode))) return;
+    next.push({ ...original, rows: ids.map(id => ({ id, name: choices.get(id).name })) });
   }
-  closePicker();
+  relicSlots.value = next;
+  selectionOrder.value = [...selectionOrder.value.filter(item => item.kind !== 'relic'), ...next.filter(slot => slot.rows.length).map(slot => ({ kind: 'relic', id: slot.id }))];
 }
 const effectChoices = computed(() => {
   const groups = new Map();
@@ -148,6 +151,18 @@ const effectChoices = computed(() => {
   return [...groups.values()];
 });
 const effectChoiceById = computed(() => new Map(effectChoices.value.map(item => [item.id, item])));
+function effectCategory(effect) {
+  if (effect.kind === 'event' || effect.eventId != null) return 'event';
+  if (effect.kind === 'reward') return 'field';
+  if (effect.goodsId != null) return 'goods';
+  return effect.buffId ? 'art' : 'field';
+}
+function effectPresentation(item) { return describeDamageBuff(item, effectChoices.value); }
+function effectImage(item) { return catalogs.value?.buffIcons?.icons?.[item?.effects[0]?.buffId]?.image; }
+function selectionImage(item) {
+  return item.kind === 'relic' ? relicById.value.get(item.id)?.image
+    : item.kind === 'effect' ? effectImage(effectChoiceById.value.get(item.id)) : null;
+}
 const compatibleActions = computed(() => actions.value.filter(item => {
   if (!showcaseSelection.value) return false;
   if (item.scope?.heroId != null && String(item.scope.heroId) !== characterId.value) return false;
@@ -195,11 +210,18 @@ const weaponTraitRuleIds = computed(() => new Set(selectedWeaponTraits.value.fla
 function providedByWeapon(item) { return item.effects.some(effect => weaponTraitRuleIds.value.has(String(effect.id))); }
 const selectedEffects = computed(() => selectionOrder.value.flatMap(item => item.kind === 'effect' ? (effectChoiceById.value.get(item.id)?.effects || []).filter(effect => !weaponTraitRuleIds.value.has(String(effect.id))) : effectIdsForSelection(item).map(id => effectById.value.get(String(id))).filter(Boolean)));
 const unmodelledRelics = computed(() => selectionOrder.value.filter(item => item.kind === 'relic').map(item => relicById.value.get(item.id)).filter(item => item?.unmodelledEffectIds?.length));
+const countOptions = computed(() => [...new Map(selectedEffects.value.filter(effect => effect.countKey).map(effect => [effect.countKey, { id: effect.countKey, name: effect.countLabel, max: effect.countMax }])).values()]);
+function setEffectCount(item, value) {
+  const count = Number(value);
+  effectCounts[item.id] = Number.isFinite(count) ? Math.max(0, Math.min(item.max, Math.floor(count))) : 0;
+  return effectCounts[item.id];
+}
 const unmodelledTraits = computed(() => selectedWeaponTraits.value.filter(slot => ['partial', 'missing-rule'].includes(slot.trait.calculationStatus) || slot.trait.unmodelledEffectIds?.length || (slot.trait.effectIds || []).some(id => !effectById.value.has(String(id))) || !slot.trait.calculationStatus && !slot.trait.effectIds?.length && !slot.trait.statGains));
 const conditionOptions = computed(() => {
   const names = new Map((catalogs.value?.effects.conditions || []).map(item => [String(item.id), item.name]));
   const result = new Map();
   for (const effect of selectedEffects.value) {
+    if (effect.characterIds?.length && !effect.characterIds.map(String).includes(characterId.value)) continue;
     const values = Array.isArray(effect.conditions) ? effect.conditions : Object.keys(effect.conditions || {});
     for (const item of values) {
       const id = typeof item === 'object' ? String(item.id) : String(item);
@@ -233,7 +255,7 @@ const target = computed(() => {
 const result = computed(() => {
   if (!catalogs.value) return { kind: 'unavailable', total: null, rows: [], missing: ['计算资料尚未载入'] };
   if (outsideShowcase.value) return { kind: 'unavailable', total: null, rows: [], missing: ['当前变体或战技尚未收录，可点击「选择武器」更换。'] };
-  const calculated = calculateDamage({ panel: panel.value, segments: segments.value, selectedSegmentIds: selectedSegmentIds.value, effects: selectedEffects.value, conditions: { ...conditions }, manualPanel: mode.value === 'manual', target: target.value, characterId: characterId.value, weaponId: weaponId.value, variantId: variantId.value, weaponType: weapon.value?.categoryId, weaponPhysicalTypes: panelCatalog.value?.variants?.[variantId.value]?.physicalTypes, artId: artId.value || action.value?.artId, allowReferenceDefense: true, projectileInputs: projectileInputs.value, projectileContext: { catalog: panelCatalog.value, variantId: variantId.value, characterId: characterId.value, level: Number(level.value), reinforcement: Number(reinforcement.value), quality: quality.value, statGains: statGains.value, manualPanel: mode.value === 'manual' }, weaponEnchant: mode.value === 'auto' && enchantEnabled.value ? action.value?.appliedWeaponEffects?.[0] : null });
+  const calculated = calculateDamage({ panel: panel.value, segments: segments.value, selectedSegmentIds: selectedSegmentIds.value, effects: selectedEffects.value, effectCounts: { ...effectCounts }, conditions: { ...conditions }, manualPanel: mode.value === 'manual', target: target.value, characterId: characterId.value, weaponId: weaponId.value, variantId: variantId.value, weaponType: weapon.value?.categoryId, weaponPhysicalTypes: panelCatalog.value?.variants?.[variantId.value]?.physicalTypes, artId: artId.value || action.value?.artId, allowReferenceDefense: true, projectileInputs: projectileInputs.value, projectileContext: { catalog: panelCatalog.value, variantId: variantId.value, characterId: characterId.value, level: Number(level.value), reinforcement: Number(reinforcement.value), quality: quality.value, statGains: statGains.value, manualPanel: mode.value === 'manual' }, weaponEnchant: mode.value === 'auto' && enchantEnabled.value ? action.value?.appliedWeaponEffects?.[0] : null });
   if (!unmodelledRelics.value.length && !unmodelledTraits.value.length) return calculated;
   return { ...calculated, kind: calculated.kind === 'unavailable' ? 'unavailable' : 'partial', hasUnmodelledRelic: true, missing: [...calculated.missing, ...unmodelledRelics.value.map(item => `「${item.name}」有未计入的词条`), ...unmodelledTraits.value.map(slot => `武器词条「${slot.trait.name}」尚有未计入的效果`)] };
 });
@@ -271,29 +293,27 @@ const pickerChoices = computed(()=>{
   if (picker.value==='trait') return availableWeaponTraits.value.map(trait => ({
     id: String(trait.id), name: trait.name, detail: traitDetail(trait)
   }));
-  if (picker.value==='effect') return effectChoices.value.filter(item=>item.effects.some(effect=>effect.kind!=='relic')).map(item=>({
-    id:item.id, name:item.name, disabled:checked('effect',item.id) || providedByWeapon(item),
-    detail:item.effects[0].buffId && item.effects[0].durationSeconds ? `持续 ${item.effects[0].durationSeconds} 秒` :
-      item.effects[0].anyTags?.includes('atkSubCategory:124') ? '仅对带双手共持标记的武器命中生效' :
-      item.effects[0].anyTags?.includes('atkSubCategory:125') ? '仅对带双持标记的武器命中生效' : ''
+  if (picker.value==='effect') return effectChoices.value.filter(item=>item.effects.some(effect=>['reward','buff','event'].includes(effect.kind))).map(item=>({
+    id:item.id, name:item.name, category:effectCategory(item.effects[0]), disabled:checked('effect',item.id),
+    image:effectImage(item), ...effectPresentation(item)
   }));
-  return relics.value.map(item=>({id:String(item.id),name:item.name,image:item.image,detail:relicDetails(item).map(row=>row.name + (row.missing ? '（未计入）' : '')).join('、'),disabled:checked('relic',item.id)}));
+  return [];
 });
 function pickItem(id) {
   if (picker.value === 'weapon') {
     const entry = damageShowcase.find(item => item.variantId === id);
     if (entry) chooseShowcase(entry);
   } else if (picker.value==='trait') addWeaponTrait(id);
-  else if (picker.value==='relic' || picker.value==='effect') toggleEffect(picker.value,id,true);
+  else if (picker.value==='effect') toggleEffect(picker.value,id,true);
   picker.value='';
 }
 function checked(kind, id) { return selectionOrder.value.some(item => item.kind === kind && item.id === String(id)); }
 function toggleEffect(kind, id, enabled) {
   if (kind === 'trait') { removeWeaponTrait(id); return; }
   id = String(id);
-  if (kind === 'relic' && enabled && !canAddRelic(id)) return;
+  if (kind === 'relic' && enabled) return;
   let remaining = selectionOrder.value.filter(item => item.kind !== kind || item.id !== id);
-  if (!enabled && kind === 'relic') savedRelics.value = savedRelics.value.filter(item=>item.id!==id);
+  if (!enabled && kind === 'relic') relicSlots.value = relicSlots.value.map(slot => slot.id === id ? { ...slot, rows: [] } : slot);
   const group = kind === 'effect' ? effectChoiceById.value.get(id)?.exclusiveGroup : null;
   if (enabled && group) remaining = remaining.filter(item => item.kind !== 'effect' || effectChoiceById.value.get(item.id)?.exclusiveGroup !== group);
   selectionOrder.value = enabled ? [...remaining, { kind, id }] : remaining;
@@ -456,7 +476,7 @@ async function loadCatalogs() {
         if (!response.ok) throw new Error('伤害计算资料暂未就绪，请稍后重试。');
         return response.json();
       }));
-      catalogs.value = Object.fromEntries(['weapons', 'panel', 'actions', 'effects', 'targets', 'arts', 'traits','definitions'].map((key, index) => [key, values[index]]));
+      catalogs.value = Object.fromEntries(['weapons', 'panel', 'actions', 'effects', 'targets', 'arts', 'traits','definitions','crossMode','buffIcons'].map((key, index) => [key, values[index]]));
       normalizeSelection();
     } catch (cause) { if (cause.name !== 'AbortError') error.value = cause.message || '计算资料载入失败'; }
     finally { loading.value = false; }
@@ -474,6 +494,12 @@ function locationChanged() { if (props.active && location.hash === '#damage') { 
 watch([actionId, variantId, characterId, level, reinforcement, quality, statGains, mode, manualValues, enchantEnabled], () => { projectileInputs.value = {}; }, { deep: true });
 watch(actionId, () => { enchantEnabled.value = false; });
 watch(quality, value => { if (value === 'red') mode.value = 'auto'; });
+watch([weaponTraitSlots, selectionOrder], () => {
+  const removedSlots = weaponTraitSlots.value.filter(slot => String(slot.traitId) === removedWeaponTraitId);
+  const removedSelections = selectionOrder.value.filter(item => item.kind === 'trait' && (String(item.id) === removedWeaponTraitId || removedSlots.some(slot => slot.id === item.id)) || item.kind === 'effect' && (item.id === `native:${removedWeaponTraitId}` || item.id === `field:${removedWeaponTraitId}:final:physical,magic,fire,lightning,holy`));
+  if (removedSelections.length) selectionOrder.value = selectionOrder.value.filter(item => !removedSelections.includes(item));
+  if (removedSlots.length) weaponTraitSlots.value = weaponTraitSlots.value.filter(slot => !removedSlots.includes(slot));
+}, { deep: true, flush: 'sync' });
 watch([variantId, quality, reinforcement], () => { for (const key of Object.keys(manualValues)) manualValues[key] = ''; pruneWeaponTraits(); });
 watch(action, () => { selectedSegmentIds.value = defaultSegments(); });
 watch(characterId, chooseAction);
@@ -511,27 +537,29 @@ defineExpose({ restoreNavigation });
           </div>
         </section>
         <section class="damage-card damage-loadout">
-          <h2 class="loadout-heading-line">当前配装 <span class="relic-count" role="status">已装备 {{ relicCount }}/{{ relicLimit }} 件遗物</span></h2>
+          <h2 class="loadout-heading-line">当前配装 <span class="relic-count" role="status">普通 {{ normalRelicCount }}/3 · 深夜 {{ deepRelicCount }}/3</span></h2>
             <button class="damage-target-card" type="button" aria-label="选择怪物" @click="openExternalPicker('enemy')">
               <img v-if="selectedTarget" :src="targetPortrait" alt=""><span><small>目标怪物</small><strong>{{ selectedTarget?.name || '选择怪物' }}</strong></span><span aria-hidden="true">›</span>
             </button>
           <div class="loadout-actions">
             <button v-if="showcaseSelection" type="button" :disabled="!availableWeaponTraits.length" @click="picker='trait'">添加武器词条</button>
             <button type="button" @click="picker='effect'">添加局内词条或增益</button>
-            <button type="button" :disabled="relicCount >= relicLimit" @click="picker='relic'">添加遗物</button>
+            <button type="button" @click="editRelic(null)">添加遗物词条</button>
           </div>
           <details v-if="selectionOrder.length" class="damage-equipped">
             <summary>查看或编辑当前配装</summary>
             <ul class="loadout-selected">
             <li v-for="item in selectionOrder" :key="item.kind+':'+item.id">
-              <img v-if="item.kind === 'relic' && relicById.get(item.id)?.image" class="loadout-portrait" :src="relicById.get(item.id).image" alt="" width="28" height="28">
+              <img v-if="selectionImage(item)" class="loadout-portrait" :src="selectionImage(item)" alt="" width="28" height="28">
               <span>{{ item.kind === 'trait' && traitById.get(item.id)?.polarity === 'negative' ? '负面 · ' : '' }}{{ selectionName(item) }}</span>
-              <button v-if="item.kind === 'relic' && item.id.startsWith('custom:')" type="button" :aria-label="'编辑' + selectionName(item)" @click="editRelic(item.id)">编辑</button>
+              <button v-if="item.kind === 'relic'" type="button" :aria-label="'编辑' + selectionName(item)" @click="editRelic(item.id)">编辑</button>
               <button type="button" :aria-label="'移除'+selectionName(item)" @click="toggleEffect(item.kind,item.id,false)">×</button>
+              <small v-if="item.kind==='effect'" class="loadout-buff-summary">{{ effectPresentation(effectChoiceById.get(item.id)).detail }}</small>
               <ul v-if="item.kind==='relic'"><li v-for="(row,index) in relicDetails(relicById.get(item.id))" :key="index">{{ row.name }}<small v-if="row.missing">未计入</small></li></ul>
             </li>
           </ul>
           </details>
+          <div v-if="countOptions.length" class="damage-effect-counts"><label v-for="item in countOptions" :key="item.id">{{ item.name }}<input type="number" :aria-label="item.name" min="0" :max="item.max" step="1" :value="effectCounts[item.id] || 0" @input="$event.target.value = setEffectCount(item, $event.target.value)"></label></div>
           <fieldset v-if="conditionOptions.length" class="damage-conditions"><legend>当前满足的条件</legend><label v-for="item in conditionOptions" :key="item.id"><input :checked="conditions[item.id] || false" type="checkbox" @change="toggleCondition(item.id, $event.target.checked)">{{ item.name }}</label></fieldset>
         </section>
         <div class="damage-tools">
@@ -579,17 +607,19 @@ defineExpose({ restoreNavigation });
           <details class="damage-card damage-advanced"><summary>逐段结果 · {{ result.rows?.length || 0 }} 段</summary><p v-if="!result.rows?.length" class="damage-note">选择动作并补全面板后查看结果。</p><article v-for="row in result.rows || []" :key="row.id" class="damage-row"><header><h3>{{ row.name }}</h3><strong>{{ display(row.total) }}</strong></header><dl class="damage-channel-results"><div v-for="channel in rowChannels(row)" :key="channel.key"><dt>{{ channel.label }}</dt><dd>{{ display(row.channels?.[channel.key]) }}</dd></div></dl><p v-if="row.applied?.length" class="damage-note">已生效：{{ row.applied.join('、') }}</p><ul v-if="row.missing?.length" class="damage-missing"><li v-for="(item, index) in row.missing" :key="index">{{ item }}</li></ul></article></details>
       </aside>
     </div>
-    <DamagePicker v-if="picker" :kind="picker" :choices="pickerChoices" :custom-choices="customChoices" :editing-relic="editingRelic" :custom-limit="customLimit"
-      @pick="pickItem" @custom="addCustom" @ritual="openExternalPicker('relic')" @close="closePicker" />
+    <DamageRelicPicker v-if="picker === 'relic'" :slots="relicSlots" :choices="customChoices" :initial-slot-id="editingRelicId || ''" @save="saveRelicSlots" @close="closePicker" />
+    <DamagePicker v-else-if="picker" :kind="picker" :choices="pickerChoices" @pick="pickItem" @close="closePicker" />
   </section>
 </template>
 <style scoped>
+.damage-effect-counts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.damage-effect-counts label{display:flex;align-items:center;gap:8px}.damage-effect-counts input{width:65px}
 .damage-page{min-width:0;color:#dce5e9;font-family:Arial,'Microsoft YaHei',sans-serif}.damage-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.damage-heading h1{margin:0;color:#ecd7a7;font:500 25px/1.4 'Noto Serif SC',serif}.eyebrow{margin:0;font-size:10px;color:#a7b7c5;letter-spacing:.12em}.damage-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,.48fr);gap:12px;align-items:start}.damage-inputs,.damage-result{display:grid;gap:8px;min-width:0}.damage-result{position:sticky;top:12px;max-height:calc(100dvh - 30px);overflow:auto;overscroll-behavior:contain}.damage-card{min-width:0;padding:12px;border:1px solid #3e566e;border-radius:5px;background:#132131}.damage-card h2{margin:0 0 8px;color:#e7d5ac;font-size:14px;font-weight:500}.damage-card h3{margin:12px 0 8px;color:#c8d4dc;font-size:13px;font-weight:500}.damage-weapon-cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin-bottom:12px}.damage-page .damage-weapon-cards button{display:grid;justify-items:center;align-content:start;gap:3px;min-width:0;padding:5px 2px;background:#152737;border-color:#3e566e}.damage-weapon-cards button[aria-pressed=true]{border-color:#d2b674;box-shadow:inset 0 -2px #d2b674;background:#253540}.damage-weapon-cards img{width:100%;height:48px;object-fit:contain}.damage-weapon-cards strong{font-size:11px;font-weight:400;overflow-wrap:anywhere}.damage-weapon-cards small{font-size:9px;color:#9db3c4}.damage-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}.damage-core-fields{grid-template-columns:minmax(0,1fr) minmax(0,.65fr)}.damage-page label{display:grid;gap:4px;min-width:0;color:#bdcdd7;font-size:11px}.damage-page input,.damage-page select{box-sizing:border-box;min-width:0;width:100%;min-height:34px;padding:6px;border:1px solid #4c657b;border-radius:3px;background:#101d2a;color:#e0e7e9;font:inherit;font-size:12px}.damage-page button{min-height:32px;padding:6px 9px;border:1px solid #596b7e;border-radius:3px;background:#1b2d40;color:#e7d5ac;font:inherit;font-size:12px;cursor:pointer}.damage-page button:disabled,.damage-page input:disabled{opacity:.45}.damage-page button:focus-visible,.damage-page input:focus-visible,.damage-page select:focus-visible,.damage-page summary:focus-visible{outline:2px solid #d5b477;outline-offset:2px}.damage-weapon-slots,.damage-stat-gains{min-width:0;margin:8px 0 10px;padding:8px 0;border:0;border-top:1px solid #33495b}.damage-weapon-slots legend,.damage-stat-gains legend{padding-right:8px;color:#d8c7a1;font-size:12px}.damage-trait-search{display:grid;grid-template-columns:minmax(0,1fr) 60px;gap:8px}.damage-trait-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}.damage-target-picker{padding-top:10px;margin-bottom:0;border-top:1px solid #33495b;grid-template-columns:.8fr 1.2fr}.damage-mode,.damage-conditions{display:flex;flex-wrap:wrap;gap:8px 12px;margin:10px 0;padding:8px 0;border:0;border-top:1px solid #33495b}.damage-mode legend,.damage-conditions legend{padding-right:8px;color:#d8c7a1;font-size:12px}.damage-page .damage-mode label,.damage-page .damage-conditions label,.damage-page .damage-check,.damage-options label,.damage-segments label{display:flex;align-items:center;gap:7px;min-height:30px}.damage-page input[type=checkbox],.damage-page input[type=radio]{flex:0 0 16px;width:16px;min-height:16px;height:16px;padding:0;accent-color:#ccb17a}.damage-channels{display:grid;grid-template-columns:repeat(auto-fit,minmax(65px,1fr));gap:8px}.damage-channels output{padding:8px;border:1px solid #34495b;background:#192b3d;color:#e7d5ac;font-size:16px;font-variant-numeric:tabular-nums}.damage-note,.damage-notice{margin:8px 0 0;font-size:11px;line-height:1.6;color:#aebfcc;overflow-wrap:anywhere}.damage-stat-gains p{margin:0 0 8px}.damage-stat-gains small{font-size:10px}.damage-default-note{font-size:10px}.damage-segments,.damage-options{list-style:none;padding:0;margin:10px 0}.damage-segments li,.damage-options li{padding:5px 0;border-bottom:1px solid #2d4356}.damage-segments small{display:block;margin-top:3px;color:#9fb2c1;font-size:11px}.damage-segment-tools,.damage-selected,.damage-pagination{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.damage-options{max-height:245px;overflow:auto;overscroll-behavior:contain}.damage-card details{padding-top:8px;margin-top:10px;border-top:1px solid #33495b}.damage-card summary{color:#dacba6;cursor:pointer;font-size:12px;line-height:1.6}.damage-advanced>summary{margin:0}.damage-advanced[open]>summary{margin-bottom:12px}.damage-selected button{font-size:11px}.damage-pagination{justify-content:space-between;color:#aebfcc;font-size:12px}.damage-total{border-top:2px solid #b99b64}.damage-result-kind{margin:0;color:#d9cba7;font-size:12px;line-height:1.6;overflow-wrap:anywhere}.damage-headline-numbers{display:grid;grid-template-columns:1fr;align-items:baseline;gap:10px;padding:14px 0;border-bottom:1px solid #33495b}.damage-headline-numbers>div{min-width:0}.damage-headline-numbers span{display:block;margin-bottom:4px;font-size:10px;color:#9eb2c2}.damage-headline-numbers output{display:block;color:#f0dca9;font:400 28px/1.2 Arial,'Microsoft YaHei',sans-serif;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.damage-headline-numbers .positive{color:#a4d1af}.damage-headline-numbers .negative{color:#e1a699}.damage-total>p:not(.damage-result-kind){font-size:11px;color:#aebfcc;line-height:1.6;margin:8px 0}.damage-missing{margin:8px 0 0;padding-left:16px;color:#d9b48e;font-size:11px;line-height:1.7;overflow-wrap:anywhere}.damage-row{padding:10px 0;border-top:1px solid #33495b}.damage-row header{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.damage-row header h3{margin:0;color:#dfcfa8;font-size:13px;overflow-wrap:anywhere}.damage-row header strong{color:#e8d9ad;font-variant-numeric:tabular-nums;white-space:nowrap}.damage-channel-results{display:flex;flex-wrap:wrap;gap:8px 18px;margin:10px 0;font-size:11px}.damage-channel-results dt{color:#9eb2c2}.damage-channel-results dd{margin:3px 0 0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.damage-notice{padding:10px;border:1px solid #5a4e3e;background:#292b30}
 @media(max-width:1050px){.damage-workspace{display:flex;flex-direction:column}.damage-inputs{order:2;width:100%}.damage-result{position:static;display:contents;max-height:none;overflow:visible}.damage-result>.damage-card{order:3;width:100%;box-sizing:border-box}.damage-result>.damage-total{order:1}.damage-weapon-cards img{height:58px}.damage-headline-numbers{padding:9px 0}.damage-page input,.damage-page select{min-height:40px;font-size:14px}.damage-page button{min-height:36px}.damage-weapon-cards strong{font-size:12px}}
 @media(max-width:600px){.damage-weapon-cards{grid-template-columns:repeat(3,minmax(0,1fr))}.damage-core-fields{grid-template-columns:repeat(3,minmax(0,1fr))}.damage-core-fields label:nth-last-child(-n+2){grid-column:span 1}.damage-fields.damage-target-picker{grid-template-columns:minmax(0,1fr)}.damage-card{padding:12px}.damage-channels{grid-template-columns:repeat(3,minmax(0,1fr))}.damage-heading h1{font-size:23px}.damage-weapon-cards small{font-size:10px}.damage-trait-slots{grid-template-columns:minmax(0,1fr)}}
 
 .loadout-actions,.damage-target-picker{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.damage-target-picker{margin-top:12px}.damage-target-card{display:flex;align-items:center;gap:10px;text-align:left;flex:1;min-width:160px}.damage-target-card img{height:40px;width:40px;object-fit:cover}.damage-target-card>span:first-of-type{display:grid;gap:3px}.damage-target-card>span:last-of-type{margin-left:auto}.damage-target-card small,.loadout-selected ul{color:#aec1d0}.loadout-selected,.loadout-selected ul{padding:0;list-style:none}.loadout-selected{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.loadout-selected>li{padding:4px 7px;border:1px solid #354c60;border-radius:4px;font-size:12px}.loadout-selected>li>button{background:transparent;border:0;min-height:24px;margin-left:4px}.loadout-selected ul li{font-size:11px;line-height:1.6}.loadout-selected small{margin-left:6px;color:#e2bd87}
 .loadout-portrait { vertical-align: middle; margin-right: 6px; object-fit: contain; }
+.loadout-selected .loadout-buff-summary { display: block; margin: 3px 0 0; color: #aec1d0; }
 .relic-count{align-self:center;color:#b6c6d3;font-size:.85rem;font-variant-numeric:tabular-nums}
 .damage-common{display:grid;grid-template-columns:minmax(130px,.9fr) minmax(0,1.2fr);gap:8px 12px;align-items:end}
 .damage-common h2,.damage-action-field,.damage-common>.damage-notice{grid-column:1/-1}

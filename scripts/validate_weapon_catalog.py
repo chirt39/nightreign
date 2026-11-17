@@ -22,6 +22,9 @@ def validate(catalogue_path, source, audit_dir, baseline=None, baseline_mode="ic
     raw = extraction.param("EquipParamWeapon")
     by_id = {r["id"]: r for r in raw}
     weapon_names = extraction.texts("WeaponName")
+    attached_effects = {r["id"]: r for r in extraction.param("AttachEffectParam")}
+    effect_names = extraction.texts("AttachEffectName")
+    effect_info = extraction.texts("AttachEffectInfo")
     menu_rows = {r["id"]: r for r in extraction.param("MenuValueTableParam")}
     menu_text = extraction.texts("CL_MenuText")
     csv_weapons = {r["row_id"]: r for r in csv.DictReader((source / "csv/EquipParamWeapon.csv").open(encoding="utf-8-sig"))}
@@ -79,6 +82,18 @@ def validate(catalogue_path, source, audit_dir, baseline=None, baseline_mode="ic
             check(isinstance(vid, str) and vid not in variants, "Variant ID duplicate or not string")
             variants[vid] = variant
             row = by_id[vid]
+            effect = attached_effects.get(row["attachEffectId"])
+            text_id = effect["attachTextId"] if effect else None
+            blessing_names = {x["text"] for x in effect_names.get(text_id, []) if "庇佑" in x["text"]}
+            if blessing_names:
+                blessing = variant.get("blessing", {})
+                check(blessing.get("id") == row["attachEffectId"], "Blessing must use this variant's direct effect reference")
+                check(blessing.get("textId") == text_id, "Blessing text ID mismatch")
+                check({blessing.get("name")} == blessing_names, "Blessing name differs from game text")
+                check({blessing.get("description")} == {x["text"] for x in effect_info[text_id]}, "Blessing effect/conditions differ from game text")
+            else:
+                check("blessing" not in variant, "Unrelated effect presented as a blessing")
+            check(variant["skill"].get("note") != "参数默认固定战技；定制配置可另行覆盖。", "Removed fixed-skill note remains")
             check(variant["name"] in {x["text"] for x in weapon_names[vid]}, "Variant name has no same-ID Chinese text")
             check(row["wepType"] == item["categoryId"], "Cross-category grouping")
             check(row["originEquipWep"] == item["id"], "Sample snapshot requires direct explicit root")

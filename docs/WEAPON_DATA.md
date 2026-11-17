@@ -25,6 +25,16 @@ python scripts/validate_weapon_catalog.py --baseline-mode grades --baseline E:\�
 
 ## 快照与数量
 
+### 武器庇佑（2026-11-17）
+
+武器详情在固定战技右侧显示当前变体的庇佑名称和效果；窄屏上下排列。没有明确庇佑关联的武器不占用该区域。删除原有“参数默认固定战技；定制配置可另行覆盖。”提示。
+
+来源链为 `EquipParamWeapon.attachEffectId → AttachEffectParam.attachTextId → AttachEffectName / AttachEffectInfo`，使用本作简体中文文本（包括 DLC 文本），沿用游戏称呼“庇佑”。名称、效果及触发条件直接取自对应文本，不按传说品质或同名武器推定，也不将同一基础武器的效果扩展给其他参数变体。公开目录新增可选的 `variants[].blessing`，包含效果 ID、文本 ID、名称和说明。
+
+本次关联到 26 件武器的 26 个变体、26 条庇佑记录。示例：暗月大剑 `3090000 → 9030900`，攻击敌人时降低敌人的魔力属性减伤率；夜与火之剑 `2140000 → 9021400`，发动战技后附加魔力或火属性攻击力。仅展示游戏文本已说明的效果，不补写未核实的倍率、持续时间或叠加上限。
+
+生成器记录新增文本文件的 SHA-256；校验器逐变体核对来源关联、名称及完整说明。外部核对报告与本地预览位于 `E:\海斗\outputs\weapon-blessings-20261117`。本次未改变其余武器属性、战技候选及分组。
+
 源 `source-manifest.json`：游戏版本 **1.3.3.0**、regulation **10350000**、Steam build **22818764**。regulation SHA-256 为 `876a3ca279a4561d0c69f81fe5e510c75c59ab9a8a201694f8cf4a42c91e0268`。公开目录的 `provenance.files` 保存所用参数及游戏文本文件的相对路径和 SHA-256。
 
 | 项目 | 数量与含义 |

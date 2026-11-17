@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path(r"E:\海斗\outputs\nightreign-data-20261109")
 META = Path(r"E:\海斗\tools\WitchyBND-3.0.1.0\Assets\Paramdex\NR\Meta\SpEffectParam.xml")
 BULLET_EVIDENCE = Path(r"E:\海斗\outputs\damage-actions-20261113")
+NATIVE_EVENTS = Path(r"E:\海斗\outputs\enemy-full-audit\native\events.jsonl")
 CHANNELS = {"physics": "physical", "magic": "magic", "fire": "fire",
             "thunder": "lightning", "dark": "holy"}
 RATE_FIELDS = {"panel": {k + "AttackPowerRate": v for k, v in CHANNELS.items()},
@@ -59,12 +60,21 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
     glossary = json.loads(glossary_path.read_text(encoding="utf-8"))
     stack_notes = {(r["category"], int(r["id"])): r["stackability"] for r in glossary["entries"]}
     effects, unsupported = [], []
+    character_flags = ["allowWylder", "allowGuardian", "allowIroneye", "allowDuchess",
+                       "allowRaider", "allowRevenant", "allowRecluse", "allowExecutor",
+                       "allowScholar", "allowUndertaker"]
+
+    def allowed_characters(eid):
+        ids = [str(index + 1) for index, flag in enumerate(character_flags) if attach[eid][flag] == "1"]
+        return ids if len(ids) < len(character_flags) else []
     effect_keys = defaultdict(list)
 
     def emit(key, name, kind, sid, source_chain, *, native_id=None, conditions=(), tags=(),
              native_goods=None, native_magic=None, character_ids=(), exclusive_group=None,
              buff_id=None, stack_note=None, stack_scope=None, check_hit_correction=False):
         row = sp[sid]
+        if native_id is not None and not character_ids:
+            character_ids = allowed_characters(native_id)
         categories = [int(row[k]) for k in ("magicSubCategoryChange1", "magicSubCategoryChange2",
                                            "magicSubCategoryChange3") if int(row[k]) != 0]
         required_tags = list(tags)
@@ -217,6 +227,92 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
          native_id=7220000, character_ids=["6"], stack_note="不可叠加",
          conditions=["弗雷德利克在场且专属强化已生效"], stack_scope="only the player's damage; not family damage")
 
+    # Victory effects expose ten native permanent-effect tiers. Read the exact
+    # rounded native values; a mathematical power is close, but not identical.
+    for eid, first, count_key, label in [
+        (7060000, 7069001, "evergaolVictories", "打倒封印监牢囚犯次数"),
+        (7060200, 7069201, "invaderVictories", "打倒黑夜入侵者次数"),
+    ]:
+        assert int(attach[eid]["permanentSpEffectId"]) == first
+        assert int(sp[eid]["replaceSpEffectId"]) == first
+        assert first + 10 not in sp
+        assert attach[eid]["unknown_9d"] == "[1]"
+        tiers = [sp[first + index] for index in range(10)]
+        rates = [1.0] + [float(row["physicsAttackRate"]) for row in tiers]
+        for row, rate in zip(tiers, rates[1:]):
+            assert row["spCategory"] == "204" and row["saveCategory"] == "9"
+            assert all(float(row[field]) == rate for field in RATE_FIELDS["final"])
+        before = len(effects)
+        emit(f"relic:{eid}", names[int(attach[eid]["attachTextId"])], "relic", first,
+             f"AttachEffectParam#{eid}.permanentSpEffectId; SpEffectParam#{eid}.replaceSpEffectId",
+             native_id=eid, stack_note=stack_notes[("normal-outside", eid)],
+             stack_scope="one native permanent tier per effect; duplicate relic copies do not multiply")
+        for entry in effects[before:]:
+            entry.update(countKey=count_key, countLabel=label, countMax=10,
+                         countScaling={"type": "native-tier", "rates": rates,
+                                       "spEffectIds": [None] + [first + index for index in range(10)],
+                                       "formula": "rates[min(count, 10)]; count=0 means no active bonus",
+                                       "capBehavior": "retain-last-tier",
+                                       "scope": "native category204 increments existing effect ID; absent next row rejects incoming effect and retains current tier",
+                                       "evidence": "metadata.permanentEffectControlFlow"})
+
+    # Character-specific roots and active effects are deliberately separate:
+    # category filters on a trigger do not restrict every subsequent buffed hit.
+    for eid, transition, active, condition, tags in [
+        (7031300, 7031301, 7031302, "无赖技艺期间受击后的强化已生效", []),
+        (7034700, 7034701, 7034702, "铁之眼绝招后的突刺反击强化已生效", ["piercingCounter"]),
+    ]:
+        root = int(attach[eid]["passiveSpEffectId_1"])
+        assert sp[transition]["invocationConditionsStateChange1"] == sp[root]["stateInfo"]
+        assert int(sp[transition]["replaceSpEffectId"]) == active
+        emit(f"relic:{eid}", names[int(attach[eid]["attachTextId"])], "relic", active,
+             f"AttachEffectParam#{eid} -> SpEffectParam#{root}.stateInfo -> #{transition}.replaceSpEffectId",
+             native_id=eid, conditions=[condition], tags=tags)
+    assert sp[7034702]["stateInfo"] == "197"  # Physical counter-attack modifier.
+
+    assert int(attach[7032900]["passiveSpEffectId_1"]) == 7032900
+    assert sp[7032901]["invocationConditionsStateChange1"] == sp[7032900]["stateInfo"]
+    assert int(sp[7032901]["cycleOccurrenceSpEffectId"]) == 7032902
+    assert int(sp[7032902]["replaceSpEffectId"]) == 7032903
+    emit("relic:7032900", names[7032900], "relic", 7032903,
+         "AttachEffectParam#7032900 -> SpEffectParam#7032900.stateInfo -> #7032901.cycleOccurrenceSpEffectId -> #7032902.replaceSpEffectId",
+         native_id=7032900, conditions=["隐士绝招自出血后的强化已生效"],
+         stack_scope="one active proc; duplicate relic copies do not create extra activations")
+    effects[-1]["stackRule"] = "highest"
+    effects[-1]["stackSource"] = "single active proc selected; duplicate Attach copies are not extra casts"
+
+    assert int(attach[7034400]["passiveSpEffectId_1"]) == 7034400
+    assert sp[7034401]["invocationConditionsStateChange1"] == sp[7034400]["stateInfo"]
+    assert int(sp[7034401]["cycleOccurrenceSpEffectId"]) == 7034402
+    assert sp[7034402]["magicSubCategoryChange1"] == "122"
+    assert sp[7034402]["invocationConditionsStateChange1"] == "609"
+    emit("relic:7034400", names[7034400], "relic", 7034402,
+         "AttachEffectParam#7034400 -> SpEffectParam#7034400.stateInfo -> #7034401.cycleOccurrenceSpEffectId",
+         native_id=7034400, conditions=["执行者妖刀技艺强化已生效"],
+         stack_scope="native attack subcategory 122 only; not all equipped weapon skills")
+
+    for eid, active, condition in [
+        (7036800, 7036801, "送葬者绝招后的强化已生效"),
+        (7037000, 7037001, "送葬者给自己附加辅助祷告后的物理强化已生效"),
+    ]:
+        assert int(attach[eid]["passiveSpEffectId_1"]) == eid
+        assert sp[active]["invocationConditionsStateChange1"] == sp[eid]["stateInfo"]
+        emit(f"relic:{eid}", names[eid], "relic", active,
+             f"AttachEffectParam#{eid} -> SpEffectParam#{eid}.stateInfo -> conditional SpEffectParam#{active}",
+             native_id=eid, conditions=[condition])
+    prayer_ids = [mid for mid, row in magic.items()
+                  if row["refCategory10"] == "2" and int(row["refId10"]) == 7037001]
+    assert {6050, 6600} <= set(prayer_ids)
+    effects[-1]["triggerMagicIds"] = sorted(prayer_ids)
+    effects[-1]["source"] += "; Magic.refCategory10=2/refId10=7037001 (conditional self buff)"
+    assert int(attach[7036900]["passiveSpEffectId_1"]) == 7036900
+    assert int(sp[7036900]["atkOccurrenceSpEffectId"]) == 7036901
+    assert sp[7036900]["magicSubCategoryChange1"] == "104"
+    assert sp[7036901]["effectTargetAttacker"] == "1"
+    emit("relic:7036900", names[7036900], "relic", 7036901,
+         "AttachEffectParam#7036900 -> SpEffectParam#7036900.atkOccurrenceSpEffectId (trigger category 104; recipient attacker)",
+         native_id=7036900, conditions=["送葬者连击最后一击命中后的强化已生效"])
+
     field_families = [8100000, 8100100, 8100200, 8100300, 8100400, 8320000, 8320100,
                       8320300, 8330000, 8330100, 8330200, 8330300, 8340000, 8350000, 8420000]
     for base in field_families:
@@ -249,6 +345,128 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
     for eid in [8851800, 8851850]:
         from_attach(eid, "field", tags=["piercingCounter"])
     from_attach(8810050, "field", conditions=["低血量攻击效果已触发（原生阈值84.99%）"])
+
+    # Independent enemy rewards are Goods -> PermanentBuff, not weapon AttachEffect.
+    permanent = {int(r["id"]): r for r in table("PermanentBuffParam")}
+    permanent_names = text("PermanentBuffName")
+    npcs = {int(r["id"]): r for r in table("NpcParam")}
+    enemy_lots = {int(r["id"]): r for r in table("ItemLotParam_enemy")}
+    item_tables = table("ItemTableParam")  # Repeated IDs are weighted alternatives.
+    reward_routes = [
+        (8100000, 8100000, 10000410, 6300100, 6300100, 4200100),
+        (8100001, 8100000, 21300510, 6210000, 6210000, 4200300),
+        (8100500, 8100500, 10000410, 6300100, 6300100, 4200100),
+        (8100501, 8100500, 21300510, 6210000, 6210000, 4200300),
+        (8330103, 8330103, 10000410, 6300100, 6300100, 4200100),
+        (8330104, 8330103, 21300510, 6210000, 6210000, 4200300),
+        (8430000, 8430000, 21000030, 6110000, 6110002, 4200200),
+    ]
+    for pid, name_id, npc_id, lot_base, lot_id, table_id in reward_routes:
+        assert int(npcs[npc_id]["rewardItemLot_2"]) == lot_base
+        assert all(rid in enemy_lots for rid in range(lot_base, lot_id + 1))
+        lot = enemy_lots[lot_id]
+        assert int(lot["lotItemId01"]) == table_id and lot["lotItemCategory01"] == "7"
+        assert int(lot["lotItemBasePoint01"]) > 0 and int(lot["lotItemNum01"]) > 0
+        assert any(int(r["id"]) == table_id and r["itemCategory"] == "1"
+                   and int(r["itemId"]) == pid and int(r["chanceWeight"]) > 0
+                   and int(r["quantity"]) > 0 for r in item_tables)
+        assert goods[pid]["goodsType"] == "11" and int(goods[pid]["vagrantItemLotId"]) == pid
+        sid = int(permanent[pid]["spEffectId"])
+        assert sid == pid and sp[sid]["spCategory"] == "10" and sp[sid]["saveCategory"] == "10"
+        name = permanent_names[name_id] + "（+" + permanent[pid]["numericValue"] + "%）"
+        chain = (f"NpcParam#{npc_id}.rewardItemLot_2={lot_base} -> ItemLotParam_enemy#{lot_id}.lotItemId01"
+                 f" (category7) -> ItemTableParam#{table_id} (category1,item={pid},positive weight)"
+                 f" -> EquipParamGoods#{pid}.vagrantItemLotId -> PermanentBuffParam#{pid}.spEffectId")
+        emit(f"reward:{pid}", name, "reward", sid, chain, buff_id=f"reward:{pid}",
+             tags=["piercingCounter"] if pid == 8430000 else [],
+             stack_scope="independently acquired reward; weapon AttachEffect is a separate source")
+        effects[-1]["permanentBuffId"] = pid
+        effects[-1]["rewardGoodsId"] = pid  # Not a consumable goods picker item.
+        effects[-1]["nameFmgId"] = name_id
+        if name_id != pid:
+            effects[-1]["nameNote"] = "display alias from the same lower-tier family; tier value separately verified"
+
+    # Native map event reward: the permanent grant and the conditional active buff
+    # are different rows. Selecting the reward never makes its proc unconditional.
+    assert int(permanent[4]["spEffectId"]) == 6999300
+    assert int(sp[6999300]["cycleOccurrenceSpEffectId"]) == 6999332
+    assert int(sp[6999332]["invocationConditionsStateChange1"]) == 2280
+    assert int(sp[6999332]["cycleOccurrenceSpEffectId"]) == 6999333
+    assert sp[6999333]["spCategory"] == "20" and float(sp[6999333]["effectEndurance"]) == 20
+    assert all(float(sp[6999333][field]) == 1.15 for field in RATE_FIELDS["final"])
+    assert "周围人物陷入异常状态冻伤时" in text("PermanentBuffInfo")[9990030]
+    emit("event:4", permanent_names[9990030], "event", 6999333,
+         "common.emevd event0 instruction410 -> common_func.emevd#90015003 (7601/9193)"
+         " -> PermanentBuffParam#4.spEffectId=6999300 -> SpEffectParam#6999300.cycleOccurrenceSpEffectId"
+         " -> #6999332.invocationConditionsStateChange1=2280/cycleOccurrenceSpEffectId",
+         buff_id="event:4", conditions=["山顶恩惠的周围冻伤攻击增益生效中"],
+         stack_scope="reward already acquired; nearby frostbite proc active; same effect refreshes")
+    effects[-1]["permanentBuffId"] = 4
+    effects[-1]["eventId"] = "mountaintop-blessing"
+    effects[-1]["description"] = "周围人物冻伤后，20秒内五属性伤害+15%"
+
+    # The grace reward is explicitly maintained by common event 1450. Its
+    # thresholds are team totals, not a counter captured when the reward arrives.
+    event_rows = {}
+    with NATIVE_EVENTS.open(encoding="utf-8") as stream:
+        for line in stream:
+            entry = json.loads(line)
+            name = entry["file"].replace("\\", "/").rsplit("/", 1)[-1]
+            wanted = {0, 1450} if name == "common.emevd" else ({90015005, 90005580} if name == "common_func.emevd" else set())
+            for event in entry["events"]:
+                if event["ID"] in wanted:
+                    event_rows[(name, event["ID"])] = event
+    common_init = event_rows[("common.emevd", 0)]["instructions"]
+    assert common_init[398]["int32"] == [0, 1450, 8970001, 8970000]
+    assert common_init[400]["int32"] == [0, 90015003, 8970001, 8075, 0, 8025, 0, 8970000, 1075838976]
+    grace_event = event_rows[("common.emevd", 1450)]
+    instructions = grace_event["instructions"]
+    resolved = [bytearray.fromhex(i["hex"]) for i in instructions]
+    arguments = struct.pack("<ii", 8970001, 8970000)
+    for patch in grace_event["parameters"]:
+        target, origin, size = patch["TargetStartByte"], patch["SourceStartByte"], patch["ByteCount"]
+        resolved[patch["InstructionIndex"]][target:target + size] = arguments[origin:origin + size]
+    assert len(instructions) == 113
+    assert [(i["Bank"], i["ID"]) for i in instructions[1:11]] == [(2004, 21)] * 10
+    assert struct.unpack_from("<i", resolved[11], 8)[0] == 8970001
+    for count in range(1, 11):
+        grant = 17 + (count - 1) * 10
+        compare = 14 if count == 1 else grant - 6
+        saved_compare = 12 if count == 1 else grant - 8
+        assert (instructions[compare]["Bank"], instructions[compare]["ID"]) == (3, 53)
+        assert resolved[compare][1] == 4  # GreaterOrEqual
+        assert struct.unpack_from("<i", resolved[compare], 4)[0] == count
+        assert (instructions[saved_compare]["Bank"], instructions[saved_compare]["ID"]) == (3, 12)
+        assert struct.unpack_from("<i", resolved[saved_compare], 4)[0] == 9130
+        assert resolved[saved_compare][8:10] == bytes([4, 4])  # Four bits, >=.
+        assert struct.unpack_from("<i", resolved[saved_compare], 12)[0] == count
+        assert (instructions[grant]["Bank"], instructions[grant]["ID"]) == (2004, 8)
+        assert struct.unpack("<ii", resolved[grant]) == (20000, 8970000)
+        assert instructions[grant - 2]["int32"] == [9130, 4, 10]
+    assert instructions[112]["int32"] == [1]  # Restart; rebuild saved reached tiers.
+    for event_id, index in [(90015005, 3), (90005580, 6)]:
+        grace = event_rows[("common_func.emevd", event_id)]["instructions"]
+        assert (grace[index]["Bank"], grace[index]["ID"]) == (2003, 99)
+        assert any((i["Bank"], i["ID"]) == (1003, 101) for i in grace[:index])
+    assert int(permanent[8970000]["spEffectId"]) == 8970001
+    assert int(permanent[8970000]["graceSpEffectId"]) == 8970000
+    assert int(sp[8970001]["spEffectTextId_1"]) == 8970000
+    assert all(float(sp[8970000][field]) == 1.02 for field in RATE_FIELDS["final"])
+    assert sp[8970000]["isUseAtkParamAtkPowerCorrect"] == "0"
+    assert sp[8970000]["spCategory"] == "10" and sp[8970000]["effectEndurance"] == "-1"
+    emit("event:8970000", permanent_names[8970000], "event", 8970000,
+         "common_func#90035205 success flag8025 -> common event0 instruction400/90015003"
+         " -> root8970001; common event0 instruction398 -> event1450: TeamOpenedBonfires>=1..10"
+         " -> SetSpEffect8970000 per threshold; saved event value9130 (4bits,max10)",
+         buff_id="event:8970000", stack_scope="one acquired reward; multiply its active grace instances, maximum ten")
+    effects[-1].update({"permanentBuffId": 8970000, "eventId": "morgott-grace-reward",
+                       "acquisition": "击败入侵的恶兆妖鬼后获得", "searchTerms": ["恶兆妖鬼", "恶兆王"],
+                       "stackRule": "highest",
+                       "stackSource": "同一份已获得奖励的计数汇总只计算一次；各活动实例仍由native-instances逐层乘算，原生spCategory10",
+                       "countKey": "morgottGraces", "countLabel": "本局队伍发现的赐福数",
+                       "countMax": 10, "countUnit": "层",
+                       "countScaling": {"type": "native-instances", "rate": 1.02},
+                       "description": "本局队伍累计，获得奖励前已发现的也计入；重复触碰同一赐福不增加，最多10层。每层五属性伤害乘1.02。"})
 
     # Direct Goods -> SpEffect references only; Bullet-based buffs need a decoded chain.
     for gid in [1210, 11014, 11028, 11029, 11030, 11031]:
@@ -399,8 +617,6 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
         raise ValueError(f"Missing game IDs for official relics: {sorted(official.keys() - included_keys)}")
 
     for eid, reason in {
-        7060000: "per-victory count and exponential scaling cannot be represented by a fixed scalar toggle",
-        7060200: "per-victory count and exponential scaling cannot be represented by a fixed scalar toggle",
         7032700: "independently expiring per-kill stack count", 7037600: "independently timed combo tiers",
         7037700: "time-evolving ailment tiers", 7150000: "adds damage from player HP, not a multiplier",
         6500200: "flat and target-max-HP damage in a specific skill proc",
@@ -409,7 +625,10 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
         7120200: "weapon-type-dependent flat AR conversion, not scalar",
         7120300: "weapon-type-dependent flat AR conversion, not scalar",
         7035700: "random-element flat AR addition, not scalar",
-        7031200: "recipient and proc chain not fully audited", 7290000: "changes copied damage fraction, not a generic multiplier",
+        7031200: "friendly-target buff excludes self; recipient chain not modelled as own relic damage",
+        7032800: "ground-area recipient and continued field occupancy not modelled",
+        7036300: "Scholar skill buffs a target ally; not an unconditional self damage bonus",
+        7290000: "changes copied damage fraction, not a generic multiplier",
     }.items():
         unsupported.append({"nativeEffectId": eid, "reason": reason})
     unsupported += [{"magicId": 6600, "spEffectId": 1660001, "reason": "Bullet10660000.spEffectId1 references a missing definition; never synthesise its effect"},
@@ -421,6 +640,9 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
     manifest_path = source / "source-manifest.json"
     inputs.add(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    # This evidence is bound to the locally checked executable; normal data
+    # generation requires the extraction manifest, not access to the game EXE.
+    assert manifest["exe_sha256"] == "9545e8732919bb6a63904cb73223641b3c4f9a67869be5722612acca413e8b3a"
     if len({r["id"] for r in effects}) != len(effects):
         raise ValueError("Duplicate calculation rule IDs")
     for item in relics:
@@ -429,6 +651,74 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
             "metadata": {"version": "native-" + manifest["regulation_version"] + "-v1",
                          "gameVersion": manifest["executable_version"],
                          "runtimeVerified": False,
+                         "permanentEffectControlFlow": {
+                             "status": "static-native-verified", "executableSha256": manifest["exe_sha256"],
+                             "method": "offline PE section mapping and x64 instruction inspection; game not executed",
+                             "anchors": [
+                                 {"rva": "0xE6E3D0", "bytes": "488b014885c074048b4040c3b8ffffffffc3", "meaning": "AttachEffectParam permanentSpEffectId getter at +0x40"},
+                                 {"rva": "0xE6E300", "bytes": "488b014885c074050fb64027c3", "meaning": "AttachEffectParam tier-count mode getter at +0x27 (unknown_9d=1)"},
+                                 {"rva": "0x501F00", "meaning": "mode1 counts category204: same floor(id/100), maximum id%100"},
+                                 {"rva": "0x50787D", "bytes": "8b5f0885db7e5e8d7b0148c7442430000000008bd7c7442438ffffffff488d4c2430c644243c0040b501e8349f990048837c243000740541893e", "meaning": "same category/priority: existingID+1, query next SpEffect, return it when defined"},
+                                 {"rva": "0x5078B9", "bytes": "488b4424204885c0741f0fb7883e01000066413bcd750941c706ffffffffeb0966413bcc750341891e", "meaning": "category204 missing next row outputs -1; existing list not modified"},
+                                 {"rva": "0x3C8108", "bytes": "e893f6130084c0440f45bdf8000000", "meaning": "caller adopts the revised incoming effect ID"},
+                                 {"rva": "0x3C8483", "bytes": "4585ff0f888a050000", "meaning": "negative incoming ID branches to false-return at 0x3C8A16, before apply/replace"},
+                             ],
+                         },
+                         "morgottGraceControlFlow": {
+                             "status": "static-native-and-EMEVD-verified",
+                             "executableSha256": manifest["exe_sha256"],
+                             "eventId": 1450, "maximumInstances": 10,
+                             "countIncludesPreRewardDiscoveries": True,
+                             "eventValue": {"id": 9130, "bits": 4, "maximum": 10},
+                             "formula": "n=min(team discovered graces,10); f32 repeated multiplication by f32(1.02)",
+                             "source": {"file": NATIVE_EVENTS.name, "sha256": hashlib.sha256(NATIVE_EVENTS.read_bytes()).hexdigest()},
+                             "eventInstructions": [{"index": i, "bank": instructions[i]["Bank"],
+                                                    "id": instructions[i]["ID"], "resolvedHex": resolved[i].hex()}
+                                                   for i in [11, 12, 14, 15, 17, 99, 101, 105, 107, 112]],
+                             "anchors": [
+                                 {"rva": "0x58F5FB", "bytes": "41be01000000", "meaning": "successful handler path increments once"},
+                                 {"rva": "0x58F604", "bytes": "e8b7e90600", "meaning": "counter forwarding wrapper"},
+                                 {"rva": "0x5FDFC0", "bytes": "488b0509996003", "meaning": "load GameData global at143c078d0"},
+                                 {"rva": "0x5FDFC9", "bytes": "488b4840", "meaning": "statistics object at global+40"},
+                                 {"rva": "0x5FDFD0", "bytes": "0f851a46c1ff", "meaning": "non-null object conditional tail call"},
+                                 {"rva": "0x2125F0", "bytes": "80b9e008000000", "meaning": "write requires enabled statistics object"},
+                                 {"rva": "0x2125FD", "bytes": "01514c", "meaning": "team-opened-bonfires count increment"},
+                                 {"rva": "0x5B2C70", "bytes": "e84bb30400", "meaning": "same counter update on peer"},
+                                 {"rva": "0x591A84", "bytes": "4f175900", "meaning": "bank3 opcode53 jump-table entry points to0x59174F"},
+                                 {"rva": "0x591772", "bytes": "8b5004", "meaning": "condition threshold from instruction arguments+4"},
+                                 {"rva": "0x591775", "bytes": "0fb64801", "meaning": "comparison type from instruction arguments+1"},
+                                 {"rva": "0x59177C", "bytes": "e88f7c0100", "meaning": "create TeamOpenedBonfires condition at0x5A9410"},
+                                 {"rva": "0x11C2D45", "bytes": "488d0dbc1fa601", "meaning": "condition factory installs vtable0x142C24D08"},
+                                 {"rva": "0x2C24D10", "bytes": "b0945a4001000000", "meaning": "condition vtable+8 points to0x1405A94B0"},
+                                 {"rva": "0x5A94B0", "bytes": "488b0519e46503", "meaning": "condition reads GameData global0x143C078D0"},
+                                 {"rva": "0x5A94BD", "bytes": "488b4840", "meaning": "condition reads same statistics object global+40"},
+                                 {"rva": "0x5A94C6", "bytes": "448b414c", "meaning": "condition reads team count+4C written by IncrementTeamOpenedBonfires"},
+                                 {"rva": "0x5A94D1", "bytes": "458b4a2c", "meaning": "read saved condition threshold"},
+                                 {"rva": "0x6D22CA8", "bytes": "453bc1", "meaning": "comparison type4 branch compares team count against threshold; setge follows"},
+                                 {"rva": "0x6D22CAB", "bytes": "0f9dc2", "meaning": "comparison type4: true exactly when count >= target"},
+                                 {"rva": "0x502BB0", "bytes": "498b5808", "meaning": "first active-effect list node"},
+                                 {"rva": "0x502C2F", "bytes": "81e103000c80", "meaning": "inactive-node mask (conditional filtering follows)"},
+                                 {"rva": "0x502EC8", "bytes": "440f28c6", "meaning": "default scaling coefficient is 1"},
+                                 {"rva": "0x502ED1", "bytes": "f6825902000002", "meaning": "optional attack-parameter coefficient flag"},
+                                 {"rva": "0x50337E", "bytes": "488b5b38", "meaning": "advance to next effect instance, no ID de-duplication"},
+                                 {"rva": "0x50338A", "bytes": "0f8558f8ffff", "meaning": "iterate until linked-list end"},
+                                 {"rva": "0x510758", "bytes": "f30f104038", "meaning": "physical raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x503144", "bytes": "f30f5907", "meaning": "physical multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x5035B2", "bytes": "f3410f118690000000", "meaning": "physical writes accumulated result without channel clamp"},
+                                 {"rva": "0x5102E8", "bytes": "f30f10403c", "meaning": "magic raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x503211", "bytes": "f30f5900", "meaning": "magic multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x50364A", "bytes": "f3410f1186a4000000", "meaning": "magic writes accumulated result without channel clamp"},
+                                 {"rva": "0x50FFD8", "bytes": "f30f104040", "meaning": "fire raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x50323C", "bytes": "f30f5900", "meaning": "fire multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x503660", "bytes": "f3410f1186a8000000", "meaning": "fire writes accumulated result without channel clamp"},
+                                 {"rva": "0x510A48", "bytes": "f30f104044", "meaning": "lightning raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x503267", "bytes": "f30f5900", "meaning": "lightning multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x503673", "bytes": "f3410f1186ac000000", "meaning": "lightning writes accumulated result without channel clamp"},
+                                 {"rva": "0x50FF58", "bytes": "f30f1080dc010000", "meaning": "holy raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x503292", "bytes": "f30f5900", "meaning": "holy multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x503686", "bytes": "f3410f1186b0000000", "meaning": "holy writes accumulated result without channel clamp"},
+                             ],
+                         },
                          "scope": "audited scalar damage rules; not exhaustive, not a relic legality checker",
                          "phases": {"panel": "AttackPowerRate before defense, weapon component only",
                                     "final": "AttackRate after defense; limited to matching hit channels and categories"},

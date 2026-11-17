@@ -18,7 +18,22 @@ function resolveOverrides(effects) {
 function activeEffects(input, segment) {
   const conditions = new Set(Array.isArray(input.conditions) || input.conditions instanceof Set
     ? input.conditions : Object.keys(input.conditions ?? {}).filter(key => input.conditions[key]));
-  const eligible = (input.effects ?? []).filter(effect => {
+  const eligible = (input.effects ?? []).map(effect => {
+    if (!['native-tier', 'native-instances'].includes(effect.countScaling?.type)) return effect;
+    const requested = Number(input.effectCounts?.[effect.countKey] ?? 0);
+    const count = Number.isInteger(requested) && requested >= 0 ? Math.min(requested, effect.countMax) : null;
+    let rate = null;
+    if (count !== null) {
+      if (effect.countScaling.type === 'native-tier') rate = effect.countScaling.rates[count];
+      else {
+        // Native AttackRate aggregation multiplies one float32 per active node.
+        rate = 1;
+        const perInstance = Math.fround(effect.countScaling.rate);
+        for (let index = 0; index < count; index++) rate = Math.fround(rate * perInstance);
+      }
+    }
+    return { ...effect, rate, name: `${effect.name}（${count} ${effect.countUnit || '次'}）` };
+  }).filter(effect => {
     if (!numeric(effect.rate) || effect.rate === 1) return false;
     if (input.manualPanel && effect.phase === 'panel') return false;
     if (effect.conditions?.some(condition => !conditions.has(condition))) return false;

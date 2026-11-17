@@ -40,6 +40,29 @@ function createAtlas() {
   return { context, state, $, location, history };
 }
 
+test('mine occurrences merge into ordinary cards while keeping source records and location filters', () => {
+  const { context, state, $ } = createAtlas();
+  const row = id => state.enemyData.rows.find(r => String(r[1]) === id);
+  const ordinary = row('43400000'), mine = row('43401120');
+  assert.deepEqual(mine.slice(2), ordinary.slice(2));
+  assert.equal(context.enemyEntityKey(mine), context.enemyEntityKey(ordinary));
+  const pumpkin = state.enemyEntities.get(context.enemyEntityKey(ordinary));
+  assert.equal(pumpkin.name, '发狂南瓜头士兵');
+  const stats = pumpkin.statGroups.find(group => group.records.some(r => r.row === mine));
+  assert.ok(stats.records.some(r => r.row === ordinary));
+  assert.ok(context.enemySourceNote(mine).locations.includes('矿洞'));
+  assert.ok(!context.enemySourceNote(ordinary).locations.includes('矿洞'), 'do not change the original record occurrence');
+  $('#enemy-area').value = '矿洞';
+  context.filterEnemies();
+  for (const id of ['43400000', '46000000', '43510000']) {
+    const key = context.enemyEntityKey(row(id));
+    assert.equal(state.enemyGroups.filter(group => group.key === key).length, 1);
+    assert.ok(context.enemyDisplayLocations(row(id)).includes('矿洞'));
+  }
+  assert.ok(!state.enemyGroups.some(group => group.name.includes('(矿洞)')));
+  assert.ok(!row('46000110') && !row('43511120'), 'merged occurrences do not recreate duplicate cards');
+});
+
 test('Chinese composition leaves results and URL unchanged until the word is committed', () => {
   const { context, state, $, history } = createAtlas();
   const input = $('#enemy-search'), initialUpdates = history.updates;
