@@ -767,12 +767,53 @@ function relicEffectText(relic, effect, position, target) {
     data-relic-id="${esc(relic.id)}" data-effect-position="${position}">${name}</a>`;
 }
 let inspectedAnomalies = new WeakMap();
+let relicAnomaliesOnly = false;
+let relicBeforeAnomalyFilter = null;
+const relicFilterIds = ['relic-search', 'relic-category', 'relic-type', 'relic-color'];
+function captureRelicListPosition() {
+  return {
+    filters: Object.fromEntries(relicFilterIds.map(id => [id, $('#' + id).value])),
+    page: state.relicPage,
+    scrollY: window.scrollY,
+  };
+}
+function notifyRelicAnomalyFilter() {
+  window.dispatchEvent(new CustomEvent('nightreign:relic-anomaly-filter-changed', { detail: relicAnomaliesOnly }));
+}
+window.addEventListener('nightreign:relic-anomaly-filter', ({ detail }) => {
+  if (!state.save || relicAnomaliesOnly === Boolean(detail)) return;
+  clearRelicEffectSnapshot();
+  relicAnomaliesOnly = Boolean(detail);
+  if (relicAnomaliesOnly) {
+    relicBeforeAnomalyFilter = captureRelicListPosition();
+    filterRelics();
+    focusCardPage('#relic-list');
+  } else {
+    const previous = relicBeforeAnomalyFilter;
+    relicBeforeAnomalyFilter = null;
+    if (previous) for (const [id, value] of Object.entries(previous.filters)) $('#' + id).value = value;
+    filterRelics();
+    if (previous) {
+      state.relicPage = previous.page;
+      renderRelics();
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: previous.scrollY, behavior: 'instant' });
+      });
+    }
+  }
+  notifyRelicAnomalyFilter();
+});
 window.addEventListener('nightreign:relic-inspection', ({detail}) => {
   inspectedAnomalies = new WeakMap();
   for (const {relic, result} of detail) {
     if (result.status === 'anomaly') inspectedAnomalies.set(relic, result.issues.filter(issue => issue.status === 'anomaly'));
   }
-  if (state.save) renderRelics();
+  if (state.save) {
+    const page = state.relicPage;
+    filterRelics();
+    state.relicPage = page;
+    renderRelics();
+  }
 });
 function renderEffectRows(relic, showId = false, linkEffects = false) {
   const groups = pairedEffects(relic);
@@ -802,13 +843,11 @@ function renderEffectRows(relic, showId = false, linkEffects = false) {
   }).join('');
 }
 function captureRelicEffectNavigation(link) {
-  const filters = Object.fromEntries(
-    ['relic-search', 'relic-category', 'relic-type', 'relic-color'].map(id => [id, $('#' + id).value])
-  );
   return {
     kind: 'relics',
-    filters,
-    page: state.relicPage,
+    ...captureRelicListPosition(),
+    anomaliesOnly: relicAnomaliesOnly,
+    beforeAnomalyFilter: relicBeforeAnomalyFilter,
     relicId: link.dataset.relicId,
     position: link.dataset.effectPosition,
     offset: link.getBoundingClientRect().top,
@@ -821,7 +860,11 @@ function restoreRelicEffectNavigation(snapshot) {
     const findLink = () => $$('#relic-list .relic-effect-link').find(item =>
       item.dataset.relicId === snapshot.relicId && item.dataset.effectPosition === snapshot.position
     );
-    const sameFilters = Object.entries(snapshot.filters).every(([id, value]) => $('#' + id).value === value);
+    const sameFilters = relicAnomaliesOnly === Boolean(snapshot.anomaliesOnly) &&
+      Object.entries(snapshot.filters).every(([id, value]) => $('#' + id).value === value);
+    relicAnomaliesOnly = Boolean(snapshot.anomaliesOnly);
+    relicBeforeAnomalyFilter = snapshot.beforeAnomalyFilter || null;
+    notifyRelicAnomalyFilter();
     if (!sameFilters || state.relicPage !== snapshot.page || !findLink()) {
       for (const [id, value] of Object.entries(snapshot.filters)) {
         $('#' + id).value = value;
@@ -1035,6 +1078,9 @@ window.NightreignLegalityNames = {
 };
 function notifyRelicCollectionChanged() {
   inspectedAnomalies = new WeakMap();
+  relicAnomaliesOnly = false;
+  relicBeforeAnomalyFilter = null;
+  notifyRelicAnomalyFilter();
   window.dispatchEvent(new Event('nightreign:collection-changed'));
 }
 function showSave(parsed){
@@ -1070,7 +1116,8 @@ function filterRelics(){
   if(!state.save)return;
   const q=$('#relic-search').value.trim().toLocaleLowerCase(),category=$('#relic-category').value,type=$('#relic-type').value,color=$('#relic-color').value;
   state.relicFiltered=state.save.relics.filter(r=>{
-    return (type==='all'||(type==='normal'&&relicType(r)!=='DeepRelic')||(type==='deep'&&relicType(r)==='DeepRelic'))
+    return (!relicAnomaliesOnly||inspectedAnomalies.has(r))
+      &&(type==='all'||(type==='normal'&&relicType(r)!=='DeepRelic')||(type==='deep'&&relicType(r)==='DeepRelic'))
       &&(category==='all'||relicEffectCategories(r).has(category))
       &&(color==='all'||r.itemColor===color)
       &&(!q||(relicName(r)+' '+(r.itemNameEn||'')+' '+relicCategory(r)+' '+r.id+' '+r.itemId+' '+effectGroups(r).map(e=>effectName(e)+' '+e.name_en+' '+e.id).join(' ')).toLocaleLowerCase().includes(q));
