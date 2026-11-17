@@ -4,6 +4,7 @@ import { calculateDamage, calculatePanel } from '../lib/damage-calculator.js';
 import { damageShowcase } from '../lib/damage-showcase.js';
 import { hasAutomaticProjectile } from '../lib/damage-panel.js';
 import DamageRelicPicker from '../components/DamageRelicPicker.vue';
+import { relicChoiceMetadata } from '../lib/damage-relic-options.js';
 import DamagePicker from '../components/DamagePicker.vue';
 import DamageFormula from '../components/DamageFormula.vue';
 import DamageEquipmentCard from '../components/DamageEquipmentCard.vue';
@@ -105,11 +106,18 @@ function relicDetails(relic) {
 }
 const customChoices = computed(() => {
   const shared = new Set((catalogs.value?.crossMode?.positive || []).map(String));
+  const context = {
+    characterId: characterId.value, characterNames: (panelCatalog.value?.characters || []).map(item => item.name),
+    weaponId: weaponId.value, variantId: variantId.value, weaponType: weapon.value?.categoryId, artId: artId.value,
+    attack: panel.value || panelCatalog.value?.variants?.[variantId.value]?.attack,
+    segments: compatibleActions.value.flatMap(item => item.segments || []),
+  };
   return Object.values(definitions.value).filter(item => !item.type?.startsWith('减益')).map(item => {
     const rules = nativeRelicRules.value.get(String(item.id));
     const counted = rules?.find(rule => rule.countKey);
     return {
       id: String(item.id), name: item.name,
+      ...relicChoiceMetadata(rules, context, item),
       modes: [...new Set([...(item.modes || []), ...(shared.has(String(item.id)) ? ['深夜'] : [])])],
       detail: counted ? `累计增益最多 ${counted.countMax} 层，按游戏逐档倍率计算` : rules ? item.explanation : '未计入伤害',
     };

@@ -6,6 +6,7 @@ import { ref, shallowRef, computed, reactive, watch, nextTick, effectScope } fro
 import { calculateDamage, calculatePanel } from '../src/lib/damage-calculator.js';
 import { damageShowcase } from '../src/lib/damage-showcase.js';
 import { hasAutomaticProjectile } from '../src/lib/damage-panel.js';
+import { relicChoiceMetadata } from '../src/lib/damage-relic-options.js';
 
 const source = fs.readFileSync(new URL('../src/pages/DamageCalculatorPage.vue', import.meta.url), 'utf8');
 const script = source.match(/<script setup>([^]*?)<\/script>/)[1].replace(/^import .*;\r?\n/gm, '');
@@ -15,7 +16,7 @@ async function createCalculator(t, keepInitialSelection = false) {
   const scope = effectScope();
   t.after(() => scope.stop());
   const context = {
-    ref, shallowRef, computed, reactive, watch, nextTick, calculateDamage, calculatePanel, damageShowcase, hasAutomaticProjectile,
+    ref, shallowRef, computed, reactive, watch, nextTick, calculateDamage, calculatePanel, damageShowcase, hasAutomaticProjectile, relicChoiceMetadata,
     defineProps: () => ({ active: false }), defineExpose() {}, onMounted() {}, onBeforeUnmount() {},
     URL, location: { href: 'http://localhost/#damage' }, history: { state: {}, replaceState() {} },
   };
@@ -222,6 +223,24 @@ test('character relic conditions follow the selected character and never activat
   const other = get('result').value.total;
   context.toggleEffect('relic','normal:1',false);
   assert.equal(get('result').value.total, other);
+});
+
+test('relic picker metadata follows actual Halo contacts and selected character without deleting equipped effects', async t => {
+  const { context, get } = await createCalculator(t, true);
+  const choice = id => get('customChoices').value.find(item => item.id === id);
+  for (const id of ['7001402', '7001800', '7006600', '7006700', '7060000']) assert.equal(choice(id).applicable, true, id);
+  assert.equal(choice('7001500').applicable, false);
+  assert.equal(choice('7036800').applicable, false);
+  get('characterId').value = '10'; await nextTick();
+  assert.equal(choice('7036800').applicable, true);
+  context.saveRelicSlots(draftSlots(get, {'normal:1':['7036800']}));
+  get('characterId').value = '1'; await nextTick();
+  assert.equal(choice('7036800').applicable, false);
+  assert.equal(get('relicSlots').value[0].rows[0].id, '7036800');
+  get('mode').value = 'manual';
+  context.fillManualPanel();
+  get('manualValues').magic = 50;
+  assert.equal(choice('7001500').applicable, true, 'manual elemental AR must not be hidden by the weapon base channel');
 });
 
 test('row channels use their actual physical subtype and preserve zero from immunity without inventing unknown channels', async t => {
