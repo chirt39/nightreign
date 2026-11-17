@@ -2,6 +2,12 @@
 
 每次正式发布都要记录 Sites 版本与对应的 Git SHA。只记录已经成功保存并部署的版本；本地构建和未部署改动不能标记为线上版本。具体发布由工程与发布流程执行，GitHub push 不会自动更新 Sites。
 
+## nightreign.cn 资料说明精简（2026-11-17）
+
+正式代码 `41e6a75732926322dcb81179fb236c7252c7f798`，合并 [PR #59](https://github.com/chirt39/nightreign/pull/59)。按用户确认移除分类栏、技术文档入口和类型标签，保留八个来源网站、简短用途及原站链接。游戏数据介绍合并一段，许可集中页尾，详细证据只留仓库。
+
+干净快照构建通过，合并树与验收树一致。本地及公网 Edge 在 1440/1280/390/320px 核对两列/单列布局、无横向溢出、无技术文档链接、许可资源、键盘焦点及往返导航；截图与脚本位于 `E:/海斗/outputs/sources-simple-20261117`。服务器核对 1,548 个文件后切换 current，仅首页及新 JS/CSS 三个构建文件变化；五项公网文件哈希、www Bing 及 API health 通过。回滚版本为 `fbd94a5b5bb9a5965f6417201d40e9666dc16a33`，旧资源保留。证据为 release 下 `static-deployment.json` 与 `/home/admin/release-41e6a75/public-verification.json`；其他未提交修改未纳入。
+
 ## nightreign.cn 资料说明重做（2026-11-17）
 
 正式代码版本 `fbd94a5b5bb9a5965f6417201d40e9666dc16a33`，已合并 [PR #57](https://github.com/chirt39/nightreign/pull/57)。资料说明沿用图鉴全宽布局，六类导航筛选十二张来源卡片，区分游戏数据、社区资料、图片参考、存档解析和开源许可。AGENTS.md 已加入用户指定的询问偏好，来源台账和页面要求同步更新。
