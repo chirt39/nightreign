@@ -5,8 +5,8 @@ defineProps({ active: Boolean, damagePicking: Boolean });
 
 <template>
 <section id="view-relics" class="view reference-page" :class="{ active }" :data-damage-picker="damagePicking || undefined">
-          <div class="page-intro reference-heading"><p class="eyebrow">RELIC VAULT / LOCAL ONLY</p><h1>遗物仪式</h1><p>读取你的 <code>NR0000.sl2</code>，列出所有遗物及其每条效果。文件只在当前浏览器内解析。</p></div>
-          <label class="drop-zone" id="drop-zone" for="save-file"><span class="drop-icon">◇</span><strong class="save-import-idle">将存档拖到这里，或点击选择文件</strong><strong class="save-import-loaded">更换存档</strong><span>支持 .sl2 · 不上传 · 不修改原存档</span><input id="save-file" type="file" accept=".sl2,application/octet-stream" hidden></label>
+          <div class="page-intro reference-heading"><p class="eyebrow">RELIC VAULT</p><h1>遗物仪式</h1><p>读取你的 <code>NR0000.sl2</code>，列出所有遗物及其每条效果。</p></div>
+          <label class="drop-zone" id="drop-zone" for="save-file"><span class="drop-icon">◇</span><strong class="save-import-idle">将存档拖到这里，或点击选择文件</strong><strong class="save-import-loaded">更换存档</strong><span>支持 .sl2</span><input id="save-file" type="file" accept=".sl2,application/octet-stream" hidden></label>
           <p class="hint save-path-hint">常见路径：<code>AppData/Roaming/Nightreign/SteamID/NR0000.sl2</code>。请在游戏关闭或存档同步完成后读取。</p>
           <div id="save-status" class="status-line" role="status" aria-live="polite">尚未选择存档</div>
           <RelicLegalityPanel />
