@@ -1,6 +1,24 @@
 # 数据来源与核对台账
 
-现有 [README](../README.md) 记录了主要资料来源；本文件将其转成可执行的核对要求。外部网页、截图和表格是证据，不是覆盖游戏版本与全部怪物的保证。
+本文件汇总资料说明页使用的来源及各模块核对台账。外部网页、截图和表格是证据，不是覆盖游戏版本与全部怪物的保证。
+
+## 资料说明页来源整理（2026-11-17）
+
+页面按游戏数据与图标、图鉴、遗物词条、地图结晶、存档回放、开源许可分组。游戏参数、中文文本、场景与原生图集是本作数据来源；社区网页只注明实际补充范围；解包工具与社区字段注释不作为数值已核实的证明。
+
+| 来源 | 本站实际用途 | 核对入口 |
+| --- | --- | --- |
+| 本地游戏数据 | 武器、战技法术、伤害段、遗物生成规则、地点与地图图标；版本分别随各模块记录 | [武器](WEAPON_DATA.md)、[战技法术](ARTS_SPELLS.md)、[遗物检测](RELIC_LEGALITY.md)、[地图](MAP_DATA.md)、[地图资产](MAP_ASSETS.md) |
+| 夜之数据 Wiki | 怪物基础属性、抗性及部分中文词条的既有来源 | [原站](https://yanweiyuan3.github.io/nightreign-wiki/#/overview)、本页逐项台账 |
+| NightreignQuickRef | 词条中文补充、分类与叠加说明的既有快照；后续原生修正单独留证 | [原站](https://xxiixi.github.io/NightreignQuickRef/)、[GPLv3 文本](../public/NightreignQuickRef_LICENSE.txt) |
+| Biligame | 遗物名与图标、渡夜者图片；怪物外观参考逐项记录，不统一认定为原图来源 | [遗物总览](https://wiki.biligame.com/nightreign/遗物总览)、[渡夜者总览](https://wiki.biligame.com/nightreign/渡夜者总览)、[怪物图片台账](ENEMY_IMAGES.md) |
+| 5gamers | 老旧怀表与恶兆妖鬼的诅咒物的中文名及图标补充 | [老旧怀表](https://5gamers.com/zh-CN/elden-ring-nightreign/item/old-pocketwatch)、[恶兆妖鬼的诅咒物](https://5gamers.com/zh-CN/elden-ring-nightreign/item/fell-omen-fetish) |
+| 游民星空、Bandai Namco | 分别为供具中文类型参考、隐士角色图片；不作为全部数据来源 | [供具](https://www.gamersky.com/handbook/202506/1937870.shtml)、[官方角色页](https://en.bandainamcoent.eu/elden-ring/elden-ring-nightreign/characters) |
+| ERN_RelicForge | 存档解析与遗物装配推荐的基础实现；逐局回放为本项目另行核对 | [项目](https://github.com/cetusk/ERN_RelicForge)、[MIT 文本](../public/ERN_RelicForge_LICENSE.txt)、[逐局战果](BATTLE_HISTORY.md) |
+| Smithbox | 社区地图别名、配置名及字段比对，按固定版本记录 | 本页下方固定提交与许可链接 |
+| 用户提供的截图、表格与本地模型渲染 | 外观、地点和界面对照；不能代替参数、真实轨迹或事件字段 | [怪物图片](ENEMY_IMAGES.md)、[地图](MAP_DATA.md)、[逐局战果](BATTLE_HISTORY.md) |
+
+本次访问确认 ERN_RelicForge、Biligame 遗物总览及游民供具页面可读。QuickRef 为动态页面；夜之数据 Wiki 和 5gamers 未能通过本次网页读取工具获得正文，历史采录来源继续保留，不宣称已完成线上全文复核。神攻略此前未读到正文，仅保留为用户提供的参考入口，不列为已采录来源。开源代码许可不扩大到游戏名称、原生图标和第三方图片。
 
 | 数据集 | 当前静态文件／代码 | 现有来源 | 必须核对的事项 |
 | --- | --- | --- | --- |
