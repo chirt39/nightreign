@@ -385,7 +385,11 @@ function enemyDamageMultiplier(value){
   return value==null||typeof value==='string'&&!value.trim()||!Number.isFinite(reduction)?null:Math.round((1-reduction/100)*1000)/1000;
 }
 function enemyDamageText(value){const multiplier=enemyDamageMultiplier(value);return multiplier==null?'未收录':`×${fmt(multiplier)}`}
-function enemyMetricDisplay(row,index){return index>=5&&index<=12?enemyDamageText(row[index]):String(row[index]).toLowerCase()==='immune'?'免疫':fmt(row[index])}
+function enemyMetricDisplay(row,index){
+  const value=String(row[index]).toLowerCase();
+  if(index>=38&&index<=41){if(value==='yes')return '√';if(value==='no')return 'x'}
+  return index>=5&&index<=12?enemyDamageText(row[index]):value==='immune'?'免疫':fmt(row[index]);
+}
 function enemyMetricLabel(label,index){if(index===5)return '普通';if(index===14)return '腐败';if(index>=6&&index<=12)return label.replace(/^伤害[·．]/,'');if(index>=13&&index<=19)return label.replace(/^耐受[·．]/,'');return label}
 const enemyMetricIconFiles=new Map([[5,'damage-physical'],[6,'damage-slash'],[7,'damage-strike'],[8,'damage-pierce'],[9,'damage-magic'],[10,'damage-fire'],[11,'damage-lightning'],[12,'damage-holy'],[13,'status-poison'],[14,'status-rot'],[15,'status-bleed'],[16,'status-frost'],[17,'status-sleep'],[18,'status-madness']]);
 function enemyMetricIconMarkup(index){const file=enemyMetricIconFiles.get(index);return file?`<img class="enemy-metric-icon" src="./enemy-attribute-icons/${file}.png" alt="" aria-hidden="true" width="18" height="18" decoding="async">`:''}
@@ -548,7 +552,7 @@ function renderEnemyDetail(r){
   const dataRow=form?r:(selectedGroup?.anchor.row||r),c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录',locationDifferences=entity?.name==='祖灵'?new Map():enemyLocationDifferences(entity),selectedIndex=state.enemyData.rows.indexOf(dataRow),enemyId=String(dataRow[1]??'');
   const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',resist=title==='异常状态抗性'||indexes.length>8,grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=enemyMetricLabel(c[i].label,i);return `<div class="${resist?'resist':'kv'} ${tone}"><span class="enemy-metric-label">${enemyMetricIconMarkup(i)}${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${core?indexes.length+1:indexes.length} 项</small></summary>${core?'':extra}<div class="${resist?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?'<p class="enemy-damage-note">数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。</p>':''}</details>`};
   const combatSections=`<div class="enemy-combat-grid">${section('伤害倍率',[5,6,7,8,9,10,11,12],true)}${section('异常状态抗性',[13,14,15,16,17,18,19],true)}</div>`;
-  const detailValues=selectedGroup?`${section('核心属性',[24,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${enemyLocationDifferencesMarkup(locationDifferences,c)}${section('种族特攻',[38,39,40,41])}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
+  const detailValues=selectedGroup?`${section('核心属性',[24,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${enemyLocationDifferencesMarkup(locationDifferences,c)}${section('种族特攻',[38,39,40,41],true)}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
   const displayName=entity?.name||enemyDisplayName(r),portrait=enemyDetailImageMarkup(dataRow,form?`${displayName} · ${form.label}`:displayName);
   $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${portrait}<div class="enemy-name-and-form"><h2>${esc(displayName)}</h2>${enemyFormControls(form)}</div></div><div class="enemy-detail-actions">${enemyDetailNavigationMarkup()}<button type="button" class="enemy-report-trigger" data-enemy-report-open data-enemy-index="${selectedIndex}" data-enemy-id="${esc(enemyId)}">资料有误？</button></div></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>${damageEnemyPickerMarkup(entity,r)}${detailValues}`;
   $('#enemy-detail').scrollTop=0;
@@ -1049,7 +1053,7 @@ async function readSave(file){
   if(!/\.sl2$/i.test(file.name)){setSaveFailureStatus('请选择 .sl2 存档文件。');return}
   if(!state.items||!state.effects){setSaveFailureStatus('资料尚未载入，请稍后再试。');return}
   try{
-    setSaveStatus(`正在本地解析 ${file.name}…`);
+    setSaveStatus(`正在读取 ${file.name}…`);
     await validateSaveFileHeader(file);
     const buffer=await file.arrayBuffer();
     if(readId!==currentSaveRead)return;
@@ -1062,8 +1066,7 @@ async function readSave(file){
     try{sessionStorage.setItem('nightreign-parsed-save-v2',JSON.stringify(parsed))}catch(_){try{sessionStorage.removeItem('nightreign-parsed-save-v2')}catch(_){}}
     try{if(steamCloudSource)sessionStorage.setItem('nightreign-parsed-save-source-v1','steam-cloud');else sessionStorage.removeItem('nightreign-parsed-save-source-v1')}catch(_){/* 来源说明不可用时不影响解析 */}
     state.equipped={normal:[null,null,null],deep:[null,null,null]};state.selectedRelicIndex=null;renderBuildWorkspace();
-    const transferNote=steamCloudSource?'Steam 云文件由项目后端临时转发，并在本设备解析。':'未发送到服务器。';
-    setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}。原文件未修改；${transferNote}${state.saveEditor?'当前为只读模式；存档写回尚未验收。':'此存档版式暂不支持编辑。'}`);
+    setSaveStatus(`已读取 ${parsed.relics.length} 件遗物${parsed.characterName?' · '+parsed.characterName:''}`);
   }catch(err){if(readId===currentSaveRead)setSaveFailureStatus('无法解析此存档：'+(err?.message||String(err)))}
 }
 window.NightreignRelicCollection = () => state.save?.relics || [];
