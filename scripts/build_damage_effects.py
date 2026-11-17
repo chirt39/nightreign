@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path(r"E:\海斗\outputs\nightreign-data-20261109")
 META = Path(r"E:\海斗\tools\WitchyBND-3.0.1.0\Assets\Paramdex\NR\Meta\SpEffectParam.xml")
 BULLET_EVIDENCE = Path(r"E:\海斗\outputs\damage-actions-20261113")
+NATIVE_EVENTS = Path(r"E:\海斗\outputs\enemy-full-audit\native\events.jsonl")
 CHANNELS = {"physics": "physical", "magic": "magic", "fire": "fire",
             "thunder": "lightning", "dark": "holy"}
 RATE_FIELDS = {"panel": {k + "AttackPowerRate": v for k, v in CHANNELS.items()},
@@ -404,6 +405,69 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
     effects[-1]["eventId"] = "mountaintop-blessing"
     effects[-1]["description"] = "周围人物冻伤后，20秒内五属性伤害+15%"
 
+    # The grace reward is explicitly maintained by common event 1450. Its
+    # thresholds are team totals, not a counter captured when the reward arrives.
+    event_rows = {}
+    with NATIVE_EVENTS.open(encoding="utf-8") as stream:
+        for line in stream:
+            entry = json.loads(line)
+            name = entry["file"].replace("\\", "/").rsplit("/", 1)[-1]
+            wanted = {0, 1450} if name == "common.emevd" else ({90015005, 90005580} if name == "common_func.emevd" else set())
+            for event in entry["events"]:
+                if event["ID"] in wanted:
+                    event_rows[(name, event["ID"])] = event
+    common_init = event_rows[("common.emevd", 0)]["instructions"]
+    assert common_init[398]["int32"] == [0, 1450, 8970001, 8970000]
+    assert common_init[400]["int32"] == [0, 90015003, 8970001, 8075, 0, 8025, 0, 8970000, 1075838976]
+    grace_event = event_rows[("common.emevd", 1450)]
+    instructions = grace_event["instructions"]
+    resolved = [bytearray.fromhex(i["hex"]) for i in instructions]
+    arguments = struct.pack("<ii", 8970001, 8970000)
+    for patch in grace_event["parameters"]:
+        target, origin, size = patch["TargetStartByte"], patch["SourceStartByte"], patch["ByteCount"]
+        resolved[patch["InstructionIndex"]][target:target + size] = arguments[origin:origin + size]
+    assert len(instructions) == 113
+    assert [(i["Bank"], i["ID"]) for i in instructions[1:11]] == [(2004, 21)] * 10
+    assert struct.unpack_from("<i", resolved[11], 8)[0] == 8970001
+    for count in range(1, 11):
+        grant = 17 + (count - 1) * 10
+        compare = 14 if count == 1 else grant - 6
+        saved_compare = 12 if count == 1 else grant - 8
+        assert (instructions[compare]["Bank"], instructions[compare]["ID"]) == (3, 53)
+        assert resolved[compare][1] == 4  # GreaterOrEqual
+        assert struct.unpack_from("<i", resolved[compare], 4)[0] == count
+        assert (instructions[saved_compare]["Bank"], instructions[saved_compare]["ID"]) == (3, 12)
+        assert struct.unpack_from("<i", resolved[saved_compare], 4)[0] == 9130
+        assert resolved[saved_compare][8:10] == bytes([4, 4])  # Four bits, >=.
+        assert struct.unpack_from("<i", resolved[saved_compare], 12)[0] == count
+        assert (instructions[grant]["Bank"], instructions[grant]["ID"]) == (2004, 8)
+        assert struct.unpack("<ii", resolved[grant]) == (20000, 8970000)
+        assert instructions[grant - 2]["int32"] == [9130, 4, 10]
+    assert instructions[112]["int32"] == [1]  # Restart; rebuild saved reached tiers.
+    for event_id, index in [(90015005, 3), (90005580, 6)]:
+        grace = event_rows[("common_func.emevd", event_id)]["instructions"]
+        assert (grace[index]["Bank"], grace[index]["ID"]) == (2003, 99)
+        assert any((i["Bank"], i["ID"]) == (1003, 101) for i in grace[:index])
+    assert int(permanent[8970000]["spEffectId"]) == 8970001
+    assert int(permanent[8970000]["graceSpEffectId"]) == 8970000
+    assert int(sp[8970001]["spEffectTextId_1"]) == 8970000
+    assert all(float(sp[8970000][field]) == 1.02 for field in RATE_FIELDS["final"])
+    assert sp[8970000]["isUseAtkParamAtkPowerCorrect"] == "0"
+    assert sp[8970000]["spCategory"] == "10" and sp[8970000]["effectEndurance"] == "-1"
+    emit("event:8970000", permanent_names[8970000], "event", 8970000,
+         "common_func#90035205 success flag8025 -> common event0 instruction400/90015003"
+         " -> root8970001; common event0 instruction398 -> event1450: TeamOpenedBonfires>=1..10"
+         " -> SetSpEffect8970000 per threshold; saved event value9130 (4bits,max10)",
+         buff_id="event:8970000", stack_scope="one acquired reward; multiply its active grace instances, maximum ten")
+    effects[-1].update({"permanentBuffId": 8970000, "eventId": "morgott-grace-reward",
+                       "acquisition": "击败入侵的恶兆妖鬼后获得", "searchTerms": ["恶兆妖鬼", "恶兆王"],
+                       "stackRule": "highest",
+                       "stackSource": "同一份已获得奖励的计数汇总只计算一次；各活动实例仍由native-instances逐层乘算，原生spCategory10",
+                       "countKey": "morgottGraces", "countLabel": "本局队伍发现的赐福数",
+                       "countMax": 10, "countUnit": "层",
+                       "countScaling": {"type": "native-instances", "rate": 1.02},
+                       "description": "本局队伍累计，获得奖励前已发现的也计入；重复触碰同一赐福不增加，最多10层。每层五属性伤害乘1.02。"})
+
     # Direct Goods -> SpEffect references only; Bullet-based buffs need a decoded chain.
     for gid in [1210, 11014, 11028, 11029, 11030, 11031]:
         row = goods[gid]
@@ -598,6 +662,61 @@ def build(source: Path, bullet_evidence: Path = BULLET_EVIDENCE):
                                  {"rva": "0x5078B9", "bytes": "488b4424204885c0741f0fb7883e01000066413bcd750941c706ffffffffeb0966413bcc750341891e", "meaning": "category204 missing next row outputs -1; existing list not modified"},
                                  {"rva": "0x3C8108", "bytes": "e893f6130084c0440f45bdf8000000", "meaning": "caller adopts the revised incoming effect ID"},
                                  {"rva": "0x3C8483", "bytes": "4585ff0f888a050000", "meaning": "negative incoming ID branches to false-return at 0x3C8A16, before apply/replace"},
+                             ],
+                         },
+                         "morgottGraceControlFlow": {
+                             "status": "static-native-and-EMEVD-verified",
+                             "executableSha256": manifest["exe_sha256"],
+                             "eventId": 1450, "maximumInstances": 10,
+                             "countIncludesPreRewardDiscoveries": True,
+                             "eventValue": {"id": 9130, "bits": 4, "maximum": 10},
+                             "formula": "n=min(team discovered graces,10); f32 repeated multiplication by f32(1.02)",
+                             "source": {"file": NATIVE_EVENTS.name, "sha256": hashlib.sha256(NATIVE_EVENTS.read_bytes()).hexdigest()},
+                             "eventInstructions": [{"index": i, "bank": instructions[i]["Bank"],
+                                                    "id": instructions[i]["ID"], "resolvedHex": resolved[i].hex()}
+                                                   for i in [11, 12, 14, 15, 17, 99, 101, 105, 107, 112]],
+                             "anchors": [
+                                 {"rva": "0x58F5FB", "bytes": "41be01000000", "meaning": "successful handler path increments once"},
+                                 {"rva": "0x58F604", "bytes": "e8b7e90600", "meaning": "counter forwarding wrapper"},
+                                 {"rva": "0x5FDFC0", "bytes": "488b0509996003", "meaning": "load GameData global at143c078d0"},
+                                 {"rva": "0x5FDFC9", "bytes": "488b4840", "meaning": "statistics object at global+40"},
+                                 {"rva": "0x5FDFD0", "bytes": "0f851a46c1ff", "meaning": "non-null object conditional tail call"},
+                                 {"rva": "0x2125F0", "bytes": "80b9e008000000", "meaning": "write requires enabled statistics object"},
+                                 {"rva": "0x2125FD", "bytes": "01514c", "meaning": "team-opened-bonfires count increment"},
+                                 {"rva": "0x5B2C70", "bytes": "e84bb30400", "meaning": "same counter update on peer"},
+                                 {"rva": "0x591A84", "bytes": "4f175900", "meaning": "bank3 opcode53 jump-table entry points to0x59174F"},
+                                 {"rva": "0x591772", "bytes": "8b5004", "meaning": "condition threshold from instruction arguments+4"},
+                                 {"rva": "0x591775", "bytes": "0fb64801", "meaning": "comparison type from instruction arguments+1"},
+                                 {"rva": "0x59177C", "bytes": "e88f7c0100", "meaning": "create TeamOpenedBonfires condition at0x5A9410"},
+                                 {"rva": "0x11C2D45", "bytes": "488d0dbc1fa601", "meaning": "condition factory installs vtable0x142C24D08"},
+                                 {"rva": "0x2C24D10", "bytes": "b0945a4001000000", "meaning": "condition vtable+8 points to0x1405A94B0"},
+                                 {"rva": "0x5A94B0", "bytes": "488b0519e46503", "meaning": "condition reads GameData global0x143C078D0"},
+                                 {"rva": "0x5A94BD", "bytes": "488b4840", "meaning": "condition reads same statistics object global+40"},
+                                 {"rva": "0x5A94C6", "bytes": "448b414c", "meaning": "condition reads team count+4C written by IncrementTeamOpenedBonfires"},
+                                 {"rva": "0x5A94D1", "bytes": "458b4a2c", "meaning": "read saved condition threshold"},
+                                 {"rva": "0x6D22CA8", "bytes": "453bc1", "meaning": "comparison type4 branch compares team count against threshold; setge follows"},
+                                 {"rva": "0x6D22CAB", "bytes": "0f9dc2", "meaning": "comparison type4: true exactly when count >= target"},
+                                 {"rva": "0x502BB0", "bytes": "498b5808", "meaning": "first active-effect list node"},
+                                 {"rva": "0x502C2F", "bytes": "81e103000c80", "meaning": "inactive-node mask (conditional filtering follows)"},
+                                 {"rva": "0x502EC8", "bytes": "440f28c6", "meaning": "default scaling coefficient is 1"},
+                                 {"rva": "0x502ED1", "bytes": "f6825902000002", "meaning": "optional attack-parameter coefficient flag"},
+                                 {"rva": "0x50337E", "bytes": "488b5b38", "meaning": "advance to next effect instance, no ID de-duplication"},
+                                 {"rva": "0x50338A", "bytes": "0f8558f8ffff", "meaning": "iterate until linked-list end"},
+                                 {"rva": "0x510758", "bytes": "f30f104038", "meaning": "physical raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x503144", "bytes": "f30f5907", "meaning": "physical multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x5035B2", "bytes": "f3410f118690000000", "meaning": "physical writes accumulated result without channel clamp"},
+                                 {"rva": "0x5102E8", "bytes": "f30f10403c", "meaning": "magic raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x503211", "bytes": "f30f5900", "meaning": "magic multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x50364A", "bytes": "f3410f1186a4000000", "meaning": "magic writes accumulated result without channel clamp"},
+                                 {"rva": "0x50FFD8", "bytes": "f30f104040", "meaning": "fire raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x50323C", "bytes": "f30f5900", "meaning": "fire multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x503660", "bytes": "f3410f1186a8000000", "meaning": "fire writes accumulated result without channel clamp"},
+                                 {"rva": "0x510A48", "bytes": "f30f104044", "meaning": "lightning raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x503267", "bytes": "f30f5900", "meaning": "lightning multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x503673", "bytes": "f3410f1186ac000000", "meaning": "lightning writes accumulated result without channel clamp"},
+                                 {"rva": "0x50FF58", "bytes": "f30f1080dc010000", "meaning": "holy raw SpEffectParam AttackRate getter"},
+                                 {"rva": "0x503292", "bytes": "f30f5900", "meaning": "holy multiplies this instance factor into existing channel accumulator"},
+                                 {"rva": "0x503686", "bytes": "f3410f1186b0000000", "meaning": "holy writes accumulated result without channel clamp"},
                              ],
                          },
                          "scope": "audited scalar damage rules; not exhaustive, not a relic legality checker",

@@ -5,13 +5,14 @@ import { damageShowcase } from '../lib/damage-showcase.js';
 import { hasAutomaticProjectile } from '../lib/damage-panel.js';
 import DamageRelicPicker from '../components/DamageRelicPicker.vue';
 import { relicChoiceMetadata } from '../lib/damage-relic-options.js';
+import { describeDamageBuff } from '../lib/damage-buff-details.js';
 import DamagePicker from '../components/DamagePicker.vue';
 import DamageFormula from '../components/DamageFormula.vue';
 import DamageEquipmentCard from '../components/DamageEquipmentCard.vue';
 import DamageProjectileInputs from '../components/DamageProjectileInputs.vue';
 
 const props = defineProps({ active: Boolean, catalogVersions: Object });
-const files = ['weapon-catalog.json', 'damage-panel.json', 'damage-actions.json', 'damage-effects.json', 'damage-targets.json', 'arts-catalog.json', 'damage-weapon-traits.json', 'relic_rule_effects.json', 'relic_effect_cross_mode.json'];
+const files = ['weapon-catalog.json', 'damage-panel.json', 'damage-actions.json', 'damage-effects.json', 'damage-targets.json', 'arts-catalog.json', 'damage-weapon-traits.json', 'relic_rule_effects.json', 'relic_effect_cross_mode.json', 'damage-buff-icons.json'];
 const catalogs = shallowRef(null), loading = ref(false), error = ref('');
 const weaponId = ref(''), variantId = ref(''), artId = ref(''), actionId = ref('');
 const mode = ref('auto'), characterId = ref(''), level = ref(''), reinforcement = ref('');
@@ -156,14 +157,11 @@ function effectCategory(effect) {
   if (effect.goodsId != null) return 'goods';
   return effect.buffId ? 'art' : 'field';
 }
-function effectDetail(item) {
-  const effect = item.effects[0];
-  if (effect.kind === 'reward') return item.effects.map(rule => {
-    const names = rule.channels?.length === 5 ? '全属性' : (rule.channels || []).map(key => channelLabels[key]).join('／');
-    return `${names}伤害 +${Math.round((rule.rate - 1) * 10000) / 100}%`;
-  }).join('；');
-  if (effect.kind === 'event') return effect.description || '';
-  return effect.durationSeconds ? `持续 ${effect.durationSeconds} 秒` : '';
+function effectPresentation(item) { return describeDamageBuff(item, effectChoices.value); }
+function effectImage(item) { return catalogs.value?.buffIcons?.icons?.[item?.effects[0]?.buffId]?.image; }
+function selectionImage(item) {
+  return item.kind === 'relic' ? relicById.value.get(item.id)?.image
+    : item.kind === 'effect' ? effectImage(effectChoiceById.value.get(item.id)) : null;
 }
 const compatibleActions = computed(() => actions.value.filter(item => {
   if (!showcaseSelection.value) return false;
@@ -216,6 +214,7 @@ const countOptions = computed(() => [...new Map(selectedEffects.value.filter(eff
 function setEffectCount(item, value) {
   const count = Number(value);
   effectCounts[item.id] = Number.isFinite(count) ? Math.max(0, Math.min(item.max, Math.floor(count))) : 0;
+  return effectCounts[item.id];
 }
 const unmodelledTraits = computed(() => selectedWeaponTraits.value.filter(slot => ['partial', 'missing-rule'].includes(slot.trait.calculationStatus) || slot.trait.unmodelledEffectIds?.length || (slot.trait.effectIds || []).some(id => !effectById.value.has(String(id))) || !slot.trait.calculationStatus && !slot.trait.effectIds?.length && !slot.trait.statGains));
 const conditionOptions = computed(() => {
@@ -296,7 +295,7 @@ const pickerChoices = computed(()=>{
   }));
   if (picker.value==='effect') return effectChoices.value.filter(item=>item.effects.some(effect=>['reward','buff','event'].includes(effect.kind))).map(item=>({
     id:item.id, name:item.name, category:effectCategory(item.effects[0]), disabled:checked('effect',item.id),
-    detail:effectDetail(item)
+    image:effectImage(item), ...effectPresentation(item)
   }));
   return [];
 });
@@ -477,7 +476,7 @@ async function loadCatalogs() {
         if (!response.ok) throw new Error('伤害计算资料暂未就绪，请稍后重试。');
         return response.json();
       }));
-      catalogs.value = Object.fromEntries(['weapons', 'panel', 'actions', 'effects', 'targets', 'arts', 'traits','definitions','crossMode'].map((key, index) => [key, values[index]]));
+      catalogs.value = Object.fromEntries(['weapons', 'panel', 'actions', 'effects', 'targets', 'arts', 'traits','definitions','crossMode','buffIcons'].map((key, index) => [key, values[index]]));
       normalizeSelection();
     } catch (cause) { if (cause.name !== 'AbortError') error.value = cause.message || '计算资料载入失败'; }
     finally { loading.value = false; }
@@ -551,15 +550,16 @@ defineExpose({ restoreNavigation });
             <summary>查看或编辑当前配装</summary>
             <ul class="loadout-selected">
             <li v-for="item in selectionOrder" :key="item.kind+':'+item.id">
-              <img v-if="item.kind === 'relic' && relicById.get(item.id)?.image" class="loadout-portrait" :src="relicById.get(item.id).image" alt="" width="28" height="28">
+              <img v-if="selectionImage(item)" class="loadout-portrait" :src="selectionImage(item)" alt="" width="28" height="28">
               <span>{{ item.kind === 'trait' && traitById.get(item.id)?.polarity === 'negative' ? '负面 · ' : '' }}{{ selectionName(item) }}</span>
               <button v-if="item.kind === 'relic'" type="button" :aria-label="'编辑' + selectionName(item)" @click="editRelic(item.id)">编辑</button>
               <button type="button" :aria-label="'移除'+selectionName(item)" @click="toggleEffect(item.kind,item.id,false)">×</button>
+              <small v-if="item.kind==='effect'" class="loadout-buff-summary">{{ effectPresentation(effectChoiceById.get(item.id)).detail }}</small>
               <ul v-if="item.kind==='relic'"><li v-for="(row,index) in relicDetails(relicById.get(item.id))" :key="index">{{ row.name }}<small v-if="row.missing">未计入</small></li></ul>
             </li>
           </ul>
           </details>
-          <div v-if="countOptions.length" class="damage-effect-counts"><label v-for="item in countOptions" :key="item.id">{{ item.name }}<input type="number" :aria-label="item.name" min="0" :max="item.max" step="1" :value="effectCounts[item.id] || 0" @input="setEffectCount(item, $event.target.value)"></label></div>
+          <div v-if="countOptions.length" class="damage-effect-counts"><label v-for="item in countOptions" :key="item.id">{{ item.name }}<input type="number" :aria-label="item.name" min="0" :max="item.max" step="1" :value="effectCounts[item.id] || 0" @input="$event.target.value = setEffectCount(item, $event.target.value)"></label></div>
           <fieldset v-if="conditionOptions.length" class="damage-conditions"><legend>当前满足的条件</legend><label v-for="item in conditionOptions" :key="item.id"><input :checked="conditions[item.id] || false" type="checkbox" @change="toggleCondition(item.id, $event.target.checked)">{{ item.name }}</label></fieldset>
         </section>
         <div class="damage-tools">
@@ -619,6 +619,7 @@ defineExpose({ restoreNavigation });
 
 .loadout-actions,.damage-target-picker{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.damage-target-picker{margin-top:12px}.damage-target-card{display:flex;align-items:center;gap:10px;text-align:left;flex:1;min-width:160px}.damage-target-card img{height:40px;width:40px;object-fit:cover}.damage-target-card>span:first-of-type{display:grid;gap:3px}.damage-target-card>span:last-of-type{margin-left:auto}.damage-target-card small,.loadout-selected ul{color:#aec1d0}.loadout-selected,.loadout-selected ul{padding:0;list-style:none}.loadout-selected{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.loadout-selected>li{padding:4px 7px;border:1px solid #354c60;border-radius:4px;font-size:12px}.loadout-selected>li>button{background:transparent;border:0;min-height:24px;margin-left:4px}.loadout-selected ul li{font-size:11px;line-height:1.6}.loadout-selected small{margin-left:6px;color:#e2bd87}
 .loadout-portrait { vertical-align: middle; margin-right: 6px; object-fit: contain; }
+.loadout-selected .loadout-buff-summary { display: block; margin: 3px 0 0; color: #aec1d0; }
 .relic-count{align-self:center;color:#b6c6d3;font-size:.85rem;font-variant-numeric:tabular-nums}
 .damage-common{display:grid;grid-template-columns:minmax(130px,.9fr) minmax(0,1.2fr);gap:8px 12px;align-items:end}
 .damage-common h2,.damage-action-field,.damage-common>.damage-notice{grid-column:1/-1}

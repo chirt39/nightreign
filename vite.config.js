@@ -39,6 +39,7 @@ const catalogJsonFiles = [
   'damage-panel.json',
   'damage-actions.json',
   'damage-effects.json',
+  'damage-buff-icons.json',
   'damage-weapon-traits.json',
   'damage-targets.json',
   'map-catalog.json',

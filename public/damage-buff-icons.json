@@ -1,0 +1,600 @@
+{
+  "icons": {
+    "goods:1210": {
+      "iconId": 63,
+      "sourceTable": "EquipParamGoods",
+      "sourceId": 1210,
+      "source": "EquipParamGoods#1210.iconId=63",
+      "image": "/damage-buff-icons/63-89b1a6deee75.webp",
+      "reused": false,
+      "sha256": "89b1a6deee7580d46657cd8629deb86ac655317a892f20c1aaabaa12471e8df4"
+    },
+    "goods:3500": {
+      "iconId": 226,
+      "sourceTable": "EquipParamGoods",
+      "sourceId": 3500,
+      "source": "EquipParamGoods#3500.iconId=226",
+      "image": "/damage-buff-icons/226-d84a1a5ae531.webp",
+      "reused": false,
+      "sha256": "d84a1a5ae5311eadd962bdd3429b4a2b55393b34fce63ff7edc328f2ee2d6863"
+    },
+    "goods:3550": {
+      "iconId": 225,
+      "sourceTable": "EquipParamGoods",
+      "sourceId": 3550,
+      "source": "EquipParamGoods#3550.iconId=225",
+      "image": "/damage-buff-icons/225-5f581377eece.webp",
+      "reused": false,
+      "sha256": "5f581377eecebaaf38e4dcad7c8802b49b12a3778147a2c97ac86ab8752c48a2"
+    },
+    "goods:11014": {
+      "iconId": 414,
+      "sourceTable": "EquipParamGoods",
+      "sourceId": 11014,
+      "source": "EquipParamGoods#11014.iconId=414",
+      "image": "/damage-buff-icons/414-b6ba7d705e1f.webp",
+      "reused": false,
+      "sha256": "b6ba7d705e1f569e656fbecfbbd7d8895cd5a7576fea7acfa856bd04d9bea1f5"
+    },
+    "goods:11028": {
+      "iconId": 428,
+      "sourceTable": "EquipParamGoods",
+      "sourceId": 11028,
+      "source": "EquipParamGoods#11028.iconId=428",
+      "image": "/damage-buff-icons/428-3d295e253aa9.webp",
+      "reused": false,
+      "sha256": "3d295e253aa9d0469eda90f2320d9a6103f240bb4f537374c8f08803c220d301"
+    },
+    "goods:11029": {
+      "iconId": 429,
+      "sourceTable": "EquipParamGoods",
+      "sourceId": 11029,
+      "source": "EquipParamGoods#11029.iconId=429",
+      "image": "/damage-buff-icons/429-2d99d9939a56.webp",
+      "reused": false,
+      "sha256": "2d99d9939a5630b02c76b09299879071a15b40cb0002ea28892a9315c638ea2c"
+    },
+    "goods:11030": {
+      "iconId": 430,
+      "sourceTable": "EquipParamGoods",
+      "sourceId": 11030,
+      "source": "EquipParamGoods#11030.iconId=430",
+      "image": "/damage-buff-icons/430-93c143a9c298.webp",
+      "reused": false,
+      "sha256": "93c143a9c298ea16878272832378d361542a7db004d9bd71c00f7ce3447d4387"
+    },
+    "goods:11031": {
+      "iconId": 431,
+      "sourceTable": "EquipParamGoods",
+      "sourceId": 11031,
+      "source": "EquipParamGoods#11031.iconId=431",
+      "image": "/damage-buff-icons/431-181aace6c314.webp",
+      "reused": false,
+      "sha256": "181aace6c314f363e032aa66cc707568f2e416236602f3488d0c86e1b63b09c3"
+    },
+    "magic:6050": {
+      "iconId": 6308,
+      "sourceTable": "Magic",
+      "sourceId": 6050,
+      "source": "Magic#6050.iconId=6308",
+      "image": "/spell-images/6308-1fe22b3c4172.webp",
+      "reused": true,
+      "sha256": "1fe22b3c41726cf08d33b830c6c8bfbcaffb3e4cb61995de974bac1da879e332"
+    },
+    "magic:6600": {
+      "iconId": 6504,
+      "sourceTable": "Magic",
+      "sourceId": 6600,
+      "source": "Magic#6600.iconId=6504",
+      "image": "/spell-images/6504-c3236722ba8c.webp",
+      "reused": true,
+      "sha256": "c3236722ba8c045a5a3f3d825342a2402487dc657d50c6a73b13ed3510073a34"
+    },
+    "art:603": {
+      "iconId": 8423,
+      "sourceTable": "SwordArtsParam",
+      "sourceId": 603,
+      "source": "SwordArtsParam#603.iconId=8423",
+      "image": "/skill-images/8423-ba2854d5d8ee.webp",
+      "reused": true,
+      "sha256": "ba2854d5d8ee627d10426889598af5242e4a13589c94f8b7fa55346c554be743"
+    },
+    "art:1010": {
+      "iconId": 8510,
+      "sourceTable": "SwordArtsParam",
+      "sourceId": 1010,
+      "source": "SwordArtsParam#1010.iconId=8510",
+      "image": "/skill-images/8510-92c84b6a283b.webp",
+      "reused": true,
+      "sha256": "92c84b6a283b234cf41198dced72e1d9fe29c6094b6f44dedbcf21b3f6dc9b27"
+    },
+    "art:1197": {
+      "iconId": 8586,
+      "sourceTable": "SwordArtsParam",
+      "sourceId": 1197,
+      "source": "SwordArtsParam#1197.iconId=8586",
+      "image": "/skill-images/8586-50c3ce784df8.webp",
+      "reused": true,
+      "sha256": "50c3ce784df8a1675377a562e8b7bdecb775f2d11681f422b9ffba1d8e948e2f"
+    },
+    "reward:8100000": {
+      "iconId": 21206,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 8100000,
+      "source": "PermanentBuffParam#8100000.iconId=21206",
+      "image": "/damage-buff-icons/21206-602001aaa4a7.webp",
+      "reused": false,
+      "sha256": "602001aaa4a7567efc70e0276f61cff9910e9b7cfa2eb8ebf33d3fbe6f7b67c6"
+    },
+    "reward:8100001": {
+      "iconId": 21206,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 8100001,
+      "source": "PermanentBuffParam#8100001.iconId=21206",
+      "image": "/damage-buff-icons/21206-602001aaa4a7.webp",
+      "reused": false,
+      "sha256": "602001aaa4a7567efc70e0276f61cff9910e9b7cfa2eb8ebf33d3fbe6f7b67c6"
+    },
+    "reward:8100500": {
+      "iconId": 21206,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 8100500,
+      "source": "PermanentBuffParam#8100500.iconId=21206",
+      "image": "/damage-buff-icons/21206-602001aaa4a7.webp",
+      "reused": false,
+      "sha256": "602001aaa4a7567efc70e0276f61cff9910e9b7cfa2eb8ebf33d3fbe6f7b67c6"
+    },
+    "reward:8100501": {
+      "iconId": 21206,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 8100501,
+      "source": "PermanentBuffParam#8100501.iconId=21206",
+      "image": "/damage-buff-icons/21206-602001aaa4a7.webp",
+      "reused": false,
+      "sha256": "602001aaa4a7567efc70e0276f61cff9910e9b7cfa2eb8ebf33d3fbe6f7b67c6"
+    },
+    "reward:8330103": {
+      "iconId": 21207,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 8330103,
+      "source": "PermanentBuffParam#8330103.iconId=21207",
+      "image": "/damage-buff-icons/21207-2171c2d7e6ef.webp",
+      "reused": false,
+      "sha256": "2171c2d7e6efa8b1c8e170d260644877dd267639ee4a2ed8a9a1fdcfe678b404"
+    },
+    "reward:8330104": {
+      "iconId": 21207,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 8330104,
+      "source": "PermanentBuffParam#8330104.iconId=21207",
+      "image": "/damage-buff-icons/21207-2171c2d7e6ef.webp",
+      "reused": false,
+      "sha256": "2171c2d7e6efa8b1c8e170d260644877dd267639ee4a2ed8a9a1fdcfe678b404"
+    },
+    "reward:8430000": {
+      "iconId": 21206,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 8430000,
+      "source": "PermanentBuffParam#8430000.iconId=21206",
+      "image": "/damage-buff-icons/21206-602001aaa4a7.webp",
+      "reused": false,
+      "sha256": "602001aaa4a7567efc70e0276f61cff9910e9b7cfa2eb8ebf33d3fbe6f7b67c6"
+    },
+    "event:4": {
+      "iconId": 21206,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 4,
+      "source": "PermanentBuffParam#4.iconId=21206",
+      "image": "/damage-buff-icons/21206-602001aaa4a7.webp",
+      "reused": false,
+      "sha256": "602001aaa4a7567efc70e0276f61cff9910e9b7cfa2eb8ebf33d3fbe6f7b67c6"
+    },
+    "event:8970000": {
+      "iconId": 21720,
+      "sourceTable": "PermanentBuffParam",
+      "sourceId": 8970000,
+      "source": "PermanentBuffParam#8970000.iconId=21720",
+      "image": "/damage-buff-icons/21720-a8c2af524d8a.webp",
+      "reused": false,
+      "sha256": "a8c2af524d8a7651237728a959e20e2ec2f9367365c03f5d6541aacf8ba6efbb"
+    }
+  },
+  "metadata": {
+    "gameVersion": "1.3.3.0",
+    "regulationVersion": 10350000,
+    "source": "Native parameter iconId -> MENU_ItemIcon sprite; exact lossless crop, no replacement artwork",
+    "sourceParamSha256": {
+      "EquipParamGoods": "b8c1d9931d142fbff910c26a6a4c615161bf42bf896ced8eea66a5aba2260553",
+      "Magic": "dca5395772d47986e88d379a7c243be1946bd15753c847420293ec51cdd6a656",
+      "SwordArtsParam": "46eb5c01d45d11d8303456db19b445e20b85958b1e5fa6f3f81b7427f81a78d6",
+      "PermanentBuffParam": "86e0a79ed0c1d18b9f62d3358d501613ca5c6e23a0d972a2a84e3ef443c5676f"
+    },
+    "provenance": [
+      {
+        "iconId": 63,
+        "src": "/damage-buff-icons/63-89b1a6deee75.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_00063.png",
+        "rectangle": [
+          0,
+          2952,
+          160,
+          160
+        ],
+        "rgbaSha256": "d1c73737156080d44d62f979e84b43595707badf36f1fb565524acf8289a6b2d",
+        "webpSha256": "89b1a6deee7580d46657cd8629deb86ac655317a892f20c1aaabaa12471e8df4",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 225,
+        "src": "/damage-buff-icons/225-5f581377eece.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_00225.png",
+        "rectangle": [
+          164,
+          164,
+          160,
+          160
+        ],
+        "rgbaSha256": "8d6d796cfae038887f3df42b860a23ca4aeb147964840d9fc695beb931334251",
+        "webpSha256": "5f581377eecebaaf38e4dcad7c8802b49b12a3778147a2c97ac86ab8752c48a2",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 226,
+        "src": "/damage-buff-icons/226-d84a1a5ae531.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_00226.png",
+        "rectangle": [
+          164,
+          328,
+          160,
+          160
+        ],
+        "rgbaSha256": "3497cc60e49ac4f4ee38f0f076887545d734ae65b3e6fd60e2ff2c8306aab889",
+        "webpSha256": "d84a1a5ae5311eadd962bdd3429b4a2b55393b34fce63ff7edc328f2ee2d6863",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 414,
+        "src": "/damage-buff-icons/414-b6ba7d705e1f.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_00414.png",
+        "rectangle": [
+          164,
+          2788,
+          160,
+          160
+        ],
+        "rgbaSha256": "b4b03edb83b88323f6f360496b1a7e61d36e45b34d22e5c62f8af993b7a444f8",
+        "webpSha256": "b6ba7d705e1f569e656fbecfbbd7d8895cd5a7576fea7acfa856bd04d9bea1f5",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 428,
+        "src": "/damage-buff-icons/428-3d295e253aa9.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_00428.png",
+        "rectangle": [
+          492,
+          164,
+          160,
+          160
+        ],
+        "rgbaSha256": "9d95fa92e87cae02f64405e1939db52adc39492eecee26c99190c4ea0d1a02f7",
+        "webpSha256": "3d295e253aa9d0469eda90f2320d9a6103f240bb4f537374c8f08803c220d301",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 429,
+        "src": "/damage-buff-icons/429-2d99d9939a56.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_00429.png",
+        "rectangle": [
+          656,
+          164,
+          160,
+          160
+        ],
+        "rgbaSha256": "595c8912dd1628cb0fb6d646bcd24e24146adcdabeb54ef8e27ca0f0d9243b6e",
+        "webpSha256": "2d99d9939a5630b02c76b09299879071a15b40cb0002ea28892a9315c638ea2c",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 430,
+        "src": "/damage-buff-icons/430-93c143a9c298.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_00430.png",
+        "rectangle": [
+          820,
+          164,
+          160,
+          160
+        ],
+        "rgbaSha256": "0adacb601aa2ce5c071f89e5d290be49c2167ca95f6b299a95e8fb4f95f01d81",
+        "webpSha256": "93c143a9c298ea16878272832378d361542a7db004d9bd71c00f7ce3447d4387",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 431,
+        "src": "/damage-buff-icons/431-181aace6c314.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_00431.png",
+        "rectangle": [
+          984,
+          164,
+          160,
+          160
+        ],
+        "rgbaSha256": "053c747efec7f22b65d9dc21ead3fef9eeb0d1132029f5ac3d1b63db2ec94925",
+        "webpSha256": "181aace6c314f363e032aa66cc707568f2e416236602f3488d0c86e1b63b09c3",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 6308,
+        "src": "/spell-images/6308-1fe22b3c4172.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_06308.png",
+        "rectangle": [
+          2296,
+          820,
+          160,
+          160
+        ],
+        "rgbaSha256": "2229058c2dc2a89de4d477122c38bf08bcf1c9bd6b53dff39abb23195ed992ff",
+        "webpSha256": "1fe22b3c41726cf08d33b830c6c8bfbcaffb3e4cb61995de974bac1da879e332",
+        "resampled": false,
+        "reused": true
+      },
+      {
+        "iconId": 6504,
+        "src": "/spell-images/6504-c3236722ba8c.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_06504.png",
+        "rectangle": [
+          984,
+          1476,
+          160,
+          160
+        ],
+        "rgbaSha256": "08978bf3b0226aa1aadad0a910f0fcc8ca7d8f747cd25a829c13798ea4fe5a26",
+        "webpSha256": "c3236722ba8c045a5a3f3d825342a2402487dc657d50c6a73b13ed3510073a34",
+        "resampled": false,
+        "reused": true
+      },
+      {
+        "iconId": 8423,
+        "src": "/skill-images/8423-ba2854d5d8ee.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_08423.png",
+        "rectangle": [
+          1968,
+          1804,
+          160,
+          160
+        ],
+        "rgbaSha256": "99412f6e84ac710bab23bcfa014017806ce669c0ff4bc59b2a48eceda62225bf",
+        "webpSha256": "59390d11e64aa3779ac3b9d15b52b4bd88b49255e73fae3106bcaab270440346",
+        "resampled": false,
+        "reused": true
+      },
+      {
+        "iconId": 8510,
+        "src": "/skill-images/8510-92c84b6a283b.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "cd41d1b4b9987f1c239cbb1eea98eda25b60b3d74c20f7eb7bb7ab6b5e4949cd",
+        "texture": "SB_ItemIcon_0",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_0.layout",
+        "layoutSha256": "a90401904a0ce6c4ff908aa83996fd4d68c621bae60e9c59f43b4eb2676cd21c",
+        "sprite": "MENU_ItemIcon_08510.png",
+        "rectangle": [
+          3280,
+          1968,
+          160,
+          160
+        ],
+        "rgbaSha256": "8f3606efa414e40c359028ff160e25436f7dcefe7dc27a10c34e766c5ef10dc5",
+        "webpSha256": "e72ffcb435ef99b745afc6a8fdf3cc307113344f611aa6af346e1ba9f5349f01",
+        "resampled": false,
+        "reused": true
+      },
+      {
+        "iconId": 8586,
+        "src": "/skill-images/8586-50c3ce784df8.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "845afdbd87a65423ef964b93ae23ea5b509631c14926f7406741ebe57cd63ae1",
+        "texture": "SB_ItemIcon_1",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_1.layout",
+        "layoutSha256": "c295338103c4707e6356aca21b507759335024e3168aa7187f1ae66fd200bfb0",
+        "sprite": "MENU_ItemIcon_08586.png",
+        "rectangle": [
+          656,
+          3608,
+          160,
+          160
+        ],
+        "rgbaSha256": "c4c49c41b8f80eba2509e85bf128699705e7fed8a0dabe42807a6fc533520594",
+        "webpSha256": "3d3c2ab4eb14631d6778dfba54d9de151ebdfead184cc882acb129a7f1d1cf1e",
+        "resampled": false,
+        "reused": true
+      },
+      {
+        "iconId": 21206,
+        "src": "/damage-buff-icons/21206-602001aaa4a7.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "fd12dcb630743dbffb91b58ff436bcf181fc95a457014746e4994809062d94a3",
+        "texture": "SB_ItemIcon_2",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_2.layout",
+        "layoutSha256": "2fedadffc8a246a2aca269e43de229d3a93356ab3c511170668cc082e500a85a",
+        "sprite": "MENU_ItemIcon_21206.png",
+        "rectangle": [
+          3116,
+          1804,
+          160,
+          160
+        ],
+        "rgbaSha256": "7726755a087b1b0056ad4bbed54c0e5b53e5573bcca6e445579305bf1ed761af",
+        "webpSha256": "602001aaa4a7567efc70e0276f61cff9910e9b7cfa2eb8ebf33d3fbe6f7b67c6",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 21207,
+        "src": "/damage-buff-icons/21207-2171c2d7e6ef.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "fd12dcb630743dbffb91b58ff436bcf181fc95a457014746e4994809062d94a3",
+        "texture": "SB_ItemIcon_2",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_2.layout",
+        "layoutSha256": "2fedadffc8a246a2aca269e43de229d3a93356ab3c511170668cc082e500a85a",
+        "sprite": "MENU_ItemIcon_21207.png",
+        "rectangle": [
+          3280,
+          1804,
+          160,
+          160
+        ],
+        "rgbaSha256": "8c98e7b5322a0b1c7bdf73821776663dba43cc713d657e0a77530c063e322674",
+        "webpSha256": "2171c2d7e6efa8b1c8e170d260644877dd267639ee4a2ed8a9a1fdcfe678b404",
+        "resampled": false,
+        "reused": false
+      },
+      {
+        "iconId": 21720,
+        "src": "/damage-buff-icons/21720-a8c2af524d8a.webp",
+        "width": 160,
+        "height": 160,
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "ddsSha256": "fd12dcb630743dbffb91b58ff436bcf181fc95a457014746e4994809062d94a3",
+        "texture": "SB_ItemIcon_2",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_ItemIcon_2.layout",
+        "layoutSha256": "2fedadffc8a246a2aca269e43de229d3a93356ab3c511170668cc082e500a85a",
+        "sprite": "MENU_ItemIcon_21720.png",
+        "rectangle": [
+          1968,
+          3280,
+          160,
+          160
+        ],
+        "rgbaSha256": "6bfc575da3e6d5a9649d31cfce2d4d40ff28376b2e100838ffd6b23efdc18730",
+        "webpSha256": "a8c2af524d8a7651237728a959e20e2ec2f9367365c03f5d6541aacf8ba6efbb",
+        "resampled": false,
+        "reused": false
+      }
+    ],
+    "license": "Original game UI assets; rights retained by the original rights holders."
+  }
+}

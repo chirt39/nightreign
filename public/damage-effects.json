@@ -5241,6 +5241,43 @@
       "description": "周围人物冻伤后，20秒内五属性伤害+15%"
     },
     {
+      "id": "event:8970000:final:physical,magic,fire,lightning,holy",
+      "name": "赐福王的余威",
+      "kind": "event",
+      "phase": "final",
+      "rate": 1.02,
+      "channels": [
+        "physical",
+        "magic",
+        "fire",
+        "lightning",
+        "holy"
+      ],
+      "stackGroup": "speffect:8970000:final:physical,magic,fire,lightning,holy",
+      "stackRule": "highest",
+      "source": "common_func#90035205 success flag8025 -> common event0 instruction400/90015003 -> root8970001; common event0 instruction398 -> event1450: TeamOpenedBonfires>=1..10 -> SetSpEffect8970000 per threshold; saved event value9130 (4bits,max10) -> SpEffectParam#8970000.physicsAttackRate,magicAttackRate,fireAttackRate,thunderAttackRate,darkAttackRate",
+      "spEffectId": 8970000,
+      "stackSource": "同一份已获得奖励的计数汇总只计算一次；各活动实例仍由native-instances逐层乘算，原生spCategory10",
+      "buffId": "event:8970000",
+      "scopeNote": "one acquired reward; multiply its active grace instances, maximum ten",
+      "permanentBuffId": 8970000,
+      "eventId": "morgott-grace-reward",
+      "acquisition": "击败入侵的恶兆妖鬼后获得",
+      "searchTerms": [
+        "恶兆妖鬼",
+        "恶兆王"
+      ],
+      "countKey": "morgottGraces",
+      "countLabel": "本局队伍发现的赐福数",
+      "countMax": 10,
+      "countUnit": "层",
+      "countScaling": {
+        "type": "native-instances",
+        "rate": 1.02
+      },
+      "description": "本局队伍累计，获得奖励前已发现的也计入；重复触碰同一赐福不增加，最多10层。每层五属性伤害乘1.02。"
+    },
+    {
       "id": "buff:goods:1210:final:physical",
       "name": "勇者肉块",
       "kind": "buff",
@@ -7122,6 +7159,292 @@
         }
       ]
     },
+    "morgottGraceControlFlow": {
+      "status": "static-native-and-EMEVD-verified",
+      "executableSha256": "9545e8732919bb6a63904cb73223641b3c4f9a67869be5722612acca413e8b3a",
+      "eventId": 1450,
+      "maximumInstances": 10,
+      "countIncludesPreRewardDiscoveries": true,
+      "eventValue": {
+        "id": 9130,
+        "bits": 4,
+        "maximum": 10
+      },
+      "formula": "n=min(team discovered graces,10); f32 repeated multiplication by f32(1.02)",
+      "source": {
+        "file": "events.jsonl",
+        "sha256": "5cb0bc754e84eaa05edc6e7b5bb3ffd6751b6cb0302b83ea44b59397450d3673"
+      },
+      "eventInstructions": [
+        {
+          "index": 11,
+          "bank": 4,
+          "id": 5,
+          "resolvedHex": "00000000204e000011df8800010000000000803f"
+        },
+        {
+          "index": 12,
+          "bank": 3,
+          "id": 12,
+          "resolvedHex": "01000000aa2300000404000001000000"
+        },
+        {
+          "index": 14,
+          "bank": 3,
+          "id": 53,
+          "resolvedHex": "0004000001000000"
+        },
+        {
+          "index": 15,
+          "bank": 2003,
+          "id": 127,
+          "resolvedHex": "aa230000040000000a000000"
+        },
+        {
+          "index": 17,
+          "bank": 2004,
+          "id": 8,
+          "resolvedHex": "204e000010df8800"
+        },
+        {
+          "index": 99,
+          "bank": 3,
+          "id": 12,
+          "resolvedHex": "0a000000aa230000040400000a000000"
+        },
+        {
+          "index": 101,
+          "bank": 3,
+          "id": 53,
+          "resolvedHex": "f60400000a000000"
+        },
+        {
+          "index": 105,
+          "bank": 2003,
+          "id": 127,
+          "resolvedHex": "aa230000040000000a000000"
+        },
+        {
+          "index": 107,
+          "bank": 2004,
+          "id": 8,
+          "resolvedHex": "204e000010df8800"
+        },
+        {
+          "index": 112,
+          "bank": 1000,
+          "id": 4,
+          "resolvedHex": "01000000"
+        }
+      ],
+      "anchors": [
+        {
+          "rva": "0x58F5FB",
+          "bytes": "41be01000000",
+          "meaning": "successful handler path increments once"
+        },
+        {
+          "rva": "0x58F604",
+          "bytes": "e8b7e90600",
+          "meaning": "counter forwarding wrapper"
+        },
+        {
+          "rva": "0x5FDFC0",
+          "bytes": "488b0509996003",
+          "meaning": "load GameData global at143c078d0"
+        },
+        {
+          "rva": "0x5FDFC9",
+          "bytes": "488b4840",
+          "meaning": "statistics object at global+40"
+        },
+        {
+          "rva": "0x5FDFD0",
+          "bytes": "0f851a46c1ff",
+          "meaning": "non-null object conditional tail call"
+        },
+        {
+          "rva": "0x2125F0",
+          "bytes": "80b9e008000000",
+          "meaning": "write requires enabled statistics object"
+        },
+        {
+          "rva": "0x2125FD",
+          "bytes": "01514c",
+          "meaning": "team-opened-bonfires count increment"
+        },
+        {
+          "rva": "0x5B2C70",
+          "bytes": "e84bb30400",
+          "meaning": "same counter update on peer"
+        },
+        {
+          "rva": "0x591A84",
+          "bytes": "4f175900",
+          "meaning": "bank3 opcode53 jump-table entry points to0x59174F"
+        },
+        {
+          "rva": "0x591772",
+          "bytes": "8b5004",
+          "meaning": "condition threshold from instruction arguments+4"
+        },
+        {
+          "rva": "0x591775",
+          "bytes": "0fb64801",
+          "meaning": "comparison type from instruction arguments+1"
+        },
+        {
+          "rva": "0x59177C",
+          "bytes": "e88f7c0100",
+          "meaning": "create TeamOpenedBonfires condition at0x5A9410"
+        },
+        {
+          "rva": "0x11C2D45",
+          "bytes": "488d0dbc1fa601",
+          "meaning": "condition factory installs vtable0x142C24D08"
+        },
+        {
+          "rva": "0x2C24D10",
+          "bytes": "b0945a4001000000",
+          "meaning": "condition vtable+8 points to0x1405A94B0"
+        },
+        {
+          "rva": "0x5A94B0",
+          "bytes": "488b0519e46503",
+          "meaning": "condition reads GameData global0x143C078D0"
+        },
+        {
+          "rva": "0x5A94BD",
+          "bytes": "488b4840",
+          "meaning": "condition reads same statistics object global+40"
+        },
+        {
+          "rva": "0x5A94C6",
+          "bytes": "448b414c",
+          "meaning": "condition reads team count+4C written by IncrementTeamOpenedBonfires"
+        },
+        {
+          "rva": "0x5A94D1",
+          "bytes": "458b4a2c",
+          "meaning": "read saved condition threshold"
+        },
+        {
+          "rva": "0x6D22CA8",
+          "bytes": "453bc1",
+          "meaning": "comparison type4 branch compares team count against threshold; setge follows"
+        },
+        {
+          "rva": "0x6D22CAB",
+          "bytes": "0f9dc2",
+          "meaning": "comparison type4: true exactly when count >= target"
+        },
+        {
+          "rva": "0x502BB0",
+          "bytes": "498b5808",
+          "meaning": "first active-effect list node"
+        },
+        {
+          "rva": "0x502C2F",
+          "bytes": "81e103000c80",
+          "meaning": "inactive-node mask (conditional filtering follows)"
+        },
+        {
+          "rva": "0x502EC8",
+          "bytes": "440f28c6",
+          "meaning": "default scaling coefficient is 1"
+        },
+        {
+          "rva": "0x502ED1",
+          "bytes": "f6825902000002",
+          "meaning": "optional attack-parameter coefficient flag"
+        },
+        {
+          "rva": "0x50337E",
+          "bytes": "488b5b38",
+          "meaning": "advance to next effect instance, no ID de-duplication"
+        },
+        {
+          "rva": "0x50338A",
+          "bytes": "0f8558f8ffff",
+          "meaning": "iterate until linked-list end"
+        },
+        {
+          "rva": "0x510758",
+          "bytes": "f30f104038",
+          "meaning": "physical raw SpEffectParam AttackRate getter"
+        },
+        {
+          "rva": "0x503144",
+          "bytes": "f30f5907",
+          "meaning": "physical multiplies this instance factor into existing channel accumulator"
+        },
+        {
+          "rva": "0x5035B2",
+          "bytes": "f3410f118690000000",
+          "meaning": "physical writes accumulated result without channel clamp"
+        },
+        {
+          "rva": "0x5102E8",
+          "bytes": "f30f10403c",
+          "meaning": "magic raw SpEffectParam AttackRate getter"
+        },
+        {
+          "rva": "0x503211",
+          "bytes": "f30f5900",
+          "meaning": "magic multiplies this instance factor into existing channel accumulator"
+        },
+        {
+          "rva": "0x50364A",
+          "bytes": "f3410f1186a4000000",
+          "meaning": "magic writes accumulated result without channel clamp"
+        },
+        {
+          "rva": "0x50FFD8",
+          "bytes": "f30f104040",
+          "meaning": "fire raw SpEffectParam AttackRate getter"
+        },
+        {
+          "rva": "0x50323C",
+          "bytes": "f30f5900",
+          "meaning": "fire multiplies this instance factor into existing channel accumulator"
+        },
+        {
+          "rva": "0x503660",
+          "bytes": "f3410f1186a8000000",
+          "meaning": "fire writes accumulated result without channel clamp"
+        },
+        {
+          "rva": "0x510A48",
+          "bytes": "f30f104044",
+          "meaning": "lightning raw SpEffectParam AttackRate getter"
+        },
+        {
+          "rva": "0x503267",
+          "bytes": "f30f5900",
+          "meaning": "lightning multiplies this instance factor into existing channel accumulator"
+        },
+        {
+          "rva": "0x503673",
+          "bytes": "f3410f1186ac000000",
+          "meaning": "lightning writes accumulated result without channel clamp"
+        },
+        {
+          "rva": "0x50FF58",
+          "bytes": "f30f1080dc010000",
+          "meaning": "holy raw SpEffectParam AttackRate getter"
+        },
+        {
+          "rva": "0x503292",
+          "bytes": "f30f5900",
+          "meaning": "holy multiplies this instance factor into existing channel accumulator"
+        },
+        {
+          "rva": "0x503686",
+          "bytes": "f3410f1186b0000000",
+          "meaning": "holy writes accumulated result without channel clamp"
+        }
+      ]
+    },
     "scope": "audited scalar damage rules; not exhaustive, not a relic legality checker",
     "phases": {
       "panel": "AttackPowerRate before defense, weapon component only",
@@ -7290,16 +7613,16 @@
     ],
     "rights": "Game data rights remain with original owners; stacking snapshot retains GPL-3.0 attribution",
     "counts": {
-      "effects": 235,
+      "effects": 236,
       "kinds": {
         "relic": 138,
         "field": 76,
         "reward": 7,
-        "event": 1,
+        "event": 2,
         "buff": 13
       },
       "phases": {
-        "final": 235
+        "final": 236
       },
       "officialRelics": 45
     }

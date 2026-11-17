@@ -247,5 +247,41 @@ test('mountaintop reward only adds its verified active frostbite proc and refres
   const conditions = Object.fromEntries(effect.conditions.map(name => [name, true]));
   close(calculate(effects, [], {conditions}).total, 46);
   close(calculate([...effects, ...effects], [], {conditions}).total, 46);
-  assert.ok(!data.effects.some(row => row.kind === 'event' && [8970000, 8970030, 8970065].includes(row.spEffectId)));
+  assert.ok(!data.effects.some(row => row.kind === 'event' && [8970030, 8970065].includes(row.spEffectId)));
+});
+
+test('Morgott reward restores team graces and multiplies at most ten native instances', () => {
+  const [effect] = buff('event:8970000');
+  assert.equal(effect.spEffectId, 8970000);
+  assert.equal(effect.permanentBuffId, 8970000);
+  assert.equal(effect.countKey, 'morgottGraces');
+  assert.equal(effect.countMax, 10);
+  assert.equal(effect.countUnit, '层');
+  assert.equal(effect.stackRule, 'highest');
+  assert.match(effect.stackSource, /原生spCategory10/);
+  assert.deepEqual(effect.searchTerms, ['恶兆妖鬼', '恶兆王']);
+  assert.equal(effect.acquisition, '击败入侵的恶兆妖鬼后获得');
+  assert.deepEqual(effect.countScaling, {type: 'native-instances', rate: 1.02});
+  assert.deepEqual(effect.channels, channels);
+  assert.ok(!effect.conditions?.length);
+  assert.match(effect.description, /获得奖励前已发现的也计入/);
+  assert.match(effect.source, /event1450/);
+  const withCount = count => ({effectCounts: {morgottGraces: count}});
+  let factor = 1;
+  for (let count = 0; count <= 10; count++) {
+    if (count) factor = Math.fround(factor * Math.fround(1.02));
+    close(calculate([effect], [], withCount(count)).total, 40 * factor);
+    close(calculate([effect, effect], [], withCount(count)).total, 40 * factor);
+  }
+  close(calculate([effect], [], withCount(11)).total, 40 * factor);
+  close(calculate([effect], [], {...withCount(10), manualPanel: true}).total, 40 * factor);
+  close(calculate([effect], [], withCount(0)).total, 40);
+  close(calculate([effect, ...buff('reward:8100000')], [], withCount(10)).total, 40 * factor * 1.06);
+  const evidence = data.metadata.morgottGraceControlFlow;
+  assert.equal(evidence.maximumInstances, 10);
+  assert.equal(evidence.countIncludesPreRewardDiscoveries, true);
+  assert.equal(evidence.eventId, 1450);
+  assert.equal(evidence.eventValue.id, 9130);
+  assert.equal(evidence.executableSha256, data.metadata.permanentEffectControlFlow.executableSha256);
+  assert.ok(evidence.anchors.some(anchor => anchor.rva === '0x503144' && anchor.bytes === 'f30f5907'));
 });

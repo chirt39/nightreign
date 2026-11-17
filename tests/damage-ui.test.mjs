@@ -7,6 +7,7 @@ import { calculateDamage, calculatePanel } from '../src/lib/damage-calculator.js
 import { damageShowcase } from '../src/lib/damage-showcase.js';
 import { hasAutomaticProjectile } from '../src/lib/damage-panel.js';
 import { relicChoiceMetadata } from '../src/lib/damage-relic-options.js';
+import { describeDamageBuff } from '../src/lib/damage-buff-details.js';
 
 const source = fs.readFileSync(new URL('../src/pages/DamageCalculatorPage.vue', import.meta.url), 'utf8');
 const script = source.match(/<script setup>([^]*?)<\/script>/)[1].replace(/^import .*;\r?\n/gm, '');
@@ -16,7 +17,7 @@ async function createCalculator(t, keepInitialSelection = false) {
   const scope = effectScope();
   t.after(() => scope.stop());
   const context = {
-    ref, shallowRef, computed, reactive, watch, nextTick, calculateDamage, calculatePanel, damageShowcase, hasAutomaticProjectile, relicChoiceMetadata,
+    ref, shallowRef, computed, reactive, watch, nextTick, calculateDamage, calculatePanel, damageShowcase, hasAutomaticProjectile, relicChoiceMetadata, describeDamageBuff,
     defineProps: () => ({ active: false }), defineExpose() {}, onMounted() {}, onBeforeUnmount() {},
     URL, location: { href: 'http://localhost/#damage' }, history: { state: {}, replaceState() {} },
   };
@@ -454,6 +455,29 @@ test('verified event reward is categorized separately and applies only while its
   assert.ok(Math.abs(get('result').value.total / baseline - 1.15) < 1e-10);
   context.toggleCondition(conditions.at(-1), false);
   assert.equal(get('result').value.total, baseline);
+});
+
+test('Morgott reward uses cumulative team graces and float32 multiplication capped at ten layers', async t => {
+  const { context, get } = await createCalculator(t);
+  get('targetId').value = '75100020';
+  const baseline = get('result').value.total;
+  context.toggleEffect('effect', 'buff:event:8970000', true);
+  const count = get('countOptions').value.find(item => item.id === 'morgottGraces');
+  assert.ok(count);
+  assert.equal(count.max, 10);
+  assert.equal(get('result').value.total, baseline);
+  // Independent values from the native aggregation audit, not a duplicate of
+  // the engine's count loop.
+  for (const [n, expected] of [[1, 1.0199999809265137], [5, 1.1040806770324707], [10, 1.218994140625]]) {
+    context.setEffectCount(count, n);
+    assert.ok(Math.abs(get('result').value.total / baseline - expected) < 1e-10);
+  }
+  context.setEffectCount(count, 12);
+  assert.equal(get('effectCounts').morgottGraces, 10);
+  assert.ok(Math.abs(get('result').value.total / baseline - 1.218994140625) < 1e-10);
+  context.toggleEffect('effect', 'buff:event:8970000', false);
+  assert.equal(get('result').value.total, baseline);
+  assert.equal(get('countOptions').value.length, 0);
 });
 
 
