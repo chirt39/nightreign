@@ -7,3 +7,20 @@ export const damageShowcase = [
   {"weaponId": "1070000", "variantId": "1070000", "artId": "1017", "name": "辉石克力士", "artName": "辉石彗砾", "weaponImage": "/weapon-images/10007-169671d82582.webp", "artImage": "/skill-images/8517-d1c8ba80d3c4.webp", "statuses": []},
   {"weaponId": "1160000", "variantId": "1160000", "artId": "1037", "name": "使命短刀", "artName": "黄金刀刃", "weaponImage": "/weapon-images/10016-43020d4fe3b2.webp", "artImage": "/skill-images/8537-224f91c547f9.webp", "statuses": []},
 ];
+
+// Only the routes verified as shared by the native TAE/behavior export may be rebound.
+export function bindSharedArt(action, entry, panelVariant, bulletUpgrades) {
+  const segments = action.segments.map(segment => {
+    if (!segment.evidence?.weaponVariantId) return segment;
+    const evidence = { ...segment.evidence, weaponVariantId: entry.variantId,
+      weaponBehaviorVariationId: entry.variation, weaponSpEffectBehaviorIds: entry.passiveIds };
+    const field = evidence.physicalTypeWeaponField;
+    const physicalType = field ? panelVariant.physicalTypes?.[field] ?? null : segment.physicalType;
+    if (!segment.projectile) return { ...segment, evidence, physicalType };
+    return { ...segment, evidence, physicalType, projectile: { ...segment.projectile,
+      baseAtkRatesByReinforcement: bulletUpgrades[panelVariant.reinforceTypeId] } };
+  });
+  return { ...action, segments, weaponIds: [entry.variantId], weaponTypes: [entry.categoryId],
+    scope: { ...action.scope, weaponVariantIds: [entry.variantId], weaponBehaviorVariationId: entry.variation,
+      note: '已由该武器的掉落配置与战技共用动作核对。' } };
+}

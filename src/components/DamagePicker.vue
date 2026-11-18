@@ -15,7 +15,7 @@ const effectCategories = [
 ];
 const draft = ref(props.editingRelic?.rows.map(row => ({ ...row })) || []);
 const custom = computed(() => props.kind === 'relic' && tab.value === 'custom');
-const titles = {weapon:'选择武器',trait:'添加武器词条',effect:'选择局内增益',relic:'添加遗物'};
+const titles = {weapon:'选择武器',artWeapon:'更换武器',trait:'添加武器词条',effect:'选择局内增益',relic:'添加遗物'};
 const options = computed(() => (custom.value ? props.customChoices : props.choices).filter(item =>
   (props.kind !== 'effect' || item.category === effectCategory.value) &&
   `${item.name} ${item.detail || ''} ${item.searchText || ''} ${(item.details || []).map(row => row.value).join(' ')} ${item.id}`.toLocaleLowerCase().includes(query.value.trim().toLocaleLowerCase())));

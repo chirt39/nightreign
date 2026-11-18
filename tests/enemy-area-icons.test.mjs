@@ -13,6 +13,8 @@ test('actual atlas areas use the verified building keys, including ruins and the
     ['遗迹', 'buildingCategory:ruins'],
     ['遗迹（大空洞）', 'buildingCategory:ruins'],
     ['小型要塞', 'buildingCategory:fort'],
+    ['东部地下要塞（大空洞）', 'buildingCategory:eastern-underground-fort'],
+    ['西部地下要塞（大空洞）', 'buildingCategory:western-underground-fort'],
     ['要塞', 'buildingCategory:castle'],
     ['要塞楼顶Boss', 'buildingCategory:castle'],
     ['要塞底层Boss', 'buildingCategory:castle'],
@@ -44,8 +46,25 @@ test('the central castle uses native icon 42010, independently of small fort ico
   assert.notEqual(enemyAreaIcon(manifest, '要塞'), enemyAreaIcon(manifest, '小型要塞'));
 });
 
+test('the eastern and western underground forts use their respective native map sprites', () => {
+  for (const [area, pointRow, pointIcon, sprite] of [
+    ['东部地下要塞（大空洞）', 1104, 74, 42044],
+    ['西部地下要塞（大空洞）', 1100, 75, 42045],
+  ]) {
+    const path = enemyAreaIcon(manifest, area);
+    const entry = Object.values(manifest.icons).find(icon => icon.src === path);
+    assert.equal(entry.source.pointParamRowId, pointRow);
+    assert.equal(entry.worldMapPointIconId, pointIcon);
+    assert.equal(entry.iconId, sprite);
+    assert.equal(entry.source.sprite, `MENU_MAP_${sprite}_0${pointIcon}.png`);
+    assert.equal(entry.resampled, false);
+    const png = fs.readFileSync(new URL(`../public${path}`, import.meta.url));
+    assert.equal(createHash('sha256').update(png).digest('hex'), entry.sha256);
+  }
+});
+
 test('unmatched areas, unverified entries and invalid image paths remain text-only', () => {
-  for (const area of ['all', '原野Boss', '出现地点未收录', '东部地下要塞（大空洞）', '小型营地', '教堂', '教堂（大空洞）']) {
+  for (const area of ['all', '原野Boss', '出现地点未收录', '小型营地', '教堂', '教堂（大空洞）']) {
     assert.equal(enemyAreaIcon(manifest, area), null);
   }
   assert.equal(enemyAreaIcon(null, '大教堂'), null);

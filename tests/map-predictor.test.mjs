@@ -247,12 +247,13 @@ test('building icons resolve explicit definition mappings to local assets', () =
   assert.equal(buildingIconPath({ icons: { a: { src: 'https://example.com/a.png', status: 'verified' } } }, 'a'), null);
 });
 
-test('nightlord portraits use verified menu identity and DLC has an honest fallback', () => {
+test('nightlord portraits use verified menu identities for base game and DLC', () => {
   const catalog = JSON.parse(readFileSync(new URL('../public/map-catalog.json', import.meta.url), 'utf8'));
   const manifest = JSON.parse(readFileSync(new URL('../public/enemy-image-verified.json', import.meta.url), 'utf8'));
   assert.equal(nightlordPortrait(catalog.definitions.nightlords['0'], manifest), '/enemy-images/nightboss-41820.png');
-  assert.equal(nightlordPortrait(catalog.definitions.nightlords['8'], manifest), null);
-  assert.equal(nightlordPortrait(catalog.definitions.nightlords['9'], manifest), null);
+  assert.equal(nightlordPortrait(catalog.definitions.nightlords['8'], manifest), '/enemy-images/nightboss-41828.png');
+  assert.equal(nightlordPortrait(catalog.definitions.nightlords['9'], manifest), '/enemy-images/nightboss-41829.png');
+  assert.equal(nightlordPortrait(catalog.definitions.nightlords['8'], { images: {} }), null);
 });
 
 

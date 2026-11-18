@@ -17,7 +17,6 @@ const firstSlot = draft.value.find(slot => slot.id === props.initialSlotId)
 const selectedSlotId = ref(firstSlot?.id);
 const query = ref('');
 const category = ref('all');
-const showUnsupported = ref(false);
 const categories = [
   { value: 'all', label: '全部' },
   { value: 'attribute', label: '属性攻击' },
@@ -36,7 +35,7 @@ const candidates = computed(() => {
   const mode = activeSlot.value?.mode === 'deep' ? '深夜' : '普通';
   const search = normalize(query.value).trim();
   return props.choices.filter(item => item.modes.includes(mode)
-    && (item.supported ? item.applicable : showUnsupported.value)
+    && item.applicable
     && (category.value === 'all' || item.categories.includes(category.value))
     && normalize(`${item.name} ${item.detail || ''} ${item.id}`).includes(search));
 });
@@ -116,12 +115,9 @@ onBeforeUnmount(() => {
         </aside>
         <section class="relic-candidates-panel" aria-label="选择遗物词条">
         <input v-model="query" type="search" placeholder="搜索遗物词条" aria-label="搜索遗物词条" autofocus>
-        <div class="candidate-filters">
-          <select v-model="category" aria-label="遗物词条分类">
-            <option v-for="item in categories" :key="item.value" :value="item.value">{{ item.label }}</option>
-          </select>
-          <label class="unsupported-switch"><input v-model="showUnsupported" type="checkbox">显示未计入词条</label>
-        </div>
+        <select v-model="category" class="candidate-category" aria-label="遗物词条分类">
+          <option v-for="item in categories" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
         <div class="relic-picker-results" aria-label="遗物词条候选">
           <button v-for="item in candidates" :key="item.id" type="button" class="relic-picker-option"
             :aria-pressed="isSelected(item.id)" :disabled="activeSlot?.rows.length >= 3 && !isSelected(item.id)"
@@ -167,10 +163,7 @@ button[aria-pressed=true],.save-button{color:#f2d59f;border-color:#bb9d63;backgr
 small{font-size:12px;line-height:1.4;color:#adbfcb}
 .slot-buttons small{white-space:nowrap;font-variant-numeric:tabular-nums}
 input[type=search]{width:100%;background:#0c1a27;flex-shrink:0}
-.candidate-filters{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
-.candidate-filters select{min-width:0;width:145px;flex-shrink:1}
-.unsupported-switch{display:flex;align-items:center;gap:5px;font-size:12px;white-space:nowrap}
-.unsupported-switch input{width:16px;height:16px;min-height:0;margin:0;padding:0;accent-color:#bda16b}
+.candidate-category{width:145px;max-width:100%;flex-shrink:0}
 .selected-effects{flex:1;min-height:0;margin:0;overflow:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:6px;align-items:stretch}
 .selected-effect{display:flex;align-items:center;gap:6px;background:#26394a;border:1px solid #52687d;border-radius:3px;padding:3px 4px 3px 8px;font-size:12px;flex-shrink:0}
 .selected-effect span{flex:1;min-width:0;overflow-wrap:anywhere}
@@ -193,8 +186,7 @@ input[type=search]{width:100%;background:#0c1a27;flex-shrink:0}
   .selected-effects{box-sizing:border-box;flex:none;height:43px;flex-direction:row;gap:5px;overflow-x:auto;overflow-y:hidden;align-items:flex-start;scrollbar-width:thin}
   .selected-effect{box-sizing:border-box;height:35px;max-width:100%;padding-block:1px}
   .selected-effect span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .candidate-filters{gap:7px}
-  .candidate-filters select{width:125px}
+  .candidate-category{width:125px}
 }
 @media(max-height:600px){.relic-picker-frame{padding:10px;gap:6px}.relic-picker-body,.relic-slots-panel,.relic-candidates-panel{gap:6px}.slot-groups{gap:5px}h3{margin-bottom:3px}.slot-buttons button{padding-block:4px}.slot-buttons small{font-size:11px}}
 </style>

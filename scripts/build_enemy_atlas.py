@@ -25,6 +25,9 @@ STATUS_FIELDS = (
     "resist_poison", "resist_desease", "resist_blood", "resist_freeze",
     "resist_sleep", "resist_madness", "resist_curse",
 )
+NIGHT_BOSS = "夜晚Boss"
+NIGHT_VANGUARD = "夜晚Boss前哨战"
+NIGHT_LOCATIONS = {NIGHT_BOSS, NIGHT_VANGUARD}
 ALIAS_LOCATION_PREFIXES = {
     "Fort": "小型要塞", "Camp": "大型营地", "Castle": "要塞",
     "Small Camp": "小型营地", "Night Horde": "夜晚Boss前哨战",
@@ -37,7 +40,7 @@ ALIAS_LOCATION_PREFIXES = {
 
 
 def native_id(value: object) -> str:
-    return re.sub(r"[ab]$", "", str(value))
+    return re.sub(r"(?:[ab]|-phase\d+)$", "", str(value))
 
 
 def entity_name(value: object) -> str:
@@ -48,7 +51,7 @@ def entity_name(value: object) -> str:
 def public_location(value: str) -> str | None:
     aliases = {"锻造设施": "锻造村", "永夜Boss": "夜王", "第三夜Boss": "夜王",
                "原野Boss - 恐怖强敌": "原野Boss"}
-    if value in ("宁姆韦德", "魔法师塔", "魔法师塔（大空洞）", "小型营地", "教堂"):
+    if value in ("宁姆韦德", "大空洞", "魔法师塔", "魔法师塔（大空洞）", "小型营地", "教堂"):
         return None
     return aliases.get(value, value)
 
@@ -59,14 +62,30 @@ def ordered_public_locations(values: list[str]) -> list[str]:
         normalized = public_location(value)
         if normalized and normalized not in output:
             output.append(normalized)
-    if any(value.endswith("（大空洞）") for value in output):
-        output = [value for value in output if value != "大空洞"]
     return output
 
 
 def number(value: str) -> int | float:
     n = float(value)
     return int(n) if n.is_integer() else round(n, 4)
+
+
+def species_weakness_flags(npc: dict[str, str]) -> list[str | None]:
+    # The native CSV includes the regulation defaults. Only an explicit bit
+    # value identifies a weakness or its absence.
+    labels = {"1": "Yes", "0": "No"}
+    return [labels.get(npc.get("isWeak" + suffix)) for suffix in "ABCD"]
+
+
+def fill_reviewed_fields(row, npc):
+    row[27] = round(5 * (1 + float(npc["superArmorRecoverCorrection"])), 3)
+    row[38:42] = species_weakness_flags(npc)
+    suffixes = ("Magic", "Fire", "Lightning", "Holy", "Poison", "ScarletRot", "Bleed",
+                "Frostbite", "Sleep", "Madness", "Blight", "WeakA", "WeakB", "WeakC", "WeakD")
+    for index, suffix in enumerate(suffixes, 42):
+        row[index] = number(npc["poiseBonusRate_" + suffix])
+    cap = int(npc["poiseBonusMax"])
+    row[57] = -1 if cap == 65535 else cap
 
 
 def albinauric_forms(native, rows, placements, encounters):
@@ -121,9 +140,70 @@ def first_party_row(npc: dict[str, str], name: str, width: int) -> list[object]:
     for offset in range(8):
         row[28 + offset] = number(npc[f"partsDamageRate{offset + 1}"])
     row[36] = number(npc["weakPartsDamageRate"])
-    # HP, weak-part class, race, and poise modifiers need separate game-side
+    # HP, weak-part class and poise modifiers need separate game-side
     # transformations. Null represents an unresolved value, never a zero.
     return row
+
+
+def dreglord_phases(npc, encounters, width, effects_path):
+    bars = {event["nameId"]: event["nameTexts"][0]["text"] for event in encounters
+            if event["mapId"] == "m16_10_00_00" and event["targetEntityOrGroup"] == 16100800
+            and event["memberResolution"] == "same-scene"
+            and any(str(member["npcParamId"]) == npc["row_id"] for member in event["members"])}
+    with effects_path.open(encoding="utf-8-sig", newline="") as stream:
+        effects = {r["row_id"]: r for r in csv.DictReader(stream) if r["row_id"] in ("60545", "60546")}
+    # After the transition, the low-HP effect replaces the opening effect.
+    # Both states must support one common set of rates for the second bar.
+    if any(effects["60545"][field] != effects["60546"][field] for field in DAMAGE_FIELDS):
+        raise ValueError("The two Dreglord phase-two effects have different damage rates")
+    for phase, bar in enumerate((907630000, 907630001), 1):
+        row = first_party_row(npc, f"{bars[bar]} (Boss {phase}阶段)", width)
+        evidence = {"name": "native_healthbar_FMG_and_exact_MSB_NpcParamId", "npcParamId": npc["row_id"],
+                    "nativeNameIds": [bar], "phase": phase, "scene": "m16_10_00_00", "stats": "NpcParam"}
+        if phase == 2:
+            row[1] = npc["row_id"] + "-phase2"
+            row[5:13] = [round(100 * (1 - float(npc[f]) * float(effects["60546"][f])), 6) for f in DAMAGE_FIELDS]
+            evidence.update(stats="NpcParam_and_phase_SpEffectParam", damageEffectId="60546",
+                            replacementDamageEffectId="60545")
+        yield row, evidence
+
+
+def harmonia_sources(placements, encounters):
+    scene = "m16_00_00_00"
+    bars = {e["targetEntityOrGroup"]: e for e in encounters if e["mapId"] == scene
+            and e["nameId"] == 907640000 and e["memberResolution"] == "same-scene"}
+    parts = {p["entityId"]: p for p in placements if p["scene"] == scene and p["kind"] == "enemies"}
+    sources = {}
+    # 90075850 links damage from each group to its own health-bar proxy.
+    for bar_id, group, form, version in ((16000807, 16005800, "普通", "Boss"),
+                                          (16000867, 16005860, "永夜一阶段", "永夜Boss 1阶段"),
+                                          (16000857, 16005850, "永夜二阶段", "永夜Boss 2阶段")):
+        if bar_id not in bars:
+            continue
+        name = bars[bar_id]["nameTexts"][0]["text"]
+        for i in range(7):
+            part = parts[bar_id - 7 + i]
+            if part["model"] != "c7620":
+                raise ValueError(f"Unexpected Harmonia member at {part['entityId']}")
+            sources[part["npcId"]] = {
+                "displayName": f"{name} ({version}) · 成员{i + 1}",
+                "nightlordFamily": name, "formLabel": form, "member": i + 1,
+                "scene": scene, "entityId": part["entityId"], "damageGroupId": group,
+                "healthBarEntityId": bar_id, "nativeNameIds": [907640000],
+                "searchAliases": ["七仙女", "安定者"], "stats": "NpcParam",
+            }
+        if bar_id == 16000857:
+            worm = parts[16000858]
+            if worm["model"] != "c4641":
+                raise ValueError("Unexpected Harmonia worm model")
+            sources[worm["npcId"]] = {
+                "displayName": f"{name} · 虫形 (永夜Boss 2阶段)", "formLabel": form,
+                "scene": scene, "entityId": 16000858, "damageGroupId": 16005851,
+                "healthBarEntityId": bar_id, "nativeNameIds": [907640000],
+                "searchAliases": ["七仙女", "安定者"], "stats": "NpcParam_and_resident_SpEffectParam",
+                "damageEffectId": "62990",
+            }
+    return sources
 
 
 def scene_records(paths: list[Path], aliases: dict[str, str],
@@ -191,6 +271,7 @@ def main() -> None:
     parser.add_argument("--curated-extra-locations", type=Path, default=Path("scripts/data/enemy_curated_extra_locations.json"))
     parser.add_argument("--legacy-scale-locations", type=Path, default=Path("scripts/data/enemy_legacy_scale_locations.json"))
     parser.add_argument("--curation", type=Path, default=Path("scripts/data/enemy_atlas_curation.json"))
+    parser.add_argument("--difference-review", type=Path, default=Path("scripts/data/enemy_difference_review.json"))
     parser.add_argument("--retired-ids", type=Path, default=Path("scripts/data/enemy_retired_source_ids.json"))
     parser.add_argument("--bilingual-candidates", type=Path, default=Path("scripts/data/enemy_bilingual_name_candidates.json"))
     parser.add_argument("--model-family-names", type=Path, default=Path("scripts/data/enemy_model_family_names.json"))
@@ -199,6 +280,7 @@ def main() -> None:
     if args.write and (not args.scene or not args.encounters or not args.native_encounters):
         parser.error("--write requires --scene, --encounters and --native-encounters")
     curation = json.loads(args.curation.read_text(encoding="utf-8"))
+    difference_review = json.loads(args.difference_review.read_text(encoding="utf-8"))
     hostile_prefixes = tuple(curation["hostilePrefixes"])
     generated_ids = set(curation["generatedIds"])
     retired_prefixes = tuple(curation["retiredPrefixes"])
@@ -239,37 +321,51 @@ def main() -> None:
     templates = json.loads(args.template_locations.read_text(encoding="utf-8"))
     forts = json.loads(args.underground_forts.read_text(encoding="utf-8"))
     scene_rows, exact_locations = scene_records(args.scene, aliases, templates, forts)
+    native_encounters = []
+    if args.native_encounters:
+        native_encounters = [json.loads(line) for line in args.native_encounters.read_text(encoding="utf-8").splitlines() if line]
+    harmonia = harmonia_sources(scene_rows, native_encounters)
+    for npc_id in harmonia:
+        exact_locations.setdefault(npc_id, set()).add("夜王")
+    night_review = json.loads((args.curation.parent / "enemy_night_encounters.json").read_text(encoding="utf-8"))
+    night_scenes = night_review["vanguardByNightScene"]
+    dlc_scenes = {scene for scene, template in templates.items()
+                  if "4" in template["terrainCodes"] or template.get("building") in ("沼泽", "锻造村")}
+    dlc_scenes.update(scene for scene in night_scenes if scene.startswith("m52_"))
+    dlc_scenes.update(("m16_00_00_00", "m16_10_00_00", "m16_11_00_00"))
+    dlc_npcs = {part["npcId"] for part in scene_rows if part["kind"] == "enemies" and not part["placeholderModel"]
+                and (part["scene"] in dlc_scenes or (part["scene"].startswith("m60_") and part["scene"].endswith("_40")))}
+    night_roles = {source_id: NIGHT_VANGUARD for members in night_scenes.values() for source_id in members}
+    night_actors = {(part["scene"], part["entityId"], part["npcId"]) for part in scene_rows
+                    if part["scene"] in night_scenes and part["kind"] == "enemies"
+                    and not part["placeholderModel"] and part["model"] != "c0000"}
+    # A collective health bar targets a group ID. Only a bar bound to the
+    # individual placed actor identifies a boss, including in multi-boss fights.
+    for encounter in native_encounters:
+        scene = encounter["mapId"]
+        target = encounter["targetEntityOrGroup"]
+        if scene not in night_scenes or not target or encounter["memberResolution"] != "same-scene":
+            continue
+        for member in encounter["members"]:
+            npc_id = str(member["npcParamId"])
+            if member["mapId"] == scene and member["entityId"] == target and (scene, target, npc_id) in night_actors:
+                night_roles[npc_id] = NIGHT_BOSS
     encounters = json.loads(args.encounters.read_text(encoding="utf-8"))["encounters"] if args.encounters else []
     forms, forge_evidence = albinauric_forms(native, curated_rows, scene_rows, encounters)
     atlas["albinauricForms"] = forms
-    # A night battle template identifies the arena, not a second overworld placement.
     hollow_evidence = json.loads((args.curation.parent / "enemy_dlc_location_evidence.json").read_text(encoding="utf-8"))
-    night_templates = {int(t["template"]) for scene, t in templates.items()
-                       if aliases.get(scene, "").startswith("Night Boss -")}
-    hollow_night_ids = {k for k, v in hollow_evidence["locations"]["大空洞"].items() if v[0] in night_templates}
-    for row in curated_rows:
-        sid = str(row[1])
-        if "前哨战" not in str(row[0]):
-            continue
-        exact = exact_locations.get(sid, set())
-        if "夜晚Boss" in exact:
-            exact.remove("夜晚Boss")
-            exact.add("夜晚Boss前哨战")
-        if sid in hollow_night_ids and "大空洞" not in exact:
-            prior = atlas["extraLocations"].get(sid, [])
-            if "大空洞" in prior:
-                atlas["extraLocations"][sid] = [loc for loc in prior if loc != "大空洞"]
+    for sources in hollow_evidence["locations"].values():
+        dlc_npcs.update(native_id(source_id) for source_id in sources)
     for locations in exact_locations.values():
-        locations.difference_update({"魔法师塔", "魔法师塔（大空洞）"})
+        locations.difference_update(NIGHT_LOCATIONS | {"魔法师塔", "魔法师塔（大空洞）"})
+    for npc_id, role in night_roles.items():
+        exact_locations.setdefault(npc_id, set()).add(role)
     for npc_id, excluded_locations in curation["displayLocationExclusionsById"].items():
         exact_locations.get(npc_id, set()).difference_update(excluded_locations)
     scene_counts = Counter(record["npcId"] for record in scene_rows)
     scene_enemy_ids = {record["npcId"] for record in scene_rows
                        if record["kind"] == "enemies" and not record["placeholderModel"]}
     scene_locations = {record["scene"]: record["location"] for record in scene_rows if record["location"]}
-    native_encounters = []
-    if args.native_encounters:
-        native_encounters = [json.loads(line) for line in args.native_encounters.read_text(encoding="utf-8").splitlines() if line]
     group_name_ids = {event["nameId"] for event in native_encounters if len(event["members"]) > 1}
     single_event_names: dict[str, Counter[str]] = defaultdict(Counter)
     single_event_name_ids: dict[str, set[int]] = defaultdict(set)
@@ -294,6 +390,7 @@ def main() -> None:
     added = []
     generated_now = []
     card_evidence = {}
+    harmonia_rows = []
     numeric_drift = []
     for npc in native:
         row_id = npc["row_id"]
@@ -320,6 +417,33 @@ def main() -> None:
             added.append({"npcId": row_id, "name": name, "locations": sorted(exact_locations.get(row_id, []))})
         elif row_id in existing:
             state = "atlas_exact_source_id"
+        elif row_id in harmonia:
+            state = "atlas_event_text_enemy"
+            evidence = harmonia[row_id]
+            new_row = first_party_row(npc, evidence["displayName"], len(atlas["columns"]))
+            fill_reviewed_fields(new_row, npc)
+            if "damageEffectId" in evidence:
+                effect_id = evidence["damageEffectId"]
+                if npc["spEffectID20"] != effect_id:
+                    raise ValueError("Harmonia worm resident effect changed")
+                with args.native_csv.with_name("SpEffectParam.csv").open(encoding="utf-8-sig", newline="") as stream:
+                    effect = next(r for r in csv.DictReader(stream) if r["row_id"] == effect_id)
+                new_row[5:13] = [round(100 * (1 - float(npc[f]) * float(effect[f])), 6) for f in DAMAGE_FIELDS]
+            harmonia_rows.append(new_row)
+            existing[row_id].append(new_row)
+            generated_now.append(row_id)
+            card_evidence[row_id] = evidence
+            added.append({"npcId": row_id, "name": new_row[0], "locations": ["夜王"]})
+        elif row_id == "76100010" and row_id in single_event_names:
+            state = "atlas_event_text_enemy"
+            for phase_row, evidence in dreglord_phases(npc, native_encounters, len(atlas["columns"]),
+                                                       args.native_csv.with_name("SpEffectParam.csv")):
+                source_id = str(phase_row[1])
+                atlas["rows"].append(phase_row)
+                existing[row_id].append(phase_row)
+                generated_now.append(source_id)
+                card_evidence[source_id] = evidence
+                added.append({"npcId": row_id, "sourceId": source_id, "name": phase_row[0], "locations": ["夜王"]})
         elif row_id in single_event_names and npc["teamType"] != "26":
             state = "atlas_event_text_enemy"
             event_name = sorted(single_event_names[row_id].items(), key=lambda item: (-item[1], len(item[0]), item[0]))[0][0]
@@ -394,10 +518,16 @@ def main() -> None:
             "exactLocations": sorted(exact_locations.get(row_id, [])),
         })
         for atlas_row in existing.get(row_id, []):
+            if row_id in dlc_npcs:
+                atlas_row[38:42] = species_weakness_flags(npc)
+            if row_id in {"49000010", "49010010", "75600020", "75610010"}:
+                atlas_row[27] = round(5 * (1 + float(npc["superArmorRecoverCorrection"])), 3)
             if str(atlas_row[1]) != row_id:
                 continue
             expected = first_party_row(npc, name or str(atlas_row[0]), len(atlas["columns"]))
             for column in list(range(5, 20)) + [24, 28, 29, 30, 31, 32, 33, 34, 35, 36]:
+                if 5 <= column <= 12 and "damageEffectId" in card_evidence.get(row_id, {}):
+                    continue  # The calculator generator checks the composed rates against SpEffectParam.
                 actual = atlas_row[column]
                 native_value = expected[column]
                 equal = (abs(actual - native_value) < 0.11 if isinstance(actual, (int, float))
@@ -405,6 +535,11 @@ def main() -> None:
                 if actual is not None and not equal:
                     numeric_drift.append({"npcId": row_id, "column": column,
                                           "atlas": actual, "native": native_value})
+
+    # Append the new encounter in battle order, preserving older atlas row links.
+    form_order = {"普通": 0, "永夜一阶段": 1, "永夜二阶段": 2}
+    atlas["rows"].extend(sorted(harmonia_rows, key=lambda row: (
+        form_order[harmonia[str(row[1])]["formLabel"]], harmonia[str(row[1])].get("member", 8))))
 
     drift_ids = {item["npcId"] for item in numeric_drift}
     for item in coverage:
@@ -414,7 +549,7 @@ def main() -> None:
 
     extras = atlas.setdefault("extraLocations", {})
     for source_id, names in list(extras.items()):
-        extras[source_id] = sorted(set(ordered_public_locations(names)))
+        extras[source_id] = sorted(set(ordered_public_locations(names)) - NIGHT_LOCATIONS)
     for source_id, rows in existing.items():
         names = exact_locations.get(source_id)
         if names:
@@ -447,6 +582,9 @@ def main() -> None:
     (args.audit_dir / "variant-groups.json").write_text(json.dumps(variant_groups, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     audit = args.audit_dir
     audit.mkdir(parents=True, exist_ok=True)
+    dlc_species = [{"sourceId": str(row[1]), "npcId": native_id(row[1]), "flags": row[38:42]}
+                   for row in atlas["rows"] if native_id(row[1]) in dlc_npcs]
+    (audit / "dlc-species.json").write_text(json.dumps(dlc_species, indent=2) + "\n", encoding="utf-8")
     (audit / "coverage-rows.jsonl").write_text(
         "".join(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n" for row in coverage), encoding="utf-8"
     )
@@ -642,12 +780,64 @@ def main() -> None:
     scale_by_source = legacy_locations["locationsBySourceId"]
     display_locations: dict[str, list[str]] = {}
     stat_locations: dict[str, list[str]] = {}
+    # Validate against rolled layouts and their enabled enemy variations. A map
+    # alias alone also matches the unrolled 3190 template.
+    fort_parts = defaultdict(list)
+    fort_templates = {scene: str(t["template"]) for scene, t in templates.items()
+                      if t.get("building") == "小型要塞"}
+    rolls = defaultdict(set)
+    if args.native_encounters:
+        lots = args.native_encounters.parent / "configs/LotResultSmallBaseAndSpot.jsonl"
+        for line in lots.read_text(encoding="utf-8").splitlines():
+            lot = json.loads(line)["values"]
+            rolls[lot["smallBaseMapId"]].add(int(lot["variationId"]))
+    for part in scene_rows:
+        template = fort_templates.get(part["scene"])
+        if (template in rolls and part["variation"] in rolls[template]
+                and part["kind"] == "enemies" and not part["placeholderModel"]):
+            fort_parts[part["npcId"]].append(part)
+    if args.write and not fort_parts:
+        raise ValueError("No rolled fort placements available")
+    # Check the same NPCs in every scene. Attach the findings to the shared
+    # card: a placement identifies an NPC, not its a/b scaling branch.
+    other_placements = defaultdict(set)
+    for part in scene_rows:
+        if part["npcId"] not in fort_parts or part["kind"] != "enemies" or part["placeholderModel"]:
+            continue
+        location = public_location(part["location"]) if part["location"] else None
+        if not location or location == "小型要塞":
+            continue
+        template = part["nativeTemplateId"]
+        if template and (template not in rolls or part["variation"] not in {-1, *rolls[template]}):
+            continue
+        other_placements[part["npcId"]].add(location)
+    atlas["fortVariantSources"] = []
+    # Once the shell breaks, the eight incoming damage rates are the NPC's
+    # base rates. Effect 11550 only applies while the shell is intact.
+    crystal_ids = {"33500020", "33500010", "33501010", "33502010"}
+    crystals = {r["row_id"]: r for r in native if r["row_id"] in crystal_ids}
+    atlas["crystalianSources"] = []
     public_location_evidence: dict[str, dict] = {}
+    completed_ids = set(difference_review["completeNativeFields"])
+    reviewed_npcs = {r["row_id"]: r for r in native if r["row_id"] in completed_ids}
+    atlas["reviewedProfileFamilies"] = list(difference_review["profileRepresentatives"].values())
     for row in atlas["rows"]:
         source_id = str(row[1])
+        if source_id in completed_ids:
+            fill_reviewed_fields(row, reviewed_npcs[source_id])
+        npc_id = native_id(source_id)
+        if npc_id in crystal_ids:
+            crystal = crystals[npc_id]
+            row[5:13] = [round(100 * (1 - float(crystal[field])), 4) for field in DAMAGE_FIELDS]
+            atlas["crystalianSources"].append(source_id)
         curated_scale_locations = list(scale_by_source.get(source_id, []))
-        locations = list(curated_scale_locations)
+        superseded = difference_review["supersededScaleLocations"].get(source_id, [])
+        locations = [location for location in curated_scale_locations if location not in superseded and location not in NIGHT_LOCATIONS]
         exact_source_locations = atlas["extraLocations"].get(source_id, [])
+        if source_id in night_review["sourceNames"]:
+            row[0] = night_review["sourceNames"][source_id]
+        elif night_roles.get(source_id) == NIGHT_VANGUARD:
+            row[0] = re.sub(r"夜晚Boss(?!\s*前哨战)", NIGHT_VANGUARD, str(row[0]))
         entity_only_locations = atlas["entityLocationsBySourceId"].get(source_id, [])
         locations.extend(exact_source_locations)
         locations.extend(curation["displayLocationOverridesById"].get(source_id, []))
@@ -656,6 +846,32 @@ def main() -> None:
             excluded.add("山顶")
         if entity_name(row[0]) == "祖灵":
             excluded.add("要塞底层Boss")
+        if fort_parts:
+            if npc_id in fort_parts:
+                locations.append("小型要塞")
+                atlas["fortVariantSources"].append(source_id)
+                if source_id == npc_id or source_id == npc_id + "a":
+                    entity_only_locations = ordered_public_locations(
+                        entity_only_locations + sorted(other_placements[npc_id]))
+                    atlas["entityLocationsBySourceId"][source_id] = entity_only_locations
+                if source_id == "44900010b" and "[灾域]" not in row[0]:
+                    row[0] = row[0].replace("大壶", "大壶 [灾域]", 1)
+            else:
+                excluded.add("小型要塞")
+                entity_only_locations = [v for v in entity_only_locations if v != "小型要塞"]
+            if npc_id == "37024010":
+                locations.extend(sorted(exact_locations.get(npc_id, set())))
+        reviewed_locations = difference_review["additionalEntityLocations"].get(source_id, [])
+        if reviewed_locations:
+            entity_only_locations = ordered_public_locations(entity_only_locations + reviewed_locations)
+            atlas["entityLocationsBySourceId"][source_id] = entity_only_locations
+        # Old scale rows and same-family overrides cannot transfer night roles
+        # to another source. Keep those provenance records outside the filters.
+        role = night_roles.get(source_id)
+        excluded.update(NIGHT_LOCATIONS - {role})
+        entity_only_locations = [item for item in entity_only_locations if item not in NIGHT_LOCATIONS]
+        if source_id in atlas["entityLocationsBySourceId"]:
+            atlas["entityLocationsBySourceId"][source_id] = entity_only_locations
         stat_locations[source_id] = ordered_public_locations([item for item in locations if item not in excluded])
         display_locations[source_id] = ordered_public_locations(
             stat_locations[source_id] + entity_only_locations)

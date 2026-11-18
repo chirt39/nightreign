@@ -13,9 +13,10 @@ class EnemyAtlasCurationTest(unittest.TestCase):
         cls.rows = {str(row[1]): row for row in cls.atlas["rows"]}
 
     def test_exact_source_removals_and_snowfield_troll_retention(self):
-        for source_id in ("45050010", "46020030", "46000110", "43511120", "43510040"):
+        for source_id in ("45050010", "46020030", "46000110", "43511120", "43510040",
+                          "46001000", "46008000", "46003000"):
             self.assertNotIn(source_id, self.rows)
-            for field in ("extraLocations", "displayLocationsBySourceId", "statLocationsBySourceId"):
+            for field in ("extraLocations", "entityLocationsBySourceId", "displayLocationsBySourceId", "statLocationsBySourceId"):
                 self.assertNotIn(source_id, self.atlas[field])
         for source_id in ("46020000", "46020010", "46020020", "46020040", "46021000", "46022000", "46020050"):
             self.assertIn(source_id, self.rows)
@@ -34,6 +35,31 @@ class EnemyAtlasCurationTest(unittest.TestCase):
         self.assertEqual(display["36000010"], ["夜晚Boss前哨战"])
         self.assertEqual(display["36000020"], ["封印监牢"])
         self.assertIn("夜晚Boss", display["46809010"])  # Actual Fallingstar Beast.
+
+    def test_pumpkin_head_occurrences_are_specific_to_the_placed_form(self):
+        display = self.atlas["displayLocationsBySourceId"]
+        for source_id in ("43400610", "43401610"):
+            self.assertEqual(self.rows[source_id][13], "Immune")
+            self.assertEqual(display[source_id], ["“隐城”诺克拉缇欧"])
+        for source_id, area in (("43401010a", "大型营地"), ("43401120", "矿洞")):
+            self.assertEqual(self.rows[source_id][13], 112)
+            self.assertEqual(display[source_id], [area])
+
+    def test_night_roles_follow_individual_health_bars(self):
+        for field in ("statLocationsBySourceId", "displayLocationsBySourceId"):
+            locations = self.atlas[field]
+            for source_id in ("45803010", "43531110", "50400120", "50700010", "52501220"):
+                self.assertIn("夜晚Boss", locations[source_id])
+            for source_id in ("40400010", "43531400", "30600020", "49801110", "31600020"):
+                self.assertIn("夜晚Boss前哨战", locations[source_id])
+                self.assertNotIn("夜晚Boss", locations[source_id])
+            for source_id in ("45803000", "21300520", "35000110b"):
+                self.assertFalse({"夜晚Boss", "夜晚Boss前哨战"}.intersection(locations[source_id]))
+        self.assertEqual(self.rows["77100010"][0], "百足恶魔 (夜晚Boss)")
+        for source_id in ("42410010", "42500030", "42400030", "42810010", "42800520",
+                          "42800020", "45600030", "45500030"):
+            self.assertNotIn(source_id, self.rows)
+        self.assertIn("夜晚Boss前哨战", self.atlas["displayLocationsBySourceId"]["42500010"])
 
     def test_albinauric_appearance_and_forge_binding(self):
         normal, horned, silver = self.atlas["albinauricForms"]

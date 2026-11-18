@@ -22,6 +22,8 @@ REMOVED_ENEMY_IDS = frozenset({
     "75600110", "75600130", "75700030", "75700020", "75700010",
     "43630400", "75400010", "21300010", "40001020", "46004080",
     "75400100", "30101260", "30101010", "30100280", "21500400",
+    "21500000", "21500100", "21500200", "21500300", "21500310",
+    "21500500", "21500510", "40600000", "40600010",
     "45050010", "46020030", "46000110", "43511120", "43510040",
 })
 REMOVED_ENEMY_COLUMN_POSITIONS = frozenset({20, 21, 22, 23, 25})
@@ -99,6 +101,8 @@ def build() -> list[dict[str, Any]]:
         enemy_id_counts[enemy_id] = enemy_id_counts.get(enemy_id, 0) + 1
         record_id = f"enemy:{enemy_id}" if enemy_id_counts[enemy_id] == 1 else f"enemy:{enemy_id}:{enemy_id_counts[enemy_id]}"
         fields: list[str] = []
+        if enemy_id in enemy_data.get("crystalianSources", []):
+            fields.append("结晶人合并卡，伤害倍率为外壳破碎后的数值")
         locations = extra_locations.get(enemy_id, [])
         if locations:
             fields.append("出现地点：" + "、".join(locations))

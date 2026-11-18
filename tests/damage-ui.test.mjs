@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import test from 'node:test';
 import { ref, shallowRef, computed, reactive, watch, nextTick, effectScope } from 'vue';
 import { calculateDamage, calculatePanel } from '../src/lib/damage-calculator.js';
-import { damageShowcase } from '../src/lib/damage-showcase.js';
+import { damageShowcase, bindSharedArt } from '../src/lib/damage-showcase.js';
 import { hasAutomaticProjectile } from '../src/lib/damage-panel.js';
 import { relicChoiceMetadata } from '../src/lib/damage-relic-options.js';
 import { describeDamageBuff } from '../src/lib/damage-buff-details.js';
@@ -17,14 +17,14 @@ async function createCalculator(t, keepInitialSelection = false) {
   const scope = effectScope();
   t.after(() => scope.stop());
   const context = {
-    ref, shallowRef, computed, reactive, watch, nextTick, calculateDamage, calculatePanel, damageShowcase, hasAutomaticProjectile, relicChoiceMetadata, describeDamageBuff,
+    ref, shallowRef, computed, reactive, watch, nextTick, calculateDamage, calculatePanel, damageShowcase, bindSharedArt, hasAutomaticProjectile, relicChoiceMetadata, describeDamageBuff,
     defineProps: () => ({ active: false }), defineExpose() {}, onMounted() {}, onBeforeUnmount() {},
     URL, location: { href: 'http://localhost/#damage' }, history: { state: {}, replaceState() {} },
   };
   vm.createContext(context);
   scope.run(() => vm.runInContext(script, context));
   const get = name => vm.runInContext(name, context);
-  get('catalogs').value = { weapons: load('weapon-catalog'), panel: load('damage-panel'), actions: load('damage-actions'), effects: load('damage-effects'), targets: load('damage-targets'), arts: load('arts-catalog'), traits: load('damage-weapon-traits'), definitions:load('relic_rule_effects'), crossMode:load('relic_effect_cross_mode') };
+  get('catalogs').value = { weapons: load('weapon-catalog'), panel: load('damage-panel'), actions: load('damage-actions'), effects: load('damage-effects'), targets: load('damage-targets'), arts: load('arts-catalog'), traits: load('damage-weapon-traits'), artWeapons: load('damage-art-weapons'), definitions:load('relic_rule_effects'), crossMode:load('relic_effect_cross_mode') };
   context.normalizeSelection(); await nextTick();
   if (keepInitialSelection) return { context, get };
   get('targetId').value = '';
@@ -572,4 +572,58 @@ test('removed low-health -7% trait cannot enter damage through either picker or 
   assert.equal(get('equipmentTraits').value.length, 0);
   assert.equal(get('result').value.total, baseline);
   assert.ok(get('traits').value.some(item => item.id === 8810000), 'separate -5% trait retained');
+});
+test('Double Slash swaps weapon without losing the FP branch, selected hit, target or relics', async t => {
+  const { context, get } = await createCalculator(t, true);
+  context.chooseShowcase(damageShowcase.find(item => item.artId === '112'));
+  context.saveRelicSlots(draftSlots(get, { 'normal:1': ['7001402'] }));
+  context.setInsufficientFp(true);
+  await nextTick();
+  const previous = get('action').value;
+  const hit = previous.segments[0].id;
+  const target = get('targetId').value;
+  get('selectedSegmentIds').value = [hit];
+  const before = get('result').value.total;
+  get('picker').value = 'artWeapon';
+  assert.ok(get('pickerChoices').value.some(item => item.id === '2000000' && item.image));
+  assert.ok(!get('pickerChoices').value.some(item => item.id === '9010500'));
+  context.pickItem('2000000');
+  await nextTick();
+  const next = get('action').value;
+  assert.equal(next.id, previous.id);
+  assert.equal(next.scope.enoughFp, false);
+  assert.deepEqual(Array.from(get('selectedSegmentIds').value), [hit]);
+  assert.equal(next.segments[0].physicalType, 'normal');
+  assert.equal(previous.segments[0].physicalType, 'slash');
+  assert.equal(get('targetId').value, target);
+  assert.equal(get('relicCount').value, 1);
+  assert.ok(get('result').value.total > 0);
+  assert.notEqual(get('result').value.total, before);
+});
+
+test('every offered weapon binds both FP branches and calculates the default hit with its own panel', async t => {
+  const { context, get } = await createCalculator(t);
+  for (const artId of ['112','214']) {
+    context.chooseShowcase(damageShowcase.find(item => item.artId === artId));
+    await nextTick();
+    const choices = get('sharedArtChoices').value;
+    assert.ok(choices.length > 1);
+    for (const entry of choices) {
+      get('picker').value = 'artWeapon';
+      context.pickItem(entry.variantId);
+      await nextTick();
+      const branches = get('compatibleActions').value;
+      assert.equal(branches.length, 2, entry.name);
+      assert.ok(branches.every(branch => branch.weaponIds.includes(entry.variantId)), entry.name);
+      assert.ok(get('result').value.total > 0, entry.name);
+      if (artId !== '214') continue;
+      const segments = get('segments').value;
+      const projectile = segments.find(s => s.projectile);
+      const variant = get('panelCatalog').value.variants[entry.variantId];
+      assert.equal(projectile.evidence.weaponVariantId, entry.variantId);
+      assert.equal(projectile.projectile.baseAtkRatesByReinforcement[0].reinforceRowId, Number(variant.reinforceTypeId));
+      assert.ok(segments.some(s => s.id === 'missing-attack-40000-2' && !s.rates));
+      if (entry.variantId === '11000500') assert.equal(segments.find(s => s.evidence.physicalTypeWeaponField).physicalType, 'strike');
+    }
+  }
 });

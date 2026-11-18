@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-11",
+  "updatedAt": "2026-11-18",
   "images": {
     "44700010a": {
       "path": "enemy-images/candidate-fextralife-39c1e0836f262c8b.png",
@@ -296,12 +296,12 @@
       "licenseStatus": "unverified"
     },
     "77100010": {
-      "path": "enemy-images/candidate-nightreign-gallery-5288a216d93e4544.png",
-      "assetOrigin": "nightreign-gallery",
-      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Smelter-demon-nightreign-300px.png",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/6/68/Smelter-demon-nightreign-300px.png",
-      "matchEvidence": "gallery image named Smelter-demon-nightreign-300px.png; variant or stage may differ",
-      "sourceEnemyName": "Smelter-demon-nightreign-300px.png",
+      "path": "enemy-images/candidate-nightreign-boss-shot-aea5fdc63ab963a4.png",
+      "assetOrigin": "nightreign-boss-shot",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Centipede_Demon",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/0/0f/Centipede-demon-night-boss-nightreign-300px.png",
+      "matchEvidence": "Existing Centipede Demon boss image matched to the individual night boss health bar for NPC 77100010.",
+      "sourceEnemyName": "Centipede-demon-night-boss-nightreign-300px.png",
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
@@ -663,37 +663,6 @@
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
-    "42410010": {
-      "path": "enemy-images/candidate-fextralife-07d1f227f0c0636c.png",
-      "assetOrigin": "fextralife",
-      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Colossal_Fingercreeper",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/c/c0/Colossal_fingercreeper_enemies_elden_ring_nightreign_wiki_600px.png",
-      "matchEvidence": "illustrated entry for colossal fingercreeper enemies elden ring nightreign wiki 600px; variant or stage may differ",
-      "sourceEnemyName": "colossal fingercreeper enemies elden ring nightreign wiki 600px",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "42500030": {
-      "path": "enemy-images/candidate-fextralife-0ddf773e72125d4d.png",
-      "assetOrigin": "fextralife",
-      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Lesser_Fingercreeper",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/3/3e/Lesser_fingercreeper_elden_ring_nightreign_wiki_300px.png",
-      "matchEvidence": "illustrated entry for lesser fingercreeper elden ring nightreign wiki 300px; variant or stage may differ",
-      "sourceEnemyName": "lesser fingercreeper elden ring nightreign wiki 300px",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "42400030": {
-      "path": "enemy-images/candidate-bwiki-31cee19b0d2e7672.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742500021",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/2/2c/8w5us1274yc5adk0v1tplzjkr6dwzo5.jpg/200px-NPC_Avatar_42500021.jpg",
-      "matchEvidence": "same Chinese base name; source NPC ID may differ",
-      "sourceEnemyName": "指虫",
-      "sourceEnemyId": "42500021",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
     "42500000": {
       "path": "enemy-images/candidate-fextralife-0ddf773e72125d4d.png",
       "assetOrigin": "fextralife",
@@ -801,49 +770,6 @@
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
-    "42810010": {
-      "path": "enemy-images/candidate-bwiki-ad9b3fcd12543d15.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742800160",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/8/87/3tr2mr60dkwdtxgik00np8zccpzoikm.jpg/200px-NPC_Avatar_42800160.jpg",
-      "matchEvidence": "same enemy family or named variant; candidate only",
-      "sourceEnemyName": "巨型蚂蚁",
-      "sourceEnemyId": "42800160",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "42800520": {
-      "path": "enemy-images/candidate-bwiki-ad9b3fcd12543d15.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742800160",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/8/87/3tr2mr60dkwdtxgik00np8zccpzoikm.jpg/200px-NPC_Avatar_42800160.jpg",
-      "matchEvidence": "same enemy family or named variant; candidate only",
-      "sourceEnemyName": "巨型蚂蚁",
-      "sourceEnemyId": "42800160",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "42800020": {
-      "path": "enemy-images/candidate-fextralife-ff43e49a85c3f2a8.png",
-      "assetOrigin": "fextralife",
-      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Giant_Ant",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/9/96/Giant_ant_enemies_elden_ring_wiki_600px.png",
-      "matchEvidence": "illustrated entry for giant ant enemies elden ring wiki 600px; variant or stage may differ",
-      "sourceEnemyName": "giant ant enemies elden ring wiki 600px",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "42810000": {
-      "path": "enemy-images/candidate-bwiki-ad9b3fcd12543d15.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B742800160",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/8/87/3tr2mr60dkwdtxgik00np8zccpzoikm.jpg/200px-NPC_Avatar_42800160.jpg",
-      "matchEvidence": "same enemy family or named variant; candidate only",
-      "sourceEnemyName": "巨型蚂蚁",
-      "sourceEnemyId": "42800160",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
     "22700000": {
       "path": "enemy-images/22700010.jpg",
       "assetOrigin": "legacy-repository",
@@ -853,16 +779,6 @@
       "licenseStatus": "unverified"
     },
     "45600000": {
-      "path": "enemy-images/candidate-fextralife-3b741143da0bb82a.png",
-      "assetOrigin": "fextralife",
-      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Monstrous_crow_enemies_elden_ring_wiki_600px.png",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/4/4b/Monstrous_crow_enemies_elden_ring_wiki_600px.png/300px-Monstrous_crow_enemies_elden_ring_wiki_600px.png",
-      "matchEvidence": "illustrated entry for monstrous crow enemies elden ring wiki 600px; variant or stage may differ",
-      "sourceEnemyName": "monstrous crow enemies elden ring wiki 600px",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "45600030": {
       "path": "enemy-images/candidate-fextralife-3b741143da0bb82a.png",
       "assetOrigin": "fextralife",
       "sourcePage": "https://eldenring.wiki.fextralife.com/File:Monstrous_crow_enemies_elden_ring_wiki_600px.png",
@@ -883,16 +799,6 @@
       "licenseStatus": "unverified"
     },
     "45500000": {
-      "path": "enemy-images/candidate-fextralife-1b96d0c9e4f18b2f.png",
-      "assetOrigin": "fextralife",
-      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Monstrous_Dog",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/6/6a/Monstrous_dog_enemies_elden_ring_nightreign_wiki_600px.png",
-      "matchEvidence": "illustrated entry for monstrous dog enemies elden ring nightreign wiki 600px; variant or stage may differ",
-      "sourceEnemyName": "monstrous dog enemies elden ring nightreign wiki 600px",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "45500030": {
       "path": "enemy-images/candidate-fextralife-1b96d0c9e4f18b2f.png",
       "assetOrigin": "fextralife",
       "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Monstrous_Dog",
@@ -1139,17 +1045,6 @@
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
-    "40600000": {
-      "path": "enemy-images/candidate-bwiki-e83295942aeb7076.jpg",
-      "assetOrigin": "bwiki",
-      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B740500012",
-      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/7/73/t6vztvoe27t776silamhhdih3mu0waf.jpg/200px-NPC_Avatar_40500012.jpg",
-      "matchEvidence": "same Chinese base name; source NPC ID may differ",
-      "sourceEnemyName": "凯丹佣兵",
-      "sourceEnemyId": "40500012",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
     "38100000": {
       "path": "enemy-images/candidate-eldenring-api-1c25eaf84e7438c9.png",
       "assetOrigin": "eldenring-api",
@@ -1184,16 +1079,6 @@
       "matchEvidence": "same enemy family or named variant; candidate only",
       "sourceEnemyName": "白金之子",
       "sourceEnemyId": "34715120",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "41900000": {
-      "path": "enemy-images/candidate-fextralife-b4b2c0798acd1667.png",
-      "assetOrigin": "fextralife",
-      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/Teardrop_Scarab",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/5/5f/Teardrop-scarab-nightreign-300px.png",
-      "matchEvidence": "illustrated entry for teardrop-scarab-nightreign-300px; variant or stage may differ",
-      "sourceEnemyName": "teardrop-scarab-nightreign-300px",
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
@@ -1289,16 +1174,6 @@
       "matchEvidence": "same enemy family or named variant; candidate only",
       "sourceEnemyName": "灵庙士兵",
       "sourceEnemyId": "43150012",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
-    "21500000": {
-      "path": "enemy-images/candidate-gameplay-blog-ed5c4732f73f900d.png",
-      "assetOrigin": "gameplay-blog",
-      "sourcePage": "https://blackjackrants.blogspot.com/2025/10/reviewing-monsters-elden-ring-part-20.html",
-      "sourceImage": "https://blogger.googleusercontent.com/img/a/AVvXsEiJ6SkRhvN4fzK2PQ8IMffJc4AZlRWft9HKb2e6PDwYTAMLRc47xwpQRvkHR3Dhuvz9RdwFhFAa2hRv_uFxK2VOzZg_eqniq1FkMrd1y8EG_FYA90k7uk83R-2Ba4rZj4jMDlxvefcLlWA_iMzW2J9RB1zYJ7NBy7t3vz3dllstX4V-XVY6yz_rSF7qATXO",
-      "matchEvidence": "image captioned Wisp, the lightning ball enemy",
-      "sourceEnemyName": "Wisp",
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
@@ -1845,16 +1720,6 @@
       "matchStatus": "candidate",
       "licenseStatus": "unverified"
     },
-    "43540000": {
-      "path": "enemy-images/candidate-fextralife-32019581f45b98d5.png",
-      "assetOrigin": "fextralife",
-      "sourcePage": "https://eldenring.wiki.fextralife.com/File:Redmane_knight_enemies_elden_ring_wiki_600px.png",
-      "sourceImage": "https://static0.fextralifeimages.com/file/eldenring/thumb/8/86/Redmane_knight_enemies_elden_ring_wiki_600px.png/300px-Redmane_knight_enemies_elden_ring_wiki_600px.png",
-      "matchEvidence": "illustrated entry for redmane knight enemies elden ring wiki 600px; variant or stage may differ",
-      "sourceEnemyName": "redmane knight enemies elden ring wiki 600px",
-      "matchStatus": "candidate",
-      "licenseStatus": "unverified"
-    },
     "43542010a": {
       "path": "enemy-images/candidate-fextralife-32019581f45b98d5.png",
       "assetOrigin": "fextralife",
@@ -2219,6 +2084,56 @@
       "matchStatus": "candidate",
       "licenseStatus": "unverified",
       "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/1/13/nfgchpbf0wormqblg1de33ycab9lho9.jpg/200px-NPC_Avatar_30100114.jpg"
+    },
+    "46601010a": {
+      "path": "enemy-images/46601010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746601010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/ec/k8w4xgdfzmypm1otmm70ihmzbw7woi9.jpg/200px-NPC_Avatar_46601010.jpg",
+      "sourceEnemyName": "魔像守卫－大弓",
+      "matchEvidence": "Existing golem portrait matched by weapon model mask",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46601010b": {
+      "path": "enemy-images/46601010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746601010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/thumb/e/ec/k8w4xgdfzmypm1otmm70ihmzbw7woi9.jpg/200px-NPC_Avatar_46601010.jpg",
+      "sourceEnemyName": "魔像守卫－大弓",
+      "matchEvidence": "Existing golem portrait matched by weapon model mask",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46600030a": {
+      "path": "enemy-images/46600010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746600010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/7/73/19neq4nrio7wy58wprc0237bc6siexg.jpg",
+      "sourceEnemyName": "魔像守卫－戟",
+      "matchEvidence": "Existing golem portrait matched by weapon model mask",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "46600030b": {
+      "path": "enemy-images/46600010.jpg",
+      "assetOrigin": "legacy-repository",
+      "sourcePage": "https://wiki.biligame.com/eldenring/%E6%80%AA%E7%89%A9%E7%BC%96%E5%8F%B746600010",
+      "sourceImage": "https://patchwiki.biligame.com/images/eldenring/7/73/19neq4nrio7wy58wprc0237bc6siexg.jpg",
+      "sourceEnemyName": "魔像守卫－戟",
+      "matchEvidence": "Existing golem portrait matched by weapon model mask",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
+    },
+    "78200010": {
+      "path": "enemy-images/candidate-nightreign-gallery-5288a216d93e4544.png",
+      "assetOrigin": "nightreign-gallery",
+      "sourcePage": "https://eldenringnightreign.wiki.fextralife.com/File:Smelter-demon-nightreign-300px.png",
+      "sourceImage": "https://static0.fextralifeimages.com/file/eldenringnightreign/6/68/Smelter-demon-nightreign-300px.png",
+      "matchEvidence": "gallery image named Smelter-demon-nightreign-300px.png; variant or stage may differ",
+      "sourceEnemyName": "Smelter-demon-nightreign-300px.png",
+      "matchStatus": "candidate",
+      "licenseStatus": "unverified"
     }
   }
 }
