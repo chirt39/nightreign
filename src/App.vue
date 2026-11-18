@@ -334,8 +334,8 @@ onUnmounted(() => {
 <style>
 .damage-picker-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:0 0 auto;margin-bottom:8px;color:#e3cd99}
 .enemy-damage-pick{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:10px 0}
-.enemy-damage-pick label{display:flex;align-items:center;gap:6px;min-width:0}
-.enemy-damage-pick select{max-width:min(62vw,380px)}
+
+
 
 .atlas-navigation{display:flex;flex:0 0 auto;align-items:center;gap:5px;min-width:0;max-width:100%;margin:0 0 12px;padding:0 0 8px;border-bottom:1px solid #3e566e;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin}
 .atlas-navigation a{display:flex;flex:0 0 auto;align-items:center;gap:7px;min-height:38px;padding:7px 14px;border:1px solid transparent;border-radius:4px;background:#172638;color:#b8c9d4;white-space:nowrap;font-size:14px}

@@ -1178,18 +1178,6 @@
     "rowAlias": "",
     "matchingAlias": false
   },
-  "40400030": {
-    "entityName": "蛞蝓",
-    "model": "c4040",
-    "behaviorVariationId": "40400",
-    "sourceIds": [
-      "40400010",
-      "40400020",
-      "40401010"
-    ],
-    "rowAlias": "",
-    "matchingAlias": false
-  },
   "40500030": {
     "entityName": "凯丹佣兵",
     "model": "c4050",

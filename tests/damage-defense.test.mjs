@@ -34,9 +34,10 @@ test('targets preserve exact source variants and flag unresolved defenses', () =
   assert.equal(snowTroll.taken.slash, 1.1);
   assert.equal(snowTroll.source.npcParamId, '46020050');
   assert.ok(snowTroll.source.locations.includes('山顶'));
-  assert.equal(data.targets.filter(target => target.source.takenStatus.startsWith('manual')).length, 7);
+  const unresolved = data.targets.filter(target => target.source.takenStatus.startsWith('manual'));
+  assert.deepEqual(unresolved.map(t => t.id).sort(), ['42801100']);
   assert.ok(data.targets.filter(target => target.source.takenStatus.startsWith('manual')).every(target => Object.values(target.taken).every(value => value === null)));
-  for (const sourceId of ['45050010', '46020030', '46000110', '43511120', '43510040']) {
+  for (const sourceId of ['45050010', '46020030', '46000110', '43511120', '43510040', '40800300', '43408000']) {
     assert.ok(!data.targets.some(target => target.source.atlasSourceId === sourceId));
   }
 });

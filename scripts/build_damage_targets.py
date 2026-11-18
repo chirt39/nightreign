@@ -49,16 +49,28 @@ def main() -> None:
     atlas = json.loads(args.atlas.read_text(encoding="utf-8"))
     with args.native_csv.open(encoding="utf-8-sig", newline="") as stream:
         native = {row["row_id"]: row for row in csv.DictReader(stream)}
+    evidence = atlas.get("nativeCardEvidence", {})
+    effect_ids = {info["damageEffectId"] for info in evidence.values() if "damageEffectId" in info}
+    effects = {}
+    effects_path = args.native_csv.with_name("SpEffectParam.csv")
+    if effect_ids:
+        with effects_path.open(encoding="utf-8-sig", newline="") as stream:
+            effects = {r["row_id"]: r for r in csv.DictReader(stream) if r["row_id"] in effect_ids}
     source_ids = Counter(str(row[1]) for row in atlas["rows"])
     generated = set(atlas.get("generatedNativeIds", []))
     targets = []
     for index, row in enumerate(atlas["rows"]):
         source_id = str(row[1])
-        npc_id = re.sub(r"[ab]$", "", source_id)
+        info = evidence.get(source_id, {})
+        npc_id = info.get("npcParamId") or re.sub(r"[ab]$", "", source_id)
         npc = native.get(npc_id)
         if npc is None:
             raise ValueError(f"No native NpcParam row for atlas source {source_id}")
         native_taken = {key: float(npc[field]) for key, field in TAKEN_FIELDS.items()}
+        effect_id = info.get("damageEffectId")
+        if effect_id:
+            native_taken = {key: round(rate * float(effects[effect_id][TAKEN_FIELDS[key]]), 6)
+                            for key, rate in native_taken.items()}
         atlas_percent = row[5:13]
         agrees = all(isinstance(value, (int, float)) and abs((1 - native_taken[key]) * 100 - value) < .01
                      for (key, _), value in zip(TAKEN_FIELDS.items(), atlas_percent))
@@ -77,7 +89,11 @@ def main() -> None:
                 "variantBranch": source_id[-1] if source_id.endswith(("a", "b")) else None,
                 "disasterForm": "[灾域]" in str(row[0]),
                 "locations": atlas.get("displayLocationsBySourceId", {}).get(source_id, []),
-                "takenStatus": "native_param_atlas_agree" if agrees else "manual_review_native_atlas_conflict",
+                "takenStatus": ("manual_review_native_atlas_conflict" if not agrees else
+                                "native_resident_effect_atlas_agree" if info.get("stats") == "NpcParam_and_resident_SpEffectParam" else
+                                "native_phase_effect_atlas_agree" if effect_id else "native_param_atlas_agree"),
+                **({"phase": info["phase"]} if "phase" in info else {}),
+                **({"damageEffectId": effect_id} if effect_id else {}),
                 "baseDefenseStatus": "native_npc_param_base; not encounter_final",
                 "defenseStatus": "manual_final_defense_required",
                 **({"nativeTaken": native_taken, "atlasTakenPercent": atlas_percent} if not agrees else {}),
@@ -92,6 +108,7 @@ def main() -> None:
         "provenance": {
             "enemyAtlasSha256": hashlib.sha256(args.atlas.read_bytes()).hexdigest(),
             "npcParamCsvSha256": hashlib.sha256(args.native_csv.read_bytes()).hexdigest(),
+            **({"spEffectParamCsvSha256": hashlib.sha256(effects_path.read_bytes()).hexdigest()} if effect_ids else {}),
         },
         "defenseStatus": "not_verified_for_encounter; enter the target's actual physical/magic/fire/lightning/holy defense",
         "baseDefenseStatus": "NpcParam def_* base values; not encounter-final defense or a day/depth multiplier",

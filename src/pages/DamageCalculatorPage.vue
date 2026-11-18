@@ -1,7 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 import { calculateDamage, calculatePanel } from '../lib/damage-calculator.js';
-import { damageShowcase } from '../lib/damage-showcase.js';
+import { damageShowcase, bindSharedArt } from '../lib/damage-showcase.js';
 import { hasAutomaticProjectile } from '../lib/damage-panel.js';
 import DamageRelicPicker from '../components/DamageRelicPicker.vue';
 import { relicChoiceMetadata } from '../lib/damage-relic-options.js';
@@ -12,7 +12,7 @@ import DamageEquipmentCard from '../components/DamageEquipmentCard.vue';
 import DamageProjectileInputs from '../components/DamageProjectileInputs.vue';
 
 const props = defineProps({ active: Boolean, catalogVersions: Object });
-const files = ['weapon-catalog.json', 'damage-panel.json', 'damage-actions.json', 'damage-effects.json', 'damage-targets.json', 'arts-catalog.json', 'damage-weapon-traits.json', 'relic_rule_effects.json', 'relic_effect_cross_mode.json', 'damage-buff-icons.json'];
+const files = ['weapon-catalog.json', 'damage-panel.json', 'damage-actions.json', 'damage-effects.json', 'damage-targets.json', 'arts-catalog.json', 'damage-weapon-traits.json', 'relic_rule_effects.json', 'relic_effect_cross_mode.json', 'damage-buff-icons.json', 'damage-art-weapons.json'];
 const catalogs = shallowRef(null), loading = ref(false), error = ref('');
 const weaponId = ref(''), variantId = ref(''), artId = ref(''), actionId = ref('');
 const mode = ref('auto'), characterId = ref(''), level = ref(''), reinforcement = ref('');
@@ -35,14 +35,22 @@ let controller = null, request = null, targetInitialized = false;
 const weapons = computed(() => catalogs.value?.weapons.weapons || []);
 const weapon = computed(() => weapons.value.find(item => String(item.id) === weaponId.value));
 const variant = computed(() => weapon.value?.variants?.find(item => String(item.id) === variantId.value));
-const showcaseSelection = computed(() => damageShowcase.find(item => item.weaponId === weaponId.value && item.variantId === variantId.value && item.artId === artId.value));
+const sharedArtChoices = computed(() => {
+  const template = damageShowcase.find(entry => entry.artId === artId.value);
+  if (!template) return [];
+  const categories = new Map(weapons.value.map(item => [String(item.id), item.categoryId]));
+  return (catalogs.value?.artWeapons?.choices || []).filter(entry => entry.artId === artId.value)
+    .map(entry => ({ ...entry, artName: template.artName, artImage: template.artImage, categoryId: categories.get(entry.weaponId) }));
+});
+const showcaseSelection = computed(() => [...damageShowcase, ...sharedArtChoices.value].find(
+  item => item.weaponId === weaponId.value && item.variantId === variantId.value && item.artId === artId.value));
 const outsideShowcase = computed(() => Boolean(catalogs.value && (weaponId.value || artId.value) && !showcaseSelection.value));
 function variantArtIds(item) { return ['fixed', 'pool'].includes(item?.skill?.kind) ? (item.skill.itemIds || []).map(String) : []; }
 const incompatibleArt = computed(() => Boolean(artId.value && variant.value && !variantArtIds(variant.value).includes(artId.value)));
 const panelCatalog = computed(() => catalogs.value?.panel);
 const qualityProfile = computed(() => panelCatalog.value?.variants?.[variantId.value]?.qualityProfile);
 const nativeQualityColor = computed(() => qualityProfile.value?.colorByReinforcement?.[String(reinforcement.value)] || qualityProfile.value?.baseColor);
-const canRed = computed(() => qualityProfile.value?.redAvailable === true);
+const canRed = computed(() => qualityProfile.value?.redAvailable === true && !showcaseSelection.value?.drop);
 const colors = { purple: '紫色', gold: '金色', blue: '蓝色', green: '绿色', white: '白色', red: '红色' };
 const qualityColor = computed(() => quality.value === 'red' ? 'red' : colors[nativeQualityColor.value] ? nativeQualityColor.value : 'unknown');
 const qualityName = computed(() => quality.value === 'red' ? '红武' : colors[qualityColor.value] || '品质待核对');
@@ -67,9 +75,14 @@ const actions = computed(() => catalogs.value?.actions.actions || []);
 const effects = computed(() => (catalogs.value?.effects.effects || []).filter(item => String(item.nativeEffectId) !== removedWeaponTraitId));
 const targets = computed(() => catalogs.value?.targets.targets || []);
 const selectedTarget = computed(() => targets.value.find(item => String(item.id) === targetId.value));
-const targetPortrait = computed(() => {
+const targetCard = computed(() => {
   portraitVersion.value;
-  return selectedTarget.value && window.NightreignDamageEnemyPicker?.portrait(selectedTarget.value) || '/enemy-images/image-pending.svg';
+  const picker = window.NightreignDamageEnemyPicker;
+  const target = selectedTarget.value;
+  return {
+    name: target ? picker?.cardName(target) || '已选怪物' : '选择怪物',
+    portrait: picker?.portrait(target) || '/enemy-images/image-pending.svg',
+  };
 });
 async function openExternalPicker(kind) {
   if (picker.value) { picker.value = ''; await nextTick(); }
@@ -163,18 +176,28 @@ function selectionImage(item) {
   return item.kind === 'relic' ? relicById.value.get(item.id)?.image
     : item.kind === 'effect' ? effectImage(effectChoiceById.value.get(item.id)) : null;
 }
-const compatibleActions = computed(() => actions.value.filter(item => {
-  if (!showcaseSelection.value) return false;
-  if (item.scope?.heroId != null && String(item.scope.heroId) !== characterId.value) return false;
-  if (!variant.value && !artId.value) return false;
-  if (incompatibleArt.value || weaponId.value && !variant.value) return false;
-  if (artId.value && String(item.artId) !== artId.value) return false;
-  if (item.artId != null && variant.value && !variantArtIds(variant.value).includes(String(item.artId))) return false;
-  if (item.weaponIds?.length && (!variant.value || !item.weaponIds.map(String).includes(variantId.value))) return false;
-  if (item.weaponTypes?.length && !weapon.value) return false;
-  if (weapon.value && item.weaponTypes?.length && !item.weaponTypes.map(String).some(id => [String(weapon.value.categoryId), weapon.value.categoryLabel].includes(id))) return false;
-  return true;
-}));
+const compatibleActions = computed(() => {
+  const entry = showcaseSelection.value;
+  if (entry?.drop) {
+    const data = catalogs.value.artWeapons;
+    const panelVariant = panelCatalog.value?.variants?.[variantId.value];
+    if (!panelVariant || incompatibleArt.value) return [];
+    return actions.value.filter(item => item.artId === artId.value && data.routes[artId.value].includes(item.id))
+      .map(item => bindSharedArt(item, entry, panelVariant, data.bulletUpgrades));
+  }
+  return actions.value.filter(item => {
+    if (!showcaseSelection.value) return false;
+    if (item.scope?.heroId != null && String(item.scope.heroId) !== characterId.value) return false;
+    if (!variant.value && !artId.value) return false;
+    if (incompatibleArt.value || weaponId.value && !variant.value) return false;
+    if (artId.value && String(item.artId) !== artId.value) return false;
+    if (item.artId != null && variant.value && !variantArtIds(variant.value).includes(String(item.artId))) return false;
+    if (item.weaponIds?.length && (!variant.value || !item.weaponIds.map(String).includes(variantId.value))) return false;
+    if (item.weaponTypes?.length && !weapon.value) return false;
+    if (weapon.value && item.weaponTypes?.length && !item.weaponTypes.map(String).some(id => [String(weapon.value.categoryId), weapon.value.categoryLabel].includes(id))) return false;
+    return true;
+  });
+});
 const action = computed(() => compatibleActions.value.find(item => String(item.id) === actionId.value));
 function isChargedAction(item) {
   return item?.scope?.charged ?? Boolean(item?.name.includes('蓄力'));
@@ -287,6 +310,10 @@ function rowChannels(row) {
   return (row.activeChannels || []).filter(key => Object.hasOwn(channelLabels, key)).map(key => ({ key, label: key === 'physical' ? physicalLabels[row.physicalType] || '物理（类型待核对）' : channelLabels[key] }));
 }
 const pickerChoices = computed(()=>{
+  if (picker.value === 'artWeapon') return sharedArtChoices.value.map(entry => ({
+    id: entry.variantId, name: entry.name, image: entry.weaponImage, detail: entry.label === entry.name ? entry.artName : entry.label,
+    disabled: entry.variantId === variantId.value,
+  }));
   if (picker.value === 'weapon') return damageShowcase.map(entry => ({
     id: entry.variantId, name: entry.name, image: entry.weaponImage, detail: entry.artName
   }));
@@ -303,6 +330,16 @@ function pickItem(id) {
   if (picker.value === 'weapon') {
     const entry = damageShowcase.find(item => item.variantId === id);
     if (entry) chooseShowcase(entry);
+  } else if (picker.value === 'artWeapon') {
+    const entry = sharedArtChoices.value.find(item => item.variantId === id);
+    if (entry && entry.variantId !== variantId.value) {
+      weaponId.value = entry.weaponId;
+      variantId.value = entry.variantId;
+      quality.value = 'native';
+      mode.value = 'auto';
+      pruneWeaponTraits(true);
+      chooseVariant();
+    }
   } else if (picker.value==='trait') addWeaponTrait(id);
   else if (picker.value==='effect') toggleEffect(picker.value,id,true);
   picker.value='';
@@ -332,7 +369,7 @@ function traitDetail(trait) {
   return [...(trait.polarity === 'negative' ? ['负面词条'] : []), ...extraGains, ...new Set(rates)].join('；') || (trait.calculationStatus === 'non-damage' ? '非伤害用途，不计入伤害数值' : ['partial', 'missing-rule'].includes(trait.calculationStatus) ? '伤害规则尚未完整覆盖' : '');
 }
 function chooseShowcase(entry) {
-  if (showcaseSelection.value?.variantId === entry.variantId) return;
+  if (showcaseSelection.value?.variantId === entry.variantId && artId.value === entry.artId) return;
   if (variantId.value !== entry.variantId) reinforcement.value = '0';
   weaponId.value = entry.weaponId; variantId.value = entry.variantId; artId.value = entry.artId; actionId.value = '';
   quality.value = 'native'; pruneWeaponTraits(true); chooseVariant();
@@ -476,7 +513,7 @@ async function loadCatalogs() {
         if (!response.ok) throw new Error('伤害计算资料暂未就绪，请稍后重试。');
         return response.json();
       }));
-      catalogs.value = Object.fromEntries(['weapons', 'panel', 'actions', 'effects', 'targets', 'arts', 'traits','definitions','crossMode','buffIcons'].map((key, index) => [key, values[index]]));
+      catalogs.value = Object.fromEntries(['weapons', 'panel', 'actions', 'effects', 'targets', 'arts', 'traits','definitions','crossMode','buffIcons','artWeapons'].map((key, index) => [key, values[index]]));
       normalizeSelection();
     } catch (cause) { if (cause.name !== 'AbortError') error.value = cause.message || '计算资料载入失败'; }
     finally { loading.value = false; }
@@ -501,7 +538,10 @@ watch([weaponTraitSlots, selectionOrder], () => {
   if (removedSlots.length) weaponTraitSlots.value = weaponTraitSlots.value.filter(slot => !removedSlots.includes(slot));
 }, { deep: true, flush: 'sync' });
 watch([variantId, quality, reinforcement], () => { for (const key of Object.keys(manualValues)) manualValues[key] = ''; pruneWeaponTraits(); });
-watch(action, () => { selectedSegmentIds.value = defaultSegments(); });
+watch(action, (current, previous) => {
+  if (current && previous && current.id === previous.id && current.artId === previous.artId) return;
+  selectedSegmentIds.value = defaultSegments();
+});
 watch(characterId, chooseAction);
 watch([weaponId, variantId, artId, actionId], writeUrl);
 watch(() => props.active, async active => { if (active) { readUrl(); await loadCatalogs(); if (props.active) { normalizeSelection(); writeUrl(); } } }, { immediate: true });
@@ -518,10 +558,13 @@ defineExpose({ restoreNavigation });
     <div v-else-if="catalogs" class="damage-workspace">
       <div class="damage-inputs">
         <section class="damage-card damage-common"><h2>武器与角色</h2>
-          <button class="damage-weapon-trigger" type="button" aria-label="选择武器" @click="picker='weapon'">
+          <div class="damage-weapon-switch">
+            <button class="damage-weapon-trigger" type="button" aria-label="选择武器" @click="picker='weapon'">
             <img v-if="showcaseSelection" :src="showcaseSelection.weaponImage" alt="">
             <span><strong>{{ showcaseSelection?.name || weapon?.name || '选择武器' }}</strong><small>{{ showcaseSelection?.artName || selectedArt?.name }}<template v-if="artId === '1051' && action?.scope?.enoughFp && action.fpCosts?.length"> · 每发 {{ action.fpCosts[0] }} 专注值</template></small></span><span aria-hidden="true">›</span>
           </button>
+            <button v-if="showcaseSelection && sharedArtChoices.length > 1" type="button" aria-haspopup="dialog" @click="picker='artWeapon'">更换武器</button>
+          </div>
           <p v-if="outsideShowcase" class="damage-notice" role="status">{{ weapon?.name || selectedArt?.name || '链接中的装备' }}：当前变体或战技未纳入本轮预览，尚未替换为其他武器。可点击「选择武器」更换，或返回原详情。</p>
           <div class="damage-fields damage-core-fields">
             <label>角色<select v-model="characterId"><option v-for="item in panelCatalog?.characters || []" :key="item.id" :value="String(item.id)">{{ item.name }}</option></select></label>
@@ -539,7 +582,7 @@ defineExpose({ restoreNavigation });
         <section class="damage-card damage-loadout">
           <h2 class="loadout-heading-line">当前配装 <span class="relic-count" role="status">普通 {{ normalRelicCount }}/3 · 深夜 {{ deepRelicCount }}/3</span></h2>
             <button class="damage-target-card" type="button" aria-label="选择怪物" @click="openExternalPicker('enemy')">
-              <img v-if="selectedTarget" :src="targetPortrait" alt=""><span><small>目标怪物</small><strong>{{ selectedTarget?.name || '选择怪物' }}</strong></span><span aria-hidden="true">›</span>
+              <img v-if="selectedTarget" :src="targetCard.portrait" alt=""><span><small>目标怪物</small><strong>{{ targetCard.name }}</strong></span><span aria-hidden="true">›</span>
             </button>
           <div class="loadout-actions">
             <button v-if="showcaseSelection" type="button" :disabled="!availableWeaponTraits.length" @click="picker='trait'">添加武器词条</button>
@@ -603,7 +646,6 @@ defineExpose({ restoreNavigation });
 
           <DamageFormula :result="result" />
         </section>
-        <details v-if="result.missing?.length" class="damage-card damage-result-notes"><summary>计算说明 · {{ result.missing.length }} 项</summary><ul class="damage-missing"><li v-for="(item, index) in result.missing" :key="index">{{ item }}</li></ul></details>
           <details class="damage-card damage-advanced"><summary>逐段结果 · {{ result.rows?.length || 0 }} 段</summary><p v-if="!result.rows?.length" class="damage-note">选择动作并补全面板后查看结果。</p><article v-for="row in result.rows || []" :key="row.id" class="damage-row"><header><h3>{{ row.name }}</h3><strong>{{ display(row.total) }}</strong></header><dl class="damage-channel-results"><div v-for="channel in rowChannels(row)" :key="channel.key"><dt>{{ channel.label }}</dt><dd>{{ display(row.channels?.[channel.key]) }}</dd></div></dl><p v-if="row.applied?.length" class="damage-note">已生效：{{ row.applied.join('、') }}</p><ul v-if="row.missing?.length" class="damage-missing"><li v-for="(item, index) in row.missing" :key="index">{{ item }}</li></ul></article></details>
       </aside>
     </div>
@@ -626,6 +668,9 @@ defineExpose({ restoreNavigation });
 .damage-common h2,.damage-core-fields{margin:0}
 .damage-core-fields{grid-template-columns:minmax(0,1fr) minmax(0,.65fr)}
 .loadout-heading-line{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.damage-fp{margin:4px 0 0;font-size:12px;color:#d8c7a1;font-variant-numeric:tabular-nums}
+.damage-weapon-switch{display:flex;align-items:stretch;gap:6px;min-width:0}
+.damage-weapon-switch .damage-weapon-trigger{flex:1}
+.damage-weapon-switch button{white-space:normal}
 .damage-weapon-trigger{display:flex;align-items:center;text-align:left;gap:6px;min-width:0}
 .damage-weapon-trigger img{width:36px;height:36px;object-fit:contain}
 .damage-weapon-trigger strong,.damage-weapon-trigger small{display:block;line-height:1.4}

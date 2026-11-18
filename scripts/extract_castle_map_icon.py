@@ -77,7 +77,10 @@ def main():
         'identityScope': 'Fixed central castle icon for atlas castle/rooftop/basement areas; not the random small fort icon 42006. Does not extend map predictor identity coverage.',
         'rights': 'Derived from local game UI resources; original rights remain with the game rights holders. Redistribution permission not independently verified.',
     }
-    manifest['coverage']['mappedAtlasOnlyBuildingIcons'] = 1
+    manifest['coverage']['mappedAtlasOnlyBuildingIcons'] = sum(
+        f'buildingCategory:{name}' in manifest['icons']
+        for name in ('castle', 'eastern-underground-fort', 'western-underground-fort')
+    )
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(json.dumps({'icon': relative, 'size': [width, height], 'sprite': sprite, 'pointParamRowId': 64433700, 'pixelRoundtrip': 'passed'}, ensure_ascii=False))
 
