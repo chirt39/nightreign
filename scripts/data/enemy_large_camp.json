@@ -1,0 +1,268 @@
+{
+  "layouts": {
+    "3200": [
+      0,
+      1
+    ],
+    "3210": [
+      0,
+      1,
+      2
+    ],
+    "3220": [
+      0,
+      1
+    ]
+  },
+  "forms": [
+    {
+      "name": "流刑士兵",
+      "npcIds": [
+        "30000010",
+        "30000110",
+        "30001010",
+        "30200010"
+      ],
+      "representative": "30000010a",
+      "path": "enemy-images/30000014.jpg",
+      "evidence": "同倍率的普通与大体型合卡，采用图鉴 30000000 的流刑士兵头像，其部件掩码与代表一致。"
+    },
+    {
+      "name": "失乡骑士",
+      "npcIds": [
+        "30100270",
+        "30101250",
+        "30102240"
+      ],
+      "representative": "30100270",
+      "path": "enemy-images/30100014.jpg",
+      "evidence": "三名营地骑士雷 ×1，沿用普通失乡骑士的盔甲头像。"
+    },
+    {
+      "name": "片鳞混种",
+      "npcIds": [
+        "34500030",
+        "34501030"
+      ],
+      "representative": "34500030a",
+      "path": "enemy-images/34500030.jpg",
+      "evidence": "柴刀、飞行型倍率一致，与监牢共用柴刀实机图。"
+    },
+    {
+      "name": "片鳞混种",
+      "npcIds": [
+        "34510030"
+      ],
+      "representative": "34510030a",
+      "path": "enemy-images/34510030.jpg",
+      "evidence": "营地大斧型已有实机图，与监牢共用。"
+    },
+    {
+      "name": "狮子混种",
+      "npcIds": [
+        "34600010"
+      ],
+      "representative": "34600010a",
+      "path": "enemy-images/34600913.jpg",
+      "evidence": "与既有狮子混种代表同为 c3460、00 部件，使用红鬃头像。"
+    },
+    {
+      "name": "燃烧活尸",
+      "npcIds": [
+        "36612010",
+        "36622010"
+      ],
+      "representative": "36612010a",
+      "path": "enemy-images/camp-burning-corpse.jpg",
+      "evidence": "两种体型的火焰活尸共用燃烧状态的实机全身图。两者均使用状态 17002，分别由效果 17011、17016 呈现对应体型的燃烧特效。",
+      "sourcePage": "https://eldenring.wiki.gg/wiki/File:ER_Burning_Putrid_Corpse.jpg",
+      "sourceImage": "https://eldenring.wiki.gg/images/ER_Burning_Putrid_Corpse.jpg",
+      "licenseStatus": "unverified"
+    },
+    {
+      "name": "大野犬",
+      "npcIds": [
+        "41600010",
+        "41601010"
+      ],
+      "representative": "41601010a",
+      "path": "enemy-images/41601010.jpg",
+      "evidence": "采用本区编号 41601010 的犬形实机头像。"
+    },
+    {
+      "name": "野犬",
+      "npcIds": [
+        "41610010",
+        "41610210"
+      ],
+      "representative": "41610010a",
+      "path": "enemy-images/41610020.jpg",
+      "evidence": "与普通大教堂同编号、同倍率，共用代表图。"
+    },
+    {
+      "name": "老狮子",
+      "npcIds": [
+        "42700030"
+      ],
+      "representative": "42700030a",
+      "path": "enemy-images/candidate-fextralife-cdfc597c40e7487d.png",
+      "evidence": "老狮子实机战斗图，可见鬃毛与前肢刀刃。"
+    },
+    {
+      "name": "普通活尸",
+      "npcIds": [
+        "43000010",
+        "43004010",
+        "43005010"
+      ],
+      "representative": "43005010a",
+      "path": "enemy-images/43002010.jpg",
+      "evidence": "与大空洞大教堂同倍率，共用已有实机图。"
+    },
+    {
+      "name": "葛瑞克士兵",
+      "npcIds": [
+        "43110010",
+        "43112010",
+        "43112310",
+        "43113010"
+      ],
+      "representative": "43110010a",
+      "path": "enemy-images/43111110.jpg",
+      "evidence": "与小型要塞同倍率，共用该阵营的实机头像。"
+    },
+    {
+      "name": "癫火罗德尔士兵",
+      "npcIds": [
+        "43130010",
+        "43131010",
+        "43132010",
+        "43133010",
+        "43134010",
+        "43135020",
+        "43136020"
+      ],
+      "representative": "43136020a",
+      "path": "enemy-images/camp-leyndell-greatsword.jpg",
+      "evidence": "采用癫火士兵持大剑的实机图。对应癫火山妖营地 43136020 的 c4313 头部和 WP_sword_Large 部件。",
+      "sourcePage": "https://eldenring.wiki.gg/wiki/File:ER_Enemy_Frenzied_Flame_Soldier_w_Greatsword.png",
+      "sourceImage": "https://eldenring.wiki.gg/images/ER_Enemy_Frenzied_Flame_Soldier_w_Greatsword.png",
+      "licenseStatus": "unverified"
+    },
+    {
+      "name": "红狮子城士兵",
+      "npcIds": [
+        "43140010",
+        "43140110",
+        "43141010",
+        "43141110",
+        "43142010"
+      ],
+      "representative": "43140010a",
+      "path": "enemy-images/candidate-fextralife-0bd06ccf877d3012.png",
+      "evidence": "采用红狮子军士兵实机图，代表穿铠甲的 c4314 士兵。"
+    },
+    {
+      "name": "发狂南瓜头士兵",
+      "npcIds": [
+        "43401010"
+      ],
+      "representative": "43401010a",
+      "path": "enemy-images/43401013.jpg",
+      "evidence": "采用同系列南瓜头士兵的头盔近照。"
+    },
+    {
+      "name": "葛瑞克骑士",
+      "npcIds": [
+        "43510010"
+      ],
+      "representative": "43510010a",
+      "path": "enemy-images/candidate-bwiki-0da68c0d27d558d1.jpg",
+      "evidence": "与小型要塞同倍率，共用葛瑞克骑士实机头像。"
+    },
+    {
+      "name": "罗德尔骑士",
+      "npcIds": [
+        "43530030",
+        "43531030",
+        "43532030",
+        "43531210"
+      ],
+      "representative": "43531030a",
+      "path": "enemy-images/43530020.jpg",
+      "evidence": "王城军营地三名骑士及癫火山妖营地的矛骑士同倍率，采用现有王城骑士头盔头像。"
+    },
+    {
+      "name": "红狮子骑士",
+      "npcIds": [
+        "43541010",
+        "43542010"
+      ],
+      "representative": "43541010a",
+      "path": "enemy-images/candidate-fextralife-32019581f45b98d5.png",
+      "evidence": "两名正式骑士共用红狮子骑士实机图，持盾型为代表。"
+    },
+    {
+      "name": "普通士兵",
+      "npcIds": [
+        "43710010",
+        "43712010",
+        "43712510",
+        "43714010",
+        "43716010"
+      ],
+      "representative": "43716010a",
+      "path": "enemy-images/43716010.jpg",
+      "evidence": "与小型要塞同一代表编号，共用短矛士兵实机图。"
+    },
+    {
+      "name": "罗德尔普通士兵",
+      "npcIds": [
+        "43730510",
+        "43732010",
+        "43732510",
+        "43734010",
+        "43736010",
+        "43738010",
+        "43738110"
+      ],
+      "representative": "43732010a",
+      "path": "enemy-images/candidate-fextralife-08e3e3e711d0169f.png",
+      "evidence": "使用王城阵营普通士兵截图，对应轻装步兵。"
+    },
+    {
+      "name": "红狮子城士兵",
+      "npcIds": [
+        "43740010",
+        "43740510",
+        "43742010",
+        "43742510",
+        "43747010"
+      ],
+      "representative": "43740010a",
+      "path": "enemy-images/candidate-fextralife-46fcb5b2e9fe9863.png",
+      "evidence": "红狮子军轻装步兵截图，斩击与 c4314 的铠甲士兵不同。"
+    },
+    {
+      "name": "火焰战车",
+      "npcIds": [
+        "44600010"
+      ],
+      "representative": "44600010a",
+      "path": "enemy-images/44607020.jpg",
+      "evidence": "图鉴火焰战车的火炉面部实机图，与 44600000 一样启用 11 部件。"
+    },
+    {
+      "name": "山妖 - 癫火",
+      "npcIds": [
+        "46004010"
+      ],
+      "representative": "46004010a",
+      "path": "enemy-images/camp-frenzied-troll.jpg",
+      "evidence": "采用披袍山妖释放癫火的实机图，与营地 c4600 的 14、15 号部件相符。",
+      "sourcePage": "https://eldenring.wiki.gg/wiki/File:ER_Frenzied_Troll.png",
+      "sourceImage": "https://eldenring.wiki.gg/images/ER_Frenzied_Troll.png",
+      "licenseStatus": "unverified"
+    }
+  ]
+}

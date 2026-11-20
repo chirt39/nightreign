@@ -1,4 +1,4 @@
-"""Extract the fixed central castle icon from existing, read-only game caches."""
+"""Extract the central castle and evergaol icons from existing, read-only game caches."""
 import argparse
 import hashlib
 from io import BytesIO
@@ -53,36 +53,60 @@ def main():
     atlas = Image.open(BytesIO(texture['bytes'])).convert('RGBA')
     tree = ET.parse(layout).getroot()
     assert atlas.size == (int(tree.attrib['width']), int(tree.attrib['height']))
-    sprite = 'MENU_MenuIcon_42010.png'
-    node = next(item.attrib for item in tree if item.attrib['name'] == sprite)
-    x, y, width, height = [int(node[key]) for key in ['x', 'y', 'width', 'height']]
-    crop = atlas.crop((x, y, x + width, y + height))
-    assert crop.getextrema()[3][0] == 0 and crop.getextrema()[3][1] > 0
-    buffer = BytesIO()
-    crop.save(buffer, 'PNG')
-    png = buffer.getvalue()
-    assert Image.open(BytesIO(png)).convert('RGBA').tobytes() == crop.tobytes()
-    relative = f'/map-icons/castle-42010-{sha(png)[:12]}.png'
-    (args.repo / 'public' / relative.lstrip('/')).write_bytes(png)
-    manifest['icons']['buildingCategory:castle'] = {
-        'src': relative, 'nameZh': '中央主城', 'width': width, 'height': height,
-        'status': 'verified', 'worldMapPointIconId': 11, 'iconId': 42010,
-        'sha256': sha(png), 'resampled': False,
-        'source': known_source | {
-            'sprite': sprite, 'rectangle': [x, y, width, height],
-            'pointParam': 'WorldMapPointParam', 'pointParamRowId': 64433700,
-            'pointParamXmlSha256': sha(point_param.read_bytes()),
-            'pointPosition': {key: point[key] for key in ['areaNo', 'gridXNo', 'gridZNo', 'posX', 'posY', 'posZ']},
-        },
-        'identityScope': 'Fixed central castle icon for atlas castle/rooftop/basement areas; not the random small fort icon 42006. Does not extend map predictor identity coverage.',
-        'rights': 'Derived from local game UI resources; original rights remain with the game rights holders. Redistribution permission not independently verified.',
+    definition_param = source / 'strict/regulation-bin/SmallBaseAndSpotDefine.param.xml'
+    definitions = rows(definition_param)
+    gaol_ids = [209, 215, 2209, 2215]
+    for row_id in gaol_ids:
+        definition = definitions[str(row_id)]
+        expected = [4650, 4660, 4670] if row_id in (209, 2209) else [4680]
+        assert [int(definition[f'mapId{i}']) for i in (1, 2, 3)
+                if int(definition[f'mapId{i}']) > 0] == expected
+        assert definition['worldMapPointIconId1'] == '5'
+    assert rows(icon_param)['5']['iconId'] == '42004'
+    castle_reference = {
+        'pointParam': 'WorldMapPointParam', 'pointParamRowId': 64433700,
+        'pointParamXmlSha256': sha(point_param.read_bytes()),
+        'pointPosition': {key: point[key] for key in ['areaNo', 'gridXNo', 'gridZNo', 'posX', 'posY', 'posZ']},
     }
+    gaol_reference = {
+        'definitionParam': 'SmallBaseAndSpotDefine', 'definitionRowIds': gaol_ids,
+        'definitionParamXmlSha256': sha(definition_param.read_bytes()),
+        'mapTemplateIds': [4650, 4660, 4670, 4680],
+    }
+    for key, name, point_icon, icon_id, reference, identity in [
+        ('castle', '中央主城', 11, 42010, castle_reference,
+         'Fixed central castle icon for atlas castle/rooftop/basement areas; not the random small fort icon 42006. Does not extend map predictor identity coverage.'),
+        ('evergaol', '封印监牢', 5, 42004, gaol_reference,
+         'Primary game map icon shared by all four evergaol templates.'),
+    ]:
+        sprite = f'MENU_MenuIcon_{icon_id}.png'
+        node = next(item.attrib for item in tree if item.attrib['name'] == sprite)
+        x, y, width, height = [int(node[key]) for key in ['x', 'y', 'width', 'height']]
+        crop = atlas.crop((x, y, x + width, y + height))
+        assert crop.getextrema()[3][0] == 0 and crop.getextrema()[3][1] > 0
+        buffer = BytesIO()
+        crop.save(buffer, 'PNG')
+        png = buffer.getvalue()
+        assert Image.open(BytesIO(png)).convert('RGBA').tobytes() == crop.tobytes()
+        relative = f'/map-icons/{key}-{icon_id}-{sha(png)[:12]}.png'
+        (args.repo / 'public' / relative.lstrip('/')).write_bytes(png)
+        manifest['icons'][f'buildingCategory:{key}'] = {
+            'src': relative, 'nameZh': name, 'width': width, 'height': height,
+            'status': 'verified', 'worldMapPointIconId': point_icon, 'iconId': icon_id,
+            'sha256': sha(png), 'resampled': False,
+            'source': known_source | {
+                'sprite': sprite, 'rectangle': [x, y, width, height],
+                **reference,
+            },
+            'identityScope': identity,
+            'rights': 'Derived from local game UI resources; original rights remain with the game rights holders. Redistribution permission not independently verified.',
+        }
     manifest['coverage']['mappedAtlasOnlyBuildingIcons'] = sum(
         f'buildingCategory:{name}' in manifest['icons']
-        for name in ('castle', 'eastern-underground-fort', 'western-underground-fort')
+        for name in ('castle', 'eastern-underground-fort', 'western-underground-fort', 'evergaol')
     )
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    print(json.dumps({'icon': relative, 'size': [width, height], 'sprite': sprite, 'pointParamRowId': 64433700, 'pixelRoundtrip': 'passed'}, ensure_ascii=False))
+
 
 
 if __name__ == '__main__':

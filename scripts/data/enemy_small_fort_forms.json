@@ -1,0 +1,429 @@
+{
+  "forms": [
+    {
+      "cardName": "结晶人",
+      "label": "圆刃刀",
+      "equipmentLabel": "圆刃刀",
+      "npcIds": [
+        "33500020"
+      ],
+      "imageNpcId": "33500020",
+      "model": "c3350",
+      "displayMasks": [
+        0,
+        1,
+        10
+      ],
+      "evidence": "00/01 为大小两枚 chakram，10 为完整披风。3030/1 要塞部件使用此组合。"
+    },
+    {
+      "cardName": "结晶人",
+      "label": "矛",
+      "equipmentLabel": "矛",
+      "npcIds": [
+        "33501010"
+      ],
+      "imageNpcId": "33501010",
+      "model": "c3350",
+      "displayMasks": [
+        3,
+        10
+      ],
+      "evidence": "03 为 spear，10 为完整披风。封印监牢 m46_60 配置 2 布置此来源。"
+    },
+    {
+      "cardName": "结晶人",
+      "label": "法杖",
+      "equipmentLabel": "法杖",
+      "npcIds": [
+        "33502010"
+      ],
+      "imageNpcId": "33502010",
+      "model": "c3350",
+      "displayMasks": [
+        2,
+        10
+      ],
+      "evidence": "02 为 wand，10 为完整披风。封印监牢 m46_60 配置 2 布置此来源。"
+    },
+    {
+      "cardName": "辉石魔法师",
+      "label": "蓝晶头套、杖与书",
+      "equipmentLabel": "蓝晶头套、杖与书",
+      "npcIds": [
+        "37020020",
+        "37020030"
+      ],
+      "imageNpcId": "37020020",
+      "model": "c3702",
+      "displayMasks": [
+        0,
+        1,
+        10
+      ],
+      "evidence": "00 为学院辉石杖（模型 1322），01 为书，10 为蓝晶单面石头套。3030/1 两个 NPC 的模型、装备、头套完全相同，首领配置和报酬各异。"
+    },
+    {
+      "cardName": "辉石魔法师",
+      "label": "拉兹利辉石剑、冰纹铁盾",
+      "equipmentLabel": "拉兹利辉石剑、冰纹铁盾",
+      "npcIds": [
+        "37022010"
+      ],
+      "imageNpcId": "37022010",
+      "model": "c3702",
+      "displayMasks": [
+        2,
+        3,
+        12
+      ],
+      "evidence": "02/03 分别用武器模型 232/2118，对应拉兹利辉石剑和冰纹铁盾。3030/1 此来源仅启用单面的 12 号头套，旧名为双辉石头套魔法师。"
+    },
+    {
+      "cardName": "辉石魔法师",
+      "label": "双面高晶头套、杖与书",
+      "equipmentLabel": "双面高晶头套、杖与书",
+      "npcIds": [
+        "37023010"
+      ],
+      "imageNpcId": "37023010",
+      "model": "c3702",
+      "displayMasks": [
+        0,
+        1,
+        13
+      ],
+      "evidence": "遗迹 m34_10 配置 2。00/01 为学院辉石杖和书。13 号头套的两张脸朝向不同，头顶有高耸晶簇。"
+    },
+    {
+      "cardName": "辉石魔法师",
+      "label": "并排双头套、杖与书",
+      "equipmentLabel": "并排双头套、杖与书",
+      "npcIds": [
+        "37024010"
+      ],
+      "imageNpcId": "37024010",
+      "model": "c3702",
+      "displayMasks": [
+        0,
+        1,
+        14
+      ],
+      "evidence": "遗迹 m34_10 配置 2。00/01 为学院辉石杖和书。14 号头套由两个并排的石头人头组成，各自有头顶装饰。"
+    },
+    {
+      "cardName": "蛞蝓",
+      "label": "普通",
+      "equipmentLabel": "普通",
+      "npcIds": [
+        "40400020"
+      ],
+      "imageNpcId": "40400020",
+      "model": "c4040",
+      "displayMasks": [
+        0
+      ],
+      "evidence": "3030/0 仅显示 00 肉身（meat/body），无 02 的成对长突起。"
+    },
+    {
+      "cardName": "蛞蝓",
+      "label": "双长突起",
+      "equipmentLabel": "双长突起",
+      "npcIds": [
+        "40400010"
+      ],
+      "imageNpcId": "40400010",
+      "model": "c4040",
+      "displayMasks": [
+        0,
+        2
+      ],
+      "evidence": "蚯蚓脸前哨 m48_90 的四个生成部件使用 00 肉身和 02 deracine_meat。侧面模型可见后者是伸出体外的一对长突起。"
+    },
+    {
+      "cardName": "巨型鼠",
+      "label": "普通",
+      "equipmentLabel": "普通",
+      "npcIds": [
+        "40900010"
+      ],
+      "imageNpcId": "40900010",
+      "model": "c4090",
+      "displayMasks": [],
+      "evidence": "3030/0 使用默认皮毛和身体，无 10 号眼部网格。"
+    },
+    {
+      "cardName": "巨型鼠",
+      "label": "眼部特效",
+      "equipmentLabel": "眼部特效",
+      "npcIds": [
+        "40900310"
+      ],
+      "imageNpcId": "40900310",
+      "model": "c4090",
+      "displayMasks": [
+        10
+      ],
+      "evidence": "沼泽 m50_05 配置 0 启用 10 号 Chaos 眼部网格，正面可见。常驻效果 10422 对应 SpEffectVfxParam 52510，持续附着特效 640901。"
+    },
+    {
+      "cardName": "葛瑞克士兵",
+      "label": "君王军直剑、黄铜盾",
+      "equipmentLabel": "君王军直剑、黄铜盾",
+      "npcIds": [
+        "43110010",
+        "43110030"
+      ],
+      "imageNpcId": "43110010",
+      "model": "c4311",
+      "displayMasks": [
+        10,
+        25,
+        26
+      ],
+      "evidence": "10 为盾，25/26 为直剑部件。材质纹理编号 2203/0207 对应黄铜盾、君王军直剑。两 NPC 仅 teamType 不同。"
+    },
+    {
+      "cardName": "葛瑞克士兵",
+      "label": "君王军直剑、火把",
+      "equipmentLabel": "君王军直剑、火把",
+      "npcIds": [
+        "43111110"
+      ],
+      "imageNpcId": "43111110",
+      "model": "c4311",
+      "displayMasks": [
+        12,
+        25,
+        26
+      ],
+      "evidence": "3030/0 布置。12 为 torch，25/26 的纹理编号 0207 对应君王军直剑。"
+    },
+    {
+      "cardName": "葛瑞克士兵",
+      "label": "君王军大剑",
+      "equipmentLabel": "君王军大剑",
+      "npcIds": [
+        "43113010"
+      ],
+      "imageNpcId": "43113010",
+      "model": "c4311",
+      "displayMasks": [
+        27,
+        28
+      ],
+      "evidence": "27/28 均使用 sword_Large 材质和 0607 纹理，游戏武器名为君王军大剑。"
+    },
+    {
+      "cardName": "葛瑞克骑士",
+      "label": "骑士大剑、金黄大盾",
+      "equipmentLabel": "骑士大剑、金黄大盾",
+      "npcIds": [
+        "43510020"
+      ],
+      "imageNpcId": "43510020",
+      "model": "c4351",
+      "displayMasks": [
+        0,
+        1
+      ],
+      "evidence": "3000/0 的 00 Sword 与 01 Shield 对应武器模型 0609 和 2226。"
+    },
+    {
+      "cardName": "葛瑞克骑士",
+      "label": "阔头枪、金黄大盾",
+      "equipmentLabel": "阔头枪、金黄大盾",
+      "npcIds": [
+        "43511120"
+      ],
+      "imageNpcId": "43511120",
+      "model": "c4351",
+      "displayMasks": [
+        1,
+        2
+      ],
+      "evidence": "矿洞骑士使用 01 Shield 与 02 Lance，对应武器模型 2226 和 0921。正式部件见 m60_43_38_00、m60_43_38_50。"
+    },
+    {
+      "cardName": "普通士兵",
+      "label": "匕首",
+      "equipmentLabel": "匕首",
+      "npcIds": [
+        "43710010",
+        "43710030"
+      ],
+      "imageNpcId": "43710010",
+      "model": "c4371",
+      "displayMasks": [
+        0
+      ],
+      "evidence": "00 号武器部件使用 WP_A_0100 材质。EquipParamWeapon 的相同模型编号对应本作简中「匕首」。两 NPC 仅 teamType 不同。"
+    },
+    {
+      "cardName": "普通士兵",
+      "label": "短剑",
+      "equipmentLabel": "短剑",
+      "npcIds": [
+        "43712010"
+      ],
+      "imageNpcId": "43712010",
+      "model": "c4371",
+      "displayMasks": [
+        1
+      ],
+      "evidence": "01 号武器部件使用 WP_A_0199 材质。EquipParamWeapon 的相同模型编号对应本作简中「短剑」。"
+    },
+    {
+      "cardName": "普通士兵",
+      "label": "士兵弩",
+      "equipmentLabel": "士兵弩",
+      "npcIds": [
+        "43714020"
+      ],
+      "imageNpcId": "43714020",
+      "model": "c4371",
+      "displayMasks": [
+        2
+      ],
+      "evidence": "02 号武器部件使用 WP_A_1501 材质。EquipParamWeapon 的相同模型编号对应本作简中「士兵弩」。"
+    },
+    {
+      "cardName": "普通士兵",
+      "label": "短矛",
+      "equipmentLabel": "短矛",
+      "npcIds": [
+        "43716010",
+        "43716020"
+      ],
+      "imageNpcId": "43716010",
+      "model": "c4371",
+      "displayMasks": [
+        3
+      ],
+      "evidence": "03 号武器部件使用 WP_A_0923 材质。EquipParamWeapon 的相同模型编号对应本作简中「短矛」。两 NPC 仅 teamType 不同。"
+    },
+    {
+      "cardName": "普通士兵",
+      "label": "烛台棒",
+      "equipmentLabel": "烛台棒",
+      "npcIds": [
+        "43717010"
+      ],
+      "imageNpcId": "43717010",
+      "model": "c4371",
+      "displayMasks": [
+        4,
+        26
+      ],
+      "evidence": "04 号武器部件使用 WP_A_3001 材质。EquipParamWeapon 的相同模型编号对应本作简中「烛台棒」。另启用的 26 在该模型中没有对应网格。"
+    },
+    {
+      "cardName": "雷卢卡利亚士兵",
+      "label": "匕首",
+      "equipmentLabel": "匕首",
+      "npcIds": [
+        "43720010"
+      ],
+      "imageNpcId": "43720010",
+      "model": "c4372",
+      "displayMasks": [
+        0
+      ],
+      "evidence": "00 号武器部件使用 WP_A_0100 材质。EquipParamWeapon 的相同模型编号对应本作简中「匕首」。"
+    },
+    {
+      "cardName": "雷卢卡利亚士兵",
+      "label": "短矛",
+      "equipmentLabel": "短矛",
+      "npcIds": [
+        "43726010"
+      ],
+      "imageNpcId": "43726010",
+      "model": "c4372",
+      "displayMasks": [
+        3
+      ],
+      "evidence": "03 号武器部件使用 WP_A_0923 材质。EquipParamWeapon 的相同模型编号对应本作简中「短矛」。"
+    },
+    {
+      "cardName": "掳人少女人偶",
+      "label": "双摆荡镰刀",
+      "equipmentLabel": "双摆荡镰刀",
+      "npcIds": [
+        "44700010"
+      ],
+      "imageNpcId": "44700010",
+      "model": "c4470",
+      "displayMasks": [
+        0,
+        1,
+        10
+      ],
+      "evidence": "3000/1 启用 00 左、01 右 Pendulum 和链条。武器名称对应游戏简中 NpcName 904470000「掳人少女人偶（摆荡镰刀）」。"
+    },
+    {
+      "cardName": "掳人少女人偶",
+      "label": "刺轮、摆荡镰刀",
+      "equipmentLabel": "刺轮、摆荡镰刀",
+      "npcIds": [
+        "44702010"
+      ],
+      "imageNpcId": "44702010",
+      "model": "c4470",
+      "displayMasks": [
+        1,
+        2,
+        10
+      ],
+      "evidence": "大教堂（大空洞）m52_45 常驻部件启用 02 左 chainsaw 和 01 右 Pendulum。简中 NpcName 904470001 和 904470000 分别使用刺轮、摆荡镰刀。"
+    },
+    {
+      "cardName": "大壶",
+      "label": "普通",
+      "equipmentLabel": "普通",
+      "npcIds": [
+        "44900010",
+        "44900210"
+      ],
+      "imageNpcId": "44900010",
+      "model": "c4490",
+      "displayMasks": [
+        1
+      ],
+      "evidence": "3030/1 两 NPC 均启用同一 01 壶身、蜡封和四肢。44900210 碰撞高度为 2.8，另一条为 2.9；其额外效果 15206 的 vfxId=-1，模型、材质和 AI 参数相同。"
+    },
+    {
+      "cardName": "魔像守卫-大弓",
+      "label": "魔像大弓",
+      "equipmentLabel": "魔像大弓",
+      "npcIds": [
+        "46601010"
+      ],
+      "imageNpcId": "46601010",
+      "model": "c4660",
+      "displayMasks": [
+        1,
+        20,
+        24,
+        26
+      ],
+      "evidence": "3030/0 启用 01 弓弦和弓、20 箭袋，以及 24/26 身体部件。纹理与武器模型 1407 对应本作简中魔像大弓。"
+    },
+    {
+      "cardName": "魔像守卫-戟",
+      "label": "魔像戟",
+      "equipmentLabel": "魔像戟",
+      "npcIds": [
+        "46600030"
+      ],
+      "imageNpcId": "46600030",
+      "model": "c4660",
+      "displayMasks": [
+        0,
+        23,
+        26
+      ],
+      "evidence": "大教堂 m38_00 配置 1，00 号武器的材质模型编号 1012 对应本作简中魔像戟，23/26 为身体部件。"
+    }
+  ]
+}

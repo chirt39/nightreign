@@ -24,15 +24,15 @@ REMOVED_ENEMY_IDS = frozenset({
     "75400100", "30101260", "30101010", "30100280", "21500400",
     "21500000", "21500100", "21500200", "21500300", "21500310",
     "21500500", "21500510", "40600000", "40600010",
-    "45050010", "46020030", "46000110", "43511120", "43510040",
+    "45050010", "46020030", "46000110", "43510040",
 })
-REMOVED_ENEMY_COLUMN_POSITIONS = frozenset({20, 21, 22, 23, 25})
+REMOVED_ENEMY_COLUMN_POSITIONS = frozenset({20, 21, 22, 23, 25, 27})
 REMOVED_ENEMY_FIELD_KEYS = frozenset({
-    "removed_20", "removed_21", "removed_22", "removed_23", "removed_25",
+    "removed_20", "removed_21", "removed_22", "removed_23", "removed_25", "removed_27",
     "bleedResist", "frostResist", "sleepResist", "madnessResist", "poiseResist",
 })
 REMOVED_ENEMY_FIELD_LABELS = frozenset({
-    "出血承受率", "冻伤承受率", "催眠承受率", "发狂承受率", "韧性承受率",
+    "韧性回复时间", "出血承受率", "冻伤承受率", "催眠承受率", "发狂承受率", "韧性承受率",
     "承受·出血", "承受·冻伤", "承受·催眠", "承受·发狂", "承受·韧性",
 })
 
@@ -92,6 +92,7 @@ def build() -> list[dict[str, Any]]:
     enemy_columns = enemy_data.get("columns", [])
     extra_locations = enemy_data.get("extraLocations", {})
     entity_locations = enemy_data.get("entityLocationsBySourceId", {})
+    appearances = {source: form for form in enemy_data.get("appearanceForms", []) for source in form["sourceIds"]}
     enemy_id_counts: dict[str, int] = {}
     for row in enemy_data.get("rows", []):
         values = {col.get("k", ""): row[i] for i, col in enumerate(enemy_columns) if i < len(row)}
@@ -101,14 +102,19 @@ def build() -> list[dict[str, Any]]:
         enemy_id_counts[enemy_id] = enemy_id_counts.get(enemy_id, 0) + 1
         record_id = f"enemy:{enemy_id}" if enemy_id_counts[enemy_id] == 1 else f"enemy:{enemy_id}:{enemy_id_counts[enemy_id]}"
         fields: list[str] = []
+        appearance = appearances.get(enemy_id)
+        if appearance:
+            fields.append("外观：" + appearance["label"])
         if enemy_id in enemy_data.get("crystalianSources", []):
             fields.append("结晶人合并卡，伤害倍率为外壳破碎后的数值")
-        locations = extra_locations.get(enemy_id, [])
+        locations = (enemy_data["displayLocationsBySourceId"].get(enemy_id, [])
+                     if appearance else extra_locations.get(enemy_id, []))
         if locations:
             fields.append("出现地点：" + "、".join(locations))
-        family_locations = [name for name in entity_locations.get(enemy_id, []) if name not in locations]
+        family_locations = [name for name in (appearance["locations"] if appearance else entity_locations.get(enemy_id, []))
+                            if name not in locations]
         if family_locations:
-            fields.append("同种怪物的其他出现地点：" + "、".join(family_locations))
+            fields.append(("此外观的其他来源地点：" if appearance else "同种怪物的其他出现地点：") + "、".join(family_locations))
         damage_values: list[tuple[str, float]] = []
         for index, col in enumerate(enemy_columns):
             key = col.get("k", "")

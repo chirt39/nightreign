@@ -1,0 +1,69 @@
+{
+  "33500020a": {
+    "path": "enemy-images/candidate-bwiki-d2ddaf64c4ba86de.jpg",
+    "cardName": "结晶人",
+    "confidence": "高",
+    "evidence": "3030/1 的 33500020 启用大小两枚圆刃刀。实机截图可同时看到手中小圆刃和身前大圆刃，符合这一武器组合。既有候选对应 BWiki 图号 33500920。"
+  },
+  "37020020a": {
+    "path": "enemy-images/37020020.jpg",
+    "cardName": "辉石魔法师",
+    "confidence": "高",
+    "evidence": "3030/1 的 37020020 为戴单面石头套的杖书法师。原图映射直接指向 37020020，实机头像可辨石质长须脸、头顶晶簇与红色领边，武器位于裁切范围外。"
+  },
+  "40400020a": {
+    "path": "enemy-images/fort-40400020.png",
+    "imageKind": "game-model-render",
+    "cardName": "蛞蝓",
+    "confidence": "高",
+    "evidence": "3030/0 的 40400020 为火 ×1.2 的普通蛞蝓。库内实机候选出自图号 40403020，可见橙红发光的身体，属于火蛞蝓外观。普通型采用 40400020 的游戏模型渲染，c4040 仅启用 00 号身体部件。"
+  },
+  "40900010a": {
+    "path": "enemy-images/40900020.jpg",
+    "cardName": "巨型鼠",
+    "confidence": "高",
+    "evidence": "3030/0 的 40900010 为普通眼部的巨型鼠。选用同卡 40900020 的明亮侧面实机头像，能辨棕灰毛、长吻和普通眼睛。两者均为 c4090、32 个部件掩码全关，八项倍率相同。"
+  },
+  "43111110a": {
+    "path": "enemy-images/43111110.jpg",
+    "cardName": "葛瑞克士兵",
+    "confidence": "高",
+    "evidence": "3030/0 的 43111110 使用 c4311 的 12 号火把部件和直剑部件。实机图号直接对应，可辨绿橙罩袍、头盔和点燃的火把。"
+  },
+  "43510020a": {
+    "path": "enemy-images/candidate-bwiki-0da68c0d27d558d1.jpg",
+    "cardName": "葛瑞克骑士",
+    "confidence": "高",
+    "evidence": "3000/0 的 43510020 与 43510010 均为 c4351，启用骑士大剑、金黄大盾，八项倍率相同。选用仓库内 BWiki 图号 43510010 的 200 像素截图，可辨羽饰骑士盔与盾，武器局部超出画面。"
+  },
+  "43716010a": {
+    "path": "enemy-images/43716010.jpg",
+    "cardName": "普通士兵",
+    "confidence": "高",
+    "evidence": "3000/0、3000/1 和 3030/0 均布置 43716010。实机图号直接对应，可辨宽檐铁盔、肩部锁甲和握持的长柄；其 c4371 的 03 号武器部件对应短矛。"
+  },
+  "43720010a": {
+    "path": "enemy-images/candidate-fextralife-cc59b870fe37a4d1.png",
+    "cardName": "雷卢卡利亚士兵",
+    "confidence": "中",
+    "evidence": "3030/1 的 43720010 与旧图索引 43720000 均为 c4372 匕首型，部件掩码、常驻效果与八项倍率一致。Fextralife 的 Raya Lucaria Foot Soldier 实机图可辨金属筒帽、灰色短袍和护腕，画面在手边裁切。"
+  },
+  "44700010a": {
+    "path": "enemy-images/candidate-fextralife-39c1e0836f262c8b.png",
+    "cardName": "掳人少女人偶",
+    "confidence": "高",
+    "evidence": "3000/1 的 44700010 为双摆荡镰刀型，原候选对应同一普通来源。实机图能辨人偶、两臂垂下的长链和左右弯刃。"
+  },
+  "44900010a": {
+    "path": "enemy-images/44907014.jpg",
+    "cardName": "大壶",
+    "confidence": "中",
+    "evidence": "3030/1 的 44900010 与原图索引 44900000 同为 c4490，部件掩码、常驻效果与八项倍率一致。既有实机图 44907014 可辨浮雕壶身与圆形蜡封；裁切中缺少可供独立比较体型的参照物。"
+  },
+  "46601010a": {
+    "path": "enemy-images/46601010.jpg",
+    "cardName": "魔像守卫-大弓",
+    "confidence": "高",
+    "evidence": "3030/0 的 46601010 为大弓型。既有同编号实机截图可见石质头肩及背后的箭束，原图索引和 BWiki 图号均为 46601010。"
+  }
+}

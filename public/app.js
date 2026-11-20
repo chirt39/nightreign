@@ -90,17 +90,19 @@ async function loadEnemyImageManifest(file, versions){
 }
 
 const bossRe=/boss|首领|夜王|夜之王|夜王者/i;
-const enemyCategoryLabels={'夜王':'夜王','夜晚Boss':'夜晚首领','强敌boss':'强敌首领','中boss':'小型首领','小boss':'小型首领','boss':'Boss','封印监牢':'封印监牢','古代封印监牢':'古代封印监牢','特殊':'特殊敌人'};
+const enemyCategoryLabels={'夜王':'夜王','夜晚Boss':'夜晚首领','强敌boss':'强敌首领','中boss':'小型首领','小boss':'小型首领','boss':'Boss','封印监牢':'封印监牢','古代封印监牢':'封印监牢','特殊':'特殊敌人'};
 const enemyExcludedNumericSourceIds=new Set(['30200100','30200110','30208000','30208020','30208010','30200120']);
-const enemyPrimarySourceIds=new Set(['30200000','30200030','30200010a','30200020']);
+const enemyPrimarySourceIds=new Set(['30200000','30200030','30200010a','30200020','36626010','39100130','45803020a']);
 const enemyExplicitVariantPairs=new Map([['30200010b','30200000'],['45803020b','45803020a'],['30000010b','30000010a'],['30000110b','30000110a'],['30001010b','30001010a'],['36622010b','36622010a'],['44700010b','44700010a'],['43002410b','43000010a'],['71000110b','71000110a']]);
 const enemyUnpairedDisasterIds=new Set(['36612010b','36615010b']);
-const enemyAreaDisplayAliases=new Map([['第三夜Boss','夜王'],['永夜Boss','夜王'],['原野Boss - 恐怖强敌','原野Boss'],['锻造设施','锻造村']]);
+const enemyAreaDisplayAliases=new Map([['第三夜Boss','夜王'],['永夜Boss','夜王'],['原野Boss - 恐怖强敌','原野Boss'],['锻造设施','锻造村'],['古代封印监牢','封印监牢']]);
 const enemyHiddenAreas=new Set(['宁姆韦德','大空洞','小型营地','教堂','魔法师塔']);
 const enemyRequiredAreas=['沼泽','锻造村'];
 function enemySearchText(row){
   const info=state.enemyData.nativeCardEvidence?.[row[1]];
-  return [enemyName(row),enemyDisplayName(row),row[1],enemyCategoryLabel(row),...enemyDisplayLocations(row),...(info?.searchAliases||[]),info?.formLabel].join(' ');
+  const appearance=state.enemyAppearanceById?.get(String(row[1]));
+  const locations=appearance?[...enemyRowDisplayLocations(row),...appearance.locations]:enemyDisplayLocations(row);
+  return [enemyName(row),enemyDisplayName(row),row[1],enemyCategoryLabel(row),...locations,appearance?.label,...(info?.searchAliases||[]),info?.formLabel].join(' ');
 }
 function enemyName(r){return String(r[0]||'未知敌人')}
 function isBoss(r){return bossRe.test(enemyName(r))}
@@ -123,10 +125,10 @@ function enemyEntityKey(row){
 }
 function isIndependentDisaster(row){return enemyName(row).includes('[灾域]')&&enemyEntityKey(row).startsWith('disaster:')}
 function enemyDisplayName(row){return state.enemyRowInfo.get(row)?.displayName||stripEnemyOccurrenceAnnotations(enemyName(row))}
-function enemyProfileQualifier(sample, others){
+function enemyProfileQualifier(sample, others, end=20, skipIndex=null){
   const differences = [];
-  for (let i = 5; i < 20 && others.length; i++) {
-    if (others.every(row => row[i] === sample[i])) continue;
+  for (let i = 5; i < end && others.length; i++) {
+    if (i===skipIndex || others.every(row => row[i] === sample[i])) continue;
     differences.push(enemyMetricLabel(state.enemyData.columns[i].label, i) + ' ' + enemyMetricDisplay(sample, i));
     others = others.filter(row => row[i] === sample[i]);
   }
@@ -168,6 +170,7 @@ function groupNightlordForms(records) {
   const families = new Map();
   for (const {row} of records) {
     if (!enemyRowDisplayLocations(row).includes('夜王')) continue;
+    if (state.enemyData.nativeCardEvidence?.[row[1]]?.encounterRole === '夜王战召唤物') continue;
     const name = state.enemyData.nativeCardEvidence?.[row[1]]?.nightlordFamily ||
       enemyName(row).replace(/\s*[（(](?:永夜\s*)?Boss(?:\s*\d+阶段)?[）)]$/i, '').replace(/\s*[-－]\s*分身$/, '').trim();
     const rates = row.slice(5, 13);
@@ -190,12 +193,79 @@ function groupNightlordForms(records) {
     }
   }
 }
+// The cathedral audit identifies same-name forms by their full eight-rate profile.
+// Elsewhere, ordinary cards still merge only when seven coordinates are shared.
+function groupSingleDamageDifferences(records){
+  const families = new Map();
+  const hollowSources = new Set(state.enemyData.hollowCathedralSources);
+  for (const info of records) {
+    const {row} = info, rates = row.slice(5,13);
+    if (info.key?.startsWith('nightlord:') || enemyExcludedNumericSourceIds.has(String(row[1])) ||
+        !rates.every(Number.isFinite)) continue;
+    const family = enemyGroupName(row);
+    const name = family === '催眠大螃蟹' ? '大螃蟹' : family;
+    const signature = JSON.stringify(rates);
+    if (!families.has(name)) families.set(name,new Map());
+    const profiles = families.get(name);
+    if (!profiles.has(signature)) profiles.set(signature,[]);
+    profiles.get(signature).push(info);
+  }
+  for (const [name,profiles] of families) {
+    if (profiles.size < 2) continue;
+    const samples=[...profiles.values()];
+    if(name==='山妖' || samples.some(entries=>entries.some(({row})=>hollowSources.has(String(row[1]))))){
+      // Use a single button value only when it uniquely identifies the entire profile.
+      const index=[5,6,7,8,9,10,11,12].find(i=>new Set(samples.map(entries=>entries[0].row[i])).size===profiles.size);
+      if(index!==undefined){
+        for(const entries of samples)for(const info of entries){
+          info.key=name==='山妖'?'enemy:山妖':'enemy:'+name+':hollow-forms';
+          info.displayName=name;
+          info.rateIndex=index;
+        }
+        continue;
+      }
+    }
+    const buckets = new Map();
+    for (const [signature,entries] of profiles) {
+      const rates = entries[0].row.slice(5,13);
+      rates.forEach((_,i) => {
+        const key = JSON.stringify(rates.map((v,j) => i === j ? null : v));
+        if (!buckets.has(key)) buckets.set(key,{key,index:i+5,signatures:[]});
+        buckets.get(key).signatures.push(signature);
+      });
+    }
+    const used = new Set();
+    const candidates = [...buckets.values()].filter(b => b.signatures.length > 1)
+      .sort((a,b) => b.signatures.length-a.signatures.length || a.index-b.index || a.key.localeCompare(b.key));
+    for (const {key,index,signatures} of candidates) {
+      const available = signatures.filter(sig => !used.has(sig));
+      if (available.length < 2) continue;
+      const sample = profiles.get(available[0])[0];
+      const base = name === '大螃蟹' ? name : sample.displayName.split(' · ')[0];
+      const outside = [...profiles.keys()].filter(sig => !signatures.includes(sig)).map(sig => profiles.get(sig)[0].row);
+      // Only label a card with attributes shared by every choice on that card.
+      const qualifier=enemyProfileQualifier(sample.row,outside,13,index);
+      for (const sig of available) {
+        used.add(sig);
+        for (const info of profiles.get(sig)) {
+          info.key = 'enemy:'+name+':variants:'+key;
+          info.displayName = qualifier ? base+' · '+qualifier : base;
+          info.rateIndex = index;
+        }
+      }
+    }
+  }
+}
 function buildEnemyDisplayIndex(){
   // Rebuild all derived fields together when the catalog or metadata changes.
   state.enemyRowInfo=new WeakMap();
   state.enemyRowsById=new Map();
   state.enemyOrdinarySignatures=new Set();
   state.enemySearchRows=[];
+  state.enemyAppearanceById=new Map();
+  for(const form of state.enemyData.appearanceForms||[]){
+    for(const id of form.sourceIds)state.enemyAppearanceById.set(id,form);
+  }
   const hiddenFormIds = new Set(state.enemyData.albinauricForms?.find(form => form.statId === '34700000')?.sourceIds);
   const visibleRecords = [];
   const crystalianSources = new Set(state.enemyData.crystalianSources);
@@ -204,22 +274,23 @@ function buildEnemyDisplayIndex(){
     if(hiddenFormIds.has(id))return;
     visibleRecords.push({row,index});
     if(!state.enemyRowsById.has(id))state.enemyRowsById.set(id,row);
-    const displayName=crystalianSources.has(id)?'结晶人':enemyDisplayName(row);
-    const groupName=crystalianSources.has(id)?displayName:enemyGroupName(row);
+    const cardName=state.enemyData.cardNamesBySourceId?.[id]||(crystalianSources.has(id)?'结晶人':null);
+    const displayName=cardName||enemyDisplayName(row);
+    const groupName=cardName||enemyGroupName(row);
     state.enemyRowInfo.set(row,{row,index,displayName,groupName});
     if(!enemyName(row).includes('[灾域]'))state.enemyOrdinarySignatures.add(JSON.stringify([groupName,enemyClassificationSignature(row)]));
   });
   // Include same-name records from other areas when grouping the audited enemies.
-  const fortSources = new Set(state.enemyData.fortVariantSources || []);
-  const auditedNames = new Set(visibleRecords.filter(({row}) => fortSources.has(String(row[1]))).map(({row}) => enemyGroupName(row)));
+  const reviewedSources = new Set([...(state.enemyData.fortVariantSources || []), ...(state.enemyData.cathedralSources || []), ...(state.enemyData.hollowCathedralSources || []), ...(state.enemyData.evergaolSources || []), ...(state.enemyData.largeCampSources || [])]);
+  const auditedNames = new Set(visibleRecords.filter(({row}) => reviewedSources.has(String(row[1]))).map(({row}) => enemyGroupName(row)));
   const profilesByName = new Map();
   for (const {row} of visibleRecords) {
     const name = enemyGroupName(row);
     if (!auditedNames.has(name)) continue;
     if (!profilesByName.has(name)) profilesByName.set(name, new Map());
     const profiles = profilesByName.get(name);
-    // Columns 5–12 are damage rates and 13–19 are status resistances.
-    const signature = JSON.stringify(row.slice(5, 20));
+    const rates = row.slice(5, 13);
+    const signature = rates.every(Number.isFinite) ? JSON.stringify(rates) : 'source:' + row[1];
     if (!profiles.has(signature)) profiles.set(signature, []);
     profiles.get(signature).push(state.enemyRowInfo.get(row));
   }
@@ -229,7 +300,7 @@ function buildEnemyDisplayIndex(){
       const ordinary = records.find(({row}) => !enemyName(row).includes('[灾域]'));
       const sample = (ordinary || records[0]).row;
       const key = (ordinary ? 'enemy:' : 'disaster:') + name + ':' + signature;
-      const qualifier = enemyProfileQualifier(sample, representatives.filter(row => row !== records[0].row));
+      const qualifier = enemyProfileQualifier(sample, representatives.filter(row => row !== records[0].row), 13);
       const label = enemyDisplayName(sample) + (qualifier ? ' · ' + qualifier : '');
       for (const record of records) {
         record.key = key;
@@ -237,19 +308,39 @@ function buildEnemyDisplayIndex(){
       }
     }
   }
-  applyReviewedEnemyProfiles(visibleRecords);
+  applyReviewedEnemyProfiles(visibleRecords.filter(({row})=>!auditedNames.has(enemyGroupName(row))));
   groupNightlordForms(visibleRecords);
+  groupSingleDamageDifferences(visibleRecords.map(({row}) => state.enemyRowInfo.get(row)));
+  const regionalPortraits=[['小型要塞',state.enemyData.smallFortRepresentatives],['大教堂',state.enemyData.cathedralRepresentatives],['大教堂（大空洞）',state.enemyData.hollowCathedralRepresentatives],['封印监牢',state.enemyData.evergaolRepresentatives],['大型营地',state.enemyData.largeCampRepresentatives],['遗迹',state.enemyData.ruinsRepresentatives]];
   const entities=new Map();
   visibleRecords.forEach(({row,index})=>{
     const key=enemyEntityKey(row);
     if(!entities.has(key))entities.set(key,{key,name:enemyDisplayName(row),records:[],pairedDisaster:[],sourceOnly:[],statGroups:[]});
     const entity=entities.get(key),record={row,index};
+    const id=String(row[1]);
+    const rateIndex=state.enemyRowInfo.get(row).rateIndex;
+    if (rateIndex !== undefined) {
+      entity.rateIndex=rateIndex;
+      entity.rateOptions ??= new Map();
+      if (!entity.rateOptions.has(row[rateIndex])) entity.rateOptions.set(row[rateIndex],[]);
+      entity.rateOptions.get(row[rateIndex]).push(record);
+    }
+    for(const [area,portraits] of regionalPortraits){
+      if(!Object.hasOwn(portraits||{},id))continue;
+      entity.regionRepresentatives ??= new Map();
+      const portrait={...record,area,path:portraits[id],imageKind:state.enemyData.modelPortraitSources?.includes(id)?'game-model-render':'representative-photo'};
+      entity.regionRepresentatives.set(area,portrait);
+      if(entity.rateOptions)(entity.ratePortraits ??= []).push(portrait);
+    }
     if(enemyExcludedNumericSourceIds.has(String(row[1])))entity.sourceOnly.push(record);
     else if(enemyName(row).includes('[灾域]')&&key.startsWith('enemy:'))entity.pairedDisaster.push(record);
     else entity.records.push(record);
     if(!enemyName(row).includes('[灾域]'))entity.name=enemyDisplayName(row);
   });
   for(const entity of entities.values()){
+    if(entity.regionRepresentatives){
+      entity.representative=regionalPortraits.map(([area])=>entity.regionRepresentatives.get(area)).find(Boolean);
+    }
     const byStats=new Map();
     for(const record of entity.records){
       const signature=JSON.stringify(record.row.slice(2));
@@ -257,7 +348,11 @@ function buildEnemyDisplayIndex(){
       byStats.get(signature).records.push(record);
     }
     entity.statGroups=[...byStats.values()];
-    const order=group=>group.records.every(({row})=>state.enemyRowInfo.get(row).unconfirmedProfile)?3:group.records.some(({row})=>enemyPrimarySourceIds.has(String(row[1])))?0:group.records.some(({row})=>!enemyName(row).includes('[灾域]'))?1:2;
+    const order=group=>{
+      if(group.records.some(({row})=>enemyPrimarySourceIds.has(String(row[1]))))return 0;
+      if(group.records.every(({row})=>state.enemyRowInfo.get(row).unconfirmedProfile))return 3;
+      return group.records.some(({row})=>!enemyName(row).includes('[灾域]'))?1:2;
+    };
     entity.statGroups.sort((a,b)=>order(a)-order(b));
     for(const group of entity.statGroups){
       group.anchor=group.records.find(({row})=>enemyPrimarySourceIds.has(String(row[1])))||group.records.find(({row})=>!enemyName(row).includes('[灾域]'))||group.records[0];
@@ -278,10 +373,9 @@ function buildEnemyDisplayIndex(){
   }
   state.enemyEntities=entities;
   state.enemySearchRows=visibleRecords.map(({row})=>{
-    const info=state.enemyRowInfo.get(row),entity=entities.get(enemyEntityKey(row));
+    const info=state.enemyRowInfo.get(row);
     info.searchText=enemySearchText(row).toLocaleLowerCase();
     info.locations=enemyRowDisplayLocations(row);
-    if(!info.locations.length&&!entity.locations.length)info.locations=['出现地点未收录'];
     info.recordType=enemyExcludedNumericSourceIds.has(String(row[1]))?'filteredSourceOnly':enemyName(row).includes('[灾域]')&&info.key.startsWith('enemy:')?'filteredPairedDisaster':'filteredRecords';
     return info;
   });
@@ -304,13 +398,11 @@ function enemySourceNote(row){
   return {sourceName,locations:displayEnemyLocations([...locations]),variant:enemyName(row).includes('[灾域]')?(independent?'独立记录':'灾域版'):'普通版'};
 }
 function enemyLocationSummary(group){
-  const locations=group.locations||[];
-  return locations.length?locations.join('、'):'出现地点未收录';
+  return (group?.locations || []).join('、');
 }
 function enemyDisplayLocations(row){
   const entity=state.enemyEntities.get(enemyEntityKey(row));
-  const locations=entity?entity.locations:enemyRowDisplayLocations(row);
-  return locations.length?locations:['出现地点未收录'];
+  return entity ? entity.locations : enemyRowDisplayLocations(row);
 }
 function buildEnemyMetadata(){
   state.enemyMetaByRow=new WeakMap();
@@ -390,7 +482,7 @@ function enemyCategoryLabel(row){
 }
 function setupEnemyFilters(){
   const entities=[...state.enemyEntities.values()];
-  const areas=new Set(entities.flatMap(entity=>entity.locations.length?entity.locations:['出现地点未收录']));
+  const areas=new Set(entities.flatMap(entity=>entity.locations));
   $('#enemy-area').innerHTML='<option value="all">全部区域 / 遭遇</option>'+[...areas].map(area=>`<option value="${esc(area)}">${esc(area)}</option>`).join('');
   $('#enemy-area').dispatchEvent(new Event('nightreign:enemy-area-sync'));
 }
@@ -439,12 +531,28 @@ function filterEnemies(resetPage=true){
   const groups=new Map();
   rows.forEach(item=>{const key=item.key;if(!groups.has(key)){const entity=state.enemyEntities.get(key);groups.set(key,{...entity,filteredRecords:[],filteredPairedDisaster:[],filteredSourceOnly:[]})}groups.get(key)[item.recordType].push(item)});
   state.enemyGroups=[...groups.values()];
-  if(state.enemyUrlId||state.enemyUrlIndex!==null){const match=resolveEnemyUrlMatch(rows,state.enemyData.rows,state.enemyUrlIndex,state.enemyUrlId);state.enemySelected=match?.row||null;if(match){const selectedGroupIndex=state.enemyGroups.findIndex(group=>group.key===enemyEntityKey(state.enemySelected));if(!resetPage&&selectedGroupIndex>=0)state.enemyPage=Math.floor(selectedGroupIndex/state.enemyPageSize)+1}state.enemyUrlId='';state.enemyUrlIndex=null}
+  const restoreSelection=Boolean(state.enemyUrlId||state.enemyUrlIndex!==null);
+  if(restoreSelection){const match=resolveEnemyUrlMatch(rows,state.enemyData.rows,state.enemyUrlIndex,state.enemyUrlId);state.enemySelected=match?.row||null;if(match){const selectedGroupIndex=state.enemyGroups.findIndex(group=>group.key===enemyEntityKey(state.enemySelected));if(!resetPage&&selectedGroupIndex>=0)state.enemyPage=Math.floor(selectedGroupIndex/state.enemyPageSize)+1}state.enemyUrlId='';state.enemyUrlIndex=null}
   if(state.enemySelected&&!rows.some(({row})=>row===state.enemySelected)){
     const group=groups.get(enemyEntityKey(state.enemySelected));
-    state.enemySelected=group?enemyListRecord(group)?.row:null;
+    if(!(restoreSelection&&enemyAllowsOtherAreas(group)))state.enemySelected=group?enemyListRecord(group)?.row:null;
   }
   if(resetPage)state.enemyPage=1;renderEnemies();renderEnemyDetail(state.enemySelected);syncEnemyUrl();
+}
+function enemyRegionalRepresentative(entity, id, area=$('#enemy-area').value) {
+  if (entity?.rateOptions && id != null) {
+    const source=state.enemyRowsById.get(String(id)), value=source?.[entity.rateIndex];
+    const matches=(entity.ratePortraits||[]).filter(p => p.row[entity.rateIndex]===value);
+    return matches.find(p=>String(p.row[1])===String(id)) || matches.find(p=>p.area===area) || matches[0] || null;
+  }
+  const byArea=entity?.regionRepresentatives;
+  if(!byArea)return null;
+  const selected=byArea.get(area);
+  if(selected)return selected;
+  if(id != null && state.enemyData.largeCampSources?.includes(String(id)))return byArea.get('大型营地') || entity.representative;
+  if(id != null && state.enemyData.evergaolSources?.includes(String(id)))return byArea.get('封印监牢') || entity.representative;
+  if(id != null && state.enemyData.hollowCathedralSources?.includes(String(id)))return byArea.get('大教堂（大空洞）') || entity.representative;
+  return entity.representative;
 }
 function enemyListRecord(group) {
   const matches = [...group.filteredRecords, ...group.filteredPairedDisaster, ...group.filteredSourceOnly];
@@ -454,7 +562,22 @@ function enemyListRecord(group) {
     const current = matches.find(({row}) => damageTargetForRow(row)?.id === damageEnemyPicker.selected);
     if (current || matches.length === 1) return current || matches[0];
   }
-  if ($('#enemy-area').value !== 'all' || group.key.startsWith('nightlord:')) return matches[0];
+  if (group.rateOptions) {
+    const available=matches.filter(({row})=>Number.isFinite(row[group.rateIndex]));
+    const values=[...new Set(available.map(({row})=>row[group.rateIndex]))].sort((a,b)=>b-a);
+    const ordinaryTroll=group.name==='山妖' && available.find(({row})=>String(row[1])==='46000030');
+    const value=ordinaryTroll?ordinaryTroll.row[group.rateIndex]:values[0];
+    const records=available.filter(({row})=>row[group.rateIndex]===value);
+    return enemyRateRecord(group,records) || matches[0];
+  }
+  const regional=enemyRegionalRepresentative(group);
+  if(regional){
+    const representative=matches.find(({row})=>row===regional.row);
+    return representative || matches[0];
+  }
+  if ($('#enemy-area').value !== 'all' || group.key.startsWith('nightlord:')) {
+    return matches.find(({row}) => enemyPrimarySourceIds.has(String(row[1]))) || matches[0];
+  }
   return group.statGroups[0]?.anchor || group.filteredRecords[0] || group.filteredPairedDisaster[0] || group.filteredSourceOnly[0];
 }
 function renderEnemies(){
@@ -466,7 +589,7 @@ function renderEnemies(){
     const record=enemyListRecord(group);
     if(!record)return '';
     const {row,index}=record,selected=state.enemySelected&&enemyEntityKey(state.enemySelected)===group.key;
-    return `<button type="button" class="enemy-row ${selected?'active':''}" data-enemy-index="${index}"><span class="enemy-row-copy"><strong>${esc(group.name)}</strong><small>${esc(enemyLocationSummary(group))}</small></span></button>`;
+    return `<button type="button" class="enemy-row ${selected?'active':''}" data-enemy-index="${index}"><span class="enemy-row-copy"><strong>${esc(group.name)}</strong>${group.locations.length?`<small>${esc(enemyLocationSummary(group))}</small>`:''}</span></button>`;
   }).join(''):'<div class="empty-state"><h3>没有找到记录</h3><p>试试其他名称或 ID。</p></div>';
   renderPagination('enemy-pagination',total,state.enemyPageSize,state.enemyPage);
 }
@@ -490,13 +613,18 @@ function locationFor(row){
 // 敌人表的伤害列存的是减伤百分比；图鉴使用玩家实际造成伤害的倍率。
 function enemyDamageMultiplier(value){
   const reduction=Number(value);
-  return value==null||typeof value==='string'&&!value.trim()||!Number.isFinite(reduction)?null:Math.round((1-reduction/100)*1000)/1000;
+  return value==null||typeof value==='string'&&!value.trim()||!Number.isFinite(reduction)?null:Math.round((1-reduction/100)*1e6)/1e6;
 }
 function enemyDamageText(value){const multiplier=enemyDamageMultiplier(value);return multiplier==null?'未收录':`×${multiplier}`}
+function enemyDamageTone(multiplier){
+  if (multiplier==null) return '';
+  return multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral';
+}
 function enemyMetricDisplay(row,index){
+  // 沼泽巨型鼠原生催眠免疫，图鉴暂与其他巨型鼠统一展示。
+  if(index===17 && String(row[1])==='40900310')return '84';
   const value=String(row[index]).toLowerCase();
   if(index>=38&&index<=41){if(value==='yes')return '√';if(value==='no')return 'x'}
-  if(index===27 && typeof row[index]==='number')return String(row[index]);
   return index>=5&&index<=12?enemyDamageText(row[index]):value==='immune'?'免疫':fmt(row[index]);
 }
 function enemyMetricLabel(label,index){if(index===5)return '普通';if(index===14)return '腐败';if(index>=6&&index<=12)return label.replace(/^伤害[·．]/,'');if(index>=13&&index<=19)return label.replace(/^耐受[·．]/,'');return label}
@@ -504,18 +632,27 @@ const enemyMetricIconFiles=new Map([[5,'damage-physical'],[6,'damage-slash'],[7,
 function enemyMetricIconMarkup(index){const file=enemyMetricIconFiles.get(index);return file?`<img class="enemy-metric-icon" src="./enemy-attribute-icons/${file}.png" alt="" aria-hidden="true" width="18" height="18" decoding="async">`:''}
 function enemyLocationDifferences(entity){
   const groups=entity?.statGroups||[],records=groups.flatMap(group=>group.records),differences=new Map();
-  const metricIndexes=[...Array(21)].map((_,offset)=>offset+5).filter(index=>index!==25&&(index<20||index>23)).concat(27,[...Array(4)].map((_,offset)=>offset+38),[...Array(16)].map((_,offset)=>offset+42));
+  const reviewedLocations = records.length && state.enemyData.reviewedResistanceLocations?.[enemyGroupName(records[0].row)];
+  const metricIndexes=[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,24,38,39,40,41];
   for(const index of metricIndexes){
+    if (index===entity?.rateIndex) continue;
     const byLocation=new Map(),allValues=new Set();
+    const status = index >= 13 && index <= 19 ? enemyMetricLabel(state.enemyData.columns[index].label, index) : null;
     for(const {row} of records){
       if(row[index]==null || row[index]==='')continue;
-      const value=enemyMetricDisplay(row,index),sourceLocations=enemySourceNote(row).locations,locations=sourceLocations.length?sourceLocations:['出现地点未收录'];
+      if (status && row[index] === 'Immune' && enemyImmunityStatuses(state.enemyData.statusImmunityNotesBySource?.[row[1]]).includes(status)) continue;
+      const sourceLocations = enemySourceNote(row).locations;
+      const locations = new Set(sourceLocations);
+      if (reviewedLocations && status) {
+        for (const location of reviewedLocations[row[1]] || []) locations.add(location);
+      }
+      if (!locations.size) continue;
+      const value = enemyMetricDisplay(row,index);
       allValues.add(value);
       for(const location of locations){
         const form = state.enemyData.nativeCardEvidence?.[row[1]]?.formLabel;
-        const label = location === '夜王' && form ? `夜王（${form}）` :
-          index === 27 && location === '夜王' && /[（(](永夜)?Boss[）)]/i.test(enemyName(row))
-            ? (/永夜Boss/i.test(enemyName(row)) ? '夜王（永夜）' : '夜王（普通）') : location;
+        const locationForm = location === '夜王' ? form : index === 24 && state.enemyData.poiseFormBySource?.[row[1]];
+        const label = locationForm ? `${location}（${locationForm}）` : location;
         if(!byLocation.has(label))byLocation.set(label,new Set());
         byLocation.get(label).add(value);
       }
@@ -530,23 +667,76 @@ function enemyLocationDifferencesMarkup(differences,columns){
   for(const [index,byLocation] of differences)for(const [location,values] of byLocation){const pending=values.size>1;rows.push(`<tr><th scope="row">${esc(enemyMetricLabel(columns[index].label,index))}</th><td>${esc(location)}</td><td>${[...values].map(esc).join(' / ')}${pending?'<small class="enemy-difference-pending">待核对</small>':''}</td></tr>`)}
   return `<details id="enemy-location-differences" class="detail-section enemy-location-differences" open><summary><span>地点与记录差异</span><small>${rows.length} 条</small></summary><div class="enemy-health-table-wrap"><table class="enemy-health-table"><thead><tr><th scope="col">资料项</th><th scope="col">地点</th><th scope="col">数值</th></tr></thead><tbody>${rows.join('')}</tbody></table></div></details>`;
 }
+function enemyImmunityStatuses(note){
+  return note?.statuses || (note?.status ? [note.status] : []);
+}
+function enemyImmunityNoteMarkup(entity,active){
+  const notes = new Set();
+  const records = entity?.rateOptions && active ? entity.rateOptions.get(active[entity.rateIndex]) || [] :
+    [...(entity?.records || []), ...(entity?.pairedDisaster || [])];
+  for (const {row} of records) {
+    const note = state.enemyData.statusImmunityNotesBySource?.[row[1]];
+    if (note) notes.add(note.text || note.location + '免疫' + enemyImmunityStatuses(note).join('、'));
+  }
+  if (!notes.size) return '';
+  return `<aside class="kv enemy-core-note" aria-label="地点备注"><span class="enemy-metric-label">地点备注</span><strong>${[...notes].map(esc).join('<br>')}</strong></aside>`;
+}
+function enemyRateRecord(entity,records,area=$('#enemy-area').value){
+  const eligible=records.filter(({row})=>(area==='all'||enemyRowDisplayLocations(row).includes(area)) && (!damageEnemyPicker||damageTargetForRow(row)));
+  const portraits=entity.ratePortraits||[];
+  const nativePortrait=({row})=>state.enemyImageManifest?.images?.[row[1]]?.renderNpcId===String(row[1]).replace(/[ab]$/,'');
+  const placed=eligible.filter(({row})=>!enemyName(row).includes('[灾域]') && enemyRowDisplayLocations(row).length);
+  return portraits.find(p=>(area==='all'||p.area===area)&&eligible.some(item=>item.row===p.row)) ||
+    placed.find(nativePortrait) || placed[0] || eligible.find(nativePortrait) || eligible[0];
+}
+function enemyVariantControls(label,buttons){
+  return `<div class="enemy-form-options" role="group" aria-label="${esc(label)}">${buttons.join('')}</div>`;
+}
+function enemyAllowsOtherAreas(entity){
+  return entity?.name==='大螃蟹' || (entity?.rateOptions && $('#enemy-area').value==='大教堂（大空洞）' && entity.locations.includes('大教堂（大空洞）'));
+}
+function enemyFormOptionLabel(entity,records){
+  const ids=records.map(({row})=>String(row[1]));
+  if(entity.name==='山妖')return ids.includes('46030010')?'矿洞山妖':'普通山妖';
+  if(entity.name==='仿身泪滴')return ids.includes('46000040')?'山妖形态':'变身前';
+  if(entity.name==='拷问官')return ids.includes('53200010')?'首领':'普通';
+  if(entity.name==='大螃蟹')return ids.some(id=>id==='22740030'||id==='22740020')?'催眠型':'普通／骤死型';
+  return '';
+}
+function enemyRateView(entity,active){
+  if (!entity?.rateOptions) return null;
+  let locations='';
+  const index=entity.rateIndex, label=enemyMetricLabel(state.enemyData.columns[index].label,index);
+  const options=[...entity.rateOptions.entries()].sort(([a],[b])=>b-a);
+  const namedForms=Boolean(enemyFormOptionLabel(entity,options[0][1]));
+  const buttons=options.map(([value,records])=>{
+    const selected=value===active[index];
+    if(selected)locations=displayEnemyLocations(records.flatMap(({row})=>enemyRowDisplayLocations(row))).join('、');
+    const rep=selected?state.enemyRowInfo.get(active):enemyRateRecord(entity,records) ||
+      (enemyAllowsOtherAreas(entity) && enemyRateRecord(entity,records,'all'));
+    const control=rep?`data-enemy-rate="${rep.index}"`:'disabled title="当前筛选下不可选"';
+    const buttonLabel=enemyFormOptionLabel(entity,records) || `${label} ${enemyDamageText(value)}`;
+    return `<button type="button" ${control} aria-pressed="${selected}">${esc(buttonLabel)}</button>`;
+  });
+  return {controls:enemyVariantControls(namedForms?entity.name+'形态':'倍率切换',buttons),locations};
+}
 function enemyAttributeDifferenceLink(differences,index){return differences.has(index)?'<button type="button" class="enemy-difference-link" data-enemy-difference-open>地点差异</button>':''}
 function enemyElementSummary(row){
   const elements=[[9,'魔'],[10,'火'],[11,'雷'],[12,'圣']].map(([index,name])=>({name,value:enemyDamageMultiplier(row[index])})).filter(item=>item.value!=null);
   if(!elements.length)return '<div class="enemy-element-card neutral"><span>四属性倍率未收录</span></div>';
   const highest=Math.max(...elements.map(item=>item.value)),lowest=Math.min(...elements.map(item=>item.value));
-  if(highest===lowest)return `<div class="enemy-element-card neutral"><div class="enemy-element-line"><span>${elements.map(item=>item.name).join(' / ')}</span><strong>均为 ×${highest}</strong></div></div>`;
-  const line=(kind,value,label)=>`<div class="enemy-element-line ${kind}"><span>${label} · ${elements.filter(item=>item.value===value).map(item=>item.name).join(' / ')}</span><strong>×${value}</strong></div>`;
-  return `<div class="enemy-element-card">${line('high',highest,'最高倍率')}${line('low',lowest,'最低倍率')}</div>`;
+  if(highest===lowest)return `<div class="enemy-element-card"><div class="enemy-element-line ${enemyDamageTone(highest)}"><span>${elements.map(item=>item.name).join(' / ')}</span><strong>均为 ×${highest}</strong></div></div>`;
+  const line=(value,label)=>`<div class="enemy-element-line ${enemyDamageTone(value)}"><span>${label} · ${elements.filter(item=>item.value===value).map(item=>item.name).join(' / ')}</span><strong>×${value}</strong></div>`;
+  return `<div class="enemy-element-card">${line(highest,'最高倍率')}${line(lowest,'最低倍率')}</div>`;
 }
 function enemyHealthCanMerge(entity){const sources=[...(entity?.records||[]),...(entity?.pairedDisaster||[])];return sources.length>0&&sources.every(({row})=>Object.is(row[2],row[3]))}
 function enemyHealthEntries(entity){
   const entries=[],seen=new Set(),ordinaryByLocation=new Map();
   for(const group of entity?.statGroups||[])for(const {row} of group.records)for(const location of enemySourceNote(row).locations){if(!ordinaryByLocation.has(location))ordinaryByLocation.set(location,new Set());ordinaryByLocation.get(location).add(JSON.stringify([row[2],row[3]]))}
   const add=(version,location,row)=>{const key=JSON.stringify([version,location,[typeof row[2],row[2]],[typeof row[3],row[3]]]);if(seen.has(key))return;seen.add(key);entries.push({version,location,first:fmt(row[2]),second:fmt(row[3])})};
-  for(const group of entity?.statGroups||[])for(const {row} of group.records){const locations=enemySourceNote(row).locations.length?enemySourceNote(row).locations:['出现地点未收录'];for(const location of locations)add('普通',location,row)}
+  for(const group of entity?.statGroups||[])for(const {row} of group.records){for(const location of enemySourceNote(row).locations)add('普通',location,row)}
   const merged=enemyHealthCanMerge(entity);
-  for(const group of entity?.statGroups||[]){const ordinaryRow=group.anchor.row,ordinaryHP=merged?fmt(ordinaryRow[2]):`${fmt(ordinaryRow[2])}/${fmt(ordinaryRow[3])}`,fallback=[...new Set(group.records.flatMap(({row})=>enemySourceNote(row).locations))];for(const {row} of group.pairedDisaster||[]){const sourceLocations=enemySourceNote(row).locations,locations=sourceLocations.length?sourceLocations:Object.hasOwn(state.enemyData.statLocationsBySourceId||{},String(row[1]))?['出现地点未收录']:fallback.length?fallback:['出现地点未收录'];for(const location of locations){const normalValues=ordinaryByLocation.get(location)||new Set(),separateEncounter=fallback.length&&!fallback.includes(location),label=separateEncounter?`${location}（普通${fallback.join('、')} ${ordinaryHP}）`:normalValues.size>1?`${location}（普通${ordinaryHP}）`:location;add('灾域',label,row)}}}
+  for(const group of entity?.statGroups||[]){const ordinaryRow=group.anchor.row,ordinaryHP=merged?fmt(ordinaryRow[2]):`${fmt(ordinaryRow[2])}/${fmt(ordinaryRow[3])}`,fallback=[...new Set(group.records.flatMap(({row})=>enemySourceNote(row).locations))];for(const {row} of group.pairedDisaster||[]){const sourceLocations=enemySourceNote(row).locations,locations=sourceLocations.length?sourceLocations:Object.hasOwn(state.enemyData.statLocationsBySourceId||{},String(row[1]))?[]:fallback;for(const location of locations){const normalValues=ordinaryByLocation.get(location)||new Set(),separateEncounter=fallback.length&&!fallback.includes(location),label=separateEncounter?`${location}（普通${fallback.join('、')} ${ordinaryHP}）`:normalValues.size>1?`${location}（普通${ordinaryHP}）`:location;add('灾域',label,row)}}}
   return entries;
 }
 function enemyHealthSection(entity){
@@ -558,15 +748,38 @@ function enemyHealthSections(entity){return enemyHealthSection(entity)}
 function enemyDetailPlaceholderMarkup(name){
   return `<img class="enemy-detail-image enemy-detail-placeholder" src="./enemy-images/image-pending.svg" alt="${esc(name)}：图片待补" width="80" height="80" decoding="async">`;
 }
-function enemyPortraitPath(id){
+function enemyPortraitPath(id,area){
+  const row = state.enemyRowsById?.get(String(id));
+  const representative = row && enemyRegionalRepresentative(state.enemyEntities?.get(enemyEntityKey(row)), id, area);
+  if(representative?.path){
+    const own=state.enemyImageManifest?.images?.[id];
+    // A regional render can depict a different mesh with the same damage rates.
+    if(representative.imageKind==='game-model-render' && String(representative.row[1])!==String(id) &&
+       own?.matchStatus==='verified' && own.imageKind==='game-model-render' &&
+       (own.renderNpcId===String(id).replace(/[ab]$/,'') || own.representativeSourceId))return own;
+    return representative;
+  }
+  if (row && enemyGroupName(row) === '大螃蟹') id = '22700000';
   const source = state.enemyData?.nativeCardEvidence?.[id];
   // All members of Harmonia's shared card use the normal expedition portrait.
   if (source?.member && source.nativeNameIds?.includes(907640000)) id = '76200010';
   const form = albinauricForm(id);
   if (form) id = form.statId;
-  const verified = state.enemyImageManifest?.images?.[id];
-  const candidate = state.enemyImageCandidates?.[id];
-  const entry = verified?.matchStatus === 'verified' ? verified : candidate?.matchStatus === 'candidate' ? candidate : null;
+  const portraitForSource = sourceId => {
+    const verified = state.enemyImageManifest?.images?.[sourceId];
+    const candidate = state.enemyImageCandidates?.[sourceId];
+    return verified?.matchStatus === 'verified' ? verified : candidate?.matchStatus === 'candidate' ? candidate : null;
+  };
+  let entry=portraitForSource(id);
+  if (!entry && row) {
+    const donorId=state.enemyImageManifest?.representativeBySource?.[id];
+    const donor=donorId && state.enemyRowsById.get(donorId);
+    if (donor && enemyEntityKey(donor)===enemyEntityKey(row) &&
+        row.slice(5,13).every((value,i)=>Number.isFinite(value) && value===donor[5+i])) {
+      const portrait=portraitForSource(donorId);
+      if(portrait)entry={...portrait,representativeOnly:true};
+    }
+  }
   const path = entry?.path;
   return typeof path === 'string' && /^enemy-images\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(path) ? entry : null;
 }
@@ -574,7 +787,11 @@ function enemyDetailImageMarkup(record,name){
   const entry = enemyPortraitPath(String(record?.[1] ?? ''));
   if (!entry) return enemyDetailPlaceholderMarkup(name);
   const path = entry.path;
-  const menuPortrait=entry.imageKind==='nightboss-menu-portrait',label=menuPortrait?`${name}：出击菜单头像`:name;
+  if(entry.imageKind==='game-model-render'||entry.imageKind==='model-render'){
+    const url='./'+esc(path);
+    return `<a href="${url}" target="_blank" rel="noopener" aria-label="${esc(name)}，查看模型大图"><img class="enemy-detail-image" src="${url}" alt="${esc(name)}的${entry.representativeOnly?'同倍率代表模型':'游戏模型'}" width="80" height="80" decoding="async"></a>`;
+  }
+  const menuPortrait=entry.imageKind==='nightboss-menu-portrait',label=menuPortrait?`${name}：出击菜单头像`:entry.representativeOnly || entry.imageKind==='representative-photo'?`${name}代表图`:name;
   return `<img class="enemy-detail-image" src="./${esc(path)}" alt="${esc(label)}"${menuPortrait?' title="出击菜单头像"':''} width="80" height="80" decoding="async">`;
 }
 let damageEnemyPicker = null;
@@ -628,20 +845,22 @@ window.NightreignDamageEnemyPicker = {
   },
   portrait(target) {
     const id = target?.source?.atlasSourceId;
-    return './'+(enemyPortraitPath(id)?.path || 'enemy-images/image-pending.svg');
+    const area=$('#enemy-area').value;
+    return './'+(enemyPortraitPath(id,target?.source?.locations?.includes(area)?area:'all')?.path || 'enemy-images/image-pending.svg');
   },
 };
 
 $('#enemy-detail').addEventListener('click', event => {
-  const choice = event.target.closest('[data-enemy-form]');
+  const choice = event.target.closest('[data-enemy-form], [data-enemy-rate]');
   if (choice) {
-    const row = state.enemyRowsById.get(choice.dataset.enemyForm);
+    const row = choice.hasAttribute('data-enemy-rate') ? state.enemyData.rows[Number(choice.dataset.enemyRate)] : state.enemyRowsById.get(choice.dataset.enemyForm);
     if (!row) return;
     state.enemySelected = row;
     if (damageEnemyPicker) damageEnemyPicker.selected = damageTargetForRow(row)?.id;
     renderEnemyDetail(row);
     syncEnemyUrl();
-    $('#enemy-detail [data-enemy-form][aria-pressed="true"]')?.focus({preventScroll:true});
+    const control=choice.dataset.enemyRate ? "data-enemy-rate" : "data-enemy-form";
+    $(`#enemy-detail [${control}][aria-pressed="true"]`)?.focus({preventScroll:true});
     return;
   }
   const button = event.target.closest('[data-damage-target-pick]');
@@ -656,26 +875,35 @@ function albinauricForm(id){
 function enemyFormView(entity, form){
   const belongs = ({row}) => form.sourceIds.includes(String(row[1]));
   const records = entity.records.filter(belongs), pairedDisaster = entity.pairedDisaster.filter(belongs);
-  const statGroups = entity.statGroups.filter(group => belongs(group.anchor));
-  const locations = displayEnemyLocations([...records, ...pairedDisaster].flatMap(({row}) => enemyRowDisplayLocations(row)));
+  const statGroups = entity.statGroups.flatMap(group=>{
+    const matching=group.records.filter(belongs);
+    return matching.length?[{...group,anchor:matching[0],records:matching,pairedDisaster:group.pairedDisaster.filter(belongs)}]:[];
+  });
+  const locations = displayEnemyLocations(form.locations||[...records, ...pairedDisaster].flatMap(({row}) => enemyRowDisplayLocations(row)));
   return {...entity, records, pairedDisaster, statGroups, locations};
 }
 function enemyFormControls(active){
   if (!active) return '';
   const forms = state.enemyData.albinauricForms.filter(form => state.enemyRowsById.has(form.statId));
-  return `<div class="enemy-form-options" role="group" aria-label="白金之子类型">${forms.map(form => `<button type="button" data-enemy-form="${esc(form.statId)}" aria-pressed="${form===active}">${esc(form.label)}</button>`).join('')}</div>`;
+  return enemyVariantControls('白金之子类型',forms.map(form => `<button type="button" data-enemy-form="${esc(form.statId)}" aria-pressed="${form===active}">${esc(form.label)}</button>`));
 }
 function renderEnemyDetail(r){
   if(!r){$('#enemy-detail').innerHTML=`<div class="enemy-detail-actions enemy-detail-actions-empty">${enemyDetailNavigationMarkup(-1)}</div><div class="empty-state"><span>⚔</span><h3>选择一名敌人</h3><p>属性和出现地点会显示在这里。</p></div>`;$('#enemy-detail').scrollTop=0;return}
   const fullEntity=state.enemyEntities.get(enemyEntityKey(r)),form=albinauricForm(r[1]);
-  const entity=form?enemyFormView(fullEntity,form):fullEntity,selectedGroup=entity?.statGroups[0];
-  const dataRow=form||entity?.key.startsWith('nightlord:')?r:(selectedGroup?.anchor.row||r),c=state.enemyData.columns,locations=entity?enemyLocationSummary(entity):'出现地点未收录',locationDifferences=entity?.name==='祖灵'?new Map():enemyLocationDifferences(entity),selectedIndex=state.enemyData.rows.indexOf(dataRow),enemyId=String(dataRow[1]??'');
+  const entity=form?enemyFormView(fullEntity,form):fullEntity;
+  const selectedGroup=!enemyExcludedNumericSourceIds.has(String(r[1])) && entity?.statGroups[0];
+  const dataRow=r,c=state.enemyData.columns,selectedIndex=state.enemyData.rows.indexOf(r),enemyId=String(r[1]);
+  const rateView=form?null:enemyRateView(fullEntity,dataRow);
+  const variantControls=rateView?.controls||enemyFormControls(form);
+  const locationDifferences=variantControls||entity?.name==='祖灵'?new Map():enemyLocationDifferences(entity);
+  const locations=rateView?rateView.locations:enemyLocationSummary(entity);
+  const immunityNote=enemyImmunityNoteMarkup(entity,dataRow);
   const damageNote = entity?.name === '结晶人' ? '以下为外壳破碎后的实际受伤倍率。' : '数值为实际受伤倍率：大于 ×1 伤害更高，小于 ×1 伤害更低。';
-  const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',resist=title==='异常状态抗性'||indexes.length>8,grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=damage&&multiplier!=null?(multiplier>1?'damage-high':multiplier<1?'damage-low':'damage-neutral'):'';const label=enemyMetricLabel(c[i].label,i);return `<div class="${resist?'resist':'kv'} ${tone}"><span class="enemy-metric-label">${enemyMetricIconMarkup(i)}${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${core?indexes.length+1:indexes.length} 项</small></summary>${core?'':extra}<div class="${resist?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}</div>${title==='伤害倍率'?`<p class="enemy-damage-note">${damageNote}</p>`:''}</details>`};
+  const section=(title,indexes,open=false,extra='',className='')=>{const core=className==='enemy-core-properties',resist=title==='异常状态抗性'||indexes.length>8,grid=indexes.map(i=>{const damage=i>=5&&i<=12,multiplier=damage?enemyDamageMultiplier(dataRow[i]):null,tone=enemyDamageTone(multiplier);const label=enemyMetricLabel(c[i].label,i);return `<div class="${resist?'resist':'kv'} ${tone}"><span class="enemy-metric-label">${enemyMetricIconMarkup(i)}${esc(label)}</span><strong>${esc(enemyMetricDisplay(dataRow,i))}</strong>${enemyAttributeDifferenceLink(locationDifferences,i)}</div>`}).join('');return `<details class="detail-section ${className}" ${open?'open':''}><summary><span>${title}</span><small>${core?indexes.length+1+Number(Boolean(immunityNote)):indexes.length} 项</small></summary>${core?'':extra}<div class="${resist?'resist-grid':'kv-grid'}">${core?`<div class="enemy-core-element">${extra}</div>`:''}${grid}${core?immunityNote:''}</div>${title==='伤害倍率'?`<p class="enemy-damage-note">${damageNote}</p>`:''}</details>`};
   const combatSections=`<div class="enemy-combat-grid">${section('伤害倍率',[5,6,7,8,9,10,11,12],true)}${section('异常状态抗性',[13,14,15,16,17,18,19],true)}</div>`;
-  const detailValues=selectedGroup?`${section('核心属性',[24,27],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${enemyLocationDifferencesMarkup(locationDifferences,c)}${section('种族特攻',[38,39,40,41],true)}${section('属性削韧',[42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57])}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
+  const detailValues=selectedGroup?`${section('核心属性',[24],true,`<div class="enemy-element-summary"><div class="enemy-element-cards">${enemyElementSummary(dataRow)}</div></div>`,'enemy-core-properties')}${combatSections}${enemyLocationDifferencesMarkup(locationDifferences,c)}${section('种族特攻',[38,39,40,41],true)}`:'<p class="enemy-source-only-note">暂未收录可展示数值。</p>';
   const displayName=entity?.name||enemyDisplayName(r),portrait=enemyDetailImageMarkup(dataRow,form?`${displayName} · ${form.label}`:displayName);
-  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${portrait}<div class="enemy-name-and-form"><h2>${esc(displayName)}</h2>${enemyFormControls(form)}</div></div><div class="enemy-detail-actions">${enemyDetailNavigationMarkup()}<button type="button" class="enemy-report-trigger" data-enemy-report-open data-enemy-index="${selectedIndex}" data-enemy-id="${esc(enemyId)}">资料有误？</button></div></div><p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>${damageEnemyPickerMarkup(r)}${detailValues}`;
+  $('#enemy-detail').innerHTML=`<div class="detail-top"><div class="enemy-detail-title">${portrait}<div class="enemy-name-and-form"><h2>${esc(displayName)}</h2>${variantControls}</div></div><div class="enemy-detail-actions">${enemyDetailNavigationMarkup()}<button type="button" class="enemy-report-trigger" data-enemy-report-open data-enemy-index="${selectedIndex}" data-enemy-id="${esc(enemyId)}">资料有误？</button></div></div>${locations?`<p class="enemy-detail-locations"><strong>出现地点：</strong>${esc(locations)}</p>`:''}${damageEnemyPickerMarkup(r)}${detailValues}`;
   $('#enemy-detail').scrollTop=0;
 }
 $('#enemy-detail').addEventListener('error',event=>{

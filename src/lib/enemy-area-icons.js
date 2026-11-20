@@ -2,6 +2,7 @@ import { buildingIconPath } from './map-predictor.js';
 
 const enemyAreaBuildingKeys = new Map([
   ['遗迹', 'buildingCategory:ruins'],
+  ['封印监牢', 'buildingCategory:evergaol'],
   ['小型要塞', 'buildingCategory:fort'],
   ['东部地下要塞', 'buildingCategory:eastern-underground-fort'],
   ['西部地下要塞', 'buildingCategory:western-underground-fort'],

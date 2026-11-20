@@ -35,9 +35,19 @@ test('targets preserve exact source variants and flag unresolved defenses', () =
   assert.equal(snowTroll.source.npcParamId, '46020050');
   assert.ok(snowTroll.source.locations.includes('山顶'));
   const unresolved = data.targets.filter(target => target.source.takenStatus.startsWith('manual'));
-  assert.deepEqual(unresolved.map(t => t.id).sort(), ['42801100']);
+  assert.deepEqual(unresolved, []);
+  const ants = data.targets.filter(t => t.name === '大蚂蚁');
+  assert.deepEqual(ants.map(t => t.id), ['42801110']);
+  assert.deepEqual(Object.values(ants[0].taken), [0.765,0.5525,0.765,0.765,0.85,1.02,0.85,0.85]);
+  assert.deepEqual(ants[0].source.damageEffectIds, ['15363']);
+  assert.ok(!data.targets.some(t => t.name.startsWith('小米兰达花')));
+  const rider = data.targets.find(t => t.id === '33001110');
+  const swordswoman = data.targets.find(t => t.id === '33001030');
+  assert.deepEqual(rider.taken, swordswoman.taken);
+  assert.equal(rider.taken.normal, 1);
+  assert.equal(rider.taken.slash, 1.1);
   assert.ok(data.targets.filter(target => target.source.takenStatus.startsWith('manual')).every(target => Object.values(target.taken).every(value => value === null)));
-  for (const sourceId of ['45050010', '46020030', '46000110', '43511120', '43510040', '40800300', '43408000']) {
+  for (const sourceId of ['45050010', '46020030', '46000110', '43510040', '40800300', '43408000']) {
     assert.ok(!data.targets.some(target => target.source.atlasSourceId === sourceId));
   }
 });

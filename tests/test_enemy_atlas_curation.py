@@ -12,8 +12,13 @@ class EnemyAtlasCurationTest(unittest.TestCase):
         cls.atlas = json.loads(ATLAS.read_text(encoding="utf-8"))
         cls.rows = {str(row[1]): row for row in cls.atlas["rows"]}
 
+    def test_permanent_immunities_and_native_species_flags(self):
+        self.assertEqual(self.rows["39502010"][13:20], ["Immune", 154, 112, 63, 63, "Immune", "Immune"])
+        self.assertEqual(self.rows["33202010"][13:20], ["Immune", "Immune", "Immune", 252, "Immune", "Immune", "Immune"])
+        self.assertEqual(self.rows["46700020"][38:42], ["No", "No", "No", "No"])
+
     def test_exact_source_removals_and_snowfield_troll_retention(self):
-        for source_id in ("45050010", "46020030", "46000110", "43511120", "43510040",
+        for source_id in ("45050010", "46020030", "46000110", "43510040",
                           "46001000", "46008000", "46003000"):
             self.assertNotIn(source_id, self.rows)
             for field in ("extraLocations", "entityLocationsBySourceId", "displayLocationsBySourceId", "statLocationsBySourceId"):
@@ -50,7 +55,7 @@ class EnemyAtlasCurationTest(unittest.TestCase):
             locations = self.atlas[field]
             for source_id in ("45803010", "43531110", "50400120", "50700010", "52501220"):
                 self.assertIn("夜晚Boss", locations[source_id])
-            for source_id in ("40400010", "43531400", "30600020", "49801110", "31600020"):
+            for source_id in ("40400010", "43531400", "30600020", "31600020"):
                 self.assertIn("夜晚Boss前哨战", locations[source_id])
                 self.assertNotIn("夜晚Boss", locations[source_id])
             for source_id in ("45803000", "21300520", "35000110b"):
@@ -60,6 +65,28 @@ class EnemyAtlasCurationTest(unittest.TestCase):
                           "42800020", "45600030", "45500030"):
             self.assertNotIn(source_id, self.rows)
         self.assertIn("夜晚Boss前哨战", self.atlas["displayLocationsBySourceId"]["42500010"])
+
+    def test_death_rite_bird_sources(self):
+        birds = {sid for sid, row in self.rows.items() if row[0].startswith("死亡仪式鸟")}
+        self.assertEqual(birds, {"49801010", "49801020a", "49801020b", "49801030", "49801040", "49801110"})
+        for key in ("statLocationsBySourceId", "displayLocationsBySourceId"):
+            locations = self.atlas[key]
+            self.assertEqual(locations["49801110"], [])
+            self.assertFalse(any("提比娅的唤声船召唤物" in sites for sites in locations.values()))
+            self.assertIn("夜晚Boss", locations["49801010"])
+            self.assertIn("东部地下要塞（大空洞）", locations["49801040"])
+            for sid in birds:
+                self.assertFalse({"夜晚Boss前哨战", "大教堂（大空洞）"}.intersection(locations[sid]))
+
+    def test_recovery_time_removed_for_every_source(self):
+        self.assertEqual(self.atlas["columns"][27]["kind"], "removed")
+        self.assertTrue(all(row[27] is None for row in self.atlas["rows"]))
+
+    def test_evergaol_public_labels(self):
+        self.assertNotIn("古代封印监牢", json.dumps(self.atlas["rows"], ensure_ascii=False))
+        for row in self.atlas["scale"]["rows"]:
+            self.assertNotIn("古代封印监牢", row[1:3])
+        self.assertIn("封印监牢", self.atlas["displayLocationsBySourceId"]["49801030"])
 
     def test_albinauric_appearance_and_forge_binding(self):
         normal, horned, silver = self.atlas["albinauricForms"]
