@@ -51,6 +51,7 @@ def main() -> None:
         native = {row["row_id"]: row for row in csv.DictReader(stream)}
     evidence = atlas.get("nativeCardEvidence", {})
     effect_ids = {info["damageEffectId"] for info in evidence.values() if "damageEffectId" in info}
+    effect_ids.update(sid for info in evidence.values() for sid in info.get("damageEffectIds", []))
     effects = {}
     effects_path = args.native_csv.with_name("SpEffectParam.csv")
     if effect_ids:
@@ -68,8 +69,9 @@ def main() -> None:
             raise ValueError(f"No native NpcParam row for atlas source {source_id}")
         native_taken = {key: float(npc[field]) for key, field in TAKEN_FIELDS.items()}
         effect_id = info.get("damageEffectId")
-        if effect_id:
-            native_taken = {key: round(rate * float(effects[effect_id][TAKEN_FIELDS[key]]), 6)
+        resident_ids = info.get("damageEffectIds", [])
+        for sid in ([effect_id] if effect_id else []) + resident_ids:
+            native_taken = {key: round(rate * float(effects[sid][TAKEN_FIELDS[key]]), 6)
                             for key, rate in native_taken.items()}
         atlas_percent = row[5:13]
         agrees = all(isinstance(value, (int, float)) and abs((1 - native_taken[key]) * 100 - value) < .01
@@ -94,6 +96,7 @@ def main() -> None:
                                 "native_phase_effect_atlas_agree" if effect_id else "native_param_atlas_agree"),
                 **({"phase": info["phase"]} if "phase" in info else {}),
                 **({"damageEffectId": effect_id} if effect_id else {}),
+                **({"damageEffectIds": resident_ids} if resident_ids else {}),
                 "baseDefenseStatus": "native_npc_param_base; not encounter_final",
                 "defenseStatus": "manual_final_defense_required",
                 **({"nativeTaken": native_taken, "atlasTakenPercent": atlas_percent} if not agrees else {}),

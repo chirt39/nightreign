@@ -413,13 +413,59 @@
         }
       },
       "identityScope": "Underground fort area in the Great Hollow enemy atlas."
+    },
+    "buildingCategory:evergaol": {
+      "src": "/map-icons/evergaol-42004-81f300085c18.png",
+      "nameZh": "封印监牢",
+      "width": 164,
+      "height": 164,
+      "status": "verified",
+      "worldMapPointIconId": 5,
+      "iconId": 42004,
+      "sha256": "81f300085c185479e2bf589caf0bf8c83fd2a5044a789c4d54dadb4600ce266c",
+      "resampled": false,
+      "source": {
+        "archive": "data0.bdt",
+        "resource": "/menu/01_common_h.tpf.dcx",
+        "resourceSha256": "d13b2e55f6811c0202dc2681a2a4bc50bae04cc607996b40f57820963c6f18d9",
+        "texture": "SB_MenuIcon_1",
+        "ddsSha256": "d65f55f87e7fb7f52bca7d67cfdaac8819dd583e7270f72dfb8a8d3a81363114",
+        "layoutResource": "/menu/01_common_h.sblytbnd.dcx",
+        "layout": "SB_MenuIcon_1.layout",
+        "layoutSha256": "ad3c5049d7a6d78e9318f236351e09db62ab4884b8fb11cb76fb8e0f33882e3b",
+        "atlasWidth": 4096,
+        "atlasHeight": 4096,
+        "sprite": "MENU_MenuIcon_42004.png",
+        "rectangle": [
+          1992,
+          2644,
+          164,
+          164
+        ],
+        "definitionParam": "SmallBaseAndSpotDefine",
+        "definitionRowIds": [
+          209,
+          215,
+          2209,
+          2215
+        ],
+        "definitionParamXmlSha256": "b38de8d785a2616fb9df9fca876b819126280af6ada2628fdf23d5c24693dc06",
+        "mapTemplateIds": [
+          4650,
+          4660,
+          4670,
+          4680
+        ]
+      },
+      "identityScope": "Primary game map icon shared by all four evergaol templates.",
+      "rights": "Derived from local game UI resources; original rights remain with the game rights holders. Redistribution permission not independently verified."
     }
   },
   "coverage": {
     "mappedBuildingCategories": 9,
     "unmappedRawBuildingDefinitions": 167,
     "unmappedPolicy": "raw_id_only definitions are not inferred or assigned placeholder game art",
-    "mappedAtlasOnlyBuildingIcons": 3
+    "mappedAtlasOnlyBuildingIcons": 4
   },
   "missing": [],
   "pointIcons": {

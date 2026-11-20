@@ -640,19 +640,6 @@
     "rowAlias": "Guilty (Demon Prince Prelude)",
     "matchingAlias": true
   },
-  "49800030": {
-    "entityName": "死亡仪式鸟",
-    "model": "c4980",
-    "behaviorVariationId": "49800",
-    "sourceIds": [
-      "49801010",
-      "49801020",
-      "49801030",
-      "49801110"
-    ],
-    "rowAlias": "",
-    "matchingAlias": false
-  },
   "30600050": {
     "entityName": "大型骷髅",
     "model": "c3060",

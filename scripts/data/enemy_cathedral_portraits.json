@@ -1,0 +1,54 @@
+{
+  "36100020a": {
+    "path": "enemy-images/candidate-fextralife-6ce5cd1ce83724cf.png",
+    "evidence": "小神谕使者，圆头巾、小型金色号角。"
+  },
+  "36200010a": {
+    "path": "enemy-images/candidate-fextralife-51aae387357cc3a1.png",
+    "evidence": "大神谕使者，长柄大型号角与高头巾。"
+  },
+  "40700010a": {
+    "path": "enemy-images/40700020.jpg",
+    "evidence": "灰狼，图源与出场参数均启用 c4070 的 11 号部件。"
+  },
+  "40710010a": {
+    "path": "enemy-images/40710010.jpg",
+    "evidence": "白狼，同出场编号的浅色狼。"
+  },
+  "46600030a": {
+    "path": "enemy-images/46600010.jpg",
+    "evidence": "戟型魔像，沿用图号 46600010 的魔像戟型图。"
+  },
+  "41010010a": {
+    "path": "enemy-images/41010020.jpg",
+    "evidence": "同倍率亚人卡选用本配置确有出现的大型亚人，配图可辨宽鼻灰毛的大型个体。"
+  },
+  "42000010": {
+    "path": "enemy-images/42000010.jpg",
+    "evidence": "同编号实机图，能辨宽翼及喙状口部。"
+  },
+  "39000020a": {
+    "path": "enemy-images/39000020.jpg",
+    "evidence": "同编号火焰习武修士，红色兜帽与白色肩毛。"
+  },
+  "43810110a": {
+    "path": "enemy-images/candidate-fextralife-63443ae47fc33191.png",
+    "evidence": "罪恶荆棘信徒，红袍与覆面的尖帽。"
+  },
+  "41610010a": {
+    "path": "enemy-images/41610020.jpg",
+    "evidence": "瘦长病犬，图源与该出场参数均启用 c4161 的 00 部件。"
+  },
+  "43550020a": {
+    "path": "enemy-images/candidate-bwiki-3e05c1257b1a26e1.jpg",
+    "evidence": "图号为出场编号 43550020，铠甲与翼状肩饰可辨。"
+  },
+  "43150010a": {
+    "path": "enemy-images/candidate-fextralife-4c592200da76b8f7.png",
+    "evidence": "披甲持盾的无头士兵，属于 c4315 分型。"
+  },
+  "43750010": {
+    "path": "enemy-images/candidate-fextralife-3fa6875eac30adf4.png",
+    "evidence": "无头步卒持短刀，属于 c4375 分型。"
+  }
+}

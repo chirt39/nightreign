@@ -24,7 +24,9 @@ class EnemyCorpusCleanupTests(unittest.TestCase):
             self.assertIn("杜鹃骑士", by_id[f"enemy:{member_id}"]["title"])
         self.assertEqual(len(image_rows), 307)
         knights = [row for row in enemy_rows if row["title"].startswith("敌人图鉴｜失乡骑士")]
-        self.assertEqual({row["id"] for row in knights}, {"enemy:30100000", "enemy:30100100"})
+        self.assertEqual({row["id"] for row in knights}, {f"enemy:{npc}" for npc in (
+            30100000, 30100100, 30100190, 30101110, 30102130, 30100270, 30101250, 30102240,
+            30100290, 30101270, 30102260)})
         self.assertFalse(any("白金之子弓手的狼" in row["title"] for row in enemy_rows))
         for row in enemy_rows:
             self.assertFalse(any(label in row["content"] for label in build_knowledge_base.REMOVED_ENEMY_FIELD_LABELS))

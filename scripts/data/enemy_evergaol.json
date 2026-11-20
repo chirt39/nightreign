@@ -1,0 +1,186 @@
+{
+  "layouts": {
+    "4650": [
+      2,
+      3,
+      4,
+      5
+    ],
+    "4660": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "4670": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "4680": [
+      0,
+      1,
+      2
+    ]
+  },
+  "forms": [
+    {
+      "name": "恶兆之子",
+      "sources": [
+        "21400210"
+      ],
+      "path": "enemy-images/evergaol-21400210.png",
+      "imageKind": "game-model-render",
+      "evidence": "监牢启用 00 弯剑、15 裤装和 17 咒角。现有 21400000 图对应有护甲的另一型。以 c2140 网格、原生底色、法线、金属贴图和启用部件渲染。"
+    },
+    {
+      "name": "守墓斗士",
+      "sources": [
+        "34001010"
+      ],
+      "path": "enemy-images/candidate-bwiki-80ff871f20e976b4.jpg",
+      "evidence": "同编号实机图。"
+    },
+    {
+      "name": "法姆亚兹拉的兽人",
+      "sources": [
+        "39701110",
+        "39703010",
+        "39702310"
+      ],
+      "path": "enemy-images/candidate-eldenring-api-0ce93e85d5d9b909.jpg",
+      "evidence": "使用柴刀兽人实机图，三种武器的八项一致。"
+    },
+    {
+      "name": "片鳞混种",
+      "sources": [
+        "34500040",
+        "34501040"
+      ],
+      "path": "enemy-images/34500030.jpg",
+      "evidence": "柴刀型和飞行型倍率一致。实机头像 34500030 与柴刀代表的部件掩码相同。"
+    },
+    {
+      "name": "片鳞混种",
+      "sources": [
+        "34510040"
+      ],
+      "path": "enemy-images/34510030.jpg",
+      "evidence": "大斧型的斩击、突刺区别于柴刀型。头像 34510030 与监牢大斧型号同为 00、10 部件。"
+    },
+    {
+      "name": "结晶人",
+      "sources": [
+        "33500010",
+        "33501010",
+        "33502010"
+      ],
+      "path": "enemy-images/candidate-bwiki-d2ddaf64c4ba86de.jpg",
+      "evidence": "三种武器按破壳后倍率合卡，与小型要塞共用圆刃刀代表。"
+    },
+    {
+      "name": "石肤白王",
+      "sources": [
+        "36000020"
+      ],
+      "path": "enemy-images/36000010.jpg",
+      "evidence": "白王肖像 36000010，启用 01、11 部件。"
+    },
+    {
+      "name": "石肤黑王",
+      "sources": [
+        "36001020"
+      ],
+      "path": "enemy-images/candidate-bwiki-ef8b4dddc4daea34.jpg",
+      "evidence": "采用黑王外观实机头像，保留原图的灵体色。"
+    },
+    {
+      "name": "失乡骑士",
+      "sources": [
+        "30100190",
+        "30101110",
+        "30102130"
+      ],
+      "path": "enemy-images/30100114.jpg",
+      "evidence": "三名骑士同倍率。以 30100190 为代表，与图鉴龙飨骑士 30100100 启用部件完全相同。"
+    },
+    {
+      "name": "诺克斯修士",
+      "sources": [
+        "33000020"
+      ],
+      "path": "enemy-images/candidate-fextralife-772d505a8bc66ae0.png",
+      "evidence": "修士实机图，型号与同卡大空洞大教堂代表一致。"
+    },
+    {
+      "name": "诺克斯剑士",
+      "sources": [
+        "33001020"
+      ],
+      "path": "enemy-images/candidate-fextralife-d748b7846faa8f30.png",
+      "evidence": "剑士实机图，型号与同卡大空洞大教堂代表一致。"
+    },
+    {
+      "name": "猎犬骑士",
+      "sources": [
+        "42900010"
+      ],
+      "path": "enemy-images/42900020.jpg",
+      "evidence": "采用同装备外观的猎犬骑士实机图。"
+    },
+    {
+      "name": "龙人士兵",
+      "sources": [
+        "46500210"
+      ],
+      "path": "enemy-images/candidate-eldenring-api-b86c9c6f54d7d996.jpg",
+      "evidence": "同编号龙人士兵战斗截图。"
+    },
+    {
+      "name": "神皮使徒",
+      "sources": [
+        "35600020",
+        "35600110"
+      ],
+      "path": "enemy-images/candidate-eldenring-api-56151801c0a5e3c5.png",
+      "evidence": "单人战与双人战使徒共用实机图。"
+    },
+    {
+      "name": "神皮贵族",
+      "sources": [
+        "35700020",
+        "35700110"
+      ],
+      "path": "enemy-images/candidate-eldenring-api-30dec5e2d518a007.jpg",
+      "evidence": "单人战与双人战贵族共用实机图。"
+    },
+    {
+      "name": "熔炉骑士",
+      "sources": [
+        "25000030",
+        "25001020"
+      ],
+      "path": "enemy-images/25000010.jpg",
+      "evidence": "剑盾与大矛倍率一致。采用与剑盾代表同部件的实机头像。"
+    },
+    {
+      "name": "死亡仪式鸟",
+      "sources": [
+        "49801030"
+      ],
+      "path": "enemy-images/49801020.jpg",
+      "evidence": "对应死亡仪式鸟，部件 00、11、12、14 与 49801020 相同。"
+    },
+    {
+      "name": "古龙",
+      "sources": [
+        "45102010"
+      ],
+      "path": "enemy-images/candidate-nightreign-gallery-f8e3eef9296183c5.png",
+      "evidence": "使用古龙战斗截图，图源对应同模型与相同显示掩码。"
+    }
+  ]
+}

@@ -10,6 +10,7 @@ const actualAreas = new Set(Object.values(data.displayLocationsBySourceId).flat(
 
 test('actual atlas areas use the verified building keys, including ruins and the small fort', () => {
   const expected = [
+    ['封印监牢', 'buildingCategory:evergaol'],
     ['遗迹', 'buildingCategory:ruins'],
     ['遗迹（大空洞）', 'buildingCategory:ruins'],
     ['小型要塞', 'buildingCategory:fort'],
@@ -44,6 +45,16 @@ test('the central castle uses native icon 42010, independently of small fort ico
   assert.equal(createHash('sha256').update(fs.readFileSync(new URL(`../public${castle.src}`, import.meta.url))).digest('hex'), castle.sha256);
   assert.equal(manifest.icons['buildingCategory:fort'].iconId, 42006);
   assert.notEqual(enemyAreaIcon(manifest, '要塞'), enemyAreaIcon(manifest, '小型要塞'));
+});
+
+test('evergaol uses the original sprite from point icon 5', () => {
+  const entry = manifest.icons['buildingCategory:evergaol'];
+  assert.equal(entry.worldMapPointIconId, 5);
+  assert.equal(entry.iconId, 42004);
+  assert.equal(entry.source.sprite, 'MENU_MenuIcon_42004.png');
+  assert.equal(entry.resampled, false);
+  const png = fs.readFileSync(new URL(`../public${entry.src}`, import.meta.url));
+  assert.equal(createHash('sha256').update(png).digest('hex'), entry.sha256);
 });
 
 test('the eastern and western underground forts use their respective native map sprites', () => {
